@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building a Web server in Bash, part III - Login - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In the [previous posts](https://dev.to/leandronsp/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *netcat*. M">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03.html">
+  <meta property="og:title" content="Building a Web server in Bash, part III - Login">
+  <meta property="og:description" content="In the [previous posts](https://dev.to/leandronsp/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *netcat*. M">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-08-01T03:34:27Z">
+  <meta property="article:tag" content="webdev">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="html">
+      <meta property="article:tag" content="shellscript">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Building a Web server in Bash, part III - Login",
+    "datePublished": "2022-08-01T03:34:27Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In the [previous posts](https://dev.to/leandronsp/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *netcat*. M",
+        "keywords": "webdev, linux, html, shellscript"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Building a Web server in Bash, part III - Login</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 01 Aug 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">webdev</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">html</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">shellscript</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In the <a href="https://dev.to/leandronsp/building-a-web-server-in-bash-part-ii-parsing-http-14kg">previous posts</a> we’ve seen how to manipulate sockets using <em>netcat</em>. Moreover, we learned how to start reading and parsing an HTTP message using ShellScript.</p>
+<p><em>Time to definitely improve our app</em>.</p>
+<hr />
+<h2><a href="#app-requirements" aria-hidden="true" class="anchor" id="app-requirements"></a>App requirements</h2>
+<p>Since our application is a Web application, we should respond in a more appropriate way. Let’s define some requirements for our application:</p>
+<ul>
+<li><code>GET /login</code> should render an HTML form containing just a text field called “Name” to perform the login</li>
+<li><code>GET /</code> should render a home page containing the text <code>Hello, &lbrace;&lbrace;name&rbrace;&rbrace;</code>. Where does the <code>&lbrace;&lbrace;name&rbrace;&rbrace;</code> come from? We’ll see soon, but we should read the HTTP header <code>Cookie</code>.</li>
+<li><code>POST /login</code> should request with a body containing the name coming from the HTML form. Afterwards, the server responds an <code>HTTP 301</code> with a header <code>Set-Cookie</code>, so the client could use this cookie to perform future requests such as <code>GET /</code></li>
+<li><code>POST /logout</code> should request with a header <code>Cookie</code> containing the name. Afterwards, the server responds an <code>HTTP 301</code> with a header <code>Set-Cookie</code> using an expiration date in the past. This way, a client HTTP will permanently remove the Cookie.</li>
+</ul>
+<h3><a href="#web-fundamentals-matter" aria-hidden="true" class="anchor" id="web-fundamentals-matter"></a>Web fundamentals matter</h3>
+<p>If you need, read the requirements again.</p>
+<p><strong>Make no mistake</strong>, this is exactly how a simple web app used to work <em>prior to the blast of frontend frameworks circa 2015</em>.</p>
+<p>Software abstractions are good and save us <em>a lot of time</em>, but unfortunately they also <em>keep developers far from the basics</em>. It’s very important for us as developers, to understand <strong>how servers keep sessions across HTTP requests</strong>.</p>
+<p>If you acknowledge that HTTP requests are stateless (the server usually closes the TCP connection at every request), a wide range of capabilities will open for <em>debugging and troubleshooting</em>.</p>
+<p>Let’s build a <strong>login system</strong>, and as soon as we understand that HTTP requests are stateless, we realize the logins <em>do not exist</em>.</p>
+<p>After all, originally, the web mostly uses <strong>HTTP header Cookies</strong> to store user data in the HTTP client-side, <em>sending those cookies across future requests to the same domain.</em></p>
+<h2><a href="#separate-http-responses-in-files" aria-hidden="true" class="anchor" id="separate-http-responses-in-files"></a>Separate HTTP responses in files</h2>
+<p>A good practice is to keep our HTTP responses in separate files, thus leading to a more readable and extensible code:</p>
+<p><code>cat login.html</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 200 OK
+</div><div class="line" data-line="2">Content-Type: text/html
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">form</span> <span style="color: #e06c75;">method</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;POST&quot;</span> <span style="color: #e06c75;">action</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;/login&quot;</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="5">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">input</span> <span style="color: #e06c75;">type</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;text&quot;</span> <span style="color: #e06c75;">name</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;name&quot;</span> <span style="color: #abb2bf;">/&gt;</span>
+</div><div class="line" data-line="6">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">input</span> <span style="color: #e06c75;">type</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;submit&quot;</span> <span style="color: #e06c75;">value</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;Login&quot;</span> <span style="color: #abb2bf;">/&gt;</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">form</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p><code>cat 404.html</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 404 NotFound
+</div><div class="line" data-line="2">Content-Type: text/html
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Sorry, not found</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p>Okay, with HTML files in place, let’s see how our function <code>handleRequest</code> looks like so far:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handleRequest</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #7f848e;">## Read request, parse each line and breaks until empty line</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">line</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="4">    <span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">trline</span><span style="color: #56b6c2;">=</span>`<span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">tr</span> <span style="color: #e06c75;">-d</span> <span style="color: #98c379;">&#39;[\r\n]&#39;</span>`
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">    <span style="color: #c678dd;">[</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e5c07b;">break</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">    <span style="color: #d19a66;">HEADLINE_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;(.*?)\s(.*?)\sHTTP.*?&#39;</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #56b6c2;">=~</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">HEADLINE_REGEX</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span>
+</div><div class="line" data-line="11">      <span style="color: #d19a66;">REQUEST</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">HEADLINE_REGEX</span>/\1 \2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">done</span>
+</div><div class="line" data-line="13">   
+</div><div class="line" data-line="14">  <span style="color: #7f848e;">## Route to the response handler based on the REQUEST match</span>
+</div><div class="line" data-line="15">  <span style="color: #c678dd;">case</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">REQUEST</span>&quot;</span> <span style="color: #c678dd;">in</span>
+</div><div class="line" data-line="16">    <span style="color: #98c379;">&quot;GET /login&quot;</span><span style="color: #c678dd;">)</span> <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">login.html</span><span style="color: #abb2bf;">)</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="17">               <span style="color: #61afef;">*</span><span style="color: #c678dd;">)</span> <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">404.html</span><span style="color: #abb2bf;">)</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="18">  <span style="color: #c678dd;">esac</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20">  <span style="color: #e5c07b;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RESPONSE</span>&quot;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">response</span>
+</div><div class="line" data-line="21"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Yes, much more shorter and readable.</p>
+<h2><a href="#keep-the-server-running-forever" aria-hidden="true" class="anchor" id="keep-the-server-running-forever"></a>Keep the server running forever</h2>
+<p>Not sure if you noticed, but the server is being closed at every client connection, which is making us to run the server over and over again, at every single time we want to perform a new HTTP request.</p>
+<p>We can keep the server in an infinite loop. By doing this, we no longer need to run the server for every request:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">true</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">cat</span> <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-lN</span> <span style="color: #d19a66;">3000</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">processRequest</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">done</span>
+</div></code></pre>
+<p><em>How cool is that?</em></p>
+<h2><a href="#nice-but-show-me-some-login" aria-hidden="true" class="anchor" id="nice-but-show-me-some-login"></a>Nice, but show me some login</h2>
+<p>Okay. Open <code>localhost:3000/login</code> in your web browser, type a name in the form and submit it.</p>
+<p>I’m sure you got the response “Sorry, not found”, right?</p>
+<p>No problem, now go to the server STDOUT and check the message coming from the HTTP client:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">POST /login HTTP/1.1
+</div><div class="line" data-line="2">Host: localhost:3000
+</div><div class="line" data-line="3">Content-Length: 12
+</div><div class="line" data-line="4">....
+</div><div class="line" data-line="5">....
+</div></code></pre>
+<p>What does it mean?</p>
+<p>Following the HTTP standard, web browsers perform a <code>POST</code> on a form submit, like we have in <code>form action=POST</code>. Upon submission, <strong>every field is then added to the HTTP request body.</strong></p>
+<p>Please also note that the HTTP message contains a lot of HTTP headers (I’m using Google Chrome), but the HTTP body is nowhere to be found. <em>Why’s that?</em></p>
+<p>We should keep reading the request body after the empty line, remember? However, we should first acknowledge the “length” of the body, otherwise, <em>when should we stop reading the remaining bytes</em>?</p>
+<p>Thankfully, the HTTP standard covers that. The web browser has already sent an important header called <code>Content-Length</code>.</p>
+<p>Our work is then basically <strong>parsing this header and use it to read the remaining HTTP request message bytes</strong>, the <em>body</em>.</p>
+<h2><a href="#reading-the-http-body-message" aria-hidden="true" class="anchor" id="reading-the-http-body-message"></a>Reading the HTTP body message</h2>
+<p>Similar to the headline parsing, inside the reading loop, let’s place:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;Content-Length:\s(.*?)&#39;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #56b6c2;">=~</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span>
+</div><div class="line" data-line="4">      <span style="color: #d19a66;">CONTENT_LENGTH</span><span style="color: #56b6c2;">=</span>`<span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span>/\1/&quot;</span>`
+</div></code></pre>
+<p>Now, after the reading loop, we should read the remaining bytes in case there’s a <code>Content-Length</code> header (not always clients send the <code>Content-Length</code> header).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">## Check if Content-Length is not empty</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">if</span> <span style="color: #c678dd;">[</span> <span style="color: #56b6c2;">!</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH</span>&quot;</span> <span style="color: #c678dd;">]</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">then</span>
+</div><div class="line" data-line="3">  <span style="color: #d19a66;">BODY_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;(.*?)=(.*?)&#39;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">  <span style="color: #7f848e;">## Read the remaining request body</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">-n</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH</span> <span style="color: #e06c75;">-t1</span> <span style="color: #e06c75;">body</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="7">    <span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">body</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">    <span style="color: #d19a66;">INPUT_NAME</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">body</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">BODY_REGEX</span>/\1/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="10">    <span style="color: #d19a66;">INPUT_VALUE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">body</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">BODY_REGEX</span>/\2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="11">  <span style="color: #c678dd;">done</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">fi</span>
+</div></code></pre>
+<p>Nice. Go and perform a <code>POST /login</code>, you should see the body being displayed in the server STDOUT!</p>
+<p>Explaining the read:</p>
+<ul>
+<li><code>-n &lbrace;N&rbrace;</code>: reads an arbitrary number of bytes from a file or STDIN</li>
+<li><code>-t &lbrace;T&rbrace;</code>: timeout to read the entire message from the STDIN</li>
+<li>inside the body reading loop, we parse each line trying to find a match to <code>field=value</code> coming from the <code>POST</code> HTTP request</li>
+</ul>
+<p><em>Fantastic!</em></p>
+<h2><a href="#handle-the-message" aria-hidden="true" class="anchor" id="handle-the-message"></a>Handle the message</h2>
+<p>Reading the body message is no way close to the end. We have to handle it in the <code>switch-case</code>, remember?</p>
+<p>How about refactoring to something like this?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">## Route to the response handlers (functions)</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">case</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">REQUEST</span>&quot;</span> <span style="color: #c678dd;">in</span>
+</div><div class="line" data-line="3">  <span style="color: #98c379;">&quot;GET /login&quot;</span><span style="color: #c678dd;">)</span>   <span style="color: #61afef;">handle_GET_login</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="4">  <span style="color: #98c379;">&quot;GET /&quot;</span><span style="color: #c678dd;">)</span>        <span style="color: #61afef;">handle_GET_home</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="5">  <span style="color: #98c379;">&quot;POST /login&quot;</span><span style="color: #c678dd;">)</span>  <span style="color: #61afef;">handle_POST_login</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="6">  <span style="color: #61afef;">*</span><span style="color: #c678dd;">)</span>              <span style="color: #61afef;">handle_not_found</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">esac</span>
+</div></code></pre>
+<p>All we have to do is implementing the above functions. Let’s start the <code>handle_POST_login</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_POST_login</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">post-login.http</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="3">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_name&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">INPUT_NAME</span>/&quot;</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="4">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_value&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">INPUT_VALUE</span>/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<ul>
+<li>reads the <code>post-login.http</code> file</li>
+<li>search and replace for a pattern using <code>sed</code><br />
+Now, let’s check the <code>post-login.http</code> file:</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 301
+</div><div class="line" data-line="2">Location: http://localhost:3000/
+</div><div class="line" data-line="3">Set-Cookie: &lbrace;&lbrace;cookie_name&rbrace;&rbrace;=&lbrace;&lbrace;cookie_value&rbrace;&rbrace;; path=/; HttpOnly
+</div></code></pre>
+<p>Time to perform the test. Check yourself a dead-simple login <em>written in ShellScript</em>!</p>
+<hr />
+<h2><a href="#finally-the-complete-implementation" aria-hidden="true" class="anchor" id="finally-the-complete-implementation"></a>Finally, the complete implementation</h2>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w9pof0kkoybmc41fpao1.png" alt="finally" /></p>
+<h3><a href="#handle-request" aria-hidden="true" class="anchor" id="handle-request"></a>Handle request</h3>
+<p>First we should:</p>
+<ul>
+<li>setup the FIFO</li>
+<li>put <code>netcat</code> in a loop</li>
+<li>handle requests</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">#!/bin/bash</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">## Create the response FIFO</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">rm</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">response</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">mkfifo</span> <span style="color: #e06c75;">response</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handleRequest</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="8">  <span style="color: #7f848e;">## Read request</span>
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">line</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="10">    <span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">trline</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">tr</span> <span style="color: #e06c75;">-d</span> <span style="color: #98c379;">&#39;[\r\n]&#39;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">    <span style="color: #c678dd;">[</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e5c07b;">break</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">    <span style="color: #d19a66;">HEADLINE_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;(.*?)\s(.*?)\sHTTP.*?&#39;</span>
+</div><div class="line" data-line="16">    <span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #56b6c2;">=~</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">HEADLINE_REGEX</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span>
+</div><div class="line" data-line="17">      <span style="color: #d19a66;">REQUEST</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">HEADLINE_REGEX</span>/\1 \2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="18">
+</div><div class="line" data-line="19">    <span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;Content-Length:\s(.*?)&#39;</span>
+</div><div class="line" data-line="20">    <span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #56b6c2;">=~</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span>
+</div><div class="line" data-line="21">      <span style="color: #d19a66;">CONTENT_LENGTH</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH_REGEX</span>/\1/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23">    <span style="color: #d19a66;">COOKIE_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;Cookie:\s(.*?)\=(.*?).*?&#39;</span>
+</div><div class="line" data-line="24">    <span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #56b6c2;">=~</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_REGEX</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span>
+</div><div class="line" data-line="25">      <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">COOKIE_NAME</span> <span style="color: #e06c75;">COOKIE_VALUE</span> <span style="color: #56b6c2;">&lt;&lt;&lt;</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_REGEX</span>/\1 \2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="26">  <span style="color: #c678dd;">done</span>
+</div><div class="line" data-line="27">
+</div><div class="line" data-line="28">  <span style="color: #7f848e;">## Read body</span>
+</div><div class="line" data-line="29">  <span style="color: #c678dd;">if</span> <span style="color: #c678dd;">[</span> <span style="color: #56b6c2;">!</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH</span>&quot;</span> <span style="color: #c678dd;">]</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">then</span>
+</div><div class="line" data-line="30">    <span style="color: #d19a66;">BODY_REGEX</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&#39;(.*?)=(.*?)&#39;</span>
+</div><div class="line" data-line="31">
+</div><div class="line" data-line="32">    <span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">-n</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CONTENT_LENGTH</span> <span style="color: #e06c75;">-t1</span> <span style="color: #e06c75;">line</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="33">      <span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span>
+</div><div class="line" data-line="34">      <span style="color: #e06c75;">trline</span><span style="color: #56b6c2;">=</span>`<span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">tr</span> <span style="color: #e06c75;">-d</span> <span style="color: #98c379;">&#39;[\r\n]&#39;</span>`
+</div><div class="line" data-line="35">
+</div><div class="line" data-line="36">      <span style="color: #c678dd;">[</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span>&quot;</span> <span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e5c07b;">break</span>
+</div><div class="line" data-line="37">
+</div><div class="line" data-line="38">      <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">INPUT_NAME</span> <span style="color: #e06c75;">INPUT_VALUE</span> <span style="color: #56b6c2;">&lt;&lt;&lt;</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">trline</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">BODY_REGEX</span>/\1 \2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="39">    <span style="color: #c678dd;">done</span>
+</div><div class="line" data-line="40">  <span style="color: #c678dd;">fi</span>
+</div><div class="line" data-line="41">
+</div><div class="line" data-line="42">  <span style="color: #7f848e;">## Route to the response handlers</span>
+</div><div class="line" data-line="43">  <span style="color: #c678dd;">case</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">REQUEST</span>&quot;</span> <span style="color: #c678dd;">in</span>
+</div><div class="line" data-line="44">    <span style="color: #98c379;">&quot;GET /login&quot;</span><span style="color: #c678dd;">)</span>   <span style="color: #61afef;">handle_GET_login</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="45">    <span style="color: #98c379;">&quot;GET /&quot;</span><span style="color: #c678dd;">)</span>        <span style="color: #61afef;">handle_GET_home</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="46">    <span style="color: #98c379;">&quot;POST /login&quot;</span><span style="color: #c678dd;">)</span>  <span style="color: #61afef;">handle_POST_login</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="47">    <span style="color: #98c379;">&quot;POST /logout&quot;</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">handle_POST_logout</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="48">    <span style="color: #61afef;">*</span><span style="color: #c678dd;">)</span>              <span style="color: #61afef;">handle_not_found</span> <span style="color: #abb2bf;">;;</span>
+</div><div class="line" data-line="49">  <span style="color: #c678dd;">esac</span>
+</div><div class="line" data-line="50">
+</div><div class="line" data-line="51">  <span style="color: #e5c07b;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RESPONSE</span>&quot;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">response</span>
+</div><div class="line" data-line="52"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="53">
+</div><div class="line" data-line="54"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;Listening on 3000...&#39;</span>
+</div><div class="line" data-line="55">
+</div><div class="line" data-line="56"><span style="color: #7f848e;">## Keep server running forever</span>
+</div><div class="line" data-line="57"><span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">true</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="58">  <span style="color: #7f848e;">## 1. wait for FIFO</span>
+</div><div class="line" data-line="59">  <span style="color: #7f848e;">## 2. creates a socket and listens to the port 3000</span>
+</div><div class="line" data-line="60">  <span style="color: #7f848e;">## 3. as soon as a request message arrives to the socket, pipes it to the handleRequest function</span>
+</div><div class="line" data-line="61">  <span style="color: #7f848e;">## 4. the handleRequest function processes the request message and routes it to the response handler, which writes to the FIFO</span>
+</div><div class="line" data-line="62">  <span style="color: #7f848e;">## 5. as soon as the FIFO receives a message, it&#39;s sent to the socket</span>
+</div><div class="line" data-line="63">  <span style="color: #7f848e;">## 6. closes the connection (`-N`), closes the socket and repeat the loop</span>
+</div><div class="line" data-line="64">  <span style="color: #61afef;">cat</span> <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-lN</span> <span style="color: #d19a66;">3000</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">handleRequest</span>
+</div><div class="line" data-line="65"><span style="color: #c678dd;">done</span>
+</div></code></pre>
+<p>In short, the server:</p>
+<ol>
+<li>waits for FIFO</li>
+<li>creates a socket and listens to the port 3000</li>
+<li>as soon as a request message arrives to the socket, pipes it to the handleRequest function</li>
+<li>the handleRequest function processes the request message and routes it to the response handler, which writes to the FIFO</li>
+<li>as soon as the FIFO receives a message, it’s sent to the socket</li>
+<li>closes the connection (<code>-N</code>), closes the socket and repeat the loop</li>
+</ol>
+<h3><a href="#implement-the-handle-response-functions" aria-hidden="true" class="anchor" id="implement-the-handle-response-functions"></a>Implement the handle response functions</h3>
+<p>Look at the <code>switch-case</code>. It’s pretty simple but the functions are yet to be implemented.</p>
+<p>Place them before the <code>handleRequest</code> function, because ShellScript expects functions to be declared prior to calling.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_GET_home</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">home.html</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="3">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_NAME</span>&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_VALUE</span>/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_GET_login</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="7">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">login.html</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_POST_login</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="11">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">post-login.http</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="12">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_name&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">INPUT_NAME</span>/&quot;</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="13">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_value&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">INPUT_VALUE</span>/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="14"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_POST_logout</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="17">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">post-logout.http</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="18">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_name&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_NAME</span>/&quot;</span> <span style="color: #56b6c2;">|</span> \
+</div><div class="line" data-line="19">    <span style="color: #61afef;">sed</span> <span style="color: #98c379;">&quot;s/&lbrace;&lbrace;cookie_value&rbrace;&rbrace;/<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">COOKIE_VALUE</span>/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="20"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="21">
+</div><div class="line" data-line="22"><span style="color: #c678dd;">function</span> <span style="color: #61afef;">handle_not_found</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="23">  <span style="color: #d19a66;">RESPONSE</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">404.html</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="24"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<h3><a href="#place-the-files-accordingly" aria-hidden="true" class="anchor" id="place-the-files-accordingly"></a>Place the files accordingly</h3>
+<p>Now that we have the <code>handle response</code> functions, note that all of them expect HTTP/HTML files to exist. Let’s create them.<br />
+<code>login.html</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 200 OK
+</div><div class="line" data-line="2">Content-Type: text/html
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">form</span> <span style="color: #e06c75;">method</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;POST&quot;</span> <span style="color: #e06c75;">action</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;/login&quot;</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="5">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">input</span> <span style="color: #e06c75;">type</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;text&quot;</span> <span style="color: #e06c75;">name</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;name&quot;</span> <span style="color: #abb2bf;">/&gt;</span>
+</div><div class="line" data-line="6">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">input</span> <span style="color: #e06c75;">type</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;submit&quot;</span> <span style="color: #e06c75;">value</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;Login&quot;</span> <span style="color: #abb2bf;">/&gt;</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">form</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p><code>home.html</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 200 OK
+</div><div class="line" data-line="2">Content-Type: text/html
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">p</span><span style="color: #abb2bf;">&gt;</span>Hello, &lbrace;&lbrace;name&rbrace;&rbrace;<span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">p</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">form</span> <span style="color: #e06c75;">method</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;POST&quot;</span> <span style="color: #e06c75;">action</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;/logout&quot;</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">input</span> <span style="color: #e06c75;">type</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;submit&quot;</span> <span style="color: #e06c75;">value</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;Logout&quot;</span> <span style="color: #abb2bf;">/&gt;</span>
+</div><div class="line" data-line="8"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">form</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p><code>404.html</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 404 NotFound
+</div><div class="line" data-line="2">Content-Type: text/html
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Sorry, not found</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p><code>post-login.http</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 301
+</div><div class="line" data-line="2">Location: http://localhost:3000/
+</div><div class="line" data-line="3">Set-Cookie: &lbrace;&lbrace;cookie_name&rbrace;&rbrace;=&lbrace;&lbrace;cookie_value&rbrace;&rbrace;; path=/; HttpOnly
+</div></code></pre>
+<p><code>post-logout.http</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 301
+</div><div class="line" data-line="2">Location: http://localhost:3000/login
+</div><div class="line" data-line="3">Set-Cookie: &lbrace;&lbrace;cookie_name&rbrace;&rbrace;=&lbrace;&lbrace;cookie_value&rbrace;&rbrace;; path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT
+</div></code></pre>
+<hr />
+<p><strong>So much YAY!</strong></p>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>Today we walked through refactoring our Web server.</p>
+<p>We added more capabilities, making it a complete web server <em>delivering a login, home page and logout features</em>.</p>
+<p>In the next steps we’ll explore the triad of Web: HTML, CSS and JS.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

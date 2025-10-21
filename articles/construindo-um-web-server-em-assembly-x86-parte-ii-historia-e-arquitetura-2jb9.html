@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construindo um web server em Assembly x86, parte II, história e arquitetura - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) demos uma introdução não-técnica sobre o que se">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html">
+  <meta property="og:title" content="Construindo um web server em Assembly x86, parte II, história e arquitetura">
+  <meta property="og:description" content="No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) demos uma introdução não-técnica sobre o que se">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-04-11T23:26:28Z">
+  <meta property="article:tag" content="assembly">
+      <meta property="article:tag" content="braziliandevs">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Construindo um web server em Assembly x86, parte II, história e arquitetura",
+    "datePublished": "2024-04-11T23:26:28Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) demos uma introdução não-técnica sobre o que se",
+        "keywords": "assembly, braziliandevs"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, parte II, história e arquitetura</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 11 Apr 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">assembly</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>No <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5">artigo anterior</a> demos uma introdução não-técnica sobre o que será esta saga de Assembly x86 conforme avançamos na construção de um web server.</p>
+<p>Agora, chegou o momento de começarmos a de fato falar sobre coisas técnicas.</p>
+<p>Como de costume, não gosto de esgormitar termos complexos sem a devida explicação. Portanto, vamos iniciar a saga trazendo um pouco de contexto histórico, motivações e porque estamos aqui quando o assunto é <strong>computadores</strong>.</p>
+<blockquote>
+<p>Okay, agora fui filósofo demais. Mas o que mais importa é que o verdadeiro Assembly são os amigos que fazemos no caminho</p>
+</blockquote>
+<p>Sem mais delongas, vamos ao que interessa.</p>
+<hr />
+<h2><a href="#agenda" aria-hidden="true" class="anchor" id="agenda"></a>Agenda</h2>
+<ul>
+<li><a href="#um-pouco-de-hist%C3%B3ria">Um pouco de história</a></li>
+<li><a href="#computar-informa%C3%A7%C3%B5es">Computar informações</a>
+<ul>
+<li><a href="#m%C3%A1quina-de-turing">Máquina de Turing</a></li>
+<li><a href="#arquitetura-de-von-neumann">Arquitetura de von Neumann</a></li>
+<li><a href="#o-gargalo-de-von-neumann">O gargalo de von Neumann</a></li>
+</ul>
+</li>
+<li><a href="#hierarquia-de-mem%C3%B3ria">Hierarquia de memória</a>
+<ul>
+<li><a href="#como-a-cpu-executa-instru%C3%A7%C3%B5es">Como a CPU executa instruções</a></li>
+<li><a href="#registradores-de-cpu">Registradores de CPU</a></li>
+</ul>
+</li>
+<li><a href="#isa">ISA</a>
+<ul>
+<li><a href="#cisc">CISC</a></li>
+<li><a href="#risc">RISC</a></li>
+</ul>
+</li>
+<li><a href="#por-qu%C3%AA-x86">Por quê x86?</a></li>
+<li><a href="#conclus%C3%A3o">Conclusão</a></li>
+<li><a href="#refer%C3%AAncias">Referências</a></li>
+</ul>
+<hr />
+<h2><a href="#um-pouco-de-história" aria-hidden="true" class="anchor" id="um-pouco-de-história"></a>Um pouco de história</h2>
+<p>Ainda muitos milhares de anos a.C, o ser humano precisava realizar cálculos. Um dos instrumentos mais primitivos para esta tarefa era o Ábaco, e certamente você já deve ter visto um:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4rnhwceutwrg1kxc1amx.jpeg" alt="abaco" /></p>
+<p>Não vou entrar em detalhes em como um Ábaco funciona, sugiro que compre um e experimente. É divertido. Eu usei quando estava no ensino primário (cria dos anos 90, cof cof).</p>
+<h3><a href="#computadores-mecânicos" aria-hidden="true" class="anchor" id="computadores-mecânicos"></a>Computadores mecânicos</h3>
+<p>Ainda nesta “pré-história” dos computadores e já avançando para uma Europa iluminista (circa século XVII), podemos ver a seguir invenções mecânicas e projetos como a máquina de calcular de Blaise Pascal, depois a máquina analítica de Charles Babbage e então a máquina de tabulação de Herman Hollerith.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/96zo1kt2of9iohmx3f02.jpeg" alt="babbage machine" /></p>
+<blockquote>
+<p>💡 É da máquina de tabulação de Herman Hollerith que vem o nome do seu comprovante de pagamento “holerite”</p>
+</blockquote>
+<p>Estas máquinas eram mecânicas e tinham muitas limitações como não ter uma memória própria para as “instruções”, mas foram muito importantes para a evolução, possibilitando mais tarde que Ada Lovelace pudesse escrever o primeiro possível algoritmo para o projeto da máquina de Babbage.</p>
+<blockquote>
+<p>Pra quem quiser uma explicação excelente e mais completa sobre a história dos computadores e como estes funcionam, sugiro o vídeo <a href="https://www.youtube.com/watch?v=BbnDmeNojFA">como reinventar um computador do zero</a> do canal Infinitamente.</p>
+</blockquote>
+<hr />
+<h2><a href="#computar-informações" aria-hidden="true" class="anchor" id="computar-informações"></a>Computar informações</h2>
+<p>Na era moderna dos computadores, que se dá início no século XX, é quando acontece a revolução eletrônica através das válvulas e dos transistores.</p>
+<p>Mas não apenas na área da eletrônica. Foi no século XX que vimos a revolução computacional através de um modelo abstrato que abriu portas para muito do que conhecemos hoje em termos de computadores.</p>
+<p>Estamos falando da <strong>máquina de Turing</strong>.</p>
+<h3><a href="#máquina-de-turing" aria-hidden="true" class="anchor" id="máquina-de-turing"></a>Máquina de Turing</h3>
+<p>Nos anos 30, o matemático Alan Turing desenvolveu o conceito abstrato de uma máquina que possuía uma fita infinita, dividida em células, e um cabeçote de <strong>leitura/escrita</strong> que movia para frente e para trás na fita, possiblitando modificar o estado atual na máquina.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8hpp285hmrzc0txur45m.png" alt="turing machine" /></p>
+<p>Basicamente, este modelo de máquina permitiria que certas classes de problemas pudessem ser resolvidas com operações simples.</p>
+<p>Extrapolando, nesta fita, que pode representar um tipo de “memória”, é possível armazenar o estado mas também outra máquina, ou seja, temos aqui o conceito de uma máquina de Turing universal, que é capaz de simular outra máquina de Turing.</p>
+<p>De forma resumida, podemos colocar na fita tanto o estado (dados) quanto as próprias instruções do programa, mitigando assim o problema de limitação que os computadores primitivos tinham, que era resolver problemas complexos de forma mais simples.</p>
+<p>Entretanto, a máquina de Turing era apenas uma abstração. Este conceito de instruções e estado na mesma memória precisava ser concretizado.</p>
+<p><em>É aí que entra von Neumann</em>.</p>
+<h3><a href="#arquitetura-de-von-neumann" aria-hidden="true" class="anchor" id="arquitetura-de-von-neumann"></a>Arquitetura de von Neumann</h3>
+<p>Von Neumman foi um polímata que propôs um modelo computacional que é utilizado por muitos computadores modernos e dispositivos que usamos hoje em dia.</p>
+<p>Neste modelo, temos uma unidade de processamento central, ou CPU, que é responsável por realizar cálculos aritméticos e executar instruções.</p>
+<p>Conectada a esta CPU, temos o conceito de <em>memória</em> compartilhada, que vai ser usada para armazenar todas as instruções e estado de um programa de computador.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b0f759rhez1y6kinc7bf.png" alt="von neumann 1" /></p>
+<p>Esta arquitetura possibilitou que computadores como ENIAC e EDVAC pudessem ser desenvolvidos. O EDVAC, por sua vez, foi um dos precursores na implementação do modelo de von Neumann, com uma CPU que era conectada a uma memória compartilhada e sequencial.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vmlzomad54zpeapwc2jv.jpeg" alt="edvac" /></p>
+<p>À medida que os componentes computacionais foram ficando mais modernos, os computadores foram ficando menores, mais potentes, versáteis e com utilização de propósito mais geral.</p>
+<p>Então, a arquitetura de von Neumann pode ainda contar com dispositivos de entrada e saída de dados (impressora, teclado, mouse, placa de rede, monitor, etc), também conhecidos como dispositivos I/O:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fer0xexjvwrt4ooiwbjh.png" alt="von neumann 2" /></p>
+<p>Podemos assumir, então, que quando escrevemos um programa de computador, estamos basicamente manipulando uma memória finita (que tem fim) e dispositivos de entrada e saída de dados, através de instruções que são executadas pela CPU.</p>
+<p>Tudo graças ao modelo concreto de von Neumann.</p>
+<blockquote>
+<p>Vale destacar que há arquiteturas computacionais que não seguem este modelo, mas aqui neste guia estamos focando em computadores de propósito geral</p>
+</blockquote>
+<h3><a href="#o-gargalo-de-von-neumann" aria-hidden="true" class="anchor" id="o-gargalo-de-von-neumann"></a>O gargalo de von Neumann</h3>
+<p>Esta arquitetura entretanto traz uma limitação. Como o barramento (caminho) entre a CPU e memória é único, tanto instruções quanto dados trafegam pelo mesmo local, levando a um cenário onde a CPU pode ficar limitada em processamento até que todos os dados sejam lidos do barramento.</p>
+<p>Uma forma de mitigar este problema é definir diferentes “níveis” de memória, para que a CPU possa ter uma taxa de processamento maior.</p>
+<p>Você acertou, vamos falar agora sobre a <em>hierarquia de memória</em>.</p>
+<hr />
+<h2><a href="#hierarquia-de-memória" aria-hidden="true" class="anchor" id="hierarquia-de-memória"></a>Hierarquia de memória</h2>
+<p>Nosso programa manipula memória.</p>
+<blockquote>
+<p>Com que frequência?</p>
+</blockquote>
+<p>Todo tempo.</p>
+<p>Para mitigar o problema do gargalo de von Neumann, podemos definir uma hierarquia de memória, assim não só a memória principal (RAM) é “enxergada pela CPU” como memória, mas também outros dispositivos de armazenamento no sistema computacional.</p>
+<p>Adicionado a isso, com a modernização de computadores no século XX, foi criada a necessidade de orquestrar e controlar todas as interfaces com o hardware. Temos então a concepção de <strong>sistemas operacionais</strong> para esta tarefa, que começam a surgir em meados dos anos 60/70, dentre eles o UNIX.</p>
+<p>Ao tratarmos tudo como memória, podemos introduzir tal <strong>hierarquia</strong>. Portanto, num sistema computacional tratamos tudo (ou quase tudo) como memória e assim o sistema operacional (SO) pode abstrair de um determinado programa onde aquilo na hierarquia se encontra de fato sendo utilizado, deixando então nosso programa “livre” deste detalhe de implementação física.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/i09gvyk1ext127w3u1mm.png" alt="hierarquia memoria" /></p>
+<p>Quanto mais pro topo da hierarquia, menor a capacidade de armazenamento e mais caro. Por exemplo, registradores de  CPU são memórias voláteis que estão no topo.</p>
+<blockquote>
+<p>Vamos falar sobre registradores mais a seguir na saga</p>
+</blockquote>
+<p>E quanto mais pra base da hierarquia, maior a capacidade e consequentemente mais barato. Exemplo na base são as unidades de armazenamento durável não-voláteis (HD, SSD etc).</p>
+<p>No meio temos a memória principal e volátil, tendo como principal exemplo a memória RAM.</p>
+<p>A hierarquia de memória desempenha, então, um papel crucial na forma como a CPU gerencia e acessa memória.</p>
+<h3><a href="#como-a-cpu-executa-instruções" aria-hidden="true" class="anchor" id="como-a-cpu-executa-instruções"></a>Como a CPU executa instruções</h3>
+<p>Para que uma CPU execute determinada instrução, é necessário ao menos um ciclo de clock, também chamado popularmente como “giro de CPU”, ou <em>ciclo de CPU</em>.</p>
+<p>Vamos imaginar uma coisa que fica “girando” indefinidamente igual um relógio. De forma simples, é assim que podemos imaginar o clock de uma CPU, como um giro de relógio.</p>
+<p>Alguns tipos de instruções podem gastar mais de um ciclo, e determinar quais instruções vão gastar mais ou menos ciclos é algo que é projetado diretamente na <strong>construção da CPU</strong>.</p>
+<p>E onde as instruções ficam armazenadas?</p>
+<blockquote>
+<p>Isso mesmo, na memória.</p>
+</blockquote>
+<p>Portanto, a CPU precisa buscar a instrução na memória, decodificar, executar e armazenar o resultado de volta na memória.</p>
+<p>Tudo isto faz gastar imensos ciclos de CPU. Ao gastarmos ciclos, a CPU pode bater num limite e não conseguir atender a tantas operações no mesmo segundo. Pra não mencionar a latência que a CPU gasta pra utilizar o barramento físico e “viajar” até a memória principal.</p>
+<p>Tomando como premissa a hierarquia de memória, e se ao invés de armazenar o resultado na memória principal, a CPU resolver armazenar dentro da própria CPU?</p>
+<p>Conheça os <strong>registradores de CPU</strong>.</p>
+<h3><a href="#registradores-de-cpu" aria-hidden="true" class="anchor" id="registradores-de-cpu"></a>Registradores de CPU</h3>
+<p>Você já pode estar pensando em cache de CPU, né? Mas calma lá jovem, cache de CPU é outra seara que não pretendo entrar, não por agora.</p>
+<blockquote>
+<p>Mas que também tem seu lugar na hierarquia de memória</p>
+</blockquote>
+<p>Lembrando (mais uma vez), da hierarquia de memória, de forma muito simplificada:</p>
+<ul>
+<li>topo: registradores</li>
+<li>depois: cache de CPU</li>
+<li>ainda depois: memória principal (RAM)</li>
+<li>beeem depois: memória secundária (HD, SSD)</li>
+</ul>
+<p>Quanto mais perto do topo, mais rápido a CPU consegue processar, mas em contrapartida é volátil e também tem menor capacidade de armazenamento.</p>
+<p>Então, registradores são apenas memórias de hierarquia mais alta que são preferencialmente usadas para computação porque possuem a menor latência do conjunto de memórias disponíveis.</p>
+<p>São nos registradores onde a CPU vai armazenar instruções e dados do programa em execução, de modo a manipular sem precisar ficar dando tantos “saltos” na memória principal, economizando assim latência e ciclos de CPU.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1zzyclx72ff6nyr7b3ag.png" alt="von neumann - registradores" /></p>
+<p>Vamos pensar nos registradores como “caixinhas” de tamanho fixo que ficam dentro da CPU.</p>
+<p>E como podemos manipular os registradores da CPU? Devemos estabelecer um padrão, que define como controlar o <strong>conjunto de instruções</strong> da CPU.</p>
+<p>Precisamos de uma arquitetura de conjunto de instruções, ou <strong>ISA</strong> (<em>Instruction Set Architecture</em>).</p>
+<hr />
+<h2><a href="#isa" aria-hidden="true" class="anchor" id="isa"></a>ISA</h2>
+<p>ISA serve para definir o conjunto instruções e registradores em uma determinada CPU. O fabricante define a ISA, que pode ser classificada de formas diferentes, determinando quantas operações podem ser feitas por instrução, entre outros aspectos.</p>
+<p>Neste artigo vamos destacar 2 abordagens de conjunto de instruções: <em>CISC e RISC</em>.</p>
+<h3><a href="#cisc" aria-hidden="true" class="anchor" id="cisc"></a>CISC</h3>
+<p>CISC, ou <strong>Complex Instruction Set Computing</strong>, é uma arquitetura onde as instruções podem ser agrupadas em conjuntos mais complexos de instruções, permitindo que uma única instrução execute várias operações complexas.</p>
+<p>Aqui, determinadas tarefas podem resultar em apenas um ciclo de CPU, o que aumenta eficiência, mas por outro lado, esta complexidade de instruções pode tornar o tempo de execução menos previsível.</p>
+<p>Exemplos de arquiteturas CISC incluem System/360, PDP-11 e Intel 8086.</p>
+<h3><a href="#risc" aria-hidden="true" class="anchor" id="risc"></a>RISC</h3>
+<p>Para resolver o problema de instruções muito complexas em CISC, a arquiteura RISC, ou <strong>Reduced Instruction Set Computing</strong>, determina uma execução mais simples com menos instruções, diminuindo assim o número de circuitos e consequentemente ciclos de CPU. O tamanho das instruções geralmente é fixo, resultando em um desempenho mais rápido e previsível.</p>
+<p>Exemplos de arquiteturas RISC são MIPS e ARM, sendo ARM atualmente utilizada nos processadores de MacBook M1 em diante.</p>
+<p>Este é um dos motivos de um MacBook ARM consumir menos bateria e fazer menos barulho, por exemplo.</p>
+<h3><a href="#e-já-que-o-tema-é-x86" aria-hidden="true" class="anchor" id="e-já-que-o-tema-é-x86"></a>E já que o tema é x86…</h3>
+<p>Como a saga se trata de x86, especificamente 64-bit (logo mais vamos entender o motivo disso), inicialmente esta arquitetura foi desenvolvida seguindo o padrão CISC, que é o conjunto complexo de instruções.</p>
+<p>Entretanto a ISA do x86 foi adaptada para suportar internamente operações simplificadas como encontramos em RISC, portanto pode-se sizer que x86 é um “fake-CISC”, que segue um modelo “RISC-ish”.</p>
+<hr />
+<h2><a href="#por-quê-x86" aria-hidden="true" class="anchor" id="por-quê-x86"></a>Por quê x86?</h2>
+<p>Alguns leitores mais atentos devem estar se perguntando: por quê raios x86? O que isto significa?</p>
+<p>Bom, pra entender o que é isto, vamos mergulhar um pouco na história dos microprocessadores da Intel.</p>
+<h3><a href="#anos-70" aria-hidden="true" class="anchor" id="anos-70"></a>Anos 70</h3>
+<p>Os anos 70 foram primordiais. Além da explosão cambriana de sistemas operacionais, vemos também a consolidação da era dos transistores e assim a evolução das CPU’s.</p>
+<p>Do lado Intel, temos o 8080 de 8-bit lançado em 1974, que além de ser utilizado em sistemas industriais, também foi amplamente encontrado nos primeiros computadores pessoais.</p>
+<h3><a href="#intel-8086" aria-hidden="true" class="anchor" id="intel-8086"></a>Intel 8086</h3>
+<p>Esta versão traz consigo conjuntos de instruções de 16-bits e foi um marco na era dos computadores pessoais. É aqui que passa a ser cunhado o termo de família “x86”, pois o “x” caracteriza qualquer número que venha antes de “86”.</p>
+<p>Intuitivo, não?</p>
+<h3><a href="#anos-80-a-década-do-intel-x86" aria-hidden="true" class="anchor" id="anos-80-a-década-do-intel-x86"></a>Anos 80, a década do Intel x86</h3>
+<p>A partir de então, nesta década vimos a chegada do 80286 (286) que suporta também 16-bit + 8-bit de endereçamento de memória; depois, o famoso 80386 (i386), que trouxe uma grande mudança suportando instruções de 32-bit e os famosos registradores <code>exx</code> (eax, ebx, eip, etc); para então chegarmos ao 80486 (486), que foi uma melhoria do 386 com suporte a instruções mais avançadas.</p>
+<blockquote>
+<p>Pra quem tiver curiosidade em saber a especificação da arquitetura x86, está tudo bem documentado num simples <a href="https://software.intel.com/en-us/download/intel-64-and-ia-32-architectures-sdm-combined-volumes-1-2a-2b-2c-2d-3a-3b-3c-3d-and-4">manual de 5000 páginas</a></p>
+</blockquote>
+<h3><a href="#anos-90-pentium-e-além" aria-hidden="true" class="anchor" id="anos-90-pentium-e-além"></a>Anos 90, Pentium e além</h3>
+<p>O que vem a seguir é a evolução seguindo com os Pentium 586, 686 e depois, uma simplificação dos termos para x86_32 (32-bit) ou x86_64 (64-bit).</p>
+<p>Destaca-se os Pentium II, III e os Core “i AlgumaCoisa” que perduram até hoje.</p>
+<blockquote>
+<p>E os AMD?</p>
+</blockquote>
+<p>Enquanto a Intel dominava o mercado de CPU’s, a AMD (Advanced Micro Devices) mexeu os palitinhos e também lançou versões compatíveis com x86, portanto pode-se dizer que, ao desenvolver para arquitetura x86, é possível executar as mesmas instruções em uma CPU fabricada pela AMD.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>É isto. Este foi um artigo bastante denso, que cobriu uma breve história dos computadores, passando por modelos computacionais até chegar nas arquiteturas de CPU’s e entendermos o que significa aquele “x86” no título do artigo.</p>
+<p>No próximo artigo, pretendo trazer brevemente sistema binário e hexadecimal para então começar a apresentar aquilo que estamos todos interessados: linguagem de montagem, ou simplesmente <strong>Assembly</strong>.</p>
+<p><em>Artigo revisado com carinho por <a href="https://twitter.com/JeffQuesado">Jeff Quesado</a>, o “Coelho da Bolha”, e também por <a href="https://twitter.com/_____cadu_____">Cadu</a>, o músico frustrado (same thing).</em></p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<sub>
+Ábaco, Wikipedia
+https://pt.wikipedia.org/wiki/%C3%81baco
+Máquina analítica, Wikipedia
+https://pt.wikipedia.org/wiki/M%C3%A1quina_anal%C3%ADtica
+Linguagem Assembly, Wikipedia
+https://pt.wikipedia.org/wiki/Linguagem_assembly
+Cronologia do x86, Wikipedia
+https://pt.wikipedia.org/wiki/X86
+Arquitetura de Von Neumann, Wikipedia
+https://pt.wikipedia.org/wiki/Arquitetura_de_von_Neumann
+Blau Araujo, "Fundamentos de Assembly com NASM"
+https://codeberg.org/blau_araujo/assembly-nasm-x86_64
+História da Computação, Wikipedia
+https://pt.wikipedia.org/wiki/Hist%C3%B3ria_da_computa%C3%A7%C3%A3o
+Inifitamente, "Como reinventar um computador do zero"
+https://www.youtube.com/watch?v=BbnDmeNojFA
+Total Phase, "What's a CPU register"
+https://www.totalphase.com/blog/2023/05/what-is-register-in-cpu-how-does-it-work/
+Turing Machine, Wikipedia
+https://en.wikipedia.org/wiki/Turing_machine
+Brilliant, "Turing Machines"
+https://brilliant.org/wiki/turing-machines/
+Instruction Set Architecture, Wikipedia
+https://en.wikipedia.org/wiki/Instruction_set_architecture
+</sub>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

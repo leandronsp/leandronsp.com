@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part III, controllers and self-healing - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="The [second part](https://dev.to/leandronsp/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two containe">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html">
+  <meta property="og:title" content="Kubernetes 101, part III, controllers and self-healing">
+  <meta property="og:description" content="The [second part](https://dev.to/leandronsp/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two containe">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-03-12T05:07:31Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="k8s">
+      <meta property="article:tag" content="containers">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part III, controllers and self-healing",
+    "datePublished": "2023-03-12T05:07:31Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "The [second part](https://dev.to/leandronsp/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two containe",
+        "keywords": "kubernetes, docker, k8s, containers"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part III, controllers and self-healing</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 12 Mar 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">k8s</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">containers</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>The <a href="https://dev.to/leandronsp/kubernetes-101-part-ii-pods-19pb">second part</a> of this series explained <strong>how Pods work</strong> while building a Pod having two containers communicating to each other using FIFO and a shared volume.</p>
+<p>In this post we’ll learn about <strong>self-healing systems</strong> and what we can achieve by leveraging Pod management to <strong>Kubernetes workload resources</strong> so they can manage Pods on our behalf.</p>
+<h2><a href="#-accidents-will-happen" aria-hidden="true" class="anchor" id="-accidents-will-happen"></a>🚂 Accidents will happen</h2>
+<p>Let’s say we have a single <em>healthy</em> node and multiple Pods running in it. What if the node is faced with a <em>critical hardware failure</em>, making it <em>unhealthy</em>? Remember: <strong>a Kubernetes node is represented by a virtual machine</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/937o8xbvyr8q4y88hbwv.png" alt="a node failure" /></p>
+<p>Since <em>they have a lifecycle</em>, Pods in an <em>unhealthy</em> node will <strong>begin to fail</strong>.</p>
+<h2><a href="#️-application-downtime" aria-hidden="true" class="anchor" id="️-application-downtime"></a>⬇️ Application downtime</h2>
+<p>A new node is required. But provisioning hardware is a <em>costly</em> operation, <strong>it takes time</strong>.</p>
+<p>Meanwhile, the <strong>Pod remains failed</strong> in the unhealthy node and the application is suffering a <strong>downtime</strong>.</p>
+<p>Once the new node <em>has joined and is ready to accept</em> new Pods, we can start <strong>all the pods manually</strong> using <code>kubectl</code> in the newly healthy node, for instance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">./pod.yml</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/5f89pltrpvbwggnzar3i.png" alt="starting pods in the new node" /><br />
+Until the Pod is <em>ready and running</em>, the application remains <strong>out of service</strong>, for example:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vu3ihn4kmgvokm2q8rt7.png" alt="application downtime" /></p>
+<p>Managing <em>Pods directly is not efficient</em>, it can be a cumbersome task not to mention that our application would face multiple downtimes.</p>
+<p>We should build a system which is capable of <strong>detecting failures</strong> and also <em>restarting components</em> or applications <strong>automatically</strong> with no human intervention.</p>
+<p>We need a <a href="https://techbeacon.com/app-dev-testing/how-develop-self-healing-apps-4-key-patterns">self-healing system</a>.</p>
+<h2><a href="#-self-healing-and-robotics" aria-hidden="true" class="anchor" id="-self-healing-and-robotics"></a>🤖 Self-healing and Robotics</h2>
+<p>Building a <strong>self-healing system</strong> is crucial for businesses. Anytime our infrastructure suffer disruption, networking or hardware failure, the system should be capable of “healing itself”.</p>
+<p><em>Automation is key.</em> And a potential solution for self-healing comes from <strong>Robotics</strong>.</p>
+<p>In Robotics, we usually create a <strong>controller</strong> that gets a <strong>desired state</strong> and, by using some sort of <strong>control loop</strong>, it continuously check if the <em>current state matches the desired state</em>, trying to come <strong>closer as much as possible</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4wdurha0udav30nwd67j.png" alt="controller and control loop" /></p>
+<p>A <strong>thermostat</strong> works exactly using such a <em>controller pattern</em>: it continuously checks if the current temperature matches the desired one, trying to <strong>come closer</strong>. Once it gets a match, <em>the controller turns off the equipment</em> and the process is repeated <em>over and over again</em>.</p>
+<p>Luckily, Kubernetes brings the <strong>controller pattern</strong> that solves our problem so that we don’t need to manage Pods directly.</p>
+<p>We are talking about <a href="https://kubernetes.io/docs/concepts/architecture/controller/">Kubernetes Controllers</a>.</p>
+<h2><a href="#controllers" aria-hidden="true" class="anchor" id="controllers"></a>Controllers</h2>
+<p>Kubernetes controllers are <strong>control loops</strong> that watch the cluster state, then take actions to <em>match the desired state</em> as much as possible.</p>
+<p>But how do we make use of <em>controllers</em>? Kubernetes provides several <a href="https://kubernetes.io/docs/concepts/workloads/controllers/">Workload Resources</a> so we can rely on them to <strong>manage Pods on our behalf</strong>.</p>
+<p>Time to explore one of the main <em>workload resources</em> that guarantees <em>self-healing capabilities</em>, the <strong>ReplicaSet</strong>.</p>
+<hr />
+<h2><a href="#replicaset" aria-hidden="true" class="anchor" id="replicaset"></a>ReplicaSet</h2>
+<p>Using a <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet</a> controller, we can specify a number of identical Pods.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### The kind of the Kubernetes object</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ReplicaSet</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">apps/v1</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #7f848e;">### The number of replicas of nginx Pod</span>
+</div><div class="line" data-line="8">  <span style="color: #7f848e;">### The controller will manage the Pods on our behalf</span>
+</div><div class="line" data-line="9">  <span style="color: #7f848e;">### Anytime a Pod goes down, the controller will restart a new one to guarantee that at least 2 nginx Pods are running</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">replicas</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">matchLabels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">      <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="14">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="18">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="20">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="21">        <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div></code></pre>
+<p>After applying the YAML file, we should have a representation of a <code>replicaset</code> object as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">replicasets</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>    <span style="color: #e06c75;">DESIRED</span>   <span style="color: #e06c75;">CURRENT</span>   <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx</span>   <span style="color: #d19a66;">2</span>         <span style="color: #d19a66;">2</span>         <span style="color: #d19a66;">2</span>       <span style="color: #e06c75;">13m</span>
+</div></code></pre>
+<p>Also, checking the Pods:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>          <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-r5kmn</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">15m</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx-k87fz</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">15m</span>
+</div></code></pre>
+<p><em>Note that each Pod has got a <strong>random identifier</strong> in the cluster as a suffix</em> <code>&lt;podLabelMatcher&gt;-&lt;uniqueID&gt;</code>.</p>
+<p>Moreover, we can describe the ReplicaSet in a picture:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mjb1be5wt2td2recq2z4.png" alt="A ReplicaSet controller" /></p>
+<p>In the above picture, it’s important to note that the controller may decide to keep <em>each Pod in a different Node</em>. <em>That’s exactly the resilience and self-healing capability we want!</em></p>
+<p>Whenever a Node gets <em>unhealthy</em>, we’re still keeping a <strong>healthy Node</strong>, thus our application <em>wouldn’t suffer downtime easily</em>.</p>
+<h3><a href="#deleting-a-pod-of-a-replicaset" aria-hidden="true" class="anchor" id="deleting-a-pod-of-a-replicaset"></a>Deleting a Pod of a ReplicaSet</h3>
+<p>In case we delete a Pod that was created by a ReplicaSet, the controller will start a <strong>new one automatically</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">delete</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">nginx-r5kmn</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">pod</span> <span style="color: #e06c75;">nginx-r5kmn</span> <span style="color: #e06c75;">deleted</span>
+</div></code></pre>
+<p>Checking Pods again:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>          <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-k87fz</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">29m</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">### The new Pod</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">nginx-mr2rd</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">28s</span>
+</div></code></pre>
+<h3><a href="#deleting-a-replicaset" aria-hidden="true" class="anchor" id="deleting-a-replicaset"></a>Deleting a ReplicaSet</h3>
+<p>But in case we want to delete all Pods of a ReplicaSet, we should delete the <code>replicaset</code> instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">delete</span> <span style="color: #e06c75;">replicaset</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">replicaset.apps</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">deleted</span>
+</div></code></pre>
+<p>And the Pods are finally gone:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">No</span> <span style="color: #e06c75;">resources</span> <span style="color: #e06c75;">found</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">default</span> <span style="color: #e06c75;">namespace.</span>
+</div></code></pre>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this post we’ve seen how network or hardware failures can make an impact on our application, hence the importance of a <strong>self-healing system</strong>.</p>
+<p>On top of that, we learned about <strong>Kubernetes controllers</strong> and how they <em>solve the self-healing problem</em>, by introducing one of the most important workload resources in Kubernetes: <strong>the ReplicaSet</strong>.</p>
+<p>The upcoming posts will still focus on <strong>workload resources</strong>, more precisely about how we can perform <strong>rollout deployments</strong>, define stateful Pods, single-node Pods and Pods that run a single task and then stop (Jobs).</p>
+<p>Cheers!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prometheus on Kubernetes 101 - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="[Prometheus](https://prometheus.io/docs/introduction/overview/) é um projeto open-source escrito em Go, criado em 2012 e utilizado para monitoramento e sistema d">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j.html">
+  <meta property="og:title" content="Prometheus on Kubernetes 101">
+  <meta property="og:description" content="[Prometheus](https://prometheus.io/docs/introduction/overview/) é um projeto open-source escrito em Go, criado em 2012 e utilizado para monitoramento e sistema d">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-07-06T04:31:45Z">
+  <meta property="article:tag" content="prometheus">
+      <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Prometheus on Kubernetes 101",
+    "datePublished": "2022-07-06T04:31:45Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "[Prometheus](https://prometheus.io/docs/introduction/overview/) é um projeto open-source escrito em Go, criado em 2012 e utilizado para monitoramento e sistema d",
+        "keywords": "prometheus, kubernetes, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Prometheus on Kubernetes 101</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 06 Jul 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">prometheus</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><a href="https://prometheus.io/docs/introduction/overview/">Prometheus</a> é um projeto open-source escrito em Go, criado em 2012 e utilizado para monitoramento e sistema de alerta de aplicações.</p>
+<p>Foi desenvolvido originalmente pela empresa SoundCloud, sendo mais tarde em 2016 admitido pela <a href="https://www.cncf.io/">CNCF</a> e graduado, depois do Kubernetes, como o segundo projeto cloud-native.</p>
+<p>Ou seja, é um projeto amplamente utilizado e mantido pela comunidade e sua utilização contribui para se atingir <a href="https://www.splunk.com/en_us/data-insider/what-is-observability.html">observabilidade</a> em aplicações.</p>
+<h2><a href="#arquitetura" aria-hidden="true" class="anchor" id="arquitetura"></a>Arquitetura</h2>
+<p>Sua arquitetura consiste em buscar periodicamente via HTTP, métricas de dados a partir de <em>exporters ou jobs</em>, para então agregá-las e guardá-las em um <a href="https://en.wikipedia.org/wiki/Time_series_database">time-series database</a> (TSDB).</p>
+<p>Com as métricas guardadas, Prometheus oferece uma linguagem própria para fazer queries (PromQL) no database e assim criar dashboards e alertas.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/52qysuqu8eplwvimam2m.png" alt="prometheus architecture" /></p>
+<h2><a href="#let-the-games-begin" aria-hidden="true" class="anchor" id="let-the-games-begin"></a>Let the games begin</h2>
+<p>Você pode instalar o Prometheus via binário, imagem Docker ou qualquer outra forma apropriada para teu caso de acordo com o site oficial.</p>
+<p>Mas para este artigo (e um futuro tutorial), vou configurá-lo dentro de um cluster Kubernetes, pois quero inclusive fazer o Prometheus monitorar as apps dentro do cluster e inclusive <strong>monitorar o próprio cluster</strong>.</p>
+<p><em>Nota: vou assumir que você tem um cluster fresh de Kubernetes, pronto para receber recursos</em>.</p>
+<h2><a href="#first-things-first" aria-hidden="true" class="anchor" id="first-things-first"></a>First things first</h2>
+<p>Como boa prática, criamos um namespace chamado <code>monitoring</code> onde vamos colocar todos os recursos do nosso tutorial:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">namespace</span> <span style="color: #e06c75;">monitoring</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">namespace/monitoring</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<h2><a href="#prometheus-pod" aria-hidden="true" class="anchor" id="prometheus-pod"></a>Prometheus Pod</h2>
+<p>Vamos criar a pod através do deployment controller, que permite uma melhor gestão da pod.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">deployment</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">prometheus-pod</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--namespace=monitoring</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--image=prom/prometheus</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--replicas=1</span> \
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">--port=9090</span> \
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">--dry-run=client</span> \
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">--output=yaml</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">./prometheus-pod.yml</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">./prometheus-pod.yml</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #61afef;">deployment.apps/prometheus-pod</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<p>E <em>boom</em>! Já temos um Prometheus server prontinho para ser utilizado.</p>
+<h2><a href="#visualizando-métricas" aria-hidden="true" class="anchor" id="visualizando-métricas"></a>Visualizando métricas</h2>
+<p>Para visualizarmos métricas com PromQL, precisamos acessar o Prometheus via HTTP, que está sendo servido na porta <code>9090</code>.</p>
+<p>Mas como os containers no Kubernetes são <em>isolados</em>, para fins de teste vamos fazer <strong>port-forward</strong> (encaminhamento de porta) para nosso localhost e assim conseguimos visualizar como se tivesse no próprio OS host.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">monitoring</span> <span style="color: #e06c75;">port-forward</span> <span style="color: #e06c75;">deploy/prometheus-pod</span> <span style="color: #e06c75;">9090:9090</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Forwarding</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">127.0.0.1:9090</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">9090</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Forwarding</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">::1</span><span style="color: #e06c75;">]</span><span style="color: #e06c75;">:9090</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">9090</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uvploj2tvigxrp52cur8.png" alt="prometheus app" /></p>
+<p>Por padrão, Prometheus vem configurado para exportar suas próprias métricas, embora mais tarde vamos adicionar outros exporters para outras aplicações.</p>
+<p>Dentro do container, vamos verificar a configuração padrão:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">/etc/prometheus/prometheus.yml</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">global:</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">scrape_interval:</span>     <span style="color: #e06c75;">15s</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">evaluation_interval:</span> <span style="color: #e06c75;">15s</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #61afef;">rule_files:</span>
+</div><div class="line" data-line="8">  <span style="color: #7f848e;"># - &quot;first.rules&quot;</span>
+</div><div class="line" data-line="9">  <span style="color: #7f848e;"># - &quot;second.rules&quot;</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #61afef;">scrape_configs:</span>
+</div><div class="line" data-line="12">  <span style="color: #61afef;">-</span> <span style="color: #e06c75;">job_name:</span> <span style="color: #e06c75;">prometheus</span>
+</div><div class="line" data-line="13">    <span style="color: #61afef;">static_configs:</span>
+</div><div class="line" data-line="14">      <span style="color: #61afef;">-</span> <span style="color: #e06c75;">targets:</span> <span style="color: #e06c75;">[</span><span style="color: #98c379;">&#39;localhost:9090&#39;</span><span style="color: #e06c75;">]</span>
+</div></code></pre>
+<ul>
+<li><code>global</code>: configuração global para todos os jobs/exporters</li>
+<li><code>scrape_interval</code>: frequência de scraping</li>
+<li><code>rule_files</code>: utilizado principalmente para alertas, vamos ignorar por agora</li>
+<li><code>scrape_configs</code>: onde ficam os endpoints para monitoramento</li>
+</ul>
+<p>Neste caso, o Prometheus define um job chamado <code>prometheus</code> que busca métricas no endpoint <code>localhost:9090</code>, que é onde <strong>o próprio Prometheus está sendo servido</strong>. Ou seja, Prometheus monitora a si mesmo :)</p>
+<p>Com isso, o Prometheus busca no endpoint um path chamado <code>/metrics</code>. Vamos então verificar:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">open</span> <span style="color: #e06c75;">http://localhost:9090/metrics</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># TYPE promhttp_metric_handler_requests_total counter</span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">promhttp_metric_handler_requests_total</span><span style="color: #98c379;">&lbrace;</span><span style="color: #98c379;">code=</span><span style="color: #98c379;">&quot;200&quot;</span><span style="color: #98c379;">&rbrace;</span> <span style="color: #d19a66;">14</span>
+</div><div class="line" data-line="7"><span style="color: #98c379;">promhttp_metric_handler_requests_total</span><span style="color: #98c379;">&lbrace;</span><span style="color: #98c379;">code=</span><span style="color: #98c379;">&quot;500&quot;</span><span style="color: #98c379;">&rbrace;</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">promhttp_metric_handler_requests_total</span><span style="color: #98c379;">&lbrace;</span><span style="color: #98c379;">code=</span><span style="color: #98c379;">&quot;503&quot;</span><span style="color: #98c379;">&rbrace;</span> <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>Importante notar a métrica <code>promhttp_metric_handler_requests_total</code>, que com label <code>200</code> tem 14 requests. Ou seja, neste momento, eu fiz 14 requests à este endpoint de métricas. Caso eu continue fazendo pedidos ao endpoint, este valor será incrementado.</p>
+<p>Vamos analisar esta métrica no dashboard do Prometheus, em <code>http://localhost:9090/graph</code> na tab “Table”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">promhttp_metric_handler_requests_total</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/wngg4qtytv1sfyoa0ayq.png" alt="prom table" /></p>
+<p>Cool, uh?</p>
+<p>Para ficar ainda melhor, vamos analisar a <em>taxa</em> de HTTP requests a este endpoint <strong>ao longo de um determinado tempo</strong>, afinal, é para isto que serve um time-series database.</p>
+<p>Na tab “Graph”, passamos a métrica para uma função chamada <code>rate</code> que irá calcular a taxa de requests que retornaram <code>200</code> ao longo de 1 minuto:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">rate</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">promhttp_metric_handler_requests_total</span><span style="color: #98c379;">&lbrace;</span><span style="color: #98c379;">code=</span><span style="color: #98c379;">&quot;200&quot;</span><span style="color: #98c379;">&rbrace;</span><span style="color: #98c379;">[</span><span style="color: #98c379;">1m</span><span style="color: #98c379;">]</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ezowtixqrw86bjgliu70.png" alt="prom graph" /></p>
+<p>Podemos notar que o gráfico mostra a taxa aumentando em determinado horário e depois caindo, refletindo quando eu passei a fazer menos requests enquanto escrevia este artigo :P</p>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Para não ficar muito extenso, vou deixar este artigo como sendo apenas uma introdução amigável ao Prometheus, pois muito do que descrevi aqui está no <a href="https://prometheus.io/docs/introduction/first_steps/">first steps</a> do site oficial.</p>
+<p>Nos próximos artigos irei explorar ainda mais esta ferramenta, diferentes métricas, exporters e também uma dashboard completa com Grafana.</p>
+<p>Todo o código aqui escrito será compartilhado <a href="https://github.com/leandronsp/monitoring-101">neste reposiório</a>.</p>
+<p>Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

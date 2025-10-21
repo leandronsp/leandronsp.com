@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construindo um web server em Assembly x86, the grand finale, multi-threading - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Uma vez que temos um [web server funcional](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5), podemos dar o p">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html">
+  <meta property="og:title" content="Construindo um web server em Assembly x86, the grand finale, multi-threading">
+  <meta property="og:description" content="Uma vez que temos um [web server funcional](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5), podemos dar o p">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-07-14T02:37:25Z">
+  <meta property="article:tag" content="braziliandevs">
+      <meta property="article:tag" content="assembly">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Construindo um web server em Assembly x86, the grand finale, multi-threading",
+    "datePublished": "2024-07-14T02:37:25Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Uma vez que temos um [web server funcional](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5), podemos dar o p",
+        "keywords": "braziliandevs, assembly"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, the grand finale, multi-threading</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 14 Jul 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">assembly</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Uma vez que temos um <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5">web server funcional</a>, podemos dar o próximo (e último) passo, que é deixar o servidor <strong>minimamente escalável</strong> fazendo uso de uma pool de threads.</p>
+<p>Neste artigo, vamos mergulhar nas entranhas da implementação de uma pool de threads com sincronização através de locks, e para atingir tal feito em assembly abordaremos filas, alocação dinâmica de memória e controle de locks com futex.</p>
+<p>Ao fim deste artigo, que é o último da saga, teremos uma visão mais holística sobre como funciona um web server e como uma pool de threads poderia ser implementada em linguagens de baixo nível.</p>
+<p>Respira e vem comigo, esta última parte será uma avalanche de conceitos.</p>
+<hr />
+<h2><a href="#agenda" aria-hidden="true" class="anchor" id="agenda"></a>Agenda</h2>
+<ul>
+<li><a href="#simulando-a-lat%C3%AAncia-com-nanosleep">Simulando a latência com nanosleep</a></li>
+<li><a href="#simulando-requests-em-escala-com-xargs">Simulando requests em escala com xargs</a></li>
+<li><a href="#concorr%C3%AAncia-com-forking-de-processos">Concorrência com forking de processos</a></li>
+<li><a href="#concorr%C3%AAncia-com-clone-de-processo">Concorrência com clone de processo</a></li>
+<li><a href="#concorr%C3%AAncia-com-threads">Concorrência com threads</a>
+<ul>
+<li><a href="#entendendo-a-cria%C3%A7%C3%A3o-de-uma-thread">Entendendo a criação de uma thread</a></li>
+<li><a href="#thread-flags">Thread flags</a></li>
+<li><a href="#aloca%C3%A7%C3%A3o-de-mem%C3%B3ria-com-brk">Alocação de memória com brk</a></li>
+<li><a href="#modificando-o-server-para-suportar-multi--threading">Modificando o server para suportar multi-threading</a></li>
+</ul>
+</li>
+<li><a href="#concorr%C3%AAncia-com-thread-pool">Concorrência com thread pool</a>
+<ul>
+<li><a href="#uma-thread-em-loop">Uma thread em loop</a></li>
+<li><a href="#5-threads-em-loop">5 threads em loop</a></li>
+<li><a href="#sincroniza%C3%A7%C3%A3o-com-futex">Sincronização com futex</a></li>
+</ul>
+</li>
+<li><a href="#aloca%C3%A7%C3%A3o-de-mem%C3%B3ria-com-mmap">Alocação de memória com mmap</a></li>
+<li><a href="#conclus%C3%A3o">Conclusão</a></li>
+<li><a href="#refer%C3%AAncias">Referências</a></li>
+</ul>
+<hr />
+<h2><a href="#simulando-a-latência-com-nanosleep" aria-hidden="true" class="anchor" id="simulando-a-latência-com-nanosleep"></a>Simulando a latência com nanosleep</h2>
+<p>Quando uma requisição é feita a um web server, o tempo de resposta total é um somatório de toda a latência envolvida na comunicação, desde o momento em que o pedido sai da origem (client), passando pela rede de computadores (internet), chegando no destino (server), <strong>sendo processado</strong>, para então a resposta fazer o caminho inverso até voltar ao client.</p>
+<p>Quanto maior a latência em qualquer parte do processo, maior o tempo de resposta, e portanto menor a capacidade de entregar respostas de diferentes requisições em um determinado intervalo de tempo.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/89cfxfykz32gd02sdjci.png" alt="server-database" /></p>
+<blockquote>
+<p>A esta capacidade de processar requisições em um intervalo de tempo chamamos de <strong>throughput</strong>. O que queremos no fim das contas é <em>aumentar o throughput sem comprometer a latência</em>. Esta é uma das premissas para sistemas escaláveis, mas o foco deste artigo não será em escalabilidade necessariamente.</p>
+</blockquote>
+<p>No artigo anterior, finalizamos o web server que apenas responde no socket uma mensagem HTML contendo “Hello, world”. A seguir o código inicial do server, que será a base para o restante do artigo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">global</span> <span style="color: #e5c07b;">_start</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_socket</span> <span style="color: #d19a66;">41</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_bind</span> <span style="color: #d19a66;">49</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_listen</span> <span style="color: #d19a66;">50</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_accept4</span> <span style="color: #d19a66;">288</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_write</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SYS_close</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">AF_INET</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SOCK_STREAM</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="12"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">SOCK_PROTOCOL</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="13"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">BACKLOG</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="14"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">CR</span> <span style="color: #d19a66;">0xD</span>
+</div><div class="line" data-line="15"><span style="color: #56b6c2;">%</span><span style="color: #e5c07b;">define</span> <span style="color: #e5c07b;">LF</span> <span style="color: #d19a66;">0xA</span>
+</div><div class="line" data-line="16">
+</div><div class="line" data-line="17"><span style="color: #e5c07b;">section</span> .data
+</div><div class="line" data-line="18"><span style="color: #c678dd;">sockaddr</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">	<span style="color: #e5c07b;">sa_family</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">dw</span> <span style="color: #e5c07b;">AF_INET</span>   <span style="color: #7f848e;">; 2 bytes</span>
+</div><div class="line" data-line="20">	<span style="color: #e5c07b;">port</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">dw</span> <span style="color: #d19a66;">0xB80B</span>         <span style="color: #7f848e;">; 2 bytes</span>
+</div><div class="line" data-line="21">	<span style="color: #e5c07b;">ip_addr</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">dd</span> <span style="color: #d19a66;">0</span>           <span style="color: #7f848e;">; 4 bytes</span>
+</div><div class="line" data-line="22">	<span style="color: #e5c07b;">sin_zero</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">dq</span> <span style="color: #d19a66;">0</span>          <span style="color: #7f848e;">; 8 bytes</span>
+</div><div class="line" data-line="23"><span style="color: #c678dd;">response</span><span style="color: #abb2bf;">:</span> 
+</div><div class="line" data-line="24">	<span style="color: #c678dd;">headline</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">db</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">CR</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">LF</span>
+</div><div class="line" data-line="25">	<span style="color: #c678dd;">content_type</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">db</span> <span style="color: #98c379;">&quot;Content-Type: text/html&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">CR</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">LF</span>
+</div><div class="line" data-line="26">	<span style="color: #c678dd;">content_length</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">db</span> <span style="color: #98c379;">&quot;Content-Length: 22&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">CR</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">LF</span>
+</div><div class="line" data-line="27">	<span style="color: #c678dd;">crlf</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">db</span> <span style="color: #e5c07b;">CR</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">LF</span>
+</div><div class="line" data-line="28">	<span style="color: #e5c07b;">body</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">db</span> <span style="color: #98c379;">&quot;&lt;h1&gt;Hello, World!&lt;/h1&gt;&quot;</span>
+</div><div class="line" data-line="29"><span style="color: #e5c07b;">responseLen</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">equ</span> $ <span style="color: #56b6c2;">-</span> <span style="color: #e5c07b;">response</span>
+</div><div class="line" data-line="30">
+</div><div class="line" data-line="31"><span style="color: #e5c07b;">section</span> .bss
+</div><div class="line" data-line="32"><span style="color: #e5c07b;">sockfd</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">resb</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="33">
+</div><div class="line" data-line="34"><span style="color: #e5c07b;">section</span> .text
+</div><div class="line" data-line="35"><span style="color: #c678dd;">_start</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="36">.socket<span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="37">	<span style="color: #7f848e;">; int socket(int domain, int type, int protocol)</span>
+</div><div class="line" data-line="38">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">AF_INET</span>
+</div><div class="line" data-line="39">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rsi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SOCK_STREAM</span>
+</div><div class="line" data-line="40">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdx</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SOCK_PROTOCOL</span>
+</div><div class="line" data-line="41">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_socket</span>
+</div><div class="line" data-line="42">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="43">.bind<span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="44">	<span style="color: #e5c07b;">mov</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">sockfd</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">rax</span>
+</div><div class="line" data-line="45">	<span style="color: #7f848e;">; int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen)</span>
+</div><div class="line" data-line="46">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">sockfd</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="47">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rsi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">sockaddr</span>
+</div><div class="line" data-line="48">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdx</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">16</span>
+</div><div class="line" data-line="49">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_bind</span>
+</div><div class="line" data-line="50">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="51">.listen<span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="52">	<span style="color: #7f848e;">; int listen(int sockfd, int backlog)</span>
+</div><div class="line" data-line="53">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">sockfd</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="54">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rsi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">BACKLOG</span>
+</div><div class="line" data-line="55">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_listen</span>
+</div><div class="line" data-line="56">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="57">.accept<span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="58">	<span style="color: #7f848e;">; int accept(int sockfd, struct *addr, int addrlen, int flags)</span>
+</div><div class="line" data-line="59">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">sockfd</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="60">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rsi</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="61">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdx</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="62">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">r10</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="63">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_accept4</span>
+</div><div class="line" data-line="64">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="65">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">r8</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">rax</span>
+</div><div class="line" data-line="66">	<span style="color: #e5c07b;">call</span> <span style="color: #e5c07b;">handle</span>
+</div><div class="line" data-line="67">	<span style="color: #e5c07b;">jmp</span> .accept
+</div><div class="line" data-line="68"><span style="color: #c678dd;">handle</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="69">	<span style="color: #7f848e;">; int write(fd)</span>
+</div><div class="line" data-line="70">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">r8</span>
+</div><div class="line" data-line="71">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rsi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">response</span>
+</div><div class="line" data-line="72">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdx</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">responseLen</span>
+</div><div class="line" data-line="73">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_write</span>
+</div><div class="line" data-line="74">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="75">
+</div><div class="line" data-line="76">	<span style="color: #7f848e;">; int close(fd)</span>
+</div><div class="line" data-line="77">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rdi</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">r8</span>
+</div><div class="line" data-line="78">	<span style="color: #e5c07b;">mov</span> <span style="color: #e5c07b;">rax</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">SYS_close</span>
+</div><div class="line" data-line="79">	<span style="color: #e5c07b;">syscall</span>
+</div><div class="line" data-line="80">	<span style="color: #e5c07b;">ret</span>
+</div></code></pre>
+<p>Até aqui tudo normal. A rotina <code>accept</code> fica em loop chamando a rotina <code>handle</code> que escreve “Hello, world” na resposta de cada requisição que chega no socket.</p>
+<p>Com <em>strace</em>, podemos ver as chamadas que foram feitas após uma requisição com <em>curl</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">socket</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">AF_INET,</span> <span style="color: #e06c75;">SOCK_STREAM,</span> <span style="color: #e06c75;">IPPROTO_IP</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">bind</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sa_family=AF_INET,</span> <span style="color: #e06c75;">sin_port=htons</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3000</span><span style="color: #c678dd;">)</span>, sin_addr=inet_addr<span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #c678dd;">)</span><span style="color: #98c379;">&rbrace;</span><span style="color: #98c379;">,</span> <span style="color: #d19a66;">16</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">listen</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span>                            <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">accept4</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span>               <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">4</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">write</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #e06c75;">...,</span> <span style="color: #d19a66;">86</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">86</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">close</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span><span style="color: #c678dd;">)</span>                                <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">accept4</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;"></span>
+</div></code></pre>
+<blockquote>
+<p><strong>socket</strong>, bind, listen, para então iniciar o <strong>accept</strong>, que ao receber uma requisição HTTP, passa para <strong>write</strong>, <strong>close</strong> e então voltar ao <strong>accept</strong> novamente em loop.</p>
+</blockquote>
+<p>Para simular um pouco de latência, vamos fazer com que a resposta demore cerca de 1 segundo, e para tanto precisamos utilizar uma syscall no Linux chamada <code>nanosleep</code>, que suspende a execução da thread atual até atingir um tempo decorrido especificado com base no relógio monotônico do sistema:</p>
+<p>Primeiro definimos a syscall, que tem o código 35:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_nanosleep 35
+</div></code></pre>
+<p>Na rotina <code>handle</code>, antes de escrever a resposta no socket, fazemos a chamada de sistema para <strong>nanosleep</strong> passando como argumento uma struct que representa um <em>timespec</em>, que contempla o tempo decorrido em segundos e nano-segundos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:
+</div><div class="line" data-line="2">	; int nanosleep(timespec duration)
+</div><div class="line" data-line="3">	lea rdi, [timespec]
+</div><div class="line" data-line="4">	mov rax, SYS_nanosleep
+</div><div class="line" data-line="5">	syscall
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">	; int write(fd)
+</div><div class="line" data-line="8">	...
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">	; int close(fd)
+</div><div class="line" data-line="11">	...
+</div></code></pre>
+<p>E na seção de dados, definimos o tempo decorrido em segundos, que são os primeiros 8 bytes da struct, deixando a <em>zero</em> os 8 bytes restantes que representam o tempo em nano-segundos</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">timespec:
+</div><div class="line" data-line="3">	tv_sec: dq 1
+</div><div class="line" data-line="4">	tv_nsec: dq 0
+</div></code></pre>
+<blockquote>
+<p>Neste exemplo queremos que o sleep seja de 1 segundo</p>
+</blockquote>
+<p>Com <em>strace</em>, podemos ver que a syscall <code>nanosleep</code> foi executada após o <strong>accept</strong> e antes do <strong>write</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">socket</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">AF_INET,</span> <span style="color: #e06c75;">SOCK_STREAM,</span> <span style="color: #e06c75;">IPPROTO_IP</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">bind</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sa_family=AF_INET,</span> <span style="color: #e06c75;">sin_port=htons</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3000</span><span style="color: #c678dd;">)</span>, sin_addr=inet_addr<span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #c678dd;">)</span>&rbrace;, 16) = 0
+</div><div class="line" data-line="3">listen(3, 2)                            = 0
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">accept4(3, NULL, NULL, 0)               = 4
+</div><div class="line" data-line="6">nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>, <span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>  <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">write</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #e06c75;">...,</span> <span style="color: #d19a66;">86</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">86</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #61afef;">close</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span><span style="color: #c678dd;">)</span>                                <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">accept4</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;"></span>
+</div></code></pre>
+<p>Calculando o tempo decorrido com o utilitário <code>time</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">localhost:3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">real</span>    <span style="color: #61afef;">0m1.040s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">user</span>    <span style="color: #e06c75;">0m0.005s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">sys</span>     <span style="color: #e06c75;">0m0.009s</span>
+</div></code></pre>
+<p>Podemos também encurtar a resposta do time trazendo apenas o tempo real, exportando a variável na sessão shell atual ou adicionando no <code>bashrc</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">export</span> <span style="color: #e5c07b;">TIMEFORMAT</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">%R</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">localhost:3000</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.036</span>
+</div></code></pre>
+<p><em>Yay!</em> Já conseguimos simular uma latência de 1 segundo em Assembly. Agora vamos ver se nosso web server tem a capacidade de atender a <strong>requests em escala</strong>.</p>
+<hr />
+<h2><a href="#simulando-requests-em-escala-com-xargs" aria-hidden="true" class="anchor" id="simulando-requests-em-escala-com-xargs"></a>Simulando requests em escala com xargs</h2>
+<p>Para começar, vamos simular 10 requests sequenciais com curl. Poderíamos ficar digitando <code>curl localhost:3000</code> 10 vezes, ou então ser pragmáticos, automatizar sem reinventar a roda e nem instalar nada adicional no sistema.</p>
+<blockquote>
+<p>Como?</p>
+</blockquote>
+<p><em>xargs.</em></p>
+<p><strong>xargs</strong> é um utilitário presente na maioria dos sistemas operacionais UNIX-like, que lê strings a partir de arquivos ou standard input e utiliza estas strings como argumentos para comandos arbitrários.</p>
+<p>Vamos ter como exemplo uma sequência de 1 a 10 em bash:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #c678dd;">$&lbrace;</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">1</span> <span style="color: #d19a66;">2</span> <span style="color: #d19a66;">3</span> <span style="color: #d19a66;">4</span> <span style="color: #d19a66;">5</span> <span style="color: #d19a66;">6</span> <span style="color: #d19a66;">7</span> <span style="color: #d19a66;">8</span> <span style="color: #d19a66;">9</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>Podemos utilizar cada valor do <strong>echo</strong> como argumento para o xargs:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">xargs</span> <span style="color: #e06c75;">-n1</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">4</span>
+</div><div class="line" data-line="6"><span style="color: #d19a66;">5</span>
+</div><div class="line" data-line="7"><span style="color: #d19a66;">6</span>
+</div><div class="line" data-line="8"><span style="color: #d19a66;">7</span>
+</div><div class="line" data-line="9"><span style="color: #d19a66;">8</span>
+</div><div class="line" data-line="10"><span style="color: #d19a66;">9</span>
+</div><div class="line" data-line="11"><span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>A opção <code>-n1</code> significa a quantidade de argumentos que serão usados para o comando que vem a seguir ao xargs, que no caso queremos apenas 1 argumento, o que neste caso tanto faz pois não queremos fazer nada com o argumento: queremos apenas executar o comando <strong>curl</strong> 10 vezes.</p>
+<p>Podemos então agora executar o <strong>curl</strong> com o time para saber o tempo decorrido de cada request:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">echo</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">xargs</span> <span style="color: #e06c75;">-n1</span> <span style="color: #e06c75;">bash</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;time curl localhost:3000&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.037</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.033</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.025</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.037</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.032</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.026</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.019</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.046</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.053</span>
+</div><div class="line" data-line="12"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.041</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">10.426</span>
+</div></code></pre>
+<p>Claramente, vemos que cada request demorou cerca de 1 segundo, o que no total o tempo decorrido foi de <strong>10,4</strong> segundos. Esta é a latência total para o caso de fazermos requisições sequenciais.</p>
+<p>E se fizermos <strong>requisições simultâneas</strong>? Num cenário mais próximo do real, vamos supor que nossa aplicação web recebe 10 requisições no mesmo segundo em horários de pico.</p>
+<p>Para isto, conseguimos também utilizar o <strong>xargs</strong> para simular, através da opção <code>-P</code>, que representa a quantidade de processos simultâneos que o xargs irá utilizar para realizar os comandos.</p>
+<blockquote>
+<p>Incrível! Com isto nosso web server atende 10 requisições simultâneas, fazendo com que o throughput total dos 10 requests fique em torno de 1 segundo, certo?</p>
+</blockquote>
+<p><em>Calma, calabreso</em>, vamos testar.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">echo</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">xargs</span> <span style="color: #e06c75;">-n1</span> <span style="color: #e06c75;">-P10</span> <span style="color: #e06c75;">bash</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;time curl localhost:3000&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.053</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.071</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">3.076</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">4.087</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">5.088</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">6.106</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">7.140</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">8.154</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">9.168</span>
+</div><div class="line" data-line="12"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">10.183</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">10.214</span>
+</div></code></pre>
+<p><strong>Não melhorou nada!</strong> Ter 10 requests simultâneos não quer dizer que nosso server consiga atender os 10 requests ao mesmo tempo. Muito pelo contrário, pode até piorar e prejudicar a latência total, pois há diversos requests na fila esperando para serem atendidos.</p>
+<ul>
+<li>o primeiro request demora 1 segundo</li>
+<li>o segundo request chega ao mesmo tempo mas demora 2 segundos</li>
+<li>o terceiro request chega ao mesmo tempo mas demora 3 segundos</li>
+<li>e assim sucessivamente…</li>
+</ul>
+<p>Nosso server é síncrono, e com isto podemos criar gargalos. Precisamos então que o server consiga lidar com <strong>concorrência</strong>.</p>
+<hr />
+<h2><a href="#concorrência-com-forking-de-processos" aria-hidden="true" class="anchor" id="concorrência-com-forking-de-processos"></a>Concorrência com forking de processos</h2>
+<p>Uma das formas primitivas de concorrência e escalar um web server para atender mais de um request em simultâneo é com o uso de <strong>processos</strong>. Como cada processo no sistema operacional tem sua <em>memória isolada</em> dos demais, podemos fazer com que cada request seja atendido em um processo diferente.</p>
+<p>Para entender esta técnica, precisamos compreender que <em>todo programa de computador</em> roda em um <strong>processo</strong> no sistema operacional, e isto vimos bastante nos artigos anteriores. Dentro deste processo, o programa ainda roda em uma unidade de execução no SO chamada <strong>thread</strong>.</p>
+<blockquote>
+<p>Todo processo tem uma thread chamada <em>thread principal</em>, que é onde está sendo executado o programa</p>
+</blockquote>
+<p>No exemplo anterior, quando chamamos o <em>sleep</em>, a thread que está sendo suspensa por um tempo determinado é justamente a <strong>thread principal</strong> do programa.</p>
+<p>A thread compartilha a memória do processo o qual ela faz parte, mas como precisamos criar <strong>outro processo</strong>, temos de fazer um <em>forking</em>, que basicamente <em>cria um processo filho copiando tudo</em> o que o programa principal tem.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fhz3hnrjktfwv33zqdpv.png" alt="forking de processos" /></p>
+<p>Repare que cada processo filho tem uma cópia do processo principal. O loop é basicamente o <strong>accept</strong> do nosso web server, que fica em loop. Desta forma cada request pode ser atendido por um processo diferente, <strong>de forma concorrente</strong>.</p>
+<p>Podemos fazer forking de processo com o uso da syscall <em>fork</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_fork 57
+</div></code></pre>
+<p>A rotina <em>handle</em> mantém igual, com o sleep antes de escrever a resposta no socket:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:
+</div><div class="line" data-line="2">	lea rdi, [timespec]
+</div><div class="line" data-line="3">	mov rax, SYS_nanosleep
+</div><div class="line" data-line="4">	syscall
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">	; int write(fd)
+</div><div class="line" data-line="7">	mov rdi, r8
+</div><div class="line" data-line="8">	mov rsi, response
+</div><div class="line" data-line="9">	mov rdx, responseLen
+</div><div class="line" data-line="10">	mov rax, SYS_write
+</div><div class="line" data-line="11">	syscall
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	; int close(fd)
+</div><div class="line" data-line="14">	mov rdi, r8
+</div><div class="line" data-line="15">	mov rax, SYS_close
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">	ret
+</div></code></pre>
+<p>E na rotina <strong>accept</strong>, adicionamos a chamada do fork logo após o request chegar no socket:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.accept:
+</div><div class="line" data-line="2">	; int accept(int sockfd, struct *addr, int addrlen, int flags)
+</div><div class="line" data-line="3">	mov rdi, [sockfd]
+</div><div class="line" data-line="4">	mov rsi, 0
+</div><div class="line" data-line="5">	mov rdx, 0
+</div><div class="line" data-line="6">	mov r10, 0
+</div><div class="line" data-line="7">	mov rax, SYS_accept4
+</div><div class="line" data-line="8">	syscall
+</div><div class="line" data-line="9">	mov r8, rax
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	; fork de processo
+</div><div class="line" data-line="12">	mov rax, SYS_fork
+</div><div class="line" data-line="13">	syscall
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">	; se o retorno do fork for ZERO, significa que está sendo executado
+</div><div class="line" data-line="16">	; a partir do processo filho. Então a rotina &quot;handle&quot; é executada
+</div><div class="line" data-line="17">	test rax, rax
+</div><div class="line" data-line="18">	jz handle
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20">	; quando o retorno não é ZERO, significa que a execução do programa 
+</div><div class="line" data-line="21">	; principal continuou. Então o processo principal volta para o loop
+</div><div class="line" data-line="22">	jmp .accept
+</div></code></pre>
+<ul>
+<li>depois de uma chamada ao <strong>fork</strong>, a syscall retorna ZERO quando se está dentro do processo filho. Neste caso, a execução do processo filho continua com a rotina <em>handle</em> e depois termina</li>
+<li>após a chamada do fork, se o retorno NÃO for ZERO, significa que a execução é do programa principal, então neste caso volta-se ao loop para esperar um novo request no socket</li>
+</ul>
+<p>Ao executar com strace, podemos ver várias chamadas à syscall <em>fork</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">socket</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">AF_INET,</span> <span style="color: #e06c75;">SOCK_STREAM,</span> <span style="color: #e06c75;">IPPROTO_IP</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">bind</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sa_family=AF_INET,</span> <span style="color: #e06c75;">sin_port=htons</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3000</span><span style="color: #c678dd;">)</span>, sin_addr=inet_addr<span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #c678dd;">)</span>&rbrace;, 16) = 0
+</div><div class="line" data-line="3">listen(3, 2)                            = 0
+</div><div class="line" data-line="4">accept4(3, NULL, NULL, 0)               = 4
+</div><div class="line" data-line="5">fork(strace: Process 12787 attached
+</div><div class="line" data-line="6">)                                  = 12787
+</div><div class="line" data-line="7">[pid 12786] accept4(3, NULL, NULL, 0 &lt;unfinished ...&gt;
+</div><div class="line" data-line="8">[pid 12787] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>,  &lt;unfinished ...&gt;
+</div><div class="line" data-line="9">[pid 12786] &lt;... accept4 resumed&gt;)      = 5
+</div><div class="line" data-line="10">[pid 12786] fork(strace: Process 12788 attached
+</div><div class="line" data-line="11">)                      = 12788
+</div><div class="line" data-line="12">[pid 12788] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>,  &lt;unfinished ...&gt;
+</div><div class="line" data-line="13">[pid 12786] accept4(3, NULL, NULL, 0)   = 6
+</div><div class="line" data-line="14">[pid 12786] fork(strace: Process 12789 attached
+</div><div class="line" data-line="15">)                      = 12789
+</div><div class="line" data-line="16">[pid 12786] accept4(3, NULL, NULL, 0)   = 7
+</div><div class="line" data-line="17">[pid 12786] fork( &lt;unfinished ...&gt;
+</div><div class="line" data-line="18">[pid 12789] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>, strace: Process 12790 attached
+</div><div class="line" data-line="19"> &lt;unfinished ...&gt;
+</div><div class="line" data-line="20">[pid 12786] &lt;... fork resumed&gt;)         = 12790
+</div><div class="line" data-line="21">[pid 12790] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>,  <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">12786</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">accept4</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span>   <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">8</span>
+</div><div class="line" data-line="23"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">12786</span><span style="color: #98c379;">]</span> fork<span style="color: #c678dd;">(</span><span style="color: #61afef;">strace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">12791</span> <span style="color: #e06c75;">attached</span>
+</div></code></pre>
+<p>E os tempos de resposta para 10 requests simultâneos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">echo</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">xargs</span> <span style="color: #e06c75;">-n1</span> <span style="color: #e06c75;">-P10</span> <span style="color: #e06c75;">bash</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;time curl localhost:3000&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.049</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.051</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">1.053</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">1.052</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">1.055</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.051</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.052</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.056</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.106</span>
+</div><div class="line" data-line="12"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.116</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">2.138</span>
+</div></code></pre>
+<p>Yay! Podemos ver que os requests são atendidos de forma concorrente, e que o tempo total ficou em <strong>2,1 segundos</strong> para 10 requests simultâneos!</p>
+<blockquote>
+<p>Lembrando que, quando estamos lidando com concorrência, não temos controle da ordem de execução dos processos, que são escalonados pelo sistema operacional. Esta preempção de processos pode fazer com que um request que chegou depois seja atendido primeiro. É uma das características de <em>race condition</em> e é por isso que vemos os requests chegando fora de ordem.</p>
+</blockquote>
+<p>Mas no nosso caso não importa. Cada request é único e não depende do anterior.</p>
+<hr />
+<h2><a href="#concorrência-com-clone-de-processo" aria-hidden="true" class="anchor" id="concorrência-com-clone-de-processo"></a>Concorrência com clone de processo</h2>
+<p>Outra forma muito similar à chamada <em>fork</em> é através da syscall <strong>clone</strong>, que basicamente clona um processo, tal como fizemos no exemplo anterior, garantindo isolamento e concorrência.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_clone 56
+</div></code></pre>
+<p>E a diferença é que chamamos a syscall de clone, ao invés da syscall fork:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.accept:
+</div><div class="line" data-line="2">	; int accept(int sockfd, struct *addr, int addrlen, int flags)
+</div><div class="line" data-line="3">	mov rdi, [sockfd]
+</div><div class="line" data-line="4">	mov rsi, 0
+</div><div class="line" data-line="5">	mov rdx, 0
+</div><div class="line" data-line="6">	mov r10, 0
+</div><div class="line" data-line="7">	mov rax, SYS_accept4
+</div><div class="line" data-line="8">	syscall
+</div><div class="line" data-line="9">	mov r8, rax
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	; chamada à syscall clone
+</div><div class="line" data-line="12">	; com argumentos a ZERO, significa que será feito um clone do processo
+</div><div class="line" data-line="13">	mov rdi, 0
+</div><div class="line" data-line="14">	mov rsi, 0
+</div><div class="line" data-line="15">	mov rax, SYS_clone
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18">	; se o retorno for zero, execução é a partir do processo filho
+</div><div class="line" data-line="19">	test rax, rax
+</div><div class="line" data-line="20">	jz handle
+</div><div class="line" data-line="21">
+</div><div class="line" data-line="22">	; continuação da execução do processo principal
+</div><div class="line" data-line="23">	jmp .accept
+</div></code></pre>
+<ul>
+<li>depois de uma chamada ao <strong>clone</strong>, a syscall retorna ZERO quando se está dentro do processo filho. Neste caso, a execução do processo filho continua com a rotina <em>handle</em> e depois termina</li>
+</ul>
+<ul>
+<li>após a chamada do clone, se o retorno NÃO for ZERO, significa que a execução é do programa principal, então neste caso volta-se ao loop para esperar um novo request no socket</li>
+</ul>
+<p>Executamos com strace e:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.062</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">1.064</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.063</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">1.061</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.071</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">1.061</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.059</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.069</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.135</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">2.128</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">2.148</span>
+</div></code></pre>
+<p>Ainda servindo 10 requests simultâneos <strong>perto dos 2 segundos</strong>! <em>Not bad</em>.</p>
+<p>Entretanto, forking ou clone de processos leva a um <strong>gasto excessivo de memória</strong>, pois cada processo filho é exatamente uma cópia do processo principal. Se o principal tem 200MB de memória, com 4 forks teríamos um gasto total de 800MB de memória.</p>
+<p>Chegou o momento de falarmos das <strong>threads</strong>.</p>
+<hr />
+<h2><a href="#concorrência-com-threads" aria-hidden="true" class="anchor" id="concorrência-com-threads"></a>Concorrência com threads</h2>
+<p>Vamos relembrar o que falamos no início do artigo:</p>
+<blockquote>
+<p>Todo processo tem uma thread chamada <em>thread principal</em>, que é onde está sendo executado o programa</p>
+</blockquote>
+<p>Apesar de todo programa rodar dentro de uma thread, podemos também criar mais threads que <strong>compartilham a memória do mesmo processo</strong>, e para isto podemos fazer uso da mesma syscall <strong>clone</strong>, mas passando argumentos diferentes que tornam este clone uma <em>thread dentro do mesmo processo</em>, e não uma cópia inteira do processo.</p>
+<p>Desta forma, ficamos sempre com UM processo mas atendendo requests em threads diferentes, <strong>gastando assim menos memória</strong> se comparado com forking de processos.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vszydp3du1ntg72xizmd.png" alt="threads" /></p>
+<h3><a href="#entendendo-a-criação-de-uma-thread" aria-hidden="true" class="anchor" id="entendendo-a-criação-de-uma-thread"></a>Entendendo a criação de uma thread</h3>
+<p>Antes de adaptarmos o código do server para utilizar threads, vamos dar um passo atrás e entender como se cria uma thread em Assembly.</p>
+<p>Para criar uma thread, fazemos uso da syscall <strong>clone</strong>. De acordo com a <a href="https://man7.org/linux/man-pages/man2/clone.2.html">documentação</a>, a syscall clone cria um processo “filho”, similar ao que fizemos no fork. Mas a diferença é que a syscall clone permite um maior controle sobre o que será compartilhado entre o processo principal e o processo filho.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_clone 56
+</div></code></pre>
+<p>Coisas que podem ser compartilhadas (ou não):</p>
+<ul>
+<li>espaço de endereço de memória virtual</li>
+<li>tabela de descritores de arquivos</li>
+<li>tabela de handlers de sinais</li>
+<li>entre outros recursos…</li>
+</ul>
+<blockquote>
+<p>No exemplo anterior utilizamos a syscall clone passando argumentos a ZERO, o que significa que não queríamos compartilhar nada entre os processos, portanto uma cópia seria feita como no forking de processos</p>
+</blockquote>
+<p>Para a execução da syscall, precisamos enviar 2 argumentos:</p>
+<ul>
+<li><strong>rdi</strong>: representa as <em>flags</em>, que modificam o comportamento do que será compartilhado com o processo filho (thread)</li>
+<li><strong>rsi</strong>: ponteiro para a função que a thread irá executar, que precisa ser definido dentro de uma <strong>área reservada na memória</strong>, ou seja, precisamos alocar um novo bloco de memória para a thread poder colocar a função e seus argumentos</li>
+</ul>
+<p>Portanto, para criar uma thread, precisamos de <strong>thread flags</strong> e <strong>alocação de memória</strong>.</p>
+<h3><a href="#thread-flags" aria-hidden="true" class="anchor" id="thread-flags"></a>Thread flags</h3>
+<p>Em RDI, vamos passar as seguintes flags:</p>
+<ul>
+<li><strong>CLONE_VM</strong>: processo principal e processo filho compartilham o mesmo espaço de memória virtual</li>
+<li><strong>CLONE_FS</strong>: processos compartilham o mesmo sistema de arquivos</li>
+<li><strong>CLONE_FILES</strong>: processos compartilham a mesma tabela de descritor de arquivos (file descriptor table)</li>
+<li><strong>CLONE_SIGHAND</strong>: processos compartilham a mesma tabela de handlers de sinais (signal handlers)</li>
+<li><strong>CLONE_PARENT</strong>: processos compartilham o mesmo parent, ou seja, o processo “filho” na verdade é filho do processo parent do processo original (mesmo porque estamos falando de uma thread que compartilha o mesmo processo)</li>
+<li><strong>CLONE_THREAD</strong>: o processo filho é colocado no mesmo grupo de threads do processo original</li>
+<li><strong>CLONE_IO</strong>: processos compartilham o mesmo contexto de I/O</li>
+</ul>
+<blockquote>
+<p>No fim das contas, estamos criando um processo “filho” mas que compartilha recursos com o processo principal. <strong>Este é o princípio da thread.</strong></p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov rdi, CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IO
+</div></code></pre>
+<h3><a href="#alocação-de-memória-com-brk" aria-hidden="true" class="anchor" id="alocação-de-memória-com-brk"></a>Alocação de memória com brk</h3>
+<p>Em RSI, precisamos indicar o ponteiro para a função na memória, neste caso o ponteiro da rotina <strong>handle</strong>, que tem a lógica de imprimir a mensagem  e etc. Mas aqui não basta indicar o ponteiro, mas sim em <strong>que região da memória</strong> do processo a thread irá armazenar a função, seus argumentos e variáveis locais.</p>
+<blockquote>
+<p>Cada thread precisa ter sua própria região na memória para armazenar a função e argumentos. É como se a thread tivesse uma área de “stack” só dela</p>
+</blockquote>
+<p>Para alocar memória, vamos relembrar como funciona o layout de um programa na memória:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/co0lxnlhbx2nz7uhx4k6.png" alt="layout de memória" /></p>
+<p>Nos endereços de memória mais baixos, temos o programa, e a seguir temos os <em>dados estáticos</em> (data). No topo, que é onde ficam os endereços mais altos, temos a <em>stack</em>.</p>
+<p>E no meio, o que temos <strong>a seguir a seção de dados</strong> é uma área enorme disponível na memória. A syscall <strong>brk</strong> permite mudar o ponto onde <em>termina a seção de dados</em>, também chamado de <strong>program break</strong>.</p>
+<p>Podemos ficar mudando este break em direção aos endereços mais altos. Por exemplo, se chamarmos a syscall brk passando argumento ZERO, ela devolve o endereço de memória do program break, que é onde termina a seção de dados:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_brk 12
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">...
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">mov rdi, 0
+</div><div class="line" data-line="6">mov rax, SYS_brk
+</div><div class="line" data-line="7">syscall
+</div></code></pre>
+<p>O que temos em RAX é <code>0x403000</code>, que é exatamente o endereço de memória onde termina a seção de dados. Vamos modificar o break <strong>andando UM byte pra frente</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov rdi, rax
+</div><div class="line" data-line="2">add rdi, 1
+</div><div class="line" data-line="3">mov rax, SYS_brk
+</div><div class="line" data-line="4">syscall
+</div></code></pre>
+<p>Agora, RAX traz o endereço do novo program break, que é <code>0x403001</code>. Ou seja, agora podemos manipular este endereço de memória no nosso programa.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/d32sk2d6w5eitngvri0y.png" alt="program break" /></p>
+<blockquote>
+<p>E o quê isto tem a ver com a thread?</p>
+</blockquote>
+<p>Podemos alocar <strong>uma quantidade arbitrária de bytes</strong> para a thread utilizar nesta área na memória. Como o break é sempre modificado, a próxima thread irá utilizar outra área de memória, e assim sucessivamente!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/bir1ll5slqqmsmhu7q25.png" alt="criação de threads" /></p>
+<h3><a href="#um-hello-world-com-threads-em-assembly" aria-hidden="true" class="anchor" id="um-hello-world-com-threads-em-assembly"></a>Um “Hello, world” com threads em Assembly</h3>
+<p>Vamos escrever um exemplo simples antes de ir para o web server. Primeiro, definimos as constantes, dentre elas as syscalls e as flags pra criação de threads:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_brk 12
+</div><div class="line" data-line="4">%define SYS_clone 56
+</div><div class="line" data-line="5">%define SYS_write 1        
+</div><div class="line" data-line="6">%define SYS_exit 60
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">%define STDOUT 1
+</div><div class="line" data-line="9">%define CHILD_STACK_SIZE 4096
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">%define CLONE_VM 0x00000100
+</div><div class="line" data-line="12">%define CLONE_FS 0x00000200
+</div><div class="line" data-line="13">%define CLONE_FILES 0x00000400
+</div><div class="line" data-line="14">%define CLONE_PARENT 0x00008000
+</div><div class="line" data-line="15">%define CLONE_THREAD 0x00010000
+</div><div class="line" data-line="16">%define CLONE_IO 0x80000000
+</div><div class="line" data-line="17">%define CLONE_SIGHAND 0x00000800
+</div></code></pre>
+<p>A seguir, na seção de dados, temos a mensagem “Hello, world” que a thread irá imprimir:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">msg: db &quot;Hello&quot;
+</div><div class="line" data-line="3">msgLen: equ $ - msg
+</div></code></pre>
+<p>Na seção <em>text</em>, o entrypoint do programa faz uma chamada à rotina da <em>thread</em> e a seguir termina:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .text
+</div><div class="line" data-line="2">_start:
+</div><div class="line" data-line="3">	call thread
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov rdi, 0
+</div><div class="line" data-line="6">	mov rax, SYS_exit
+</div><div class="line" data-line="7">	syscall
+</div></code></pre>
+<p>Agora, a definição da rotina <code>handle</code> que a thread irá executar:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:
+</div><div class="line" data-line="2">	mov rdi, STDOUT
+</div><div class="line" data-line="3">	mov rsi, msg
+</div><div class="line" data-line="4">	mov rdx, msgLen
+</div><div class="line" data-line="5">	mov rax, SYS_write
+</div><div class="line" data-line="6">	syscall
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">	mov rdi, 0
+</div><div class="line" data-line="9">	mov rax, SYS_exit
+</div><div class="line" data-line="10">	syscall
+</div></code></pre>
+<blockquote>
+<p>A thread imprime a mensagem no STDOUT e termina. Sim, a thread precisa terminar, caso contrário o sistema emite um segmentation fault</p>
+</blockquote>
+<p>E por fim, vamos detalhar o processo da rotina da <em>thread</em> (explicação nos comentários do exemplo a seguir):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">thread:
+</div><div class="line" data-line="2">	; Busca o break atual e guarda em RDX. Na primeira vez, o valor
+</div><div class="line" data-line="3">	; é 0x403000
+</div><div class="line" data-line="4">	mov rdi, 0
+</div><div class="line" data-line="5">	mov rax, SYS_brk
+</div><div class="line" data-line="6">	syscall
+</div><div class="line" data-line="7">	mov rdx, rax
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">	; Modifica o break atual andando 4096 bytes à frente.
+</div><div class="line" data-line="10">	; Após esta chamada, o break passa a ser 0x404000
+</div><div class="line" data-line="11">	mov rdi, rax
+</div><div class="line" data-line="12">	add rdi, CHILD_STACK_SIZE
+</div><div class="line" data-line="13">	mov rax, SYS_brk
+</div><div class="line" data-line="14">	syscall
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16">	; (1) Thread flags: como deve ser feito o compartilhamento de recursos
+</div><div class="line" data-line="17">	; entre o processo principal e o processo filho
+</div><div class="line" data-line="18">	mov rdi, CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IO
+</div><div class="line" data-line="19">	
+</div><div class="line" data-line="20">	; (2a) Endereço de memória em RSI: é o break atual + 4096 bytes.
+</div><div class="line" data-line="21">	; Retiramos também 8 bytes para caber o ponteiro da função
+</div><div class="line" data-line="22">	lea rsi, [rdx + CHILD_STACK_SIZE - 8]
+</div><div class="line" data-line="23">
+</div><div class="line" data-line="24">	; (2b) No endereço em RSI colocamos o ponteiro da função &quot;handle&quot;.
+</div><div class="line" data-line="25">	; Como endereçamento em x86_64 é de 8 bytes, é por isto
+</div><div class="line" data-line="26">	; que no passo anterior fizemos [rdx + 4096 - 8]
+</div><div class="line" data-line="27">	mov qword [rsi], handle
+</div><div class="line" data-line="28">	mov rax, SYS_clone
+</div><div class="line" data-line="29">	syscall
+</div><div class="line" data-line="30">	ret
+</div></code></pre>
+<p>E pronto, ao executar o programa, temos a mensagem “Hello” na saída do programa que foi feita pela thread.</p>
+<p>Caso o programa principal faça <code>call thread</code> 2 vezes, a próxima thread irá ter em RSI o break modificado, iniciando em <code>0x404000</code>.</p>
+<h3><a href="#modificando-o-server-para-suportar-multi-threading" aria-hidden="true" class="anchor" id="modificando-o-server-para-suportar-multi-threading"></a>Modificando o server para suportar multi-threading</h3>
+<p>Agora vamos trazer o código necessário para modificar o server:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_clone 56
+</div><div class="line" data-line="2">%define SYS_brk 12
+</div></code></pre>
+<p>Thread flags:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define CHILD_STACK_SIZE 4096
+</div><div class="line" data-line="2">%define CLONE_VM 0x00000100
+</div><div class="line" data-line="3">%define CLONE_FS 0x00000200
+</div><div class="line" data-line="4">%define CLONE_FILES 0x00000400
+</div><div class="line" data-line="5">%define CLONE_PARENT 0x00008000
+</div><div class="line" data-line="6">%define CLONE_THREAD 0x00010000
+</div><div class="line" data-line="7">%define CLONE_IO 0x80000000
+</div><div class="line" data-line="8">%define CLONE_SIGHAND 0x00000800
+</div></code></pre>
+<p>Rotina <em>accept</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.accept:
+</div><div class="line" data-line="2">	; int accept(int sockfd, struct *addr, int addrlen, int flags)
+</div><div class="line" data-line="3">	mov rdi, [sockfd]
+</div><div class="line" data-line="4">	mov rsi, 0
+</div><div class="line" data-line="5">	mov rdx, 0
+</div><div class="line" data-line="6">	mov r10, 0
+</div><div class="line" data-line="7">	mov rax, SYS_accept4
+</div><div class="line" data-line="8">	syscall
+</div><div class="line" data-line="9">	mov r8, rax
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	; Chamada da thread. Irá ser executada assincronamente tal como no
+</div><div class="line" data-line="12">	; forking de processos, mas compartilhando a memória do
+</div><div class="line" data-line="13">	; processo principal
+</div><div class="line" data-line="14">	call thread
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16">	; Processo principal volta para o loop
+</div><div class="line" data-line="17">	jmp .accept
+</div></code></pre>
+<p>Definição da <em>thread</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">thread:
+</div><div class="line" data-line="2">	mov rdi, 0
+</div><div class="line" data-line="3">	mov rax, SYS_brk
+</div><div class="line" data-line="4">	syscall
+</div><div class="line" data-line="5">	mov rdx, rax
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">	mov rdi, rax
+</div><div class="line" data-line="8">	add rdi, CHILD_STACK_SIZE
+</div><div class="line" data-line="9">	mov rax, SYS_brk
+</div><div class="line" data-line="10">	syscall
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12">	mov rdi, CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IO
+</div><div class="line" data-line="13">	lea rsi, [rdx + CHILD_STACK_SIZE - 8]
+</div><div class="line" data-line="14">	mov qword [rsi], handle
+</div><div class="line" data-line="15">	mov rax, SYS_clone
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">	ret
+</div></code></pre>
+<blockquote>
+<p>Aqui seguimos o mesmo padrão do exemplo anterior: aloca memória com brk e a seguir executa a syscall clone com as flags de compartilhamento de recursos</p>
+</blockquote>
+<p>E a lógica da rotina <em>handle</em> <strong>que será executada pela thread</strong>, que faz o <em>sleep</em>, a seguir escreve no socket a mensagem, fecha o socket da requisição e por fim termina sua execução:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:
+</div><div class="line" data-line="2">	lea rdi, [timespec]
+</div><div class="line" data-line="3">	mov rax, SYS_nanosleep
+</div><div class="line" data-line="4">	syscall
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">	; int write(fd)
+</div><div class="line" data-line="7">	mov rdi, r8
+</div><div class="line" data-line="8">	mov rsi, response
+</div><div class="line" data-line="9">	mov rdx, responseLen
+</div><div class="line" data-line="10">	mov rax, SYS_write
+</div><div class="line" data-line="11">	syscall
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	; int close(fd)
+</div><div class="line" data-line="14">	mov rdi, r8
+</div><div class="line" data-line="15">	mov rax, SYS_close
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18">	mov rdi, 0
+</div><div class="line" data-line="19">	mov rax, SYS_exit
+</div><div class="line" data-line="20">	syscall
+</div></code></pre>
+<p>Com 1 chamada isolada, temos o seguinte output com strace:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">socket</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">AF_INET,</span> <span style="color: #e06c75;">SOCK_STREAM,</span> <span style="color: #e06c75;">IPPROTO_IP</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">bind</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sa_family=AF_INET,</span> <span style="color: #e06c75;">sin_port=htons</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3000</span><span style="color: #c678dd;">)</span>, sin_addr=inet_addr<span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #c678dd;">)</span>&rbrace;, 16) = 0
+</div><div class="line" data-line="3">listen(3, 2)                            = 0
+</div><div class="line" data-line="4">accept4(3, NULL, NULL, 0)               = 4
+</div><div class="line" data-line="5">brk(NULL)                               = 0x9da000
+</div><div class="line" data-line="6">brk(0x9db000)                           = 0x9db000
+</div><div class="line" data-line="7">clone(child_stack=0x9daff8, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IOstrace: Process 13078 attached
+</div><div class="line" data-line="8">) = 13078
+</div><div class="line" data-line="9">[pid 13078] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>,  <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13077</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">accept4</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13078</span><span style="color: #98c379;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">nanosleep</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">0x9daff8</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13078</span><span style="color: #98c379;">]</span> write<span style="color: #c678dd;">(</span><span style="color: #61afef;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #e06c75;">...,</span> <span style="color: #d19a66;">86</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">86</span>
+</div><div class="line" data-line="13"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13078</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">close</span><span style="color: #c678dd;">(</span>4)                    = 0
+</div><div class="line" data-line="14">[pid 13078] exit(0)                     = ?
+</div><div class="line" data-line="15">[pid 13078] +++ exited with 0 +++
+</div><div class="line" data-line="16">&lt;... accept4 resumed&gt;)                  = ? ERESTARTSYS (To be restarted if SA_RESTART is set)
+</div><div class="line" data-line="17">--- SIGWINCH &lbrace;si_signo=SIGWINCH, si_code=SI_KERNEL<span style="color: #c678dd;">&rbrace;</span> ---
+</div><div class="line" data-line="18">accept4<span style="color: #c678dd;">(</span>3, NULL, NULL, <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>Vamos reparar na sequência de chamadas:</p>
+<ul>
+<li>depois do accept, foi feita uma chamada a <strong>brk</strong> modificando o program break (alocando memória)</li>
+<li>a seguir, vemos a chamada <strong>clone</strong>, que acoplou o processo filho 13078</li>
+<li>a thread (13078) é suspensa com <strong>nanosleep</strong> por 1 segundo</li>
+<li>o processo principal (13077) volta para o <strong>accept</strong> e fica a espera de mais requests</li>
+<li>a thread <strong>escreve</strong> no socket</li>
+<li>a thread <strong>fecha</strong> o socket</li>
+<li>a thread é encerrada com <strong>exit</strong></li>
+</ul>
+<p>Agora, simulando os 10 requests simultâneos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.060</span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.064</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.064</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.062</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.068</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.073</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.098</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">2.094</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">2.097</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">2.091</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">2.113</span>
+</div></code></pre>
+<p><em>Superb!</em> Temos o mesmo tempo total de <strong>2,1 segundos</strong> mas gastando <strong>muito menos memória</strong>!</p>
+<p>Entretanto, temos um pequeno problema. Imagina que num momento de grande número de acessos, a nossa aplicação recebe 1000 requests concorrentes. E se receber 5000? Ou então <strong>dezenas de milhares</strong> de requests simultâneos?</p>
+<p>Uma <strong>chamada de sistema tem custo</strong>. O sistema operacional oferece um limite de threads que podem ser criadas ao mesmo tempo por processo. Se deixarmos assim, nossa aplicação corre um grande risco de ultrapassar esse limite, além de que chamadas a <em>brk + clone</em> têm seus custos de criação.</p>
+<p>E se pudéssemos reciclar um número limitado de threads? Sim, estamos falando de <strong>pool de threads</strong>.</p>
+<hr />
+<h2><a href="#concorrência-com-thread-pool" aria-hidden="true" class="anchor" id="concorrência-com-thread-pool"></a>Concorrência com thread pool</h2>
+<p>A forma mais comum de trabalhar com thread é com <em>thread pool</em>. Basicamente, definimos um número arbitrário de threads <strong>que nunca terminam</strong>, mas ficam em loop consumindo mensagens de alguma estrutura de dados. Esta estrutura pode ser uma <strong>fila</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/i8ysvzs13lo7jju7opfs.png" alt="thread pool" /></p>
+<h3><a href="#uma-thread-em-loop" aria-hidden="true" class="anchor" id="uma-thread-em-loop"></a>Uma thread em loop</h3>
+<p>Vamos inicialmente definir que teremos apenas UMA thread em loop lendo mensagens da fila. O processo deverá ser o seguinte:</p>
+<ul>
+<li>processo principal inicia uma thread</li>
+<li>a thread fica em loop lendo mensagens (socket) da fila. Quando tiver vazia, repete o loop. Quando houver algum socket na fila, a thread executa a lógica que é fazer o <em>nanosleep</em>, escrever no socket, fechar o socket, e voltar para o loop de leitura da fila</li>
+<li>processo principal continua execução após criação da thread, onde fica em loop lendo requisições que chegam no socket (accept). Quando uma requisição chega, adiciona o socket na fila e volta para o loop do <strong>accept</strong>.</li>
+</ul>
+<p>Vamos passo a passo, começando pelas constantes:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_socket 41
+</div><div class="line" data-line="4">%define SYS_bind 49
+</div><div class="line" data-line="5">%define SYS_listen 50
+</div><div class="line" data-line="6">%define SYS_accept4 288
+</div><div class="line" data-line="7">%define SYS_write 1
+</div><div class="line" data-line="8">%define SYS_close 3
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">%define SYS_nanosleep 35
+</div><div class="line" data-line="11">%define SYS_clone 56
+</div><div class="line" data-line="12">%define SYS_brk 12
+</div><div class="line" data-line="13">%define SYS_exit 60
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">%define AF_INET 2
+</div><div class="line" data-line="16">%define SOCK_STREAM 1
+</div><div class="line" data-line="17">%define SOCK_PROTOCOL 0
+</div><div class="line" data-line="18">%define BACKLOG 2
+</div><div class="line" data-line="19">%define CR 0xD
+</div><div class="line" data-line="20">%define LF 0xA
+</div><div class="line" data-line="21">
+</div><div class="line" data-line="22">%define CHILD_STACK_SIZE 4096
+</div><div class="line" data-line="23">%define CLONE_VM 0x00000100
+</div><div class="line" data-line="24">%define CLONE_FS 0x00000200
+</div><div class="line" data-line="25">%define CLONE_FILES 0x00000400
+</div><div class="line" data-line="26">%define CLONE_PARENT 0x00008000
+</div><div class="line" data-line="27">%define CLONE_THREAD 0x00010000
+</div><div class="line" data-line="28">%define CLONE_IO 0x80000000
+</div><div class="line" data-line="29">%define CLONE_SIGHAND 0x00000800
+</div></code></pre>
+<p>A seguir, a seção de dados:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">sockaddr:
+</div><div class="line" data-line="3">	sa_family: dw AF_INET   ; 2 bytes
+</div><div class="line" data-line="4">	port: dw 0xB80B         ; 2 bytes
+</div><div class="line" data-line="5">	ip_addr: dd 0           ; 4 bytes
+</div><div class="line" data-line="6">	sin_zero: dq 0          ; 8 bytes
+</div><div class="line" data-line="7">response: 
+</div><div class="line" data-line="8">	headline: db &quot;HTTP/1.1 200 OK&quot;, CR, LF
+</div><div class="line" data-line="9">	content_type: db &quot;Content-Type: text/html&quot;, CR, LF
+</div><div class="line" data-line="10">	content_length: db &quot;Content-Length: 22&quot;, CR, LF
+</div><div class="line" data-line="11">	crlf: db CR, LF
+</div><div class="line" data-line="12">	body: db &quot;&lt;h1&gt;Hello, World!&lt;/h1&gt;&quot;
+</div><div class="line" data-line="13">responseLen: equ $ - response
+</div><div class="line" data-line="14">timespec:
+</div><div class="line" data-line="15">	tv_sec: dq 1
+</div><div class="line" data-line="16">	tv_nsec: dq 0
+</div><div class="line" data-line="17">queuePtr: db 0
+</div><div class="line" data-line="18">
+</div><div class="line" data-line="19">section .bss
+</div><div class="line" data-line="20">sockfd: resb 8
+</div><div class="line" data-line="21">queue: resb 8
+</div></code></pre>
+<p>Repare que a fila representa 8 bytes fixos (para nosso exemplo é o suficiente), utilizando também um ponteiro para manipular a fila.</p>
+<p>Seguindo com o código, o programa inicia logo disparando a thread:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .text
+</div><div class="line" data-line="2">_start:
+</div><div class="line" data-line="3">	call thread        
+</div></code></pre>
+<p>A seguir vêm as rotinas habituais (vou omitir pra poupar caracteres neste artigo): <em>socket, bind e listen</em>.</p>
+<p>O <strong>accept</strong> fica da seguinte forma:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.accept:
+</div><div class="line" data-line="2">	; int accept(int sockfd, struct *addr, int addrlen, int flags)
+</div><div class="line" data-line="3">	mov rdi, [sockfd]
+</div><div class="line" data-line="4">	mov rsi, 0
+</div><div class="line" data-line="5">	mov rdx, 0
+</div><div class="line" data-line="6">	mov r10, 0
+</div><div class="line" data-line="7">	mov rax, SYS_accept4
+</div><div class="line" data-line="8">	syscall
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">	mov r8, rax
+</div><div class="line" data-line="11">	call enqueue
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	jmp .accept
+</div></code></pre>
+<p>Okay, agora, ao invés de <em>chamar uma thread</em>, o programa principal enfileira o socket da requisição. Lógica do <code>enqueue</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">enqueue:
+</div><div class="line" data-line="2">	xor rdx, rdx
+</div><div class="line" data-line="3">	mov dl, [queuePtr]	
+</div><div class="line" data-line="4">	mov [queue + rdx], r8	
+</div><div class="line" data-line="5">	inc byte [queuePtr]
+</div><div class="line" data-line="6">	ret
+</div></code></pre>
+<p>Aqui, estamos manipulando o ponteiro em <code>queue</code> utilizando <code>queuePtr</code>, incrementando um byte quando algo é adicionado na fila.</p>
+<p>Agora vamos à implementação da rotina da thread:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">thread:
+</div><div class="line" data-line="2">	mov rdi, 0
+</div><div class="line" data-line="3">	mov rax, SYS_brk
+</div><div class="line" data-line="4">	syscall
+</div><div class="line" data-line="5">	mov rdx, rax
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">	mov rdi, rax
+</div><div class="line" data-line="8">	add rdi, CHILD_STACK_SIZE
+</div><div class="line" data-line="9">	mov rax, SYS_brk
+</div><div class="line" data-line="10">	syscall
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12">	mov rdi, CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IO
+</div><div class="line" data-line="13">	lea rsi, [rdx + CHILD_STACK_SIZE - 8]
+</div><div class="line" data-line="14">	mov qword [rsi], handle
+</div><div class="line" data-line="15">	mov rax, SYS_clone
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">	ret
+</div></code></pre>
+<p>Nada de novo por enquanto. O que modifica é a rotina <em>handle</em> (explicação detalhada nos comentários):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:
+</div><div class="line" data-line="2">	; Verifica se a fila está vazia. Se estiver, fica em loop infinito.
+</div><div class="line" data-line="3">	; Repare que este código não está otimizado. Loop infinito 
+</div><div class="line" data-line="4">	; acarreta alto consumo de CPU. Nas próximas seções vamos resolver isto.
+</div><div class="line" data-line="5">	; Por ora, vamos aceitar este consumo de CPU.
+</div><div class="line" data-line="6">	cmp byte [queuePtr], 0
+</div><div class="line" data-line="7">	je handle
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">	; Remove (faz pop) da fila de socket, e guarda em R8.
+</div><div class="line" data-line="10">	call dequeue
+</div><div class="line" data-line="11">	mov r8, rax
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	; Processo normal, faz o nanosleep de 1 segundo simulando latência
+</div><div class="line" data-line="14">	lea rdi, [timespec]
+</div><div class="line" data-line="15">	mov rax, SYS_nanosleep
+</div><div class="line" data-line="16">	syscall
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18">	; Escreve no socket que está em R8
+</div><div class="line" data-line="19">	; int write(fd)
+</div><div class="line" data-line="20">	mov rdi, r8
+</div><div class="line" data-line="21">	mov rsi, response
+</div><div class="line" data-line="22">	mov rdx, responseLen
+</div><div class="line" data-line="23">	mov rax, SYS_write
+</div><div class="line" data-line="24">	syscall
+</div><div class="line" data-line="25">
+</div><div class="line" data-line="26">	; Fecha o socket
+</div><div class="line" data-line="27">	; int close(fd)
+</div><div class="line" data-line="28">	mov rdi, r8
+</div><div class="line" data-line="29">	mov rax, SYS_close
+</div><div class="line" data-line="30">	syscall
+</div><div class="line" data-line="31">
+</div><div class="line" data-line="32">	; Volta para o início (loop)
+</div><div class="line" data-line="33">	jmp handle
+</div></code></pre>
+<p>E por último, a lógica da rotina <em>dequeue</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">dequeue:
+</div><div class="line" data-line="2">	xor rax, rax
+</div><div class="line" data-line="3">	xor rsi, rsi
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov al, [queue]
+</div><div class="line" data-line="6">	mov rcx, 0
+</div><div class="line" data-line="7">.loop_dequeue:
+</div><div class="line" data-line="8">	cmp byte [queuePtr], 0
+</div><div class="line" data-line="9">	je .return_dequeue
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	cmp cl, [queuePtr]
+</div><div class="line" data-line="12">	je .done_dequeue
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">	; shift
+</div><div class="line" data-line="15">	xor r10, r10
+</div><div class="line" data-line="16">	mov r10b, [queue + rcx + 1]
+</div><div class="line" data-line="17">	mov byte [queue + rcx], r10b
+</div><div class="line" data-line="18">
+</div><div class="line" data-line="19">	inc rcx
+</div><div class="line" data-line="20">	jmp .loop_dequeue
+</div><div class="line" data-line="21">.done_dequeue:
+</div><div class="line" data-line="22">	dec byte [queuePtr]
+</div><div class="line" data-line="23">.return_dequeue:
+</div><div class="line" data-line="24">	ret
+</div></code></pre>
+<blockquote>
+<p>Por enquanto não vou entrar em detalhes em como trabalhar com filas em Assembly. Vou deixar estes detalhes para outro artigo, que irá tratar especificamente de arrays, filas e listas ligadas. Em breve!</p>
+</blockquote>
+<p>Pronto, já podemos executar o server e…</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.042</span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.059</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">3.071</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">4.083</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">5.090</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">6.094</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">7.112</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">8.121</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">9.140</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">10.150</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">10.166</span>
+</div></code></pre>
+<p><em>Ouch!</em> Voltamos aos 10 segundos. Mas isto se deve ao fato de termos apenas <em>uma thread</em> em loop. Vamos aumentar o número de threads na pool.</p>
+<h3><a href="#5-threads-em-loop" aria-hidden="true" class="anchor" id="5-threads-em-loop"></a>5 threads em loop</h3>
+<p>A seguir modificamos o programa para inicializar 5 threads, para que desta forma nosso server tenha mais capacidade em atender requests simultâneos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .text
+</div><div class="line" data-line="2">_start:
+</div><div class="line" data-line="3">.initialize_pool:
+</div><div class="line" data-line="4">	mov r8, 0
+</div><div class="line" data-line="5">.pool:
+</div><div class="line" data-line="6">	call thread        
+</div><div class="line" data-line="7">	inc r8
+</div><div class="line" data-line="8">	cmp r8, 5
+</div><div class="line" data-line="9">	je .socket
+</div><div class="line" data-line="10">	jmp .pool
+</div><div class="line" data-line="11">....
+</div><div class="line" data-line="12">....
+</div></code></pre>
+<p>Com este loop fazemos <code>call thread</code> 5 vezes, pelo que cada thread, e ainda utilizando o exemplo anterior, irá ficar em loop buscando mensagens na fila.</p>
+<p>Executamos o código com 1 request e temos sucesso:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">time</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">localhost:3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.022</span>
+</div></code></pre>
+<p>Mas no output do strace, após a resposta, vemos uma sequência de erros das threads:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13483</span><span style="color: #98c379;">]</span> <span style="color: #98c379;">write</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #98c379;">...,</span> <span style="color: #d19a66;">86</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13482</span><span style="color: #98c379;">]</span> <span style="color: #98c379;">write</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">0,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #98c379;">...,</span> <span style="color: #d19a66;">86</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="3"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13480</span><span style="color: #98c379;">]</span> <span style="color: #98c379;">write</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">0,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #98c379;">...,</span> <span style="color: #d19a66;">86</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13484</span><span style="color: #98c379;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">write</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>        <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">86</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13481</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">write</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #e06c75;">...,</span> <span style="color: #e06c75;">86HTTP/1.1</span> <span style="color: #d19a66;">200</span> <span style="color: #e06c75;">OK</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">Content-Type:</span> <span style="color: #e06c75;">text/html</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">Content-Length:</span> <span style="color: #d19a66;">22</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #56b6c2;">&lt;</span>unfinished ...&gt;
+</div><div class="line" data-line="10">[pid 13480] &lt;... write resumed&gt;)        = 86
+</div><div class="line" data-line="11">HTTP/1.1 200 OK
+</div><div class="line" data-line="12">Content-Type: text/html
+</div><div class="line" data-line="13">Content-Length: 22
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">&lt;h1&gt;Hello, World!&lt;/h1&gt;[pid 13484] close(0 &lt;unfinished ...&gt;
+</div><div class="line" data-line="16">[pid 13483] &lt;... write resumed&gt;)        = 86
+</div><div class="line" data-line="17">[pid 13482] &lt;... write resumed&gt;)        = 86
+</div><div class="line" data-line="18">[pid 13480] close(0 &lt;unfinished ...&gt;
+</div><div class="line" data-line="19">[pid 13484] &lt;... close resumed&gt;)        = 0
+</div><div class="line" data-line="20">[pid 13481] &lt;... write resumed&gt;)        = 86
+</div><div class="line" data-line="21">[pid 13484] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>,  <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13483</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">close</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="23"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13482</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">close</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">0</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="24"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13481</span><span style="color: #98c379;">]</span> <span style="color: #98c379;">close</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="25"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13480</span><span style="color: #98c379;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">close</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>        <span style="color: #56b6c2;">=</span> -<span style="color: #d19a66;">1</span> <span style="color: #98c379;">EBADF</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">Bad</span> <span style="color: #61afef;">file</span> <span style="color: #61afef;">descriptor</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="26"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13483</span><span style="color: #e06c75;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">close</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>        <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="27"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13482</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">close</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>        <span style="color: #56b6c2;">=</span> -<span style="color: #d19a66;">1</span> <span style="color: #98c379;">EBADF</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">Bad</span> <span style="color: #61afef;">file</span> <span style="color: #61afef;">descriptor</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="28"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13481</span><span style="color: #e06c75;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">close</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>        <span style="color: #56b6c2;">=</span> -<span style="color: #d19a66;">1</span> <span style="color: #61afef;">EBADF</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">Bad</span> <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">descriptor</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>A thread tentou fechar o socket descriptor da requisição mas outra thread tentou ler o socket de forma concorrente (Bad file descriptor).</p>
+<p>Quando envolve <strong>mais de uma thread</strong> consumindo o mesmo recurso (neste caso a fila), precisamos de um mecanismo de <strong>sincronização</strong>, que no caso são <em>locks</em>.</p>
+<h3><a href="#sincronização-com-futex" aria-hidden="true" class="anchor" id="sincronização-com-futex"></a>Sincronização com futex</h3>
+<p>Com <em>locks</em>, conseguimos controlar o acesso a um recurso compartilhado <em>entre diferentes threads</em>.</p>
+<p>Através da syscall <strong>futex</strong>, podemos suspender uma thread baseando-se em uma “variável condicional”. De forma oposta, podemos <em>tornar uma thread de volta à execução</em> baseando-se também na variável condicional.</p>
+<p>Esta técnica de <em>variável condicional</em> (condvar) é um primitivo de sincronização bastante utilizado. No nosso caso para controle da fila, queremos o seguinte cenário:</p>
+<ul>
+<li>a thread verifica se há algo na fila. Caso a fila esteja vazia, a thread é suspensa com <em>futex wait</em> através de uma variável condicional</li>
+<li>quando algo for adicionado na fila, outra thread/processo “emite um sinal” chamando a syscall <em>futex wake</em> na mesma variável condicional.</li>
+<li>quando o sinal é emitido, neste momento a thread que tem o acesso ao lock (variável condicional) é trazida de volta ao contexto, então lê a mensagem da fila e executa a ação necessária. Após, se a fila estiver vazia, repete o processo com <em>futex wait</em> e fica novamente suspensa</li>
+</ul>
+<blockquote>
+<p>Desta forma, garantimos que as threads não ficam consumindo a CPU em loop indefinidamente</p>
+</blockquote>
+<p>Modificando o código, começamos por definir a syscall:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_futex 202
+</div></code></pre>
+<p>A seguir, na seção de dados <code>.bss</code> declaramos a <em>variável condicional</em> ocupando 8 bytes, que será utilizada como sincronização do futex:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .bss
+</div><div class="line" data-line="2">...
+</div><div class="line" data-line="3">condvar: resb 8
+</div></code></pre>
+<p>Na rotina <code>enqueue</code>, <em>emitimos o sinal</em> após o socket ser adicionado na fila:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">enqueue:
+</div><div class="line" data-line="2">	xor rdx, rdx
+</div><div class="line" data-line="3">	mov dl, [queuePtr]	
+</div><div class="line" data-line="4">	mov [queue + rdx], r8	
+</div><div class="line" data-line="5">	inc byte [queuePtr]
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">	call emit_signal
+</div><div class="line" data-line="8">	ret
+</div></code></pre>
+<p>A lógica o <em>emit_signal</em> (explicação nos comentários):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">emit_signal:
+</div><div class="line" data-line="2">   ; Endereço de memória para a variável condicional (8 bytes)
+</div><div class="line" data-line="3">   mov rdi, condvar
+</div><div class="line" data-line="4">   
+</div><div class="line" data-line="5">   ; Flags do Futex (WAKE), que irá trazer a thread
+</div><div class="line" data-line="6">   ; de volta ao contexto
+</div><div class="line" data-line="7">   mov rsi, FUTEX_WAKE | FUTEX_PRIVATE_FLAG 
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">   ; Argumentos adicionais, que neste caso vamos deixar a ZERO
+</div><div class="line" data-line="10">   xor rdx, rdx
+</div><div class="line" data-line="11">   xor r10, r10
+</div><div class="line" data-line="12">   xor r8, r8
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">   ; Chamada da syscall
+</div><div class="line" data-line="15">   mov rax, SYS_futex
+</div><div class="line" data-line="16">   syscall
+</div><div class="line" data-line="17">   ret
+</div></code></pre>
+<p>Agora, modificamos a rotina <em>handle</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">handle:	
+</div><div class="line" data-line="2">	; Caso a fila esteja vazia, fazemos jump para &quot;wait&quot;
+</div><div class="line" data-line="3">	cmp byte [queuePtr], 0         
+</div><div class="line" data-line="4">	je .wait           
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">	; Faz pop do socket da fila e segue o fluxo normal
+</div><div class="line" data-line="7">	call dequeue      
+</div><div class="line" data-line="8">	mov r10, rax
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">	lea rdi, [timespec]
+</div><div class="line" data-line="11">	mov rax, SYS_nanosleep
+</div><div class="line" data-line="12">	syscall
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">	; int write(fd)
+</div><div class="line" data-line="15">	mov rdi, r10
+</div><div class="line" data-line="16">	mov rsi, response
+</div><div class="line" data-line="17">	mov rdx, responseLen
+</div><div class="line" data-line="18">	mov rax, SYS_write
+</div><div class="line" data-line="19">	syscall
+</div><div class="line" data-line="20">
+</div><div class="line" data-line="21">	; int close(fd)
+</div><div class="line" data-line="22">	mov rdi, r10
+</div><div class="line" data-line="23">	mov rax, SYS_close
+</div><div class="line" data-line="24">	syscall
+</div><div class="line" data-line="25">
+</div><div class="line" data-line="26">	; Volta para o início
+</div><div class="line" data-line="27">	jmp handle       
+</div><div class="line" data-line="28">.wait:
+</div><div class="line" data-line="29">	; Chamada para wait_condvar, que vai suspender a thread atual com FUTEX
+</div><div class="line" data-line="30">	call wait_condvar 
+</div><div class="line" data-line="31">	jmp handle       
+</div></code></pre>
+<p>E, por último e não menos importante, a lógica da rotina <em>wait_condvar</em>, que suspende a thread de execução:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">wait_condvar:
+</div><div class="line" data-line="2">   ; Endereço de memória para a variável condicional (8 bytes)
+</div><div class="line" data-line="3">   mov rdi, condvar   
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">   ; Flags do Futex (WAIT), que irá suspender a thread
+</div><div class="line" data-line="6">   mov rsi, FUTEX_WAIT | FUTEX_PRIVATE_FLAG 
+</div><div class="line" data-line="7">   xor rdx, rdx
+</div><div class="line" data-line="8">   xor r10, r10              
+</div><div class="line" data-line="9">   xor r8, r8               
+</div><div class="line" data-line="10">   mov rax, SYS_futex
+</div><div class="line" data-line="11">   syscall
+</div><div class="line" data-line="12">   test rax, rax
+</div><div class="line" data-line="13">   jz .done_condvar
+</div><div class="line" data-line="14">.done_condvar:
+</div><div class="line" data-line="15">   ret
+</div></code></pre>
+<p>Assim que iniciamos o server com <em>strace</em>, podemos ver as syscalls em ação:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>                               <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155c000</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">0x155d000</span><span style="color: #c678dd;">)</span>                          <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155d000</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">clone</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">child_stack</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">0x155cff8,</span> <span style="color: #e06c75;">flags</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">CLONE_VM</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FS</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FILES</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_SIGHAND</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_PARENT</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_THREAD</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_IOstrace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">13539</span> <span style="color: #e06c75;">attached</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">13539</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13539</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>                   <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155d000</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> brk<span style="color: #c678dd;">(</span><span style="color: #61afef;">0x155e000</span><span style="color: #c678dd;">)</span>              <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155e000</span>
+</div><div class="line" data-line="8"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">clone</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">child_stack=0x155dff8,</span> <span style="color: #e06c75;">flags=CLONE_VM</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FS</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FILES</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_SIGHAND</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_PARENT</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_THREAD</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_IOstrace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">13540</span> <span style="color: #e06c75;">attached</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">13540</span>
+</div><div class="line" data-line="10"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13540</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>                   <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155e000</span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> brk<span style="color: #c678dd;">(</span><span style="color: #61afef;">0x155f000</span><span style="color: #c678dd;">)</span>              <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155f000</span>
+</div><div class="line" data-line="13"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">clone</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">child_stack=0x155eff8,</span> <span style="color: #e06c75;">flags=CLONE_VM</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FS</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FILES</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_SIGHAND</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_PARENT</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_THREAD</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_IOstrace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">13541</span> <span style="color: #e06c75;">attached</span>
+</div><div class="line" data-line="14"><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">13541</span>
+</div><div class="line" data-line="15"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13541</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="16"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>                   <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">0x155f000</span>
+</div><div class="line" data-line="17"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> brk<span style="color: #c678dd;">(</span><span style="color: #d19a66;">0x1560000</span><span style="color: #c678dd;">)</span>              <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0x1560000</span>
+</div><div class="line" data-line="18"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">clone</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">child_stack=0x155fff8,</span> <span style="color: #e06c75;">flags=CLONE_VM</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FS</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FILES</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_SIGHAND</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_PARENT</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_THREAD</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_IOstrace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">13542</span> <span style="color: #e06c75;">attached</span>
+</div><div class="line" data-line="19"><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">13542</span>
+</div><div class="line" data-line="20"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13542</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="21"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">brk</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">NULL</span><span style="color: #c678dd;">)</span>                   <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0x1560000</span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> brk<span style="color: #c678dd;">(</span><span style="color: #d19a66;">0x1561000</span><span style="color: #c678dd;">)</span>              <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0x1561000</span>
+</div><div class="line" data-line="23"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">clone</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">child_stack=0x1560ff8,</span> <span style="color: #e06c75;">flags=CLONE_VM</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FS</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_FILES</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_SIGHAND</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_PARENT</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_THREAD</span><span style="color: #56b6c2;">|</span><span style="color: #61afef;">CLONE_IOstrace:</span> <span style="color: #e06c75;">Process</span> <span style="color: #d19a66;">13543</span> <span style="color: #e06c75;">attached</span>
+</div><div class="line" data-line="24"><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">13543</span>
+</div><div class="line" data-line="25"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">socket</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">AF_INET,</span> <span style="color: #e06c75;">SOCK_STREAM,</span> <span style="color: #e06c75;">IPPROTO_IP</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="26"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13543</span><span style="color: #98c379;">]</span> <span style="color: #61afef;">futex</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">unfinished</span> <span style="color: #61afef;">...</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="27"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">...</span> <span style="color: #61afef;">socket</span> <span style="color: #61afef;">resumed</span><span style="color: #56b6c2;">&gt;</span><span style="color: #c678dd;">)</span>       <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="28"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #98c379;">]</span> <span style="color: #98c379;">bind</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">3,</span> <span style="color: #98c379;">&lbrace;</span><span style="color: #98c379;">sa_family=AF_INET,</span> sin_port=htons<span style="color: #c678dd;">(</span><span style="color: #d19a66;">3000</span><span style="color: #c678dd;">)</span>, sin_addr=inet_addr<span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #c678dd;">)</span>&rbrace;, 16) = 0
+</div><div class="line" data-line="29">[pid 13538] listen(3, 2)                = 0
+</div><div class="line" data-line="30">[pid 13538] accept4(3, NULL, NULL, 0)   = ? ERESTARTSYS (To be restarted if SA_RESTART is set)
+</div><div class="line" data-line="31">[pid 13538] --- SIGWINCH &lbrace;si_signo=SIGWINCH, si_code=SI_KERNEL<span style="color: #c678dd;">&rbrace;</span> <span style="color: #56b6c2;">--</span><span style="color: #56b6c2;">-</span>
+</div><div class="line" data-line="32"><span style="color: #98c379;">[</span><span style="color: #98c379;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">accept4</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">3,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #e06c75;">NULL,</span> <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>Repare que cada thread faz a chamada a futex com <em>FUTEX WAIT</em>, e isto vemos acontecer 5 vezes no trace. Ou seja, as 5 threads estão suspensas <strong>sem consumir CPU</strong>.</p>
+<p>Ao fazer o primeiro request, temos o seguinte resultado:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">)</span>   <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">4</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">[</span><span style="color: #61afef;">pid</span> <span style="color: #d19a66;">13538</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span>0x402088, FUTEX_WAKE_PRIVATE, 0) = 1
+</div><div class="line" data-line="3">[pid 13539] &lt;... futex resumed&gt;)        = 0
+</div><div class="line" data-line="4">[pid 13538] accept4(3, NULL, NULL, 0 &lt;unfinished ...&gt;
+</div><div class="line" data-line="5">[pid 13539] nanosleep(&lbrace;tv_sec=1, tv_nsec=0<span style="color: #c678dd;">&rbrace;</span>, <span style="color: #e06c75;">NULL</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13539</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">write</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">4,</span> <span style="color: #98c379;">&quot;HTTP/1.1 200 OK\r\nContent-Type: t&quot;</span><span style="color: #e06c75;">...,</span> <span style="color: #d19a66;">86</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">86</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13539</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">close</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span><span style="color: #c678dd;">)</span>                    <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">[</span><span style="color: #e06c75;">pid</span> <span style="color: #d19a66;">13539</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">futex</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">0x402088,</span> <span style="color: #e06c75;">FUTEX_WAIT_PRIVATE,</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">NULL</span>
+</div></code></pre>
+<ul>
+<li>o processo principal recebeu a mensagem no socket, enfileirou e executou <em>futex</em> com <strong>FUTEX_WAKE</strong></li>
+<li>uma das threads foi trazida de volta ao contexto e fez a sua devida execução (nanosleep + write + close)</li>
+<li>o processo principal voltou para o accept a espera de mais requests no socket</li>
+<li>a thread terminou seu trabalho, viu que não tinha mais nada na fila e executou <em>futex</em> com <strong>FUTEX_WAIT</strong>, ficando novamente suspensa</li>
+</ul>
+<p>Finalmente, podemos executar 10 requests simultâneos e…</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.079</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">1.082</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">1.083</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">1.062</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">1.083</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.087</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">2.088</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.100</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.101</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Hello,</span> <span style="color: #61afef;">World!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">2.110</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">2.127</span>
+</div></code></pre>
+<p><em>Nice!</em> Com uma pool de 5 threads, conseguimos atingir <strong>2,1 segundos</strong> para 10 requests concorrentes. Agora temos concorrência consumindo muito menos recursos:</p>
+<ul>
+<li>menos memória, pois não é forking de processos</li>
+<li>menos CPU, pois as threads não ficam em loop infinito</li>
+<li>menos latência, pois com uma limitação de 5 threads, novos requests não criam novas threads</li>
+</ul>
+<hr />
+<h2><a href="#alocação-de-memória-com-mmap" aria-hidden="true" class="anchor" id="alocação-de-memória-com-mmap"></a>Alocação de memória com mmap</h2>
+<p>Um problema comum ao utilizar <em>brk</em> é que a memória pode ficar fragmentada. Uma vez que o program break foi modificado, aquela memória pode ser utilizada, mas torna muito difícil ser reciclada.</p>
+<p>Uma forma de lidar com este problema de fragmentação é utilizar uma syscall que trata de reservar uma área na memória que pode ser reciclada futuramente. Estamos falando da syscall <strong>mmap</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">thread:
+</div><div class="line" data-line="2">	mov rdi, 0x0
+</div><div class="line" data-line="3">	mov rsi, CHILD_STACK_SIZE
+</div><div class="line" data-line="4">	mov rdx, PROT_WRITE | PROT_READ
+</div><div class="line" data-line="5">	mov r10, MAP_ANONYMOUS | MAP_PRIVATE | MAP_GROWSDOWN
+</div><div class="line" data-line="6">	mov rax, SYS_mmap
+</div><div class="line" data-line="7">	syscall
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">	mov rdi, CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_PARENT|CLONE_THREAD|CLONE_IO
+</div><div class="line" data-line="10">	lea rsi, [rax + CHILD_STACK_SIZE - 8]
+</div><div class="line" data-line="11">	mov qword [rsi], handle
+</div><div class="line" data-line="12">	mov rax, SYS_clone
+</div><div class="line" data-line="13">	syscall
+</div><div class="line" data-line="14">	ret
+</div></code></pre>
+<p>Ao invés de chamar <em>brk</em>, podemos chamar <strong>mmap</strong>, especificando:</p>
+<ul>
+<li><strong>rdi</strong>: endereço de memória onde deve ser mapeado. Se tiver ZERO, o sistema operacional se encarrega de trazer um endereço de memória disponível</li>
+<li><strong>rsi</strong>: tamanho do espaço reservado na memória. No nosso caso, queremos 4096 bytes para a thread</li>
+<li><strong>rdx</strong>: proteção de memória, neste caso queremos que a memória possa ser tanto escrita (PROT_WRITE) quanto lida (PROT_READ) pela thread</li>
+<li><strong>r10</strong>: flags de mapeamento
+<ul>
+<li><strong>MAP_ANONYMOUS</strong>: o mapeamento não é associado a nenhum arquivo ou descritor de arquivo (modo anônimo)</li>
+<li><strong>MAP_PRIVATE</strong>: mapeamento privado com <em>copy-on-write</em>, ou seja, os dados serão copiados à medida em que são escritos</li>
+<li><strong>MAP_GROWSDOWN</strong>: o mapeamento é usado no formato “stack”, ou seja, o mapeamento é dos endereços maiores em direção aos menores</li>
+</ul>
+</li>
+</ul>
+<p>Com <em>mmap</em>, podemos fazer uso da sua contrapartida, a syscall <strong>unmmap</strong>, que permite reciclar uma determinada área na memória que não é mais utilizada, evitando fragmentação.</p>
+<blockquote>
+<p>Esta técnica é muito utilizada pela libc através da função <strong>malloc</strong>. Com mmap podemos definir uma memória heap para nosso programa</p>
+</blockquote>
+<p>É isto, na prática não terá nenhum efeito com relação ao exemplo anterior. Mas esta seção foi apenas para trazer uma forma diferente de alocar memória para a thread.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Ufa! Finalmente chegamos ao final da saga. Passamos por uma <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5">introdução</a>, onde a seguir fizemos uma abordagem pela <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9">história e arquitetura de computadores</a>, para então analisar <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk">código de máquina</a>, que foi a base para entrar em <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">assembly x86</a> de fato, para finalmente <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5">concluir o desenvolvimento do web server</a>.</p>
+<p>Este último artigo foi uma abordagem para multi-threading em Assembly, passando por conceitos de concorrência como <em>forking de processos</em>, <strong>clone</strong>, threading, pool de threads e sincronização com locks.</p>
+<p>Declaro aqui então o fim da <strong>saga desenvolvendo um web server em Assembly x86</strong>.</p>
+<p><em>Até a próxima saga!</em></p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<sub>
+Synchronization: mutexes and condition variables
+https://cs61.seas.harvard.edu/site/2018/Synch3/
+Synchronization, atomics and mutexes
+https://cs.brown.edu/courses/csci0300/2023/notes/l22.html
+Basics of Futexes
+https://eli.thegreenplace.net/2018/basics-of-futexes/
+Raw Linux threads via syscalls
+https://nullprogram.com/blog/2015/05/15/
+Condition variables with Futex
+https://www.remlab.net/op/futex-condvar.shtml
+</sub>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

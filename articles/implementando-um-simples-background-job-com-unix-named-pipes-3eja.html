@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Implementando um simples background job com UNIX named pipes - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="No [último artigo](https://dev.to/leandronsp/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pipes**. E">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html">
+  <meta property="og:title" content="Implementando um simples background job com UNIX named pipes">
+  <meta property="og:description" content="No [último artigo](https://dev.to/leandronsp/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pipes**. E">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-06-15T04:42:22Z">
+  <meta property="article:tag" content="unix">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="pipes">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Implementando um simples background job com UNIX named pipes",
+    "datePublished": "2022-06-15T04:42:22Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "No [último artigo](https://dev.to/leandronsp/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pipes**. E",
+        "keywords": "unix, linux, pipes"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Implementando um simples background job com UNIX named pipes</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 15 Jun 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">unix</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">pipes</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>No <a href="https://dev.to/leandronsp/entendendo-unix-pipes-3k56">último artigo</a> vimos o funcionamento de UNIX streams, pipes e mais precisamente, <strong>anonymous pipes</strong>. E que estes canais são uma das bases de comunicação entre diferentes processos.</p>
+<p>Neste artigo vamos explorar “pipes nomeados”, ou <a href="https://en.wikipedia.org/wiki/Named_pipe">named pipes</a>, e como este modelo de dados pode ajudar a entender o funcionamento de um background job.</p>
+<h2><a href="#anonymous-pipes-são-fifo" aria-hidden="true" class="anchor" id="anonymous-pipes-são-fifo"></a>Anonymous pipes são FIFO</h2>
+<p><a href="https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics)">FIFO</a> remete a “First in, first out”, que significa</p>
+<blockquote>
+<p>Primeiro a entrar, primeiro a sair</p>
+</blockquote>
+<p>Parece com filas né? Mas entretanto…</p>
+<h3><a href="#são-unidirecionais" aria-hidden="true" class="anchor" id="são-unidirecionais"></a>São unidirecionais</h3>
+<p>…pois caminham apenas em um sentido, e nunca de forma “bidirecional”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### ----&gt; going this way ----&gt;</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">md5</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span>
+</div></code></pre>
+<p>Para que sejam bidirecionais, seria preciso que um processo enviasse mensagem de volta para o outro.</p>
+<p>E há uma solução para isto.</p>
+<h2><a href="#named-pipes" aria-hidden="true" class="anchor" id="named-pipes"></a>Named pipes</h2>
+<p>Com o comando <code>mkfifo</code>, podemos criar uma pipe nomeada e usá-la entre diferentes comandos para comunicação através dos streams.</p>
+<p>Para criar comunicação bidirecional, teríamos que criar duas FIFO, mas para nosso simples exemplo, vamos manter unidirecional com apenas uma FIFO.</p>
+<p>Esta pipe poderá servir como uma fila FIFO:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">mkfifo</span> <span style="color: #e06c75;">myqueue</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ls</span> <span style="color: #e06c75;">-la</span> <span style="color: #e06c75;">myqueue</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">prw-r--r--</span>  <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">leandronsp</span>  <span style="color: #e06c75;">staff</span>     <span style="color: #e06c75;">0B</span> <span style="color: #e06c75;">Jun</span> <span style="color: #d19a66;">14</span> <span style="color: #e06c75;">23:09</span> <span style="color: #e06c75;">myqueue</span>
+</div></code></pre>
+<h3><a href="#utilizando-o-pipe" aria-hidden="true" class="anchor" id="utilizando-o-pipe"></a>Utilizando o pipe</h3>
+<p>Podemos jogar saídas de comandos para dentro do pipe, por exemplo com este processo “escritor”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">myqueue</span>
+</div></code></pre>
+<p>O processo fica bloqueado à espera que algum outro processo “leitor” leia da fila. Em outra janela:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">myqueue</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">bXkgcHJlY2lvdXMK</span>
+</div></code></pre>
+<p>O inverso também pode acontecer, onde começamos pelo leitor:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">myqueue</span>
+</div></code></pre>
+<p>Que fica bloqueado à espera de “mensagens na fila”. E assim outro processo escritor pode enviar a mensagem:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">myqueue</span>
+</div></code></pre>
+<p><em>Janela do leitor</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">bXkgcHJlY2lvdXMK</span>
+</div></code></pre>
+<h2><a href="#processamento-assíncrono" aria-hidden="true" class="anchor" id="processamento-assíncrono"></a>Processamento assíncrono</h2>
+<p>Esta funcionalidade básica abre portas para o processamento assíncrono de mensagens, onde podemos ter um “worker” que fica <em>infinitamente</em> à espera de mensagens no pipe, ao passo que diferentes “publicadores” colocam mensagens no pipe de forma <strong>assíncrona</strong>.</p>
+<p>Estamos falando de <strong><a href="https://en.wikipedia.org/wiki/Background_process">background jobs</a></strong>.</p>
+<h3><a href="#criando-um-worker-que-decodifica-base64" aria-hidden="true" class="anchor" id="criando-um-worker-que-decodifica-base64"></a>Criando um worker que decodifica base64</h3>
+<p>Vamos então criar um worker simples em Shell script que recebe uma mensagem codificada em base64, decodifica, mostra-a no screen (STDOUT) e volta para o loop à espera de mais mensagens no pipe:<br />
+<code>sidequack.sh</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">#!/bin/bash</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">## Cria o named pipe</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">mkfifo</span> <span style="color: #e06c75;">myqueue</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;Waiting for jobs in the queue...&quot;</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">## Loop infinito</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">while</span> <span style="color: #e5c07b;">true</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="10">  <span style="color: #7f848e;">## Bloqueia à espera de mensagem no pipe</span>
+</div><div class="line" data-line="11">  <span style="color: #d19a66;">ENCODED</span><span style="color: #56b6c2;">=</span>`<span style="color: #61afef;">cat</span> <span style="color: #e06c75;">myqueue</span>`
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">  <span style="color: #7f848e;">## Nova mensagem chegou no pipe...</span>
+</div><div class="line" data-line="14">  <span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;Going to perform Job...&quot;</span>
+</div><div class="line" data-line="15">  <span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;Encoded: <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ENCODED</span> | Decoded: `<span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ENCODED</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span> <span style="color: #e06c75;">-d</span>`&quot;</span>
+</div><div class="line" data-line="16"><span style="color: #c678dd;">done</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">bash</span> <span style="color: #e06c75;">sidequack.sh</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">jobs</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">queue...</span>
+</div></code></pre>
+<p>Agora, em outra janela, podemos colocar no pipe diferentes “jobs” a serem processados:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">myqueue</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;pipes are awesome&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">myqueue</span>
+</div></code></pre>
+<p>Podemos consultar no terminal do worker:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Going</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">perform</span> <span style="color: #e06c75;">Job...</span>                                       
+</div><div class="line" data-line="2"><span style="color: #61afef;">Encoded:</span> <span style="color: #e06c75;">bXkgcHJlY2lvdXMK</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">Decoded:</span> <span style="color: #e06c75;">my</span> <span style="color: #e06c75;">precious</span>
+</div><div class="line" data-line="3">              
+</div><div class="line" data-line="4"><span style="color: #61afef;">Going</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">perform</span> <span style="color: #e06c75;">Job...</span>                                       
+</div><div class="line" data-line="5"><span style="color: #61afef;">Encoded:</span> <span style="color: #e06c75;">cGlwZXMgYXJlIGF3ZXNvbWUK</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">Decoded:</span> <span style="color: #e06c75;">pipes</span> <span style="color: #e06c75;">are</span> <span style="color: #e06c75;">awesome</span>
+</div></code></pre>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Este artigo foi uma tentativa de mostrar o funcionamento de UNIX named pipes e como podem ser usados para comunicação entre diferentes processos através de estruturas FIFO, com a demonstração da implementação de um simples background job.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

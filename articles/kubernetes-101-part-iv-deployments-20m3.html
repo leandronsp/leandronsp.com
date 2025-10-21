@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part IV, deployments - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In the [third part](https://dev.to/leandronsp/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes employ">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3.html">
+  <meta property="og:title" content="Kubernetes 101, part IV, deployments">
+  <meta property="og:description" content="In the [third part](https://dev.to/leandronsp/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes employ">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-03-12T21:02:50Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part IV, deployments",
+    "datePublished": "2023-03-12T21:02:50Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In the [third part](https://dev.to/leandronsp/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes employ",
+        "keywords": "kubernetes, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part IV, deployments</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 12 Mar 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In the <a href="https://dev.to/leandronsp/kubernetes-101-part-iii-controllers-and-self-healing-4ki5">third part</a>, we went a bit further and learned how Kubernetes employs <strong>self-healing capabilities</strong> by using the <em>controller pattern</em> through the utilisation of <em>workload resources</em> such as <strong>ReplicaSets</strong>.</p>
+<p>However, it’s well-known that most applications require to be <em>updated frequently</em>.</p>
+<p><em>ReplicaSets</em> are useful only for applications that <strong>do NOT need to be updated/deployed constantly</strong>. Almost always we’re going to need another object that Kubernetes provides as a <em>workload resource</em>: <strong>the deployment object</strong>.</p>
+<hr />
+<h2><a href="#-deployment" aria-hidden="true" class="anchor" id="-deployment"></a>🚀 Deployment</h2>
+<p>The Kubernetes <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment object</a> brings a <strong>Deployment Controller</strong> that acts like the <strong>ReplicaSet Controller</strong>, but additionaly it allows a variety of <em>update strategies</em> so the application <strong>won’t suffer any downtime</strong>.</p>
+<h3><a href="#creating-the-deployment" aria-hidden="true" class="anchor" id="creating-the-deployment"></a>Creating the Deployment</h3>
+<p>We’ll follow the same process as for the <strong>ReplicaSet</strong>, but referencing <code>kind: Deployment</code> instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Deployment</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">apps/v1</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">  <span style="color: #7f848e;">### The number of replicas of the same identical Pod</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">replicas</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">matchLabels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">        <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="17">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="18">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div><div class="line" data-line="20">        <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">nginx</span>
+</div></code></pre>
+<p>At first glance, it works <em>exactly like ReplicaSet</em>. Let’s check the <code>deployment</code> object in <code>kubectl</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">deployments</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>    <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">UP-TO-DATE</span>   <span style="color: #e06c75;">AVAILABLE</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx</span>   <span style="color: #e06c75;">2/2</span>     <span style="color: #d19a66;">2</span>            <span style="color: #d19a66;">2</span>           <span style="color: #e06c75;">11s</span>
+</div></code></pre>
+<p>The output explains that we have <em>2 of 2 replicas</em> (Pods) <strong>ready</strong>.</p>
+<p>Checking the Pods:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>                    <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-76d6c9b8c-sk28k</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">7s</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx-76d6c9b8c-f25nc</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">7s</span>
+</div></code></pre>
+<p>Note that, like ReplicaSet, each Pod gets a random unique ID in the cluster (<code>sk28k</code> and <code>f25nc</code> respectively).</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/r8gou89x56ymuwb4m2fx.png" alt="a deployment resource" /></p>
+<p>Until now, it’s exactly a ReplicaSet, nothing different from it. <em>Time to see the differences</em>.</p>
+<h3><a href="#updating-a-deployment" aria-hidden="true" class="anchor" id="updating-a-deployment"></a>Updating a Deployment</h3>
+<p>A Deployment allows <em>updates with <strong>no downtime</strong></em>. As for our example with <em>NGINX</em>, let’s demonstrate a simple update like <strong>changing the NGINX version in the Pod</strong>.</p>
+<p>First, check the current NGINX version by entering to one of the Pods in the Deployment and executing <code>nginx -v</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">deploy/nginx</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-v</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">nginx</span> <span style="color: #e06c75;">version:</span> <span style="color: #e06c75;">nginx/1.23.3</span>
+</div></code></pre>
+<p>Next, we <em>change the Pod image <strong>through the Deployment</strong></em> by issuing the command <code>kubectl set image</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">set</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">deployment/nginx</span> <span style="color: #e06c75;">nginx=nginx:1.22.1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">deployment.apps/nginx</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">updated</span>
+</div></code></pre>
+<p>Checking the Pods, we can see that the <strong>new Pods is being created</strong> while the <em>current Pods are still running</em>.</p>
+<p>Hence, <strong>the application is up and running</strong>. <em>No downtime!</em></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>                     <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>              <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-76d6c9b8c-sk28k</span>    <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>             <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">14m</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx-76d6c9b8c-f25nc</span>    <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>             <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">14m</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">nginx-756fbff4c9-t2pjb</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">ContainerCreating</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div></code></pre>
+<p>Then, after all Pods are successfully updated:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>                     <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-756fbff4c9-t2pjb</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">19s</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx-756fbff4c9-44g6w</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div></code></pre>
+<p>Wanna confirm that?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">deploy/nginx</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-v</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">nginx</span> <span style="color: #e06c75;">version:</span> <span style="color: #e06c75;">nginx/1.22.1</span>
+</div></code></pre>
+<p><em>Such a big YAY!</em> 🚀</p>
+<h3><a href="#bonus-rollout-status" aria-hidden="true" class="anchor" id="bonus-rollout-status"></a>Bonus: rollout status</h3>
+<p><code>kubectl</code> provides a command called <code>rollout status</code> that can be used during deployments, so the command <em>keeps blocked until the deployment is finished</em>.</p>
+<p>It’s very useful in <strong>CI/CD systems</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### Update the image</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">set</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">deployment/nginx</span> <span style="color: #e06c75;">nginx=nginx:1.23.1</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">deployment.apps/nginx</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">updated</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">### Check the rollout deployment (blocks until it is finished)</span>
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">status</span> <span style="color: #e06c75;">deployment/nginx</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">out</span> <span style="color: #e06c75;">of</span> <span style="color: #d19a66;">2</span> <span style="color: #e06c75;">new</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">have</span> <span style="color: #e06c75;">been</span> <span style="color: #e06c75;">updated...</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">out</span> <span style="color: #e06c75;">of</span> <span style="color: #d19a66;">2</span> <span style="color: #e06c75;">new</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">have</span> <span style="color: #e06c75;">been</span> <span style="color: #e06c75;">updated...</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">old</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">are</span> <span style="color: #e06c75;">pending</span> <span style="color: #e06c75;">termination...</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">old</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">are</span> <span style="color: #e06c75;">pending</span> <span style="color: #e06c75;">termination...</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">successfully</span> <span style="color: #e06c75;">rolled</span> <span style="color: #e06c75;">out</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13"><span style="color: #7f848e;">### Checking the NGINX version</span>
+</div><div class="line" data-line="14"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">deploy/nginx</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-v</span>
+</div><div class="line" data-line="15"><span style="color: #61afef;">nginx</span> <span style="color: #e06c75;">version:</span> <span style="color: #e06c75;">nginx/1.23.1</span>
+</div></code></pre>
+<p><strong>Kubernetes is wonderful</strong>, <em>isn’t it</em>?</p>
+<h3><a href="#️-pictures-or-didnt-happen" aria-hidden="true" class="anchor" id="️-pictures-or-didnt-happen"></a>🖼️ Pictures or didn’t happen</h3>
+<p>Okay, sometimes is worth seeing the explanation in pictures for a better comprehension.</p>
+<p>👉 The Deployment Controller starts creating a new Pod:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/yqwcys690puygq1urodu.png" alt="creating a new pod" /></p>
+<p>👉 Then, one of the old replicas starts terminating, and a new one starts being created:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xuaxefvnp2wveq54x6oc.png" alt="the second step in deployment" /></p>
+<p>👉 At the final stage, we have two new running replicas along with two old terminated replicas:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6ep0peg0ijos0o9ywh1t.png" alt="the third phase" /></p>
+<p>👉 And finally, the application was successfully rolled out:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4mka0ey3he86qs6m20ze.png" alt="successfully rolled out" /></p>
+<h3><a href="#️-rollbacks" aria-hidden="true" class="anchor" id="️-rollbacks"></a>↩️ Rollbacks</h3>
+<p>Not rare, when faced in situation where updates are <em>delivered with bugs</em>, we may want to <strong>rollback to an earlier version</strong> of our application.</p>
+<p>The <code>kubectl rollout</code> brings a command <code>history</code> where Kubernetes persist all versions given a specific deployment:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">history</span> <span style="color: #e06c75;">deployment/nginx</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">deployment.apps/nginx</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">REVISION</span>  <span style="color: #e06c75;">CHANGE-CAUSE</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">1</span>         <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">2</span>         <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="6"><span style="color: #d19a66;">3</span>         <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="7"><span style="color: #d19a66;">4</span>         <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>
+</div></code></pre>
+<p>It’s natural to think that the current version is the last one (4), but we can check that by using <code>kubectl describe</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">describe</span> <span style="color: #e06c75;">deployment/nginx</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">grep</span> <span style="color: #e06c75;">revision</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Annotations:</span>            <span style="color: #e06c75;">deployment.kubernetes.io/revision:</span> <span style="color: #d19a66;">4</span>
+</div></code></pre>
+<p>How about rolling back to the previous version (3)?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">## Rollback to the previous version</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">undo</span> <span style="color: #e06c75;">deployment/nginx</span> 
+</div><div class="line" data-line="3"><span style="color: #61afef;">deployment.apps/nginx</span> <span style="color: #e06c75;">rolled</span> <span style="color: #e06c75;">back</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">### Or simply going to a specific version</span>
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">undo</span> <span style="color: #e06c75;">deployment/nginx</span> <span style="color: #e06c75;">--to-revision=3</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #7f848e;">### Follow the deployment</span>
+</div><div class="line" data-line="9"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">status</span> <span style="color: #e06c75;">deployment/nginx</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">old</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">are</span> <span style="color: #e06c75;">pending</span> <span style="color: #e06c75;">termination...</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">Waiting</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">finish:</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">old</span> <span style="color: #e06c75;">replicas</span> <span style="color: #e06c75;">are</span> <span style="color: #e06c75;">pending</span> <span style="color: #e06c75;">termination...</span>
+</div><div class="line" data-line="12"><span style="color: #61afef;">deployment</span> <span style="color: #98c379;">&quot;nginx&quot;</span> <span style="color: #e06c75;">successfully</span> <span style="color: #e06c75;">rolled</span> <span style="color: #e06c75;">out</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14"><span style="color: #7f848e;">### Check the NGINX version</span>
+</div><div class="line" data-line="15"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">deploy/nginx</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-v</span>
+</div><div class="line" data-line="16"><span style="color: #61afef;">nginx</span> <span style="color: #e06c75;">version:</span> <span style="color: #e06c75;">nginx/1.23.3</span>
+</div></code></pre>
+<p>😱 Unbelievable! 😱 <em>Rollbacks in Kubernetes is so easy</em> that we don’t have excuses to not doing rollbacks when needed.</p>
+<h3><a href="#why-a-system-rollback-is-so-important" aria-hidden="true" class="anchor" id="why-a-system-rollback-is-so-important"></a>Why a system rollback is so important</h3>
+<p>I’ve seen a lot of projects that <strong>struggle at rollbacks</strong>. Sometimes because the rollback <em>process is very hard</em>. And sometimes because people don’t have the proficiency in managing rollbacks.</p>
+<p>Many people prefer doing Git reverts over application rollback.</p>
+<p><em>That’s a very <strong>wrong move</strong> IMHO</em>.</p>
+<p>Git reverts can be hard <strong>due to conflicts</strong>. The revert will take its time through all the <strong>CI/CD pipeline again</strong>. Until the revert is accepted to go to production, the application is <strong>bleeding</strong> with sometimes <em>unacceptable bugs</em>.</p>
+<p>Invest time and resources <em>having a good rollback system</em>. If you’re using Kubernetes, <strong>there’s no excuse to not performing rollbacks</strong>, just experiment yourself <em>how straightforward</em> it is.</p>
+<h3><a href="#scaling-replicas-in-a-deployment" aria-hidden="true" class="anchor" id="scaling-replicas-in-a-deployment"></a>Scaling replicas in a Deployment</h3>
+<p>Additionally, we can scale up (or down) the number of replicas given a Deployment:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">scale</span> <span style="color: #e06c75;">deployment/nginx</span> <span style="color: #e06c75;">--replicas=5</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">deployment.apps/nginx</span> <span style="color: #e06c75;">scaled</span>
+</div></code></pre>
+<p>Then check the Pods:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>                     <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">nginx-799c5dd65b-5ncg2</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">4m12s</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx-799c5dd65b-qm2vb</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">4m8s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">nginx-799c5dd65b-pfngc</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">nginx-799c5dd65b-w49q4</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">nginx-799c5dd65b-ph6wv</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div></code></pre>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>This post focused mainly on <strong>Deployments</strong> and how we can perform <em>updates easily</em> in Kubernetes <strong>with no downtime</strong>.</p>
+<p>Next, we’ll see how to manage <em>stateful applications</em> in Kubernetes by using <strong>StatefulSets</strong>.</p>
+<p>Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

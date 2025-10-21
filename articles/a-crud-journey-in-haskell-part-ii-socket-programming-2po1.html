@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A CRUD journey in Haskell, part II, Socket programming - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Assuming that [we've got some introduction](https://leandronsp.com/a-crud-journey-in-haskell-part-i-introduction) to Haskell, let's start doing some Socket progr">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html">
+  <meta property="og:title" content="A CRUD journey in Haskell, part II, Socket programming">
+  <meta property="og:description" content="Assuming that [we've got some introduction](https://leandronsp.com/a-crud-journey-in-haskell-part-i-introduction) to Haskell, let's start doing some Socket progr">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-08-10T02:50:43Z">
+  <meta property="article:tag" content="haskell">
+      <meta property="article:tag" content="networking">
+      <meta property="article:tag" content="tcp">
+      <meta property="article:tag" content="ruby">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "A CRUD journey in Haskell, part II, Socket programming",
+    "datePublished": "2021-08-10T02:50:43Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Assuming that [we've got some introduction](https://leandronsp.com/a-crud-journey-in-haskell-part-i-introduction) to Haskell, let's start doing some Socket progr",
+        "keywords": "haskell, networking, tcp, ruby"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">A CRUD journey in Haskell, part II, Socket programming</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 10 Aug 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">haskell</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">networking</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">tcp</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Assuming that <a href="https://leandronsp.com/a-crud-journey-in-haskell-part-i-introduction">we’ve got some introduction</a> to Haskell, let’s start doing some Socket programming in order to build a simple TCP server.</p>
+<h2><a href="#requirements" aria-hidden="true" class="anchor" id="requirements"></a>Requirements</h2>
+<p>For the purpose of this article, I’ll expect that you have some knowledge in client-server architecture, basic networking protocols and TCP/IP.</p>
+<p>You can get a deeper understanding on what’s a client-server architecture <a href="https://leandronsp.com/web-basics-a-tcp-server-in-ruby">by reading this article</a>, where we explained some networking fundamentals and created a simple TCP server in <a href="https://en.wikipedia.org/wiki/Ruby_(programming_language)">Ruby</a>.</p>
+<h2><a href="#tcp-server" aria-hidden="true" class="anchor" id="tcp-server"></a>TCP server</h2>
+<p>First things first, we’re going to use the <a href="https://hackage.haskell.org/package/network-2.6.3.1/docs/Network-Socket.html">network package</a> which exposes the module <code>Network.Socket</code> that provides full control over TCP sockets.</p>
+<p><code>Server.hs</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">Network</span><span style="color: #56b6c2;">.</span><span style="color: #e5c07b;">Socket</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">main</span> <span style="color: #56b6c2;">::</span> <span style="color: #e5c07b;">IO</span> <span style="color: #e5c07b;"><span style="color: #e5c07b;">(</span><span style="color: #e5c07b;">)</span></span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">main</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="5">  <span style="color: #56b6c2;">..</span><span style="color: #56b6c2;">.</span>
+</div></code></pre>
+<p>This will pretty much provide some essential functions for Socket programming:</p>
+<ul>
+<li><strong>sock</strong>: creates a new socket given the address family, socket type and protocol number</li>
+<li><strong>bind</strong>: binds the socket to an address</li>
+<li><strong>listen</strong>: listen for connections on the socket specifying the max number of queued connections</li>
+<li><strong>accept</strong>: accepts a connection and returns a connection socket</li>
+<li><strong>socketToHandle</strong>: turns a connection socket into a handle, ready to be <code>read/written</code></li>
+</ul>
+<p>However, the module <code>Network.Socket</code> is not enough. It does not provide functions to manipulate the <em>handle</em>. Then, we have to import the module <code>System.IO</code> that comes with the <a href="https://hackage.haskell.org/package/base-4.15.0.0/docs/System-IO.html">base package</a>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">Network</span><span style="color: #56b6c2;">.</span><span style="color: #e5c07b;">Socket</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">System</span><span style="color: #56b6c2;">.</span><span style="color: #e5c07b;">IO</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #61afef;">main</span> <span style="color: #56b6c2;">::</span> <span style="color: #e5c07b;">IO</span> <span style="color: #e5c07b;"><span style="color: #e5c07b;">(</span><span style="color: #e5c07b;">)</span></span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">main</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="6">  <span style="color: #56b6c2;">..</span><span style="color: #56b6c2;">.</span>
+</div></code></pre>
+<p>The <code>System.IO</code> module provides a lot of functions to manipulate I/O, but for now we will need:</p>
+<ul>
+<li><strong>hGetLine</strong>: reads a line from the handle</li>
+<li><strong>hPutStrLn</strong>: writes the String to the handle</li>
+<li><strong>hClose</strong>: closes the handle</li>
+</ul>
+<p>Once we presented all the needed functions for our simple TCP server, let’s dig into its implementation.</p>
+<h3><a href="#setup-and-accepting-connections" aria-hidden="true" class="anchor" id="setup-and-accepting-connections"></a>Setup and accepting connections</h3>
+<p>First, let’s create a new socket:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">sock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socket</span> <span style="color: #e5c07b;">AF_INET</span> <span style="color: #e5c07b;">Stream</span> <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>Bind the socket to the port <code>4000</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">bind</span> <span style="color: #e06c75;">sock</span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">SockAddrInet</span> <span style="color: #d19a66;">4000</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Listen for connections:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">listen</span> <span style="color: #e06c75;">sock</span> <span style="color: #d19a66;">2</span>
+</div></code></pre>
+<p>And, last but not least, accept a connection:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">-- the server will keep blocked on this line until a new TCP connection arrives</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #e06c75;">conn</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">_</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #e06c75;">accept</span> <span style="color: #e06c75;">sock</span>
+</div></code></pre>
+<p><em>The <code>accept</code> function returns a pair <code>(conn, address)</code>, but at this moment we will ignore the client address and use only the <code>conn</code> socket</em></p>
+<p>Now we have our server ready to accept incoming TCP connections. But yet we can’t read/write messages through the socket.</p>
+<h3><a href="#manupulating-the-client-socket" aria-hidden="true" class="anchor" id="manupulating-the-client-socket"></a>Manupulating the client socket</h3>
+<p>Turn a socket into a handle on read/write mode:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">handleSock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socketToHandle</span> <span style="color: #e06c75;">conn</span> <span style="color: #e5c07b;">ReadWriteMode</span>
+</div></code></pre>
+<p>Read a line from the <code>handle</code> (read request):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">line</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">hGetLine</span> <span style="color: #e06c75;">handleSock</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">putStrLn</span> $ <span style="color: #98c379;">&quot;Request received: &quot;</span> <span style="color: #56b6c2;">++</span> <span style="color: #e06c75;">line</span>
+</div></code></pre>
+<p>Send some response back to the <code>handle</code>, of course:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">hPutStrLn</span> <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">$</span> <span style="color: #98c379;">&quot;Hey, client!&quot;</span>
+</div></code></pre>
+<p>Now, we can safely close <strong>that</strong> client socket connection:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">hClose</span> <span style="color: #e06c75;">handleSock</span>
+</div></code></pre>
+<h2><a href="#the-full-implementation" aria-hidden="true" class="anchor" id="the-full-implementation"></a>The full implementation</h2>
+<p>Our TCP server is so simple that its implementation looks like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">Network</span><span style="color: #56b6c2;">.</span><span style="color: #e5c07b;">Socket</span>                            
+</div><div class="line" data-line="2"><span style="color: #c678dd;">import</span> <span style="color: #e5c07b;">System</span><span style="color: #56b6c2;">.</span><span style="color: #e5c07b;">IO</span>                                 
+</div><div class="line" data-line="3">                                                 
+</div><div class="line" data-line="4">main <span style="color: #56b6c2;">::</span> <span style="color: #e5c07b;">IO</span> <span style="color: #c678dd;"><span style="color: #e5c07b;"><span style="color: #e5c07b;">(</span><span style="color: #e5c07b;">)</span></span></span>                                    
+</div><div class="line" data-line="5"><span style="color: #61afef;">main</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>                                        
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">sock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socket</span> <span style="color: #e5c07b;">AF_INET</span> <span style="color: #e5c07b;">Stream</span> <span style="color: #d19a66;">0</span>                
+</div><div class="line" data-line="7">  <span style="color: #61afef;">bind</span> <span style="color: #e06c75;">sock</span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">SockAddrInet</span> <span style="color: #d19a66;">4000</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span>                
+</div><div class="line" data-line="8">  <span style="color: #61afef;">listen</span> <span style="color: #e06c75;">sock</span> <span style="color: #d19a66;">2</span>                                  
+</div><div class="line" data-line="9">  <span style="color: #61afef;">putStrLn</span> <span style="color: #98c379;">&quot;Listening on port 4000...&quot;</span>           
+</div><div class="line" data-line="10">                                                 
+</div><div class="line" data-line="11">  <span style="color: #c678dd;">(</span><span style="color: #e06c75;">conn</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">_</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">accept</span> <span style="color: #e06c75;">sock</span>                       
+</div><div class="line" data-line="12">  <span style="color: #61afef;">putStrLn</span> <span style="color: #98c379;">&quot;New connection accepted&quot;</span>             
+</div><div class="line" data-line="13">                                                 
+</div><div class="line" data-line="14">  <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socketToHandle</span> <span style="color: #e06c75;">conn</span> <span style="color: #e5c07b;">ReadWriteMode</span>
+</div><div class="line" data-line="15">                                                 
+</div><div class="line" data-line="16">  <span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">hGetLine</span> <span style="color: #e06c75;">handleSock</span>                    
+</div><div class="line" data-line="17">  <span style="color: #61afef;">putStrLn</span> $ <span style="color: #98c379;">&quot;Request received: &quot;</span> <span style="color: #56b6c2;">++</span> <span style="color: #e06c75;">line</span>        
+</div><div class="line" data-line="18">                                                 
+</div><div class="line" data-line="19">  <span style="color: #61afef;">hPutStrLn</span> <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">$</span> <span style="color: #98c379;">&quot;Hey, client!&quot;</span>          
+</div><div class="line" data-line="20">  <span style="color: #61afef;">hClose</span> <span style="color: #e06c75;">handleSock</span>                              
+</div></code></pre>
+<p>In order to test the TCP server, let’s use a simple TCP client in Ruby that will connect to the server and send a message:</p>
+<p><code>client.rb</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>                              
+</div><div class="line" data-line="2">                                              
+</div><div class="line" data-line="3"><span style="color: #e06c75;">server</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPSocket</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">open</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">localhost</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4000</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">                                              
+</div><div class="line" data-line="5"><span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Hey Server!</span><span style="color: #98c379;">&#39;</span>                     
+</div><div class="line" data-line="6">                                              
+</div><div class="line" data-line="7"><span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">&#39;</span>                                 
+</div><div class="line" data-line="8">                                              
+</div><div class="line" data-line="9"><span style="color: #c678dd;">while</span> <span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>                      
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">+=</span> <span style="color: #e06c75;">line</span>                            
+</div><div class="line" data-line="11"><span style="color: #c678dd;">end</span>                                           
+</div><div class="line" data-line="12">                                              
+</div><div class="line" data-line="13"><span style="color: #61afef;">puts</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Response received: </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">response</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>         
+</div><div class="line" data-line="14">                                              
+</div><div class="line" data-line="15"><span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                                  
+</div></code></pre>
+<p>Start the server:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">app/Server.hs</span> <span style="color: #e06c75;">-e</span> <span style="color: #e06c75;">main</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># Listening on port 4000...</span>
+</div></code></pre>
+<p>Run the client:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ruby</span> <span style="color: #e06c75;">client.rb</span>
+</div></code></pre>
+<p>Server output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">port</span> <span style="color: #e06c75;">4000...</span>    
+</div><div class="line" data-line="2"><span style="color: #61afef;">New</span> <span style="color: #e06c75;">connection</span> <span style="color: #e06c75;">accepted</span>      
+</div><div class="line" data-line="3"><span style="color: #61afef;">Request</span> <span style="color: #e06c75;">received:</span> <span style="color: #e06c75;">Hey</span> <span style="color: #e06c75;">Server!</span>
+</div></code></pre>
+<p>Client output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Response</span> <span style="color: #e06c75;">received:</span> <span style="color: #e06c75;">Hey,</span> <span style="color: #e06c75;">client!</span>
+</div></code></pre>
+<h3><a href="#a-note-on-tcp-client-server-architecture" aria-hidden="true" class="anchor" id="a-note-on-tcp-client-server-architecture"></a>A note on TCP client-server architecture</h3>
+<p>Note that our TCP server accepts a new connection, reads/writes to the socket, then <strong>closes</strong> the connection, exiting the program.</p>
+<p>A more reliable server should return back to the <code>listening connections</code> after every client socket is closed. It means that it must <em>loop forever</em>.</p>
+<p>In functional programming, we can loop over a function using <strong>recursion</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">loopForever</span> <span style="color: #e06c75;">sock</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>                            
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">(</span><span style="color: #e06c75;">conn</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">_</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">accept</span> <span style="color: #e06c75;">sock</span>                       
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socketToHandle</span> <span style="color: #e06c75;">conn</span> <span style="color: #e5c07b;">ReadWriteMode</span>
+</div><div class="line" data-line="4">                                                 
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">hGetLine</span> <span style="color: #e06c75;">handleSock</span>                    
+</div><div class="line" data-line="6">  <span style="color: #61afef;">putStrLn</span> $ <span style="color: #98c379;">&quot;Request received: &quot;</span> <span style="color: #56b6c2;">++</span> <span style="color: #e06c75;">line</span>        
+</div><div class="line" data-line="7">                                                 
+</div><div class="line" data-line="8">  <span style="color: #61afef;">hPutStrLn</span> <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">$</span> <span style="color: #98c379;">&quot;Hey, client!&quot;</span>          
+</div><div class="line" data-line="9">  <span style="color: #61afef;">hClose</span> <span style="color: #e06c75;">handleSock</span>                              
+</div><div class="line" data-line="10">  <span style="color: #61afef;">loopForever</span> <span style="color: #e06c75;">sock</span>                               
+</div></code></pre>
+<ul>
+<li>We moved all the code related to a specific client connection to a new function called <code>loopForever</code></li>
+<li>In the last line, we call the function <em>recursively</em></li>
+</ul>
+<p>Final implementation:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1">main <span style="color: #56b6c2;">::</span> <span style="color: #e5c07b;">IO</span> <span style="color: #c678dd;"><span style="color: #e5c07b;"><span style="color: #e5c07b;">(</span><span style="color: #e5c07b;">)</span></span></span>                                    
+</div><div class="line" data-line="2"><span style="color: #61afef;">main</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>                                        
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">sock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socket</span> <span style="color: #e5c07b;">AF_INET</span> <span style="color: #e5c07b;">Stream</span> <span style="color: #d19a66;">0</span>                
+</div><div class="line" data-line="4">  <span style="color: #61afef;">bind</span> <span style="color: #e06c75;">sock</span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">SockAddrInet</span> <span style="color: #d19a66;">4000</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span>                
+</div><div class="line" data-line="5">  <span style="color: #61afef;">listen</span> <span style="color: #e06c75;">sock</span> <span style="color: #d19a66;">2</span>                                  
+</div><div class="line" data-line="6">  <span style="color: #61afef;">putStrLn</span> <span style="color: #98c379;">&quot;Listening on port 4000...&quot;</span>           
+</div><div class="line" data-line="7">                                                 
+</div><div class="line" data-line="8">  <span style="color: #61afef;">loopForever</span> <span style="color: #e06c75;">sock</span>                               
+</div><div class="line" data-line="9">                                                 
+</div><div class="line" data-line="10"><span style="color: #61afef;"><span style="color: #61afef;"><span style="color: #61afef;">loopForever</span> <span style="color: #56b6c2;">::</span> <span style="color: #e5c07b;">Socket</span> <span style="color: #56b6c2;">-&gt;</span> <span style="color: #e5c07b;">IO</span> <span style="color: #c678dd;"><span style="color: #e5c07b;"><span style="color: #e5c07b;">(</span><span style="color: #e5c07b;">)</span></span></span></span></span>                   
+</div><div class="line" data-line="11"><span style="color: #61afef;">loopForever</span> <span style="color: #e06c75;">sock</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">do</span>                            
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">(</span><span style="color: #e06c75;">conn</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">_</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">accept</span> <span style="color: #e06c75;">sock</span>                       
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">socketToHandle</span> <span style="color: #e06c75;">conn</span> <span style="color: #e5c07b;">ReadWriteMode</span>
+</div><div class="line" data-line="14">                                                 
+</div><div class="line" data-line="15">  <span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">&lt;-</span> <span style="color: #61afef;">hGetLine</span> <span style="color: #e06c75;">handleSock</span>                    
+</div><div class="line" data-line="16">  <span style="color: #61afef;">putStrLn</span> $ <span style="color: #98c379;">&quot;Request received: &quot;</span> <span style="color: #56b6c2;">++</span> <span style="color: #e06c75;">line</span>        
+</div><div class="line" data-line="17">                                                 
+</div><div class="line" data-line="18">  <span style="color: #61afef;">hPutStrLn</span> <span style="color: #e06c75;">handleSock</span> <span style="color: #56b6c2;">$</span> <span style="color: #98c379;">&quot;Hey, client!&quot;</span>          
+</div><div class="line" data-line="19">  <span style="color: #61afef;">hClose</span> <span style="color: #e06c75;">handleSock</span>                              
+</div><div class="line" data-line="20">  <span style="color: #61afef;">loopForever</span> <span style="color: #e06c75;">sock</span>                               
+</div></code></pre>
+<p>As for now, our TCP server won’t exit after closing each client connection. Long live the Server! 🎉</p>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>In this article we learned how to do some basic Socket programming in Haskell.</p>
+<p>This lesson will be the ground for the upcoming posts, which will cover a more sophisticated kind of message over TCP: <em>the Hypertext Transfer Protocol (HTTP)</em>.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

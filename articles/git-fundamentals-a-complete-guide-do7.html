@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git fundamentals, a complete guide - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="If you already work with [Git](https://git-scm.com/book/en/v2) daily but want to have a good comprehension of Git **fundamentals**, then this post is for you.
+
+H">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7.html">
+  <meta property="og:title" content="Git fundamentals, a complete guide">
+  <meta property="og:description" content="If you already work with [Git](https://git-scm.com/book/en/v2) daily but want to have a good comprehension of Git **fundamentals**, then this post is for you.
+
+H">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-03-15T03:02:32Z">
+  <meta property="article:tag" content="git">
+      <meta property="article:tag" content="linux">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Git fundamentals, a complete guide",
+    "datePublished": "2023-03-15T03:02:32Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "If you already work with [Git](https://git-scm.com/book/en/v2) daily but want to have a good comprehension of Git **fundamentals**, then this post is for you.
+
+H",
+        "keywords": "git, linux"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Git fundamentals, a complete guide</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 15 Mar 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">git</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>If you already work with <a href="https://git-scm.com/book/en/v2">Git</a> daily but want to have a good comprehension of Git <strong>fundamentals</strong>, then this post is for you.</p>
+<p>Here, you’ll have the chance to truly understand the <strong>Git architecture</strong> and how commands such as <strong>add, checkout, reset, commit, merge, rebase, cherry-pick, pull, push</strong> and <strong>tag</strong> work internally.</p>
+<p><em>Don’t let Git master you</em>, learn the Git fundamentals and <strong>master Git instead</strong>.</p>
+<p>Brace yourselves, a <strong>complete guide about Git</strong> is about to start.</p>
+<hr />
+<h2><a href="#-first-things-first" aria-hidden="true" class="anchor" id="-first-things-first"></a>💡 First things first</h2>
+<p>You must practice <em>while you read</em> this post.</p>
+<p>Following along, let’s first create a new project called <code>git-101</code> and then initialize a git repository with the command <code>git init</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">mkdir</span> <span style="color: #e06c75;">git-101</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cd</span> <span style="color: #e06c75;">git-101</span>
+</div></code></pre>
+<p>The Git CLI provides two types of commands:</p>
+<ul>
+<li>
+<p><strong>plumbing</strong>, which consists of <em>low-level commands</em> used by Git internally behind the scenes when users type <em>high-level</em> commands</p>
+</li>
+<li>
+<p><strong>porcelain</strong>, which are the <em>high-level</em> commands commonly used by Git users</p>
+</li>
+</ul>
+<p>In this guide, we’ll see how the <strong>plumbing commands relate to the porcelain commands</strong> that we use day-to-day.</p>
+<hr />
+<h2><a href="#️-the-git-architecture" aria-hidden="true" class="anchor" id="️-the-git-architecture"></a>⚙️ The Git architecture</h2>
+<p>Inside the project <em>which contains a Git repository</em>, we can check the Git components:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ls</span> <span style="color: #e06c75;">-F1</span> <span style="color: #e06c75;">.git/</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">HEAD</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">config</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">description</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">hooks/</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">info/</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">objects/</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">refs/</span>
+</div></code></pre>
+<p>We’re going to focus on the main ones:</p>
+<ul>
+<li>
+<p>.git/objects/</p>
+</li>
+<li>
+<p>.git/refs</p>
+</li>
+<li>
+<p>HEAD</p>
+</li>
+</ul>
+<p>Let’s analyse each component <strong>in detail</strong>.</p>
+<hr />
+<h2><a href="#-the-object-database" aria-hidden="true" class="anchor" id="-the-object-database"></a>💾 The Object Database</h2>
+<p>Using the UNIX tool <code>find</code> we can see the structure of the <code>.git/objects</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/objects</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">.git/objects</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/objects/pack</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">.git/objects/info</span>
+</div></code></pre>
+<p>In Git, everything is persisted in the <code>.git/objects</code> structure, which is the <strong>Git Object Database</strong>.</p>
+<p>What kind of content can we persist in Git? <em>Everything</em>.</p>
+<blockquote>
+<p>🤔 <strong>Wait!</strong></p>
+<p>How is that possible?</p>
+</blockquote>
+<p>Through the use of <a href="https://en.wikipedia.org/wiki/Hash_function">hash functions</a>.</p>
+<h3><a href="#-hashing-for-the-rescue" aria-hidden="true" class="anchor" id="-hashing-for-the-rescue"></a>🔵 Hashing for the rescue</h3>
+<p>A <strong>hash function</strong> <em>maps data of arbitrary, dynamic size into fixed-size values</em>. By doing this, we can store/persist anything because the final value will have always the <em>same size</em>.</p>
+<p>Bad implementations of hash functions can easily lead to <strong>collisions</strong>, where two different dynamic-size data could map to the same final hash of fixed-size.</p>
+<p><a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a> is a well-known implementation of the hash function that is in general safe and hardly has collisions.</p>
+<p>Let’s take, for instance, the hashing of the string <code>my precious</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">openssl</span> <span style="color: #e06c75;">sha1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">fa628c8eeaa9527cfb5ac39f43c3760fe4bf8bed</span>
+</div></code></pre>
+<p><em>Note: If you’re using Linux, you can use the command</em> <code>sha1sum</code> instead of <code>OpenSSL</code>.</p>
+<h3><a href="#-comparing-differences-in-the-content" aria-hidden="true" class="anchor" id="-comparing-differences-in-the-content"></a>🔵 Comparing differences in the content</h3>
+<p>A <em>good hashing</em> is a safe practice where <strong>we can’t know the raw value</strong>, i.e doing the reverse engineering.</p>
+<p>In case we want to know <em>if the value has changed</em>, we just wrap the value into the hashing function and <em>voilà</em>, we can compare the difference:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">openssl</span> <span style="color: #e06c75;">sha1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">fa628c8eeaa9527cfb5ac39f43c3760fe4bf8bed</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;no longer my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">openssl</span> <span style="color: #e06c75;">sha1</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">2e71c9ae2ef57194955feeaa99f8543ea4cd9f9f</span>
+</div></code></pre>
+<p>If the <em>hashes are different</em>, then we can assume that the <strong>value has changed</strong>.</p>
+<p>Can you spot an opportunity here? What about using <strong>SHA-1</strong> to store data and <em>just keep track of everything</em> by comparing hashes?</p>
+<p>That’s exactly what Git does internally 🤯.</p>
+<h3><a href="#-git-and-sha-1" aria-hidden="true" class="anchor" id="-git-and-sha-1"></a>🔵 Git and SHA-1</h3>
+<p><strong>Git uses SHA-1 to generate hashing</strong> of everything and stores it in the <code>.git/objects</code> folder. <em>Simple like that!</em></p>
+<p>The <strong>plumbing</strong> command <code>hash-object</code> does the job:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">git</span> <span style="color: #e06c75;">hash-object</span> <span style="color: #e06c75;">--stdin</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div></code></pre>
+<p>Let’s compare with the <code>OpenSSL</code> version:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">openssl</span> <span style="color: #e06c75;">sha1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">fa628c8eeaa9527cfb5ac39f43c3760fe4bf8bed</span>
+</div></code></pre>
+<p><strong>Oooops</strong>…it’s quite different. That’s because Git <em>prepends a specific word</em> followed by the <em>content size</em> and the delimiter <code>\0</code>. Such a word is what Git calls <strong>the object type</strong>.</p>
+<p>Yes, <em>Git objects have types</em>. The first one we’ll look into is <strong>the blob object</strong>.</p>
+<h3><a href="#-the-blob-object" aria-hidden="true" class="anchor" id="-the-blob-object"></a>🔵 The blob object</h3>
+<p>When we send for instance the string “my precious” to the <code>hash-object</code> command, Git prepends the pattern <code>&lbrace;object_type&rbrace; &lbrace;content_size&rbrace;\0</code> to the SHA-1 function, so that:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">blob 12\0myprecious
+</div></code></pre>
+<p>Then:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;blob 12\0my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">openssl</span> <span style="color: #e06c75;">sha1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">git</span> <span style="color: #e06c75;">hash-object</span> <span style="color: #e06c75;">--stdin</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div></code></pre>
+<p><strong>Yay!</strong> 🎉</p>
+<h3><a href="#-storing-blobs-in-the-database" aria-hidden="true" class="anchor" id="-storing-blobs-in-the-database"></a>🔵 Storing blobs in the database</h3>
+<p>But the command <code>hash-object</code> itself does not persist into the <code>.git/objects</code> folder. We should append the option <code>-w</code> and the object will be persisted:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&quot;my precious&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">git</span> <span style="color: #e06c75;">hash-object</span> <span style="color: #e06c75;">--stdin</span> <span style="color: #e06c75;">-w</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/objects</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">.git/objects/8b</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">.git/objects/8b/73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #7f848e;">### Or, simply</span>
+</div><div class="line" data-line="10"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/objects</span> <span style="color: #e06c75;">-type</span> <span style="color: #e06c75;">f</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">.git/objects/8b/73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9m8l1485y5a0d8cwog1o.png" alt="the first object" /></p>
+<h3><a href="#-reading-the-raw-content-of-a-blob" aria-hidden="true" class="anchor" id="-reading-the-raw-content-of-a-blob"></a>🔵 Reading the raw content of a blob</h3>
+<p>We already know that for cryptographic reasons it’s not possible to read the raw content from its hashing version.</p>
+<blockquote>
+<p>🤔 Ok, but wait.</p>
+<p>How does Git <em>get to know the original value</em>?</p>
+</blockquote>
+<p>It uses the hash as a <strong>key pointing to a value</strong>, which is the <em>original content itself</em> using a compression algorithm called <a href="https://en.wikipedia.org/wiki/Zlib">Zlib</a>, that <strong>compacts the content</strong> and stores it in the object database, hence <strong>saving storage space</strong>.</p>
+<p>The <strong>plumbing</strong> command <code>cat-file</code> does the job so that, <em>given a key</em>, inflates the compressed data thus getting the original content:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">my</span> <span style="color: #e06c75;">precious</span>
+</div></code></pre>
+<p>In case you are guessing, that’s right, <strong>Git is a key-value database</strong>!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jhjl5r81esbokdfo6gqs.png" alt="nosql" /></p>
+<h3><a href="#-promoting-blobs" aria-hidden="true" class="anchor" id="-promoting-blobs"></a>🔵 Promoting blobs</h3>
+<p>When using Git, we want to work on the content and <strong>share them with other people</strong>.</p>
+<p>Commonly, after working on various files/blobs, we are ready to <em>share them and sign our names for the final work</em>.</p>
+<p>In other words, we need to <strong>group, promote and add metadata to our blobs.</strong> This process works as follows:</p>
+<ol>
+<li>
+<p>Add the blob to a <em>staging area</em></p>
+</li>
+<li>
+<p>Group <strong>all blobs</strong> in the stage area into a <em>tree structure</em></p>
+</li>
+<li>
+<p>Add <strong>metadata</strong> to the <em>tree structure</em> (author name, date, a semantic message)</p>
+</li>
+</ol>
+<p>Let’s see the <em>above steps in detail</em>.</p>
+<h3><a href="#-stage-area-the-index" aria-hidden="true" class="anchor" id="-stage-area-the-index"></a>🔵 Stage area, the index</h3>
+<p>The <strong>plumbing</strong> command <code>update-index</code> allows to add a blob to the stage area and give a name to it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">update-index</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--add</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--cacheinfo</span> <span style="color: #d19a66;">100644</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">index.txt</span>
+</div></code></pre>
+<ul>
+<li>
+<p><code>--add</code>: adds the blob to the stage, also called <strong>the index</strong></p>
+</li>
+<li>
+<p><code>--cacheinfo</code>: used to register a file that is not in the working directory yet</p>
+</li>
+<li>
+<p>the blob hash</p>
+</li>
+<li>
+<p><code>index.txt</code>: a name for the blob in the index</p>
+</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dhcrrhbui33ao66muizk.png" alt="the git index" /></p>
+<p>Where does Git <em>store the index</em>?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">.git/index</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">DIRCsҚjT¸zQp</span>    <span style="color: #e06c75;">index.txtÆ</span>
+</div><div class="line" data-line="4">                          <span style="color: #61afef;">7CJVVÙ</span>
+</div></code></pre>
+<p>It’s not human-readable though, it’s compressed using Zlib.</p>
+<p>We can add as many blobs to the index as we want, for example:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">update-index</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sha-1</span><span style="color: #e06c75;">&rbrace;</span> <span style="color: #e06c75;">f1.txt</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">update-index</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">sha-1</span><span style="color: #e06c75;">&rbrace;</span> <span style="color: #e06c75;">f2.txt</span>
+</div></code></pre>
+<p>After adding blobs to the index, we can group them into a <strong>tree structure</strong> which is ready to be promoted.</p>
+<h3><a href="#-the-tree-object" aria-hidden="true" class="anchor" id="-the-tree-object"></a>🔵 The tree object</h3>
+<p>When using the <strong>plumbing</strong> command <code>write-tree</code>, <strong>Git groups all blobs that were added to the index</strong> and create another object in the <code>.git/objects</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">write-tree</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">3725c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div></code></pre>
+<p>Checking the <code>.git/objects</code> folder, note that a new object was created:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/objects</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">### The new object</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/objects/37</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">.git/objects/37/25c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">### The blob previously created</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">.git/objects/8b</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">.git/objects/8b/73d29acc6ae79354c2b87ab791aecccf51701f</span>
+</div></code></pre>
+<p>Let’s retrieve the original value using <code>cat-file</code> to understand better:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### Using the option -t, we get the object type</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-t</span> <span style="color: #e06c75;">3725c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">tree</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">3725c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div><div class="line" data-line="6"><span style="color: #d19a66;">100644</span> <span style="color: #e06c75;">blob</span> <span style="color: #e06c75;">8b73d29acc6ae79354c2b87ab791aecccf51701f</span> <span style="color: #e06c75;">index.txt</span>
+</div></code></pre>
+<p>That’s an interesting output, it’s quite different from the blob which <em>returned the original content</em>.</p>
+<p><em>In the tree object</em>, Git returns <strong>all the objects that were added to the index</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">100644 blob 8b73d29acc6ae79354c2b87ab791aecccf51701f index.txt
+</div></code></pre>
+<ul>
+<li>
+<p><code>100644</code>: the cacheinfo</p>
+</li>
+<li>
+<p><code>blob</code>: the object type</p>
+</li>
+<li>
+<p>the blob hash</p>
+</li>
+<li>
+<p>the blob name</p>
+</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/sf62qc9mlvcgde8hzyb2.png" alt="the tree object" /></p>
+<p>Once the promotion is done, <strong>time to add some metadata to the tree</strong>, so we can declare the author’s name, date and so on.</p>
+<h3><a href="#-the-commit-object" aria-hidden="true" class="anchor" id="-the-commit-object"></a>🔵 The commit object</h3>
+<p>The <strong>plumbing</strong> command <code>commit-tree</code> receives a tree, a commit message and creates another object in the <code>.git/objects</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">commit-tree</span> <span style="color: #e06c75;">3725c</span> <span style="color: #e06c75;">-m</span> <span style="color: #98c379;">&#39;my precious commit&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div></code></pre>
+<p>What kind of object is it?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/objects</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">.git/objects/50</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/objects/50/5555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #7f848e;">### cat-file</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-t</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">commit</span>
+</div></code></pre>
+<p>What about its value?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">tree</span> <span style="color: #e06c75;">3725c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">author</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@example.com</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">1678768514</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">committer</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@example.com</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">1678768514</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #61afef;">my</span> <span style="color: #e06c75;">precious</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<ul>
+<li>
+<p><code>tree 3725c</code>: <strong>the referencing tree object</strong></p>
+</li>
+<li>
+<p>author/committer</p>
+</li>
+<li>
+<p>the commit message <strong>my precious commit</strong></p>
+</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rx73s2uu3uyi8367a47y.png" alt="the commit tree" /></p>
+<blockquote>
+<p>🤯 OMG! Am I seeing a pattern here?</p>
+</blockquote>
+<p>Furthermore, commits can reference other commits:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">commit-tree</span> <span style="color: #e06c75;">3725c</span> <span style="color: #e06c75;">-p</span> <span style="color: #d19a66;">50555</span> <span style="color: #e06c75;">-m</span> <span style="color: #98c379;">&#39;second commit&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">5ea578a41333bae71527db537072534a199a0b67</span>
+</div></code></pre>
+<p>Where the option <code>-p</code> allows referencing a <strong>parent commit</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">tree</span> <span style="color: #e06c75;">3725c9e313e5ae764b2451a8f3b1415bf67cf471</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">parent</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">author</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">1678768968</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">committer</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">1678768968</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #61afef;">second</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<p>We can see that, <em>given a commit with a parent</em>, we can traverse <strong>all commits recursively</strong>, <em>through all their trees</em> until we <strong>get to the final blobs</strong>.</p>
+<p>A potential solution:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">cat-file</span> <span style="color: #e06c75;">-p</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">first-commit-sha1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #61afef;">cat-file</span> <span style="color: #61afef;">-p</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">first-commit-tree-sha1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #61afef;">cat-file</span> <span style="color: #61afef;">-p</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">first-commit-parent-sha1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #61afef;">cat-file</span> <span style="color: #61afef;">-p</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">parent-commit-sha1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">...</span>
+</div></code></pre>
+<p>And so on. Well, <em>you got to the point.</em></p>
+<h3><a href="#-log-for-the-rescue" aria-hidden="true" class="anchor" id="-log-for-the-rescue"></a>🔵 Log for the rescue</h3>
+<p>The <strong>porcelain</strong> <code>git log</code> command solves that problem, by <em>traversing all commits, their parents and trees</em>, giving us a perspective of a <strong>timeline of our work</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span> <span style="color: #e06c75;">5ea57</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Mon</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">13</span> <span style="color: #61afef;">22:42:48</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">    <span style="color: #61afef;">second</span> <span style="color: #e06c75;">commit</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Mon</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">13</span> <span style="color: #61afef;">22:35:14</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">    <span style="color: #61afef;">my</span> <span style="color: #e06c75;">precious</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<blockquote>
+<p>🤯 OMG!</p>
+<p>Git is a giant yet lightweight key-value graph database!</p>
+</blockquote>
+<h3><a href="#-the-git-graph" aria-hidden="true" class="anchor" id="-the-git-graph"></a>🔵 The Git Graph</h3>
+<p>Within Git, we can <em>manipulate objects like pointers in graphs</em>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xwj38c1zvimxfxpfzcq1.png" alt="the git graph" /></p>
+<ul>
+<li>
+<p><strong>Blobs</strong> are data/files snapshots</p>
+</li>
+<li>
+<p><strong>Trees</strong> are set of blobs or another tree</p>
+</li>
+<li>
+<p><strong>Commits</strong> reference trees and/or other commits, adding metadata</p>
+</li>
+</ul>
+<p>That’s super nice and all. But using <code>sha1</code> in the <code>git log</code> command can be cumbersome.</p>
+<p>What about <strong>giving names to hashes</strong>? Enter <strong>References</strong>.</p>
+<hr />
+<h2><a href="#git-references" aria-hidden="true" class="anchor" id="git-references"></a>Git References</h2>
+<p>References are located in the <code>.git/refs</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/refs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">.git/refs/</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/refs/heads</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">.git/refs/tags</span>
+</div></code></pre>
+<h3><a href="#-giving-names-to-commits" aria-hidden="true" class="anchor" id="-giving-names-to-commits"></a>🔵 Giving names to commits</h3>
+<p>We can associate any commit hash with an arbitrary name located in the <code>.git/refs/heads</code>, for instance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">echo</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">.git/refs/heads/test</span>
+</div></code></pre>
+<p>Now, let’s issue <code>git log</code> using the new reference:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span> <span style="color: #e06c75;">test</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Mon</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">13</span> <span style="color: #61afef;">22:42:48</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">    <span style="color: #61afef;">second</span> <span style="color: #e06c75;">commit</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Mon</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">13</span> <span style="color: #61afef;">22:35:14</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">    <span style="color: #61afef;">my</span> <span style="color: #e06c75;">precious</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<p>Even better, Git provides the plumbing command <code>update-ref</code> so we can use it to update the association of a commit to a reference:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">update-ref</span> <span style="color: #e06c75;">refs/heads/test</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span>
+</div></code></pre>
+<p><em>Sounds familiar, uh?</em> Yes, we are talking about <strong>branches</strong>.</p>
+<h3><a href="#-branches" aria-hidden="true" class="anchor" id="-branches"></a>🔵 Branches</h3>
+<p>Branches are references that point to a specific commit.</p>
+<p>As branches represent the <code>update-ref</code> command, the <em>commit hash can change</em> at any time, that is, <strong>a branch reference is mutable</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/a00yup5tew9hrmnr96xg.png" alt="branches" /></p>
+<p>For a moment, let’s think about how a <code>git log</code> without arguments work:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">fatal:</span> <span style="color: #e06c75;">your</span> <span style="color: #e06c75;">current</span> <span style="color: #e06c75;">branch</span> <span style="color: #98c379;">&#39;main&#39;</span> <span style="color: #e06c75;">does</span> <span style="color: #e06c75;">not</span> <span style="color: #e06c75;">have</span> <span style="color: #e06c75;">any</span> <span style="color: #e06c75;">commits</span> <span style="color: #e06c75;">yet</span>
+</div></code></pre>
+<blockquote>
+<p>🤔 Hmmm…</p>
+<p>How does Git <em>get to know that my current branch is the “main”</em>?</p>
+</blockquote>
+<h3><a href="#-head" aria-hidden="true" class="anchor" id="-head"></a>🔵 HEAD</h3>
+<p>The HEAD reference is located in <code>.git/HEAD</code>. It’s a single file that points to a <em>head reference</em> (branch):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">.git/HEAD</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">ref:</span> <span style="color: #e06c75;">refs/heads/main</span>
+</div></code></pre>
+<p>Similarly, using a <strong>porcelain</strong> command:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">branch</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">*</span> <span style="color: #e06c75;">main</span>
+</div></code></pre>
+<p>Using the <strong>plumbing</strong> command <code>symbolic-ref</code>, we can manipulate to <em>which branch the HEAD points</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">symbolic-ref</span> <span style="color: #e06c75;">HEAD</span> <span style="color: #e06c75;">refs/heads/test</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">### Check the current branch</span>
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">branch</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">*</span> <span style="color: #e06c75;">test</span>
+</div></code></pre>
+<p>Like <code>update-ref</code> on branches, we can update the HEAD using <code>symbolic-ref</code> at any time.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/toezd1b9r5zlrezmwb27.png" alt="symbolic ref" /></p>
+<p>In the picture below, we’ll change our HEAD from the <strong>main</strong> branch to the <strong>fix</strong> branch:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/01nz6085jlze4nqlza9d.png" alt="updating head" /></p>
+<p>Without arguments, the <code>git log</code> command traverses the root commit that is referenced by the current branch (HEAD):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">5ea578a41333bae71527db537072534a199a0b67</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">HEAD</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">test</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Tue</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">14</span> <span style="color: #61afef;">01:42:48</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">    <span style="color: #61afef;">second</span> <span style="color: #e06c75;">commit</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #61afef;">commit</span> <span style="color: #e06c75;">505555f4f07d90ae14a0f2e67cba7f7b9af539ee</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">Author:</span> <span style="color: #e06c75;">leandronsp</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">leandronsp@gmail.com</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">Date:</span>   <span style="color: #61afef;">Tue</span> <span style="color: #61afef;">Mar</span> <span style="color: #d19a66;">14</span> <span style="color: #61afef;">01:35:14</span> <span style="color: #d19a66;">2023</span> <span style="color: #d19a66;">-0300</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">    <span style="color: #61afef;">my</span> <span style="color: #e06c75;">precious</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<p>Until now, we learned architecture <em>and main components</em> in Git, along with the <strong>plumbing commands</strong>, which are more <em>low-level</em> commands.</p>
+<p>Time to associate all this knowledge with the <strong>porcelain</strong> commands we use daily.</p>
+<hr />
+<h2><a href="#️-the-porcelain-commands" aria-hidden="true" class="anchor" id="️-the-porcelain-commands"></a>🍽️ The porcelain commands</h2>
+<p>Git brings more <em>high-level</em> commands that we can use with no need to manipulate objects and references directly.</p>
+<p>Those commands are called <strong>porcelain commands</strong>.</p>
+<h3><a href="#-git-add" aria-hidden="true" class="anchor" id="-git-add"></a>🔵 git add</h3>
+<p>The <code>git add</code> command takes files in the <strong>working directory</strong> as arguments, <em>saves them as blobs</em> into the database and adds <em>them to the index</em>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/tmfcfn23v1yvesjk9mzz.png" alt="git add" /></p>
+<p>In short, <code>git add</code>:</p>
+<ol>
+<li>
+<p>runs <code>hash-object</code> for every file argument</p>
+</li>
+<li>
+<p>runs <code>update-index</code> for every file argument</p>
+</li>
+</ol>
+<h3><a href="#-git-commit" aria-hidden="true" class="anchor" id="-git-commit"></a>🔵 git commit</h3>
+<p><code>git commit</code> takes a message as the argument, groups all the files previously added to the index and creates a <strong>commit object</strong>.</p>
+<p>First, it runs <code>write-tree</code>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/imc0yzk6cn98hd3d09gf.png" alt="commit write tree" /></p>
+<p>Then, it runs <code>commit-tree</code>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/tix2m469gnkqp2hes7k0.png" alt="commit commit-tree" /></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">commit</span> <span style="color: #e06c75;">-m</span> <span style="color: #98c379;">&#39;another commit&#39;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">[</span><span style="color: #e5c07b;">test</span> <span style="color: #e06c75;">b77b454</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">another</span> <span style="color: #e06c75;">commit</span>
+</div><div class="line" data-line="4"> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">changed,</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">deletion</span><span style="color: #c678dd;">(</span>-<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"> <span style="color: #e06c75;">delete</span> <span style="color: #e06c75;">mode</span> <span style="color: #d19a66;">100644</span> <span style="color: #e06c75;">index.txt</span>
+</div></code></pre>
+<hr />
+<h2><a href="#️-manipulating-pointers-in-git" aria-hidden="true" class="anchor" id="️-manipulating-pointers-in-git"></a>🕸️ Manipulating pointers in Git</h2>
+<p>The following <strong>porcelain</strong> commands are widely used, which manipulate the <strong>Git references</strong> under the hood.</p>
+<p>Assuming we just cloned a project where the <strong>HEAD</strong> is pointing to the <strong>main branch</strong>, which points to the commit <strong>C1</strong>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/v78l7749er21w7qzbjll.png" alt="git clone" /></p>
+<p>How can we <strong>create another new branch</strong> from the current HEAD and <em>move the HEAD to this new branch</em>?</p>
+<h3><a href="#-git-checkout" aria-hidden="true" class="anchor" id="-git-checkout"></a>🔵 git checkout</h3>
+<p>By using the <code>git checkout</code> with the <code>-b</code> option, Git will create a new branch from the current one (HEAD) and move the HEAD to this new branch.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### HEAD</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">branch</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">*</span> <span style="color: #e06c75;">main</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">### Creates a new branch &quot;fix&quot; using the same reference SHA-1</span>
+</div><div class="line" data-line="6"><span style="color: #7f848e;">#### of the current HEAD</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">checkout</span> <span style="color: #e06c75;">-b</span> <span style="color: #e06c75;">fix</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">Switched</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">a</span> <span style="color: #e06c75;">new</span> <span style="color: #e06c75;">branch</span> <span style="color: #98c379;">&#39;fix&#39;</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;">### HEAD</span>
+</div><div class="line" data-line="11"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">branch</span>
+</div><div class="line" data-line="12"><span style="color: #61afef;">*</span> <span style="color: #e06c75;">fix</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">main</span>
+</div></code></pre>
+<p>Which <strong>plumbing</strong> command is responsible for moving the HEAD? Exactly, <em>symbolic-ref</em>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3yhvz46cb9mdj720wxlu.png" alt="git checkout -b fix" /></p>
+<p>Afterwards, we do some new work on the <strong>fix branch</strong> and then perform a <code>git commit</code>, which will add a new commit called <strong>C3</strong>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6qmbh90fxn2o63wr7gpt.png" alt="git commmit" /></p>
+<p>By running <code>git checkout</code>, we can keep switching the HEAD across different branches:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b5i2b8mnp7zkrs9uguha.png" alt="git checkout ultimate" /></p>
+<p>Sometimes, we may want to <strong>move the commit that a branch points to</strong>.</p>
+<p>We already know that the plumbing command <code>update-ref</code> does that:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">update-ref</span> <span style="color: #e06c75;">refs/heads/fix</span> <span style="color: #e06c75;">356c2</span>
+</div></code></pre>
+<p>In <em>porcelain</em> language, let me introduce you to the <strong>git reset</strong>.</p>
+<h3><a href="#-git-reset" aria-hidden="true" class="anchor" id="-git-reset"></a>🔵 git reset</h3>
+<p>The <code>git reset</code> <strong>porcelain</strong> command runs <strong>update-ref</strong> internally, so we just need to perform:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">reset</span> <span style="color: #e06c75;">356c2</span>
+</div></code></pre>
+<p>But how does Git know the branch to move? Well, <em>git reset</em> <strong>moves the branch that HEAD is pointing to</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ki3dzr73q7xb7kpz7704.png" alt="git reset" /></p>
+<p>What about when there are <em>differences</em> between revisions? By using <code>reset</code>, Git moves the pointer but <strong>leaves all the differences in the stage area</strong> (index).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">reset</span> <span style="color: #e06c75;">b77b</span>
+</div></code></pre>
+<p>Checking with <code>git status</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">status</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">On</span> <span style="color: #e06c75;">branch</span> <span style="color: #e06c75;">fix</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Untracked</span> <span style="color: #e06c75;">files:</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">(</span><span style="color: #61afef;">use</span> <span style="color: #98c379;">&quot;git add &lt;file&gt;...&quot;</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">include</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">what</span> <span style="color: #e06c75;">will</span> <span style="color: #e06c75;">be</span> <span style="color: #e06c75;">committed</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">        <span style="color: #61afef;">another.html</span>
+</div><div class="line" data-line="7">        <span style="color: #61afef;">bye.html</span>
+</div><div class="line" data-line="8">        <span style="color: #61afef;">hello.html</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #61afef;">nothing</span> <span style="color: #e06c75;">added</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">commit</span> <span style="color: #e06c75;">but</span> <span style="color: #e06c75;">untracked</span> <span style="color: #e06c75;">files</span> <span style="color: #e06c75;">present</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">use</span> <span style="color: #98c379;">&quot;git add&quot;</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">track</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><em>The revision commit was changed in the</em> <em><strong>fix branch</strong></em> <em>and all the differences were</em> <em><strong>moved to the index</strong></em>.</p>
+<p>Still, what should we do in case we want to <strong>reset AND discard</strong> all the differences? Just passing on the option <code>--hard</code>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zhlcot7lpmuo57jmo5a1.png" alt="git reset hard" /></p>
+<p>By using <code>git reset --hard</code>, any difference between revisions <strong>will be discarded</strong> and they <em>won’t appear in the index</em>.</p>
+<h3><a href="#-golden-tip-about-moving-a-branch" aria-hidden="true" class="anchor" id="-golden-tip-about-moving-a-branch"></a>💡 Golden tip about moving a branch</h3>
+<p>In case we want to perform the <em>plumbing</em> <code>update-ref</code> on another branch, there’s no need to checkout the branch like needed in <strong>git reset</strong>.</p>
+<p>We can perform the <strong>porcelain</strong> <code>git branch -f source target</code> instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">branch</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">main</span> <span style="color: #e06c75;">b77b</span>
+</div></code></pre>
+<p>Under the hood, it performs a <code>git reset --hard</code> in the source branch. Let’s check to which commit the <strong>main branch</strong> is pointing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span> <span style="color: #e06c75;">main</span> <span style="color: #e06c75;">--pretty=oneline</span> <span style="color: #e06c75;">-n1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">b77b454a9a507f839880879a895ac4f241177a28</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">main</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">another</span> <span style="color: #e06c75;">commit</span>
+</div></code></pre>
+<p>Also, we confirm that the <strong>fix branch</strong> is still pointing to the <code>369cd</code> commit:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">log</span> <span style="color: #e06c75;">fix</span> <span style="color: #e06c75;">--pretty=oneline</span> <span style="color: #e06c75;">-n1</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">369cd96b1f1ef6fa7de1ff2ed12e15be979dcffa</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">HEAD</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">fix,</span> <span style="color: #61afef;">test</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">add</span> <span style="color: #e06c75;">files</span>
+</div></code></pre>
+<p>We did a “git reset” <em>without moving the HEAD</em>!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7v7faopa858go3zkrygq.png" alt="git branch -f" /></p>
+<p>Not rare, <em>instead of moving a branch pointer</em>, we want to <strong>apply a specific commit to the current branch</strong>.</p>
+<p>Meet <strong>cherry-pick</strong>.</p>
+<h3><a href="#-git-cherry-pick" aria-hidden="true" class="anchor" id="-git-cherry-pick"></a>🔵 git cherry-pick</h3>
+<p>With the <strong>porcelain</strong> <code>git cherry-pick</code>, we can apply an arbitrary commit to the current branch.</p>
+<p>Take the following scenario:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/i0n7mldmwq8p3be6bzlf.png" alt="scenario 42" /></p>
+<ul>
+<li>
+<p><strong>main</strong> points to C3 - C2 - C1</p>
+</li>
+<li>
+<p><strong>fix</strong> points to C5 - C4 - C2 - C1</p>
+</li>
+<li>
+<p><strong>HEAD</strong> points to fix</p>
+</li>
+</ul>
+<p>In the <em>fix branch</em>, we are <strong>missing the C3 commit</strong>, which is being referenced by the <em>main branch</em>.</p>
+<p>We can apply it by running <code>git cherry-pick C3</code>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uvw4m2fom52ggxvn0o13.png" alt="cherry pick A" /></p>
+<p>Note that:</p>
+<ul>
+<li>
+<p>the <strong>C3</strong> commit will be cloned into a new commit called <strong>C3’</strong></p>
+</li>
+<li>
+<p>this new commit will reference the C5 commit</p>
+</li>
+<li>
+<p><strong>fix will move the pointer to C3’</strong></p>
+</li>
+<li>
+<p><em>HEAD keeps pointing to fix</em></p>
+</li>
+</ul>
+<p>After applying changes, the graph will be represented as follows:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2gqsdauqv0alwrb4w4ol.png" alt="cherry pick B" /></p>
+<p>There’s another way to move the pointer of a branch though. It consists of <em>applying an arbitrary commit of another branch</em> but <strong>merging the differences</strong> if needed.</p>
+<p>You’re not wrong, we’re talking about <strong>git merge</strong> here.</p>
+<h3><a href="#-git-merge" aria-hidden="true" class="anchor" id="-git-merge"></a>🔵 git merge</h3>
+<p>Let’s describe the following scenario:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/61lv3lp1bsi3o7ingaxq.png" alt="another scenario" /></p>
+<ul>
+<li>
+<p>main points to C3 - C2 - C1</p>
+</li>
+<li>
+<p>fix points to C4 - C3 - C2 - C1</p>
+</li>
+<li>
+<p>HEAD points to the main</p>
+</li>
+</ul>
+<p>We want to apply the fix branch into the current (main) branch, <em>a.k.a</em> perform a <strong>git merge fix</strong>.</p>
+<p>Please note that the <strong>fix branch contains all commits belonging to the main branch</strong> (C3 - C2 - C1), having only <em>one commit ahead</em> of the main (C4).</p>
+<p>In this case, the main branch will be “forwarded”, pointing to the same commit as the fix branch.</p>
+<p>This kind of merge is called <strong>fast-forward</strong>, as described in the image below:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/m6zh34jsvg46wly76qcq.png" alt="fast forward" /></p>
+<h3><a href="#when-fast-forward-is-not-possible" aria-hidden="true" class="anchor" id="when-fast-forward-is-not-possible"></a>When fast-forward is not possible</h3>
+<p>Sometimes, our tree structure current’s state does not allow fast-forward. Take the scenario below:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/a4tsezqc59orz8a2o2nb.png" alt="scenario 44" /></p>
+<p>That’s when the merge branch - <strong>fix branch</strong> in the above example -, is <em>missing one or more commits</em> from the current branch (main): <strong>the C3 commit</strong>.</p>
+<p>As such, <em>fast-forward is not possible</em>.</p>
+<p>However, for the merge to succeed, Git performs a technique called <strong>Snapshotting</strong>, composed of the following steps.</p>
+<p>First, Git looks to the next <strong>common parent</strong> of the two branches, in this example, the <strong>C2</strong> commit.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1s3sfasy9216hhq8lzo5.png" alt="merge common parent" /></p>
+<p>Secondly, Git takes a <strong>snapshot of the target</strong> C3 commit branch:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/r5b784w4wejqx7xawynu.png" alt="target snapshot" /></p>
+<p>Third, Git takes a <strong>snapshot of the source</strong> C5 commit branch:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ouc15w3h73xwub9vuorn.png" alt="source snapshot" /></p>
+<p>Lastly, Git automatically creates a commit merge (C6) and points it to two parents respectively: C3 (target) and C5 (source):</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/q030zd9jjl0nb17i871j.png" alt="merge commit" /></p>
+<p>Have you ever wondered why your Git tree displays some commits that were created <strong>automatically</strong>?</p>
+<p><em>Make no mistake</em>, this merge process is called the <strong>three-way merge</strong>!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/05j8ntrxzax8ruydehl1.png" alt="three way merge" /></p>
+<p>Next, let’s explore <em>another merge technique</em> where fast-<strong>forward is not possible</strong>, but instead of snapshotting and automatic commit merge, Git applies the differences <strong>on top of the source branch</strong>.</p>
+<p>Yes, that’s the <strong>git rebase</strong>.</p>
+<h3><a href="#-git-rebase" aria-hidden="true" class="anchor" id="-git-rebase"></a>🔵 git rebase</h3>
+<p>Consider the following image:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/n6u9hkcopd56anjjt6s7.png" alt="scenario 55" /></p>
+<ul>
+<li>
+<p>main points to C3 - C2 - C1</p>
+</li>
+<li>
+<p>fix points to C5 - C4 - C2 - C1</p>
+</li>
+<li>
+<p>HEAD points to fix</p>
+</li>
+</ul>
+<p>We want to <strong>rebase</strong> the main branch into the fix branch, by issuing <code>git rebase main</code>. But how does <em>git rebase</em> work?</p>
+<p>👉 <strong>git reset</strong></p>
+<p>First, Git performs a <strong>git reset main</strong>, where the fix branch will point to the same main branch pointer: <em>C3 - C2 - C1</em>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qq56zo5l7v6urjib67n0.png" alt="rebase:reset" /></p>
+<p>At this moment, the C5 - C4 commits <em>have no references</em>.</p>
+<p>👉 <strong>git cherry-pick</strong></p>
+<p>Second, Git performs a <strong>git cherry-pick C5</strong> into the current branch:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ucbxeoflzk8izrb2w621.png" alt="rebase:cherry-pick" /></p>
+<p>Note that, during a <em>cherry-pick process</em>, the cherry-picked commits are cloned, thus the final hash will change: <strong>C5 - C4 becomes C5’ - C4’</strong>.</p>
+<p>After cherry-pick, we may have the following scenario:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/q65tu7b5h3zj1ma2b0gj.png" alt="rebase-cherry-pick-b" /></p>
+<p>👉 <strong>git reset again</strong></p>
+<p>Lastly, Git will perform a <strong>git reset C5’</strong>, so the fix branch pointer will move <em>from C3 to C5’</em>.</p>
+<p>The rebase process is finished.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jjs73j725nbmjiau9nwc.png" alt="rebase:finish" /></p>
+<p>So far, we’ve been working with <em>local branches</em>, i.e on our machine. Time to learn how to work with <strong>remote branches</strong>, which are synced with <em>remote repositories on the internet</em>.</p>
+<hr />
+<h2><a href="#-remote-branches" aria-hidden="true" class="anchor" id="-remote-branches"></a>🌐 Remote Branches</h2>
+<p>To work with remote branches, we have to <em>add a remote</em> to our local repository, using the <strong>porcelain</strong> command <code>git remote</code>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">remote</span> <span style="color: #e06c75;">add</span> <span style="color: #e06c75;">origin</span> <span style="color: #e06c75;">git@github.com/myaccount/myrepo.git</span>
+</div></code></pre>
+<p>Remotes are located in the <code>.git/refs/remotes</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/refs</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">.git/refs/remotes/origin</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/refs/remotes/origin/main</span>
+</div></code></pre>
+<h3><a href="#-download-from-remote" aria-hidden="true" class="anchor" id="-download-from-remote"></a>🔵 Download from remote</h3>
+<p>How do we <strong>synchronize</strong> the remote branch with our local branch?</p>
+<p>Git provides <strong>two steps</strong>:</p>
+<p>👉 <strong>git fetch</strong></p>
+<p>By using the <strong>porcelain</strong> <code>git fetch origin main</code>, Git will download the remote branch and synchronize it with a new local branch called <strong>origin/main</strong>, also known as the <strong>upstream branch</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9hii3cz4cjttk4pqnwzx.png" alt="fetch" /></p>
+<p>👉 <strong>git merge</strong></p>
+<p>After fetching and syncing the upstream branch, we can perform a <code>git merge origin/main</code> and because the upstream is ahead of our local branch, Git will safely apply a <strong>fast-forward merge</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/86x06eev8316smdlz8i2.png" alt="fetch merge ff" /></p>
+<p>However, <em><strong>fetch + merge</strong></em> <em>could be repetitive</em>, as we would synchronize local/remote branches multiple times a day.</p>
+<p>But today is <em>our lucky day</em>, and Git provides the <strong>git pull</strong> porcelain command, that performs fetch + merge on our behalf.</p>
+<p>👉 <strong>git pull</strong></p>
+<p>With <code>git pull</code>, Git will perform fetch (synchronize remote with the upstream branch), and then merge the upstream branch into the local branch.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ce7lb2f2bxpeoigfqbyr.png" alt="git pull" /></p>
+<p>Okay, we’ve seen how to pull/download changes from the remote. On the other hand, how about sending local changes to remote?</p>
+<h3><a href="#-upload-to-remote" aria-hidden="true" class="anchor" id="-upload-to-remote"></a>🔵 Upload to remote</h3>
+<p>Git provides a <strong>porcelain</strong> command called <code>git push</code>:</p>
+<p>👉 <strong>git push</strong></p>
+<p>Performing <code>git push origin main</code> will first upload the changes to remote:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/t6peyj4lcpdisu5310qx.png" alt="push A" /></p>
+<p>Then, Git will merge the upstream <code>origin/main</code> with the local <code>main</code> branch:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/nafbkbjsqioiljaeaqkw.png" alt="push B" /></p>
+<p>At the end of the <strong>push process</strong>, we have the following image:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jcq5u4t60i15qm8127jd.png" alt="push end" /></p>
+<p>Where:</p>
+<ul>
+<li>
+<p>The remote was updated (local changes pushed to the remote)</p>
+</li>
+<li>
+<p>main points to C4</p>
+</li>
+<li>
+<p>origin/main points to C4</p>
+</li>
+<li>
+<p>HEAD points to the main</p>
+</li>
+</ul>
+<h3><a href="#-giving-immutable-names-to-commits" aria-hidden="true" class="anchor" id="-giving-immutable-names-to-commits"></a>🔵 Giving immutable names to commits</h3>
+<p>Until now, we learned that <strong>branches are simply mutable references to commits</strong>, that’s why we can move a branch pointer at any time.</p>
+<p>However, Git also provides a way to <em>give immutable references</em>, which cannot have their pointers changed (unless you delete them and create them again).</p>
+<p>Immutable references are helpful when we want to <em>label/mark commits</em> that are ready for some production release, for example.</p>
+<p>Yes, we are talking about <strong>tags</strong>.</p>
+<p>👉 <strong>git tag</strong></p>
+<p>Using the porcelain <code>git tag</code> command, we can give names to commits but we cannot perform reset or any other command which would change the pointer.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pm62925zwulfu2vijjie.png" alt="git tag" /></p>
+<p>It’s quite useful for release versioning. Tags are located in the <code>.git/refs/tags</code> folder:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">.git/refs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">.git/refs/tags</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">.git/refs/tags/v1.0</span>
+</div></code></pre>
+<p><em>If we want to change the tag pointer, we must delete it and create another one with the same name.</em></p>
+<hr />
+<h2><a href="#-git-reflog" aria-hidden="true" class="anchor" id="-git-reflog"></a>💡 Git reflog</h2>
+<p>Last but not least, there’s a command called <code>git reflog</code> which keeps all the changes we’ve made in our local repository.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">git</span> <span style="color: #e06c75;">reflog</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">369cd96</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">HEAD</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">fix,</span> <span style="color: #61afef;">test</span><span style="color: #c678dd;">)</span> HEAD@&lbrace;0<span style="color: #c678dd;">&rbrace;</span>: reset: moving to main
+</div><div class="line" data-line="4">b77b454 (main) HEAD@&lbrace;1<span style="color: #c678dd;">&rbrace;</span>: reset: moving to b77b
+</div><div class="line" data-line="5">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;2<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from main to fix
+</div><div class="line" data-line="6">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;3<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from fix to main
+</div><div class="line" data-line="7">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;4<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from main to fix
+</div><div class="line" data-line="8">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;5<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from fix to main
+</div><div class="line" data-line="9">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;6<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from main to fix
+</div><div class="line" data-line="10">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;7<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from test to main
+</div><div class="line" data-line="11">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;8<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from main to test
+</div><div class="line" data-line="12">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;9<span style="color: #c678dd;">&rbrace;</span>: checkout: moving from test to main
+</div><div class="line" data-line="13">369cd96 (HEAD -&gt; fix, test) HEAD@&lbrace;10<span style="color: #c678dd;">&rbrace;</span>: commit: add files
+</div><div class="line" data-line="14">b77b454 (main) HEAD@&lbrace;11<span style="color: #c678dd;">&rbrace;</span>: commit: another commit
+</div><div class="line" data-line="15">5ea578a HEAD@&lbrace;12<span style="color: #c678dd;">&rbrace;</span>:
+</div></code></pre>
+<p><strong>It’s quite useful</strong> if we want to <strong>go back and forth</strong> on the Git timeline. Along with <em>reset, cherry-pick and similar</em>, it’s a powerful tool if we want to master Git.</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>What a long journey!</p>
+<p>This article was a bit too long, but I could express the main topics I think are important to understand about Git.</p>
+<p>I hope that, after reading this article, you should be more confident while using Git, resolving daily conflicts and painful situations during a merge/rebase process.</p>
+<p>Follow me on <a href="https://twitter.com/leandronsp">twitter</a> and check out my website blog <a href="http://leandronsp.com">leandronsp.com</a>, where I also write some tech articles.</p>
+<p>Cheers!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

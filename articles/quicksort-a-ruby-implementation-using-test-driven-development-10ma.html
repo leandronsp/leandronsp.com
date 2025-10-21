@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quicksort, a Ruby implementation using Test-driven development - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="---
+title: Quicksort, a Ruby implementation using Test-driven development
+published: true
+description: Implementing Quicksort with TDD
+tags: ruby,quicksort,algor">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/quicksort-a-ruby-implementation-using-test-driven-development-10ma.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/quicksort-a-ruby-implementation-using-test-driven-development-10ma.html">
+  <meta property="og:title" content="Quicksort, a Ruby implementation using Test-driven development">
+  <meta property="og:description" content="---
+title: Quicksort, a Ruby implementation using Test-driven development
+published: true
+description: Implementing Quicksort with TDD
+tags: ruby,quicksort,algor">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-04-16T23:30:24Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="quicksort">
+      <meta property="article:tag" content="algorithms">
+      <meta property="article:tag" content="tdd">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Quicksort, a Ruby implementation using Test-driven development",
+    "datePublished": "2021-04-16T23:30:24Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "---
+title: Quicksort, a Ruby implementation using Test-driven development
+published: true
+description: Implementing Quicksort with TDD
+tags: ruby,quicksort,algor",
+        "keywords": "ruby, quicksort, algorithms, tdd"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Quicksort, a Ruby implementation using Test-driven development</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 16 Apr 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">quicksort</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">algorithms</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">tdd</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <hr />
+<h2><a href="#title-quicksort-a-ruby-implementation-using-test-driven-development-published-true-description-implementing-quicksort-with-tdd-tags-rubyquicksortalgorithmstdd-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticles9q0pcat6jd54g5t1o7b7png" aria-hidden="true" class="anchor" id="title-quicksort-a-ruby-implementation-using-test-driven-development-published-true-description-implementing-quicksort-with-tdd-tags-rubyquicksortalgorithmstdd-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticles9q0pcat6jd54g5t1o7b7png"></a>title: Quicksort, a Ruby implementation using Test-driven development<br />
+published: true<br />
+description: Implementing Quicksort with TDD<br />
+tags: ruby,quicksort,algorithms,tdd<br />
+cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9q0pcat6jd54g5t1o7b7.png">https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9q0pcat6jd54g5t1o7b7.png</a></h2>
+<p><a href="https://en.wikipedia.org/wiki/Quicksort">Quicksort</a> is a sorting algorithm designed to have a <em>reasonable time complexity</em>.</p>
+<p>In average, most implementations of this algorithm are capable of coming to <a href="https://www.bigocheatsheet.com"><em>O(n log(n))</em></a>. It is implemented by many programming languages and platforms, being one of the most important algorithms for sorting.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fn68uggpqt7d7krk0hx9.gif" alt="Image source: Wikipedia" /></p>
+<h2><a href="#implementation" aria-hidden="true" class="anchor" id="implementation"></a>Implementation</h2>
+<p>Its implementation relies on a <a href="https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm">divide-and-conquer algorithm</a>, where it works by selecting a “pivot” element from the list, then partitioning the list into two sub-arrays: the <em>elements that are smaller than pivot</em> (smaller ones); and the <em>elements that are larger than pivot</em> (larger ones), which are then sorted <a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)">recursively</a>.</p>
+<h3><a href="#understanding-the-algorithm" aria-hidden="true" class="anchor" id="understanding-the-algorithm"></a>Understanding the algorithm</h3>
+<p>Although it’s especially important to understand this algorithm, its implementation is not that <em>hard</em> to realize.</p>
+<p>Observe the following pseudo-code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">list = [3, 1, 2]
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"># it&#39;s arbitrary to choose the pivot, however the choice may 
+</div><div class="line" data-line="4">#  impact on the final time complexity. In this guide, we&#39;ll 
+</div><div class="line" data-line="5">#  choose the first element for didactic purposes
+</div><div class="line" data-line="6">pivot = 3
+</div><div class="line" data-line="7">remaining = [1, 2]
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">smaller, larger = partition(pivot, remaining)
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">-&gt; repeat the process for the smaller list
+</div><div class="line" data-line="12">-&gt; repeat the process for the larger list
+</div></code></pre>
+<p>The above code only cares about partitioning the list into (un)sorted smaller and larger elements than <em>pivot</em>. If we repeat the process for each sub-list and <strong>place the pivot in the middle</strong>, we may end up having the following solution:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">sort(smaller) + pivot + sort(larger)
+</div></code></pre>
+<p>Consider the above explanation just a Quickstart (pun intended) to understand the overall algorithm.</p>
+<p>For many, it’s not straightforward to understand recursion, which is why this guide will try to dissecate the internals of Quicksort using <a href="https://en.wikipedia.org/wiki/Test-driven_development">Test-driven development</a>, a great technique and good practice that I use on my daily-basis, mainly when I’m trying to experiment and understand the <em>unknown</em>.</p>
+<h2><a href="#baby-steps-to-the-rescue" aria-hidden="true" class="anchor" id="baby-steps-to-the-rescue"></a>Baby steps to the rescue</h2>
+<p>When doing TDD, we are encouraged to work in small cycles, or <em>baby-steps</em>, in order to fullfil the <strong>red-green-refactor</strong> iteration.</p>
+<p>Such technique can help us to understand the Quicksort algorithm. Due to its nature of <em>divide-and-conquer</em>, it’s a perfect fit for breaking down the steps through the TDD cycle.</p>
+<p>First of all, we write a file named <code>quicksort_test.rb</code>, which will have our bootstrap code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">test/unit</span><span style="color: #98c379;">&#39;</span>                   
+</div><div class="line" data-line="2">                                      
+</div><div class="line" data-line="3"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">QuicksortTest</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Case</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_empty_list</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">end</span>    
+</div></code></pre>
+<p>This dummy code will start by sorting an empty array. Run <code>ruby quicksort_test.rb</code>. The output should be as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Finished</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">0.0004595</span> <span style="color: #e06c75;">seconds.</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">-------------------------------------------------------------------------------</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">1</span> <span style="color: #e06c75;">tests,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">assertions,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">failures,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">errors,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">pendings,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">omissions,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">notifications</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">100</span>% <span style="color: #61afef;">passed</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">-------------------------------------------------------------------------------</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">2176.28</span> <span style="color: #e06c75;">tests/s,</span> <span style="color: #e06c75;">0.00</span> <span style="color: #e06c75;">assertions/s</span>
+</div></code></pre>
+<p>For now, we will write the <em>sort</em> method in the same file for the sake of simplicity.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">test/unit</span><span style="color: #98c379;">&#39;</span>                                   
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">list</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>                      
+</div><div class="line" data-line="6">                                                      
+</div><div class="line" data-line="7"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">QuicksortTest</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">TestCase</span>
+</div><div class="line" data-line="8">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_empty_list</span>
+</div><div class="line" data-line="9">    <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10">  <span style="color: #c678dd;">end</span>                                    
+</div><div class="line" data-line="11"><span style="color: #c678dd;">end</span>                                       
+</div></code></pre>
+<p>Run the test again and…YAY!<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3u6m54b9whiy75wi26ap.jpg" alt="Alt Text" /></p>
+<h3><a href="#test-dummy-but-important-scenarios" aria-hidden="true" class="anchor" id="test-dummy-but-important-scenarios"></a>Test dummy (but important!) scenarios</h3>
+<p>Yes, dummy scenarios are important. Don’t underestimate them.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_one_number_only</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">42</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">42</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>                                        
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">list</span><span style="color: #c678dd;">)</span>            
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">[</span><span style="color: #d19a66;">42</span><span style="color: #c678dd;">]</span>                     
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>                            
+</div></code></pre>
+<p>Pretty cool, uh? And dummy, I know…</p>
+<p>Let’s sort two numbers:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_two_numbers</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">42</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">42</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>                                        
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">list</span><span style="color: #c678dd;">)</span>            
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">size</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span> <span style="color: #7f848e;"># when the list is empty</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">list</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">size</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">1</span> <span style="color: #7f848e;"># when the list has one number</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">[</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">42</span><span style="color: #c678dd;">]</span> <span style="color: #7f848e;"># OMG!                      </span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">end</span>                            
+</div></code></pre>
+<p>Please, STAHP the <em>naiveness</em>!</p>
+<p>Ok, let’s start to write a more sophisticated test:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_multiple</span> <span style="color: #e06c75;">numbers</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">list</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>                  
+</div><div class="line" data-line="3">                                          
+</div><div class="line" data-line="4">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">list</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>                                       
+</div></code></pre>
+<h3><a href="#the-initial-implementation" aria-hidden="true" class="anchor" id="the-initial-implementation"></a>The initial implementation</h3>
+<p>Suppose our input is an unsorted list:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">list</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>  
+</div></code></pre>
+<p>We can start the implementation by choosing the pivot. Already mentioned that, in this guide, we will choose the first element.</p>
+<p>But there are reasons where <a href="https://stackoverflow.com/questions/164163/quicksort-choosing-the-pivot">choosing the first element as the pivot</a> is not the best performant scenario. This is for learning purposes only, as you can later adapt the algorithm to use another approach for the pivot.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">list</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span> <span style="color: #7f848e;"># 5</span>
+</div></code></pre>
+<p>Then, we should get the remaining list (all elements but the pivot):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">list</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span> <span style="color: #7f848e;"># [1, 4, 3, 2]</span>
+</div></code></pre>
+<h3><a href="#partition-recursively" aria-hidden="true" class="anchor" id="partition-recursively"></a>Partition recursively</h3>
+<p>Next step, think about the <em>partition</em>, which takes</p>
+<ul>
+<li>the pivot</li>
+<li>the remaining list</li>
+<li>an array of smaller elements than pivot (starts empty)</li>
+<li>an array of larger elements than pivot (starts empty)</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Why are we starting the smaller/larger arrays as empty? Because we will run this method <em>recursively</em>.</p>
+<h4><a href="#a-bit-of-recursion" aria-hidden="true" class="anchor" id="a-bit-of-recursion"></a>A bit of recursion</h4>
+<p>Ok, but what’s recursion? In short:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">greet</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">name</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">puts</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Hello </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #61afef;">greet</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">name</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>The above code will run forever, taking all of the memory’s process, resulting in a <a href="https://en.wikipedia.org/wiki/Stack_overflow">stack overflow</a>.</p>
+<p>We MUST place a stop condition before the recursive call, otherwise we would never stop it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">greet</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">times</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">10</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">puts</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Hello </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">return</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">times</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">  <span style="color: #7f848e;"># decreasing the variable times on the next iteration</span>
+</div><div class="line" data-line="6">  <span style="color: #7f848e;">#  next, will be 9</span>
+</div><div class="line" data-line="7">  <span style="color: #7f848e;">#  then 8, 7, 6...successively until 0 meets our stop condition</span>
+</div><div class="line" data-line="8">  <span style="color: #61afef;">greet</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">times</span> <span style="color: #56b6c2;">-=</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="9"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Now, the following example is how we WANT to call the partition. Hold on, I know the method doesn’t yet exist, but we are doing baby-steps. A bit of pseudo-code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">unsorted_list</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span> 
+</div><div class="line" data-line="2"><span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #e06c75;">smaller</span> <span style="color: #7f848e;">#=&gt; [1]</span>
+</div><div class="line" data-line="8"><span style="color: #e06c75;">larger</span> <span style="color: #7f848e;">#=&gt; []</span>
+</div></code></pre>
+<p>Let’s write the first test for the partition in which there’s no remaining numbers. A scenario where all the elements were already partitioned (not yet sorted).</p>
+<p>Why we are writing this scenario first? Because we know that, when there’s no more elements to partition, we can <strong>stop the recursion</strong> and return the accumulated <em>smaller</em> and <em>larger</em> sub-lists.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_partition_no_remaining</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">pivot</span>     <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">5</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">smaller</span>   <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">larger</span>    <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">6</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">7</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">6</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">7</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>  
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #c678dd;">[</span><span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">]</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span>         
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>This first implementation means that, when the remaining list is empty, we can safely return the sub-arrays and stop the recursion.</p>
+<p>Partition of two numbers:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_partition_two_numbers</span>                       
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span>                                    
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>  
+</div><div class="line" data-line="4">                                                     
+</div><div class="line" data-line="5">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">end</span>                                                  
+</div></code></pre>
+<p>Here, the remaining list is <strong>not</strong> empty, so we should think on “what is a partition”.</p>
+<p>We can think of a partition being a method/function that takes a pivot, a list and accumulated smaller/larger arrays related to pivot.</p>
+<p>How can we do this recursively?</p>
+<ul>
+<li>reducing the list</li>
+<li>accumulating the smaller/larger arrays</li>
+</ul>
+<p>It’s not an easy task to write a test that detach the logic of a recursive piece of code. But we can <strong>isolate</strong> the logic that is responsible to reduce and accumulate, and place it to another method.</p>
+<p>So in the <code>partition</code> method, we’d have a separate call to the <code>next_partition</code> before the recursive call:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #c678dd;">[</span><span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">]</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">size</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #7f848e;"># Here, the method `next_partition` will return the reduced</span>
+</div><div class="line" data-line="5">  <span style="color: #7f848e;">#  list (tail|remaining), the &quot;next&quot; smaller (accumulated) and the &quot;next&quot; larger (accumulated)</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">next_partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">  <span style="color: #7f848e;"># Now, as we already have the stop condition in the first</span>
+</div><div class="line" data-line="9">  <span style="color: #7f848e;">#  line, we can safely call this method recursively</span>
+</div><div class="line" data-line="10">  <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span><span style="color: #c678dd;">)</span>        
+</div><div class="line" data-line="11"><span style="color: #c678dd;">end</span>                                                  
+</div></code></pre>
+<p>Time to dissecate the <code>next_partition</code> before running the test.</p>
+<p>Let’s then write a test scenario for the <code>next_partition</code> method:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">#=&gt; next_partition(pivot, tail, smaller, larger)</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">list</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">remaining</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">smaller</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #e06c75;">tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">next_partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">remaining</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10"> 
+</div><div class="line" data-line="11"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">tail</span>
+</div><div class="line" data-line="12"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span>
+</div></code></pre>
+<p>It may be confused at first but we can interpret this test as being:</p>
+<ul>
+<li>the unsorted list is [3, 5, 1, 4, 2]</li>
+<li>we chose the pivot as being 3, the first element</li>
+<li>excluding the pivot, the remaining numbers are [5, 1, 4, 2]</li>
+<li>smaller starts empty</li>
+<li>larger starts empty</li>
+</ul>
+<p>So, for the next iteration, we have the following data:</p>
+<ul>
+<li>reduced list (tail of remaining) is [1, 4, 2]</li>
+<li>accumulated (next) smaller ones than pivot (3) is []</li>
+<li>accumulated (next) larger ones than pivot (3) is [5]</li>
+</ul>
+<h4><a href="#golden-tip" aria-hidden="true" class="anchor" id="golden-tip"></a>Golden tip</h4>
+<p>Let’s think: the <code>next_iteration</code> <strong>should compare</strong> the pivot with the first element of remaining list, and <em>decide if</em> the element should be added to the accumulated smaller or larger arrays!</p>
+<p>Let’s keep on our iterations, one-by-one (manual recursion):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">next_tail</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span> <span style="color: #7f848e;"># still our first pivot</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">next_smaller</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #e06c75;">next_tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">next_partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_tail</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #7f848e;">## Next (final) iteration</span>
+</div><div class="line" data-line="13"><span style="color: #e06c75;">next_tail</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">4</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="14"><span style="color: #e06c75;">pivot</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">3</span> <span style="color: #7f848e;"># still</span>
+</div><div class="line" data-line="15"><span style="color: #e06c75;">next_smaller</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="16"><span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18"><span style="color: #e06c75;">next_tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">next_partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_tail</span>
+</div><div class="line" data-line="21"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_smaller</span>
+</div><div class="line" data-line="22"><span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">next_larger</span>
+</div></code></pre>
+<p>Our recursion would stop here because there’s no “next tail”. All of the initial list was reduced.</p>
+<p>In case we had unsorted smaller/larger arrays, we would repeat the process all over again for each sub-array.</p>
+<p>Now, we could concatenate the results according to our initial sort logic:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Partition result</span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">smaller</span><span style="color: #56b6c2;">:</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">pivot</span><span style="color: #56b6c2;">:</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">larger</span><span style="color: #56b6c2;">:</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># Sorted = sort(smaller) + [pivot] + sort(larger)</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">+</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">+</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>YAY!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>But we don’t have the code yet. Looking at this pseudo-code examples, now it’s easy to think on the <code>next_partition</code> logic:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">next_partition</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">pivot</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">list</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">head</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">list</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span>                                
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">tail</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">list</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>                            
+</div><div class="line" data-line="4">                                                
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">head</span> <span style="color: #56b6c2;">&lt;=</span> <span style="color: #e06c75;">pivot</span>                              
+</div><div class="line" data-line="6">    <span style="color: #c678dd;">[</span><span style="color: #e06c75;">tail</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #e06c75;">head</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">]</span>            
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">else</span>                                          
+</div><div class="line" data-line="8">    <span style="color: #c678dd;">[</span><span style="color: #e06c75;">tail</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">smaller</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #e06c75;">head</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">larger</span><span style="color: #c678dd;">]</span>            
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">end</span>                                           
+</div><div class="line" data-line="10"><span style="color: #c678dd;">end</span>                                             
+</div></code></pre>
+<p>We can test more partition scenarios:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_partition_three_numbers</span>                 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">6</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">partition</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">6</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>                                              
+</div></code></pre>
+<p>And, finally, sorting multiple numbers</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"> <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_sorting_multiple_numbers</span>                    
+</div><div class="line" data-line="2">   <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">   <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">   <span style="color: #61afef;">assert_equal</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">sort</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"> <span style="color: #c678dd;">end</span>                                                  
+</div></code></pre>
+<h3><a href="#important-note-about-performance" aria-hidden="true" class="anchor" id="important-note-about-performance"></a>Important note about performance</h3>
+<p>The examples above do not apply the “in-place” rule of Quicksort.</p>
+<p>Performance may be degraded in time complexity, but the main point here is to demonstrate the overall logic of Quicksort.</p>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>The final code can be seen <a href="https://gist.github.com/leandronsp/0d42a4487f25050ea3b672945328761f">in this Gist</a>.</p>
+<p>In this guide we covered the fundamentals of the Quicksort algorithm by using test-driven development. We also did learn a bit about recursion and how to test recursion (manually or not) by isolating the methof/function responsible for reducing/accumulating for the next iteration.</p>
+<p>I hope it could be helpful somehow. Feel free to drop a message or comment.</p>
+<p>Follow me @leandronsp in dev.to, twitter and Linkedin.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

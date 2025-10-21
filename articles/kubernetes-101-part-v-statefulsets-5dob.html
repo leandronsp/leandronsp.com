@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part V, statefulsets - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="[In the previous article](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **availabi">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html">
+  <meta property="og:title" content="Kubernetes 101, part V, statefulsets">
+  <meta property="og:description" content="[In the previous article](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **availabi">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-04-01T04:45:38Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part V, statefulsets",
+    "datePublished": "2023-04-01T04:45:38Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "[In the previous article](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **availabi",
+        "keywords": "kubernetes, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part V, statefulsets</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 01 Apr 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><a href="https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3">In the previous article</a>, we explored ways to handle pod updates without affecting <strong>availability</strong>, using <em>Deployments</em>.</p>
+<p>This article will cover stateful applications in Kubernetes and how <strong>StatefulSets</strong> fit in such scenario. Moreover, you’ll have the chance to understand <em>how volumes work in Kubernetes</em> and how they relate to Pods hence Deployments and StatefulSets.</p>
+<p><em>Let’s start the journey</em>.</p>
+<hr />
+<p>When working with containers, more precisely Pods, it’s known that <strong>their data is ephemeral</strong>, which means all data written to the Pod will live <em>during the Pod lifetime only</em>.</p>
+<p>Once the Pod is <em>terminated</em>, <strong>all its data is lost</strong>.</p>
+<p>That’s the essence of stateless applications.</p>
+<h2><a href="#-stateless-applications-are-the-default" aria-hidden="true" class="anchor" id="-stateless-applications-are-the-default"></a>🔵 Stateless applications are the default</h2>
+<p>By default, all applications in Kubernetes are <strong>stateless</strong>, meaning that <strong>data within the Pod are ephemeral and will be permanently lost</strong> during an application rollout update.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b5y0bezb5cpi46u820uz.png" alt="pod filesystem" /></p>
+<p>For instance, suppose we have a PostgreSQL Deployment:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">apps/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Deployment</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">replicas</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">matchLabels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">        <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgresql</span>
+</div><div class="line" data-line="17">          <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres:14</span>
+</div><div class="line" data-line="18">          <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_USER</span>
+</div><div class="line" data-line="20">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="21">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_PASSWORD</span>
+</div><div class="line" data-line="22">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div></code></pre>
+<p>Once it’s running, we can create a table called <code>users</code> in the database:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-79d96fb7b7-zg9kl</span> <span style="color: #e06c75;">--</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> \
+</div><div class="line" data-line="3">    <span style="color: #98c379;">&quot;CREATE TABLE users (id SERIAL, name VARCHAR);&quot;</span>
+</div></code></pre>
+<p>And running the query afterwards:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-79d96fb7b7-zg9kl</span> <span style="color: #e06c75;">--</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;SELECT * FROM users;&quot;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"> <span style="color: #61afef;">id</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">name</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">----+------</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span><span style="color: #d19a66;">0</span> <span style="color: #e06c75;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<h3><a href="#-rolling-out-the-application" aria-hidden="true" class="anchor" id="-rolling-out-the-application"></a>👉 Rolling out the application</h3>
+<p>Not rare, we have to update the application pod, either fixing some bug, updating the database version or doing some maintenance.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">restart</span> <span style="color: #e06c75;">deploy/pg</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">deployment.apps/pg</span> <span style="color: #e06c75;">restarted</span>
+</div></code></pre>
+<p>Notice the the <em>pod name has changed</em>, because it’s a deployment, and <strong>Deployments have no ordering or identity</strong> for differentiation.</p>
+<p>Let’s perform the query on this new Pod:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-8486b4f555-5dqz8</span> <span style="color: #e06c75;">--</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;SELECT * FROM users;&quot;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #61afef;">ERROR:</span>  <span style="color: #e06c75;">relation</span> <span style="color: #98c379;">&quot;users&quot;</span> <span style="color: #e06c75;">does</span> <span style="color: #e06c75;">not</span> <span style="color: #e06c75;">exist</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">LINE</span> <span style="color: #e06c75;">1:</span> <span style="color: #e06c75;">SELECT</span> <span style="color: #e06c75;">*</span> <span style="color: #e06c75;">FROM</span> <span style="color: #e06c75;">users</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p><strong>Uh, oh</strong>…<em>the table has gone away</em>. Pods are <strong>stateless</strong>, remember?</p>
+<hr />
+<h2><a href="#-stateful-applications" aria-hidden="true" class="anchor" id="-stateful-applications"></a>🔵 Stateful applications</h2>
+<p>If we want to build a <em>stateful application</em> in Kubernetes, we have to share a <strong>common persistent structure</strong> that can be mounted across different pods of the same replicaset.</p>
+<p>Enter <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes</a>.</p>
+<h3><a href="#-volumemounts-and-volumes" aria-hidden="true" class="anchor" id="-volumemounts-and-volumes"></a>👉 VolumeMounts and Volumes</h3>
+<p>In order to use persistent volumes, we have to <em>mount</em> a volume in the Pod container spec:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Deployment</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">...</span> <span style="color: #7f848e;"># more</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgresql</span>
+</div><div class="line" data-line="8">          <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres:14</span>
+</div><div class="line" data-line="9">          <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_USER</span>
+</div><div class="line" data-line="11">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="12">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_PASSWORD</span>
+</div><div class="line" data-line="13">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="14">          <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pgdata</span>
+</div><div class="line" data-line="16">              <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/lib/postgresql/data</span>
+</div></code></pre>
+<p>Here, the volume is described as <code>pgdata</code>, which will be mounted to the path <code>/var/lib/postgresql/data</code> in the container. This path is exactly where the PostgreSQL data is located.</p>
+<p>However, the volume <code>pgdata</code> can’t come from nowhere. We need to <em>request</em> a <strong>persistent volume</strong> in the underlying infrastructure storage.</p>
+<p>By infrastructure, we could think of our host machine in development, a server in the production environment or even a product storage by the underlying cloud-provider if that’s the case.</p>
+<p>In the <code>template.spec</code> section, we add the <code>volumes</code> section:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">...</span>
+</div><div class="line" data-line="7">      <span style="color: #e06c75;">volumes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pgdata</span>
+</div><div class="line" data-line="9">          <span style="color: #e06c75;">persistentVolumeClaim</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">            <span style="color: #e06c75;">claimName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pvc</span>
+</div></code></pre>
+<h3><a href="#-persistentvolumeclaim" aria-hidden="true" class="anchor" id="-persistentvolumeclaim"></a>👉 PersistentVolumeClaim</h3>
+<p>Persistent Volume Claim, or <strong>PVC</strong>, is a request by the user for some piece of storage. In the above example, we assume that we have a PVC called <code>my-pvc</code>, let’s create it then:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PersistentVolumeClaim</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pvc</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">storageClassName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-sc</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">volumeName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pv</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">    <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteOnce</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div></code></pre>
+<p>The PVC requires some attributes:</p>
+<ul>
+<li><strong>storageClassName</strong>: it’s a class of storage defined by the administrator of the cluster. Storage class holds traits about policies and other storage services of the cluster. We’ll create it soon.</li>
+<li><strong>volumeName</strong>: the persistent volume, which is a piece of storage that can be statically of dynamically provisioned in the cluster</li>
+<li>accessModes, resources among others…</li>
+</ul>
+<h3><a href="#-storageclass" aria-hidden="true" class="anchor" id="-storageclass"></a>👉 StorageClass</h3>
+<p>First, we have to create the <code>storageClass</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">StorageClass</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">storage.k8s.io/v1</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-sc</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">provisioner</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kubernetes.io/no-provisioner</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">parameters</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">local</span>
+</div></code></pre>
+<p><a href="https://kubernetes.io/docs/concepts/storage/storage-classes/#provisioner">Provisioner</a> determines the plugin used to control the storage provisioning in the cluster.</p>
+<p>In development, we can use the default <code>kubernetes.io/no-provisioner</code>, which will not request storage dynamically, so we have to declare the <strong>persistent volume</strong> manually.</p>
+<h3><a href="#-persistentvolume" aria-hidden="true" class="anchor" id="-persistentvolume"></a>👉 PersistentVolume</h3>
+<p>The Persistent Volume is a piece of storage in the underlying infrastructure.</p>
+<p>By defining capacity, storageClass, accessMode and hostPath, we can declare such a piece ready to be used by a PVC in a Pod.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PersistentVolume</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pv</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">storageClassName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-sc</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">capacity</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">    <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteOnce</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">hostPath</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/data/volumes/my-pv</span>
+</div></code></pre>
+<p>Once we applied SC, PV and PVC, we can apply the Deployment using the PVC <code>my-pvc</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">apps/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Deployment</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">replicas</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">matchLabels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">        <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgresql</span>
+</div><div class="line" data-line="17">          <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres:14</span>
+</div><div class="line" data-line="18">          <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_USER</span>
+</div><div class="line" data-line="20">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="21">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_PASSWORD</span>
+</div><div class="line" data-line="22">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="23">          <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="24">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pgdata</span>
+</div><div class="line" data-line="25">              <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/lib/postgresql/data</span>
+</div><div class="line" data-line="26">      <span style="color: #e06c75;">volumes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="27">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pgdata</span>
+</div><div class="line" data-line="28">          <span style="color: #e06c75;">persistentVolumeClaim</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="29">            <span style="color: #e06c75;">claimName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pvc</span>
+</div></code></pre>
+<p>And boom…</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                  <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">pg-7744b4d548-nxf8v</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">3s</span>
+</div></code></pre>
+<p>Now, time to check if the volumes are working properly across rollout updates:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">### CREATE TABLE</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-7744b4d548-nxf8v</span>  <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;CREATE TABLE users (id SERIAL, name VARCHAR);&quot;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;">### QUERY</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-7744b4d548-nxf8v</span>  <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;SELECT * FROM users&quot;</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">### ROLLOUT</span>
+</div><div class="line" data-line="8"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">restart</span> <span style="color: #e06c75;">deploy/pg</span>
+</div></code></pre>
+<p>And then, performing the query against the new Pod:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">pg-558d58c54-n9zb2</span>   <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;SELECT * FROM users&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"> <span style="color: #61afef;">id</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">name</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">----+------</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">(</span><span style="color: #d19a66;">0</span> <span style="color: #e06c75;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Yay! We just created a <em>stateful application</em> using Deployment and Persistent Volumes!</p>
+<hr />
+<h2><a href="#-scaling-up-stateful-applications" aria-hidden="true" class="anchor" id="-scaling-up-stateful-applications"></a>🔵 Scaling up stateful applications</h2>
+<p>At this moment, our Deployment has 1 replica only, but if we want to achieve <em>high availability</em>, we have to configure our deployment to support more replicas.</p>
+<p>Let’s scale up to 3 replicas as we learned <a href="https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3">in the previous article</a>. It’s easy as doing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">scale</span> <span style="color: #e06c75;">deploy/pg</span> <span style="color: #e06c75;">--replicas=3</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">deployment.apps/pg</span> <span style="color: #e06c75;">scaled</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span> 
+</div><div class="line" data-line="5"><span style="color: #61afef;">NAME</span>                 <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>     <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">pg-9668885c9-rt9fd</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>            <span style="color: #e06c75;">64s</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">pg-9668885c9-dqwcc</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>            <span style="color: #e06c75;">63s</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">pg-9668885c9-kt7dg</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">1</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">5s</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>   66s
+</div></code></pre>
+<p><em>Great, uh?</em></p>
+<p>After several <strong>rollout updates</strong>, we may end up with the following state:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">NAME</span>                  <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>             <span style="color: #e06c75;">RESTARTS</span>      <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">pg-55488bc8b6-wvr66</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">CrashLoopBackOff</span>   <span style="color: #d19a66;">1</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">5s</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>    <span style="color: #61afef;">9s</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">pg-55488bc8b6-x4hh2</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">CrashLoopBackOff</span>   <span style="color: #d19a66;">1</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">5s</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span>    <span style="color: #61afef;">9s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pg-55488bc8b6-hvsdb</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Error</span>              <span style="color: #d19a66;">2</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">16s</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>   19s
+</div></code></pre>
+<p>💥 Oh my…the application has gone away.💥</p>
+<p>There’s <em>no healthy</em> Pod left. <strong>The entire Deployment is broken</strong>. What happened here?</p>
+<h3><a href="#-deployment-replicas-share-the-same-pvc" aria-hidden="true" class="anchor" id="-deployment-replicas-share-the-same-pvc"></a>👉 Deployment replicas share the same PVC</h3>
+<p>All Pod replicas in the deployment are sharing the same PVC. Due to <em>concurrency issues</em>, when there are two Pods writing to the same location, it can lead to <strong>data loss or corruption</strong>.</p>
+<p>After several rollouts, it’s not rare that our deployment will end up in a broken state like above.</p>
+<p>Moreover:</p>
+<ul>
+<li>Deployments don’t guarantee <strong>ordering</strong> during updates, which can lead to data inconsistency</li>
+<li>Deployments don’t provide any kind of <strong>identity</strong>, like a stable hostname or IP address for the Pods, which can cause reference issues</li>
+</ul>
+<p>Hence, despite it’s possible, Deployments are not a good fit for stateful applications.</p>
+<p>Thankfully, Kubernetes addresses thoses problems by providing another workload object called <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>.</p>
+<hr />
+<h2><a href="#-statefulset" aria-hidden="true" class="anchor" id="-statefulset"></a>🔵 StatefulSet</h2>
+<p>The StatefulSet object brings a StatefulSet Controller that acts like the Deployment Controller, but with some differences:</p>
+<ul>
+<li>they have an identity, addressing reference issues</li>
+<li>StatefulSets guarantee ordering of updates, thus avoiding data inconsistency</li>
+<li>Pod replicas in a StatefulSet do not share the same PVC. Each replica <em>has its own PVC</em></li>
+</ul>
+<p>We’ll follow the same process as for the Deployment, but referencing <code>kind: StatefulSet</code> instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">apps/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">StatefulSet</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">replicas</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">3</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">matchLabels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">        <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pg</span>
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgresql</span>
+</div><div class="line" data-line="17">          <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres:14</span>
+</div><div class="line" data-line="18">          <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_USER</span>
+</div><div class="line" data-line="20">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="21">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">POSTGRES_PASSWORD</span>
+</div><div class="line" data-line="22">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">postgres</span>
+</div><div class="line" data-line="23">          <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="24">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pvc</span>
+</div><div class="line" data-line="25">              <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/lib/postgresql/data</span>
+</div><div class="line" data-line="26">  <span style="color: #e06c75;">volumeClaimTemplates</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="27">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="28">        <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pvc</span>
+</div><div class="line" data-line="29">      <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="30">        <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span> <span style="color: #98c379;">&quot;ReadWriteOnce&quot;</span> <span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="31">        <span style="color: #e06c75;">storageClassName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;local-path&quot;</span>
+</div><div class="line" data-line="32">        <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="33">          <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="34">            <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div></code></pre>
+<p>Note that the <code>containers.volumeMounts</code> keep the same, as it needs to reference the volume declared in the template.</p>
+<p>But the persistent volume will be created <strong>dynamically</strong> using the attribute <code>volumeClaimTemplates</code>, where we just have to define the <strong>storageClassName</strong> and <strong>storage request</strong>.</p>
+<p>Wait…why are we using <code>local-path</code> in the storageClassName?</p>
+<h3><a href="#-dynamic-provisioning" aria-hidden="true" class="anchor" id="-dynamic-provisioning"></a>👉 Dynamic Provisioning</h3>
+<p>In order to create persistent volumes dynamically, we can’t use the storageClass we created previously, because it uses a provisioner called <code>no-provisioner</code> which does not allow to provision volumes dynamically.</p>
+<p>Instead, we can use other storageClass. Chances are that you have a default storageClass created on your cluster.</p>
+<p>In my example, I created the k8s cluster using <a href="https://github.com/abiosoft/colima">colima</a>, so it already has created a default storage class that allows dynamic provisioning.</p>
+<blockquote>
+<p>Go check your cluster and choose the default storageClass created by it.</p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">sc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                   <span style="color: #e06c75;">PROVISIONER</span>             <span style="color: #e06c75;">RECLAIMPOLICY</span>   <span style="color: #e06c75;">VOLUMEBINDINGMODE</span>      <span style="color: #e06c75;">ALLOWVOLUMEEXPANSION</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">local-path</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">default</span><span style="color: #c678dd;">)</span>   <span style="color: #61afef;">rancher.io/local-path</span>   <span style="color: #e06c75;">Delete</span>          <span style="color: #e06c75;">WaitForFirstConsumer</span>   <span style="color: #e06c75;">false</span>                  <span style="color: #e06c75;">37d</span>
+</div></code></pre>
+<p>That’s why <code>local-path</code> is the name of the default storageClass, which allows dynamic provisioning.</p>
+<hr />
+<p>After applying the StatefulSet, we can check that we have 3 replicas running. This time, the name of the pods follow a ordering number:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>   <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">pg-0</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">62s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pg-1</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">32s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">pg-2</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">25s</span>
+</div></code></pre>
+<p>Also, confirm that we have 3 different PVC’s:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pvc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>       <span style="color: #e06c75;">STATUS</span>   <span style="color: #e06c75;">VOLUME</span>                                     <span style="color: #e06c75;">CAPACITY</span>   <span style="color: #e06c75;">ACCESS</span> <span style="color: #e06c75;">MODES</span>   <span style="color: #e06c75;">STORAGECLASS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">pvc-pg-0</span>   <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">pvc-f69c6af0-fc14-4e19-9c98-68ddbd69cbb5</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">local-path</span>     <span style="color: #e06c75;">86s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pvc-pg-1</span>   <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">pvc-ebee5b7f-2568-4c30-8e89-f34099036d0d</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">local-path</span>     <span style="color: #e06c75;">56s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">pvc-pg-2</span>   <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">pvc-08039a2b-d6a8-4777-a9d3-72c7b8860eea</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">local-path</span>     <span style="color: #e06c75;">49s</span>
+</div></code></pre>
+<p>And lastly, that we provisioned dynamically 3 persistent volumes, one for each replica:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pv</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                                       <span style="color: #e06c75;">CAPACITY</span>   <span style="color: #e06c75;">ACCESS</span> <span style="color: #e06c75;">MODES</span>   <span style="color: #e06c75;">RECLAIM</span> <span style="color: #e06c75;">POLICY</span>   <span style="color: #e06c75;">STATUS</span>   <span style="color: #e06c75;">CLAIM</span>              <span style="color: #e06c75;">STORAGECLASS</span>   <span style="color: #e06c75;">REASON</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">pvc-f69c6af0-fc14-4e19-9c98-68ddbd69cbb5</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">Delete</span>           <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">default/pvc-pg-0</span>   <span style="color: #e06c75;">local-path</span>              <span style="color: #e06c75;">116s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pvc-ebee5b7f-2568-4c30-8e89-f34099036d0d</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">Delete</span>           <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">default/pvc-pg-1</span>   <span style="color: #e06c75;">local-path</span>              <span style="color: #e06c75;">87s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">pvc-08039a2b-d6a8-4777-a9d3-72c7b8860eea</span>   <span style="color: #e06c75;">1Gi</span>        <span style="color: #e06c75;">RWO</span>            <span style="color: #e06c75;">Delete</span>           <span style="color: #e06c75;">Bound</span>    <span style="color: #e06c75;">default/pvc-pg-2</span>   <span style="color: #e06c75;">local-path</span>              <span style="color: #e06c75;">81s</span>
+</div></code></pre>
+<p>Such a <em>big Yay</em>! 🚀</p>
+<p>Now, we can <strong>scale up, down or perform rollout updates</strong> as many times as we want, scaling issues with stateful apps are gone!</p>
+<hr />
+<h2><a href="#-wrapping-up" aria-hidden="true" class="anchor" id="-wrapping-up"></a>🚀 Wrapping Up</h2>
+<p>Today we learned how to build stateful applications in Kubernetes using <strong>persistent volumes</strong> and how Deployments can lead to issues while scaling stateful applications.</p>
+<p>We’ve seen how <strong>StatefulSets</strong> are the best solution for this problem, by keeping <em>identity and ordering</em> during updates, avoiding data inconsistency.</p>
+<p><em>Stay tuned</em>, as the upcoming posts well continue to cover more workload resources in Kubernetes, such as DaemonSets, Jobs and CronJobs.</p>
+<p>Cheers!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

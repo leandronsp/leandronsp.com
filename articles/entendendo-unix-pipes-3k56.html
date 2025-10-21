@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entendendo UNIX pipes - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Basicamente, a todo comando UNIX é atribuído um conjunto de [streams](https://en.wikipedia.org/wiki/Standard_streams), que são canais de comunicação. Ou seja, um">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/entendendo-unix-pipes-3k56.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/entendendo-unix-pipes-3k56.html">
+  <meta property="og:title" content="Entendendo UNIX pipes">
+  <meta property="og:description" content="Basicamente, a todo comando UNIX é atribuído um conjunto de [streams](https://en.wikipedia.org/wiki/Standard_streams), que são canais de comunicação. Ou seja, um">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-06-15T03:35:29Z">
+  <meta property="article:tag" content="unix">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="pipe">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Entendendo UNIX pipes",
+    "datePublished": "2022-06-15T03:35:29Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Basicamente, a todo comando UNIX é atribuído um conjunto de [streams](https://en.wikipedia.org/wiki/Standard_streams), que são canais de comunicação. Ou seja, um",
+        "keywords": "unix, linux, pipe"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Entendendo UNIX pipes</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 15 Jun 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">unix</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">pipe</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Basicamente, a todo comando UNIX é atribuído um conjunto de <a href="https://en.wikipedia.org/wiki/Standard_streams">streams</a>, que são canais de comunicação. Ou seja, um comando pode enviar dados para uma stream de saída (STDOUT), ler dados de uma stream de entrada (STDIN) e escrever dados em uma stream de falhas/erros (STDERR).</p>
+<p>Cada stream é representada por um número inteiro através de <a href="https://en.wikipedia.org/wiki/File_descriptor">file descriptors</a>:</p>
+<ul>
+<li>0: stream de entrada</li>
+<li>1: stream de saída</li>
+<li>2: stream de erros</li>
+</ul>
+<h2><a href="#unix-e-comunicação-de-processos" aria-hidden="true" class="anchor" id="unix-e-comunicação-de-processos"></a>UNIX e comunicação de processos</h2>
+<p>Por padrão, processos no sistema operacional são isolados. Mas para uso real, um processo precisa se comunicar com outros através do <strong>envio de mensagens</strong>.</p>
+<p>Os streams de comunicação são, portanto, uma forma de comunicação <em>entre processos</em>, também chamada de <a href="https://en.wikipedia.org/wiki/Inter-process_communication">Inter-Process communication</a>, ou <strong>IPC</strong>.</p>
+<h2><a href="#redirecionamento-do-stdout" aria-hidden="true" class="anchor" id="redirecionamento-do-stdout"></a>Redirecionamento do STDOUT</h2>
+<p>Quando executamos comandos UNIX, a stream padrão de saída é o próprio screen, ou <code>STDOUT</code>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;Olá!&#39;</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Olá!</span>
+</div></code></pre>
+<p>Isto mostra no screen a palavra <code>Olá</code>. Mas podemos redirecionar o output para um arquivo à parte para ser <strong>consultado depois</strong>. Este redirecionamento deve ser feito com os sinais <code>&gt;</code> (para stdout e stderr) ou <code>&lt;</code> (para stdin).</p>
+<p>Em cada sinal deve ser prefixado o número do file descriptor correspondente.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># o stdout 1 está sendo redirecionado para out.log</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;Olá!&#39;</span> <span style="color: #56b6c2;">1</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">out.log</span> 
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">### DICA BÔNUS</span>
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># Se omitirmos o número do file descriptor, por padrão o UNIX</span>
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># entende que é o STDOUT!!!!1</span>
+</div><div class="line" data-line="8"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;Olá!&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">out.log</span> 
+</div></code></pre>
+<p>Com redirecionamento, o sistema “muda” o comportamento padrão do stream. Neste caso, não vemos mais a palavra sendo enviada para o screen. Precisamos então consultar o arquivo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">out.log</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Olá!</span>
+</div></code></pre>
+<h2><a href="#redirecionamento-do-stdin" aria-hidden="true" class="anchor" id="redirecionamento-do-stdin"></a>Redirecionamento do STDIN</h2>
+<p>Vamos imaginar um cenário onde queremos gerar hash de um conteúdo utilizando <code>md5</code>.</p>
+<p>O comando md5 recebe um arquivo como <strong>input</strong>. Como o STDIN por padrão lê do screen (e fica a espera de dados a partir do teclado), podemos redirecionar o STDIN (0) tal como fizemos com o STDOUT (1), de forma que o input seja lido a partir de um arquivo, e não do teclado:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">rawcontent.txt</span> <span style="color: #7f848e;"># redireciona stdout 1</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #d19a66;">0</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">rawcontent.txt</span>               <span style="color: #7f848e;"># redireciona stdin 0</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">2a5f942537474f69e4bca57711ae6ff2</span>
+</div></code></pre>
+<h2><a href="#e-o-stderr" aria-hidden="true" class="anchor" id="e-o-stderr"></a>E o STDERR?</h2>
+<p>Assim como fazemos para o STDOUT com o sinal <code>&gt;</code>, podemos redirecionar o STDERR (erros ocorridos durante o comando) para outro lugar:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #e06c75;">rawcontent.txt</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5err.log</span>
+</div></code></pre>
+<p>Nesse caso, como o comando não lança nenhum erro, o arquivo <code>md5err.log</code> está vazio e o output foi enviado para o STDOUT.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #e06c75;">filenotfound</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5err.log</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">md5err.log</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">md5:</span> <span style="color: #e06c75;">filenotfound:</span> <span style="color: #e06c75;">No</span> <span style="color: #e06c75;">such</span> <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">or</span> <span style="color: #e06c75;">directory</span>
+</div></code></pre>
+<p>Inclusive podemos fazer redirecionamento de todas as saídas no mesmo comando:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #e06c75;">rawcontent.txt</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5out.log</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5err.log</span>
+</div></code></pre>
+<p>Ou então, fazer com que o STDERR seja redirecionado para o STDOUT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #e06c75;">rawcontent.txt</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5out.log</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;&amp;</span><span style="color: #d19a66;">1</span>
+</div></code></pre>
+<h2><a href="#unix-pipelines" aria-hidden="true" class="anchor" id="unix-pipelines"></a>UNIX pipelines</h2>
+<p>E se quisermos continuar criando uma “pipeline” de transformação dos dados, de forma que ao fim do md5, queremos transformar o conteúdo em base64?</p>
+<p>Podemos continuar redirecionando “outs e ins” quantas vezes quisermos em múltiplos comandos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">rawcontent.txt</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">md5</span> <span style="color: #d19a66;">0</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">rawcontent.txt</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">md5content.txt</span>
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #d19a66;">0</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">md5content.txt</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">MmE1Zjk0MjUzNzQ3NGY2OWU0YmNhNTc3MTFhZTZmZjIK</span>
+</div></code></pre>
+<p>Mas esta cadeia de múltiplos comandos ficaria ilegível e difícil de manter. Sem contar que tantos aquivos de redirecionamento vão ficar ocupando espaço de armazenamento o que nos obrigaria a ter uma rotina para apagar tais arquivos.</p>
+<p>Podemos recorrer aos <strong><a href="https://en.wikipedia.org/wiki/Anonymous_pipe">pipes anônimos</a></strong> <code>|</code>, ou <strong>unnamed pipes</strong>, que basicamente <em>redirecionam o stdout de um comando para o stdin do outro comando na sequência</em>.</p>
+<p>E diferente dos arquivos de redirecionamento, os pipes anônimos funcionam como file descriptor “temporários” que são apagados ao término do comando.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">md5</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">base64</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">MmE1Zjk0MjUzNzQ3NGY2OWU0YmNhNTc3MTFhZTZmZjIK</span>
+</div></code></pre>
+<p>Lindo, não é?</p>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Neste artigo, tentei demonstrar o funcionamento básico de UNIX pipelines, que utilizam <strong>pipes anônimos</strong> para que diferentes processos possam comunicar entre si.</p>
+<p><a href="https://dev.to/____marcell/bidirectional-piping-how-to-make-two-programs-communicate-with-each-other-2ke9">Este artigo do Marcell Cruz</a> é bastante elucidativo e me ajudou a despertar interesse em dissecar o tema para produzir mais conteúdo de UNIX em pt-BR.</p>
+<p>No <a href="https://dev.to/leandronsp/implementando-um-simples-background-job-com-unix-named-pipes-3eja">artigo a seguir</a> mostro como funcionam <strong>UNIX named pipes</strong> e como isto abre portas para a implementação de um simples background job em Shell script.</p>
+<p>Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

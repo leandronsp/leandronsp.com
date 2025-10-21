@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construindo um web server em Assembly x86, parte I, introdução - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="_Assembly_. 
+
+Para alguns, um monstrinho. Pra outros, algo antiquado. Mas pra quem tem curiosidade em entender como as coisas funcionam, **oportunidade**.
+
+Nesta">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html">
+  <meta property="og:title" content="Construindo um web server em Assembly x86, parte I, introdução">
+  <meta property="og:description" content="_Assembly_. 
+
+Para alguns, um monstrinho. Pra outros, algo antiquado. Mas pra quem tem curiosidade em entender como as coisas funcionam, **oportunidade**.
+
+Nesta">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-04-09T03:51:43Z">
+  <meta property="article:tag" content="assembly">
+      <meta property="article:tag" content="braziliandevs">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Construindo um web server em Assembly x86, parte I, introdução",
+    "datePublished": "2024-04-09T03:51:43Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "_Assembly_. 
+
+Para alguns, um monstrinho. Pra outros, algo antiquado. Mas pra quem tem curiosidade em entender como as coisas funcionam, **oportunidade**.
+
+Nesta",
+        "keywords": "assembly, braziliandevs"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, parte I, introdução</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 09 Apr 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">assembly</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><em>Assembly</em>.</p>
+<p>Para alguns, um monstrinho. Pra outros, algo antiquado. Mas pra quem tem curiosidade em entender como as coisas funcionam, <strong>oportunidade</strong>.</p>
+<p>Nesta saga que será uma série de artigos, vamos explorar Assembly com NASM para arquitetura <em>x86-64</em> em GNU/Linux enquanto desenvolvemos um web server multi-thread bastante simples.</p>
+<p>O intuito não está nas capacidades do web server em si, pois este irá apenas responder uma mensagem “Hello, world” em formato HTML, mas sim nos conceitos utilizados para construi-lo.</p>
+<p>Para quem não tem muita familiaridade com conceitos de mais baixo-nível em computação e concorrência, não se preocupe, pois queremos com este guia fazer com que temas que são vistos como “complexos” possam ser absorvidos com mais facilidade a quem tem curiosidade, podendo então causar aquela boa impressão no churrasco de domingo ou no jantar de Natal.</p>
+<blockquote>
+<p>To brincando gente, tá proibido falar de Assembly nestas ocasiões, por favor não façam isso eu imploro</p>
+</blockquote>
+<hr />
+<h2><a href="#conteúdo-proposto" aria-hidden="true" class="anchor" id="conteúdo-proposto"></a>Conteúdo proposto</h2>
+<p>Ao longo dos artigos vamos passar por diversos conceitos de computação, sendo alguns de forma superficial e outros com um pouco mais de profundidade, podendo mencionar alguns:</p>
+<ul>
+<li>Arquitetura de computadores</li>
+<li>Tipos de arquiteturas</li>
+<li>Padrões, sistema binário e hexadecimal</li>
+<li>Básicos de Assembly x86-64</li>
+<li>Debugging com GDB</li>
+<li>Filesystem, Sockets</li>
+<li>Threads, pool e alocação de memória</li>
+<li>Arrays, filas, ponteiros</li>
+<li>Concorrência e primitivos de sincronização como spinlocks e futex</li>
+<li>Tag <code>h1</code> do HTML (LOL)</li>
+</ul>
+<p>Poderá haver mais conceitos a serem abordados, mas que serão mapeados e detalhados conforme necessidade.</p>
+<hr />
+<h2><a href="#é-um-tutorial-de-assembly" aria-hidden="true" class="anchor" id="é-um-tutorial-de-assembly"></a>É um tutorial de Assembly?</h2>
+<p>Definitivamente, não.</p>
+<p>A ideia aqui é desenvolver de forma prática um servidor web enquanto passamos por conceitos de Assembly e não só, mas também outros temas importantes sobre concorrência.</p>
+<p>Se quer fazer um tutorial rápido para se familiarizar com Assembly x86, há <a href="https://www.tutorialspoint.com/assembly_programming/index.htm">este do tutorials point</a>, mas atenção que ele é para 32-bits, sendo que nosso guia será feito em 64-bits (uma vez entendido os conceitos, fica fácil transportar).</p>
+<hr />
+<h2><a href="#é-um-curso-de-assembly" aria-hidden="true" class="anchor" id="é-um-curso-de-assembly"></a>É um curso de Assembly?</h2>
+<p><em>Hell no</em>.</p>
+<p>Obviamente, vamos aprender diversos conceitos à medida que avançamos na saga, mas se você tem algum interesse em aprender fundamentos de Assembly de forma bastante didática, sugiro acompanhar a playlist de <a href="https://www.youtube.com/live/Ej6U-qk0bdE?feature=shared">Fundamentos de Assembly x86-64</a> do Blau Araújo. Ele é referência no assunto em conteúdo pt-BR e já cortou muito mato neste assunto.</p>
+<hr />
+<h2><a href="#requisitos-de-ambiente" aria-hidden="true" class="anchor" id="requisitos-de-ambiente"></a>Requisitos de ambiente</h2>
+<p>É esperado que o código seja executado em um sistema UNIX-based, preferencialmente GNU/Linux x86_64 que é onde testamos o código proposto.</p>
+<ul>
+<li>Sistema Operacional Ubuntu 22.04.4 LTS (GNU/Linux 6.5.0-17-generic x86_64)</li>
+<li>NASM 2.16.01</li>
+<li>GNU ld 2.38 (binutils)</li>
+</ul>
+<p>E para debugging (claro, nesta casa fazemos debugging, não somos brincalhões):</p>
+<ul>
+<li>GNU gdb 12.1</li>
+<li>strace 5.16</li>
+</ul>
+<p>Para outros ambientes, pode-se optar por rodar o código dentro de um container Docker, seguindo as versões acima apresentadas.</p>
+<p>Exemplo de <strong>Dockerfile</strong> (validar isto plmdds):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">FROM</span> <span style="color: #e06c75;">ubuntu</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">RUN</span> <span style="color: #e06c75;">apt-get</span> <span style="color: #e06c75;">update</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #61afef;">apt-get</span> <span style="color: #e06c75;">-y</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">make</span> <span style="color: #e06c75;">binutils</span> <span style="color: #e06c75;">gdb</span> <span style="color: #e06c75;">build-essential</span> <span style="color: #e06c75;">wget</span> <span style="color: #e06c75;">strace</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">WORKDIR</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">RUN</span> <span style="color: #e06c75;">wget</span> <span style="color: #e06c75;">https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/nasm-2.16.01.tar.gz</span> <span style="color: #e06c75;">-O</span> <span style="color: #e06c75;">nasm.tar.gz</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #61afef;">tar</span> <span style="color: #e06c75;">-xzvf</span> <span style="color: #e06c75;">nasm.tar.gz</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e5c07b;">cd</span> <span style="color: #e06c75;">nasm-2.16.01</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #61afef;">./configure</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #61afef;">make</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #61afef;">make</span> <span style="color: #e06c75;">install</span>
+</div></code></pre>
+<hr />
+<h2><a href="#será-que-consigo-acompanhar" aria-hidden="true" class="anchor" id="será-que-consigo-acompanhar"></a>Será que consigo acompanhar?</h2>
+<p>Você pode apenas ler e tentar entender os conceitos, ou então ser mais hands-on e escrever código à medida que avança nos artigos.</p>
+<p>Recomendo fortemente que experimente o código e rode em seu próprio computador seguindo os requisitos de ambiente, seja em host, virtualizado ou containerizado.</p>
+<p>O repositório com o código completo pode ser encontrado em <a href="https://github.com/leandronsp/magali">leandronsp/magali</a>.</p>
+<hr />
+<p>Este artigo é o primeiro de uma série que vamos explorar sobre Assembly x86-64 enquanto desenvolvemos um web server do zero, sem enrolação e com muita mão na massa.</p>
+<p>No próximo artigo já iremos começar com introdução a arquiteturas de computadores e o básico necessário com as terminologias e um pouco de história dos computadores, padrões e linguagens Assembly.</p>
+<p>Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arrays em Assembly x86 - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Recentemente escrevi [uma saga de 6 artigos](https://dev.to/leandronsp/series/27062) sobre Assembly x86, abordando conceitos fundamentais de arquitetura de compu">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html">
+  <meta property="og:title" content="Arrays em Assembly x86">
+  <meta property="og:description" content="Recentemente escrevi [uma saga de 6 artigos](https://dev.to/leandronsp/series/27062) sobre Assembly x86, abordando conceitos fundamentais de arquitetura de compu">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-08-17T21:49:05Z">
+  <meta property="article:tag" content="assembly">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Arrays em Assembly x86",
+    "datePublished": "2024-08-17T21:49:05Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Recentemente escrevi [uma saga de 6 artigos](https://dev.to/leandronsp/series/27062) sobre Assembly x86, abordando conceitos fundamentais de arquitetura de compu",
+        "keywords": "assembly"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Arrays em Assembly x86</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 17 Aug 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">assembly</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Recentemente escrevi <a href="https://dev.to/leandronsp/series/27062">uma saga de 6 artigos</a> sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level enquanto ia desenvolvendo um web server minimalista multi-threaded.</p>
+<p>Durante o processo, acabei deixando de lado alguns conceitos importantes para artigos posteriores, pois se fosse abordar durante a saga, iria ficar maior do que já foi. Entretanto são conceitos que podem ser tratados à parte, como no caso das filas implementadas na thread pool.</p>
+<p>E quando falamos de filas, <strong>fica inevitável abordar arrays</strong> e como estes são organizados na memória do computador.</p>
+<p>Neste artigo, vamos abordar conceitos fundamentais como manipulação de memória, registradores e memória heap ao longo da implementação de arrays.</p>
+<blockquote>
+<p>Vou assumir que você já tem familiaridade com Assembly x86 e a ferramenta GDB. Caso não tenha, recomendo fortemente a leitura da minha saga.</p>
+</blockquote>
+<hr />
+<h2><a href="#agenda" aria-hidden="true" class="anchor" id="agenda"></a>Agenda</h2>
+<ul>
+<li><a href="#arrays-n%C3%A3o-existem">Arrays não existem</a></li>
+<li><a href="#strings-tamb%C3%A9m-n%C3%A3o-existem">Strings também não existem</a></li>
+<li><a href="#o-array-mais-simples-do-universo">O array mais simples do universo</a></li>
+<li><a href="#utilizando-um-array-com-dados-n%C3%A3o-inicializados">Utilizando um array com dados não inicializados</a>
+<ul>
+<li><a href="#%C3%ADndice-para-o-resgate">Índice para o resgate</a></li>
+<li><a href="#atingindo-o-limite-do-array">Atingindo o limite do array</a></li>
+</ul>
+</li>
+<li><a href="#heap-heap-horray">Heap, heap, hooray!</a>
+<ul>
+<li><a href="#aloca%C3%A7%C3%A3o-din%C3%A2mica-de-mem%C3%B3ria-com-brk">Alocação dinâmica de memória com brk</a></li>
+<li><a href="#ponteiros-ponteiros-everywhere">Ponteiros, ponteiros everywhere</a></li>
+<li><a href="#resize-com-brk">Resize com brk</a></li>
+</ul>
+</li>
+<li><a href="#o-programa-final">O programa final</a></li>
+<li><a href="#conclus%C3%A3o">Conclusão</a></li>
+<li><a href="#refer%C3%AAncias">Referências</a></li>
+</ul>
+<hr />
+<h2><a href="#arrays-não-existem" aria-hidden="true" class="anchor" id="arrays-não-existem"></a>Arrays não existem</h2>
+<p><em>Arrays não existem.</em> Simples assim.</p>
+<p>Como vimos <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">na parte IV</a> da saga, a memória é organizada de forma contígua, onde as informações são alocadas uma após a outra.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u90q0z4ka96nccs1syef.png" alt="memoria é contígua" /></p>
+<p>Supondo que queremos declarar a seguinte sequência de informações:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">1, 2, &#39;H&#39;, 0
+</div></code></pre>
+<blockquote>
+<p>Eu sei, eu sei, os tipos estão misturados, mas isto não importa para este momento. Todos eles cabem em 1 byte</p>
+</blockquote>
+<p>Em assembly x86 (vamos chamar de asm no restante do artigo), podemos declarar estas informações da seguinte forma na seção de dados:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">stuff: db 0x1, 0x2, 0x48, 0x0
+</div></code></pre>
+<blockquote>
+<p>Lembrando que o caracter ‘H’ na tabela ASCII representa 0x48 em hexadecimal</p>
+</blockquote>
+<p>Ao utilizarmos o <code>gdb</code> para fazer debugging, podemos confirmar que esta sequência de hexadecimal no rótulo <code>stuff</code> está armazenada da seguinte forma:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Leitura do primeiro hexabyte em stuff</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x/1xb</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">void*</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">stuff</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">stuff</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x01</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># Leitura do segundo hexabyte em stuff</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">x/1xb</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">void*</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">stuff+1</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">0x402001:</span>       <span style="color: #d19a66;">0x02</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #7f848e;"># Leitura do terceiro hexabyte em stuff</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">x/1xb</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">void*</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">stuff+2</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">0x402002:</span>       <span style="color: #d19a66;">0x48</span>
+</div></code></pre>
+<p>Podemos também representar o hexadecimal <code>0x48</code> em formato de string utilizando <code>x/s</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x/s</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">void*</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">stuff+2</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">0x402002:</span>       <span style="color: #98c379;">&quot;H&quot;</span>
+</div></code></pre>
+<p><em>É tudo hexadecimal!</em></p>
+<p>Com isto, caso queiramos representar a string “Hello”, de acordo com a tabela ASCII, poderia ficar assim:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">msg: db 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x0
+</div></code></pre>
+<p>No gdb vamos verificar a representação string do rótulo <code>msg</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x/s <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">msg</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">msg</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span> <span style="color: #98c379;">&quot;Hello&quot;</span>
+</div></code></pre>
+<p>Em asm, é possível declarar a string já com a representação direta da tabela ASCII:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">msg: db &quot;Hello&quot;, 0x0
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">; é o mesmo que
+</div><div class="line" data-line="5">; msg: db 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x0
+</div></code></pre>
+<hr />
+<h2><a href="#strings-também-não-existem" aria-hidden="true" class="anchor" id="strings-também-não-existem"></a>Strings também não existem</h2>
+<p>Ou seja, é tudo hexadecimal na memória. Um array, assim como uma string, é simplesmente uma sequência contígua de dados <strong>com mesmo tamanho</strong> na memória.</p>
+<p>A diferença é que a string é um “array especial” que tem dados que representam caracteres da tabela ASCII (note que ambos precisam delimitar um byte “final” para representar o término da string ou array):</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dw5cjo8fvoh7rvp8t2l3.png" alt="string e array" /></p>
+<h2><a href="#o-array-mais-simples-possível" aria-hidden="true" class="anchor" id="o-array-mais-simples-possível"></a>O array mais simples possível</h2>
+<p>A seguir temos a implementação de um array bastante simples em asm, pelo que iremos explorar cada passo nas seções subsequentes:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_exit 60
+</div><div class="line" data-line="4">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">section .data
+</div><div class="line" data-line="7">array: db 1, 2, 3, 0
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">section .text
+</div><div class="line" data-line="10">_start:
+</div><div class="line" data-line="11">	mov al, [array]        ; array[0]
+</div><div class="line" data-line="12">	mov bl, [array + 1]    ; array[1]
+</div><div class="line" data-line="13">	mov cl, [array + 2]    ; array[2]
+</div><div class="line" data-line="14">	mov sil, [array + 3]   ; array[3]
+</div><div class="line" data-line="15">.exit:
+</div><div class="line" data-line="16">	mov rdi, EXIT_SUCCESS
+</div><div class="line" data-line="17">	mov rax, SYS_exit
+</div><div class="line" data-line="18">	syscall
+</div></code></pre>
+<p>Na seção de dados inicializados <code>.data</code>, declaramos um array com 3 elementos de 1 byte cada (inteiros de 1 a 3), utilizando o número 0 como término do array:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .data
+</div><div class="line" data-line="2">array: db 1, 2, 3, 0
+</div></code></pre>
+<p>A seguir, na seção <code>.text</code>, que é onde vai o código fonte do programa, podemos acessar os elementos do array utilizando aritmética de ponteiros, armazenando o resultado em registradores:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .text
+</div><div class="line" data-line="2">_start:
+</div><div class="line" data-line="3">mov al, [array]        ; array[0]
+</div></code></pre>
+<p>No código acima, estamos acessando o valor contido no endereço de memória <code>0x402000</code> e armazenando o resultado em um registrador (AL) que tem o tamanho de 1 byte, ou seja, vai ser armazenado no registrador apenas o primeiro byte do array.</p>
+<p>Vamos conferir com gdb:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># O array está armazenado no endereço 0x402000</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;"># e contém o valor em hexa 0x00 0x03 0x02 0x01,</span>
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># lembrando que esta arquitetura utiliza o formato little-endian</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00030201</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">b</span> <span style="color: #d19a66;">13</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">run</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">next</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #7f848e;"># No registrador AL temos o primeiro elemento do array</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">i</span> <span style="color: #e06c75;">r</span> <span style="color: #e06c75;">al</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">al</span>             <span style="color: #d19a66;">0x1</span>                 <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #7f848e;"># É o mesmo que acessar o primeiro hexabyte contido no endereço</span>
+</div><div class="line" data-line="16"><span style="color: #7f848e;"># 0x402000</span>
+</div><div class="line" data-line="17"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">x/1xb</span> <span style="color: #d19a66;">0x402000</span>
+</div><div class="line" data-line="18"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x01</span>
+</div><div class="line" data-line="19">
+</div></code></pre>
+<blockquote>
+<p>Lembrando que o registrador AL representa os 8-bits menores dentro do espectro do registrador RAX que contempla um total de 64-bits na arquitetura x86_64</p>
+</blockquote>
+<p>Para acessar os demais elementos do array, basta fazer aritmética de ponteiros e ir armazenando em outros registradores de 1 byte:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov al, [array]        ; array[0] =&gt; 1
+</div><div class="line" data-line="2">mov bl, [array + 1]    ; array[1] =&gt; 2
+</div><div class="line" data-line="3">mov cl, [array + 2]    ; array[2] =&gt; 3
+</div><div class="line" data-line="4">mov sil, [array + 3]   ; array[3] =&gt; 0 (aqui termina o array)
+</div></code></pre>
+<hr />
+<h2><a href="#utilizando-um-array-com-dados-não-inicializados" aria-hidden="true" class="anchor" id="utilizando-um-array-com-dados-não-inicializados"></a>Utilizando um array com dados não inicializados</h2>
+<p>Até agora, estamos declarando o array na seção <code>.data</code> onde os dados são inicializados. Mas podemos deixar o programa mais “dinâmico”, declarando o array na seção de dados <strong>não inicializados</strong>, que é a <code>.bss</code>.</p>
+<p>Mantendo a compatibilidade com o exemplo anterior, vamos declarar um array de 4 bytes utilizando a diretiva <code>resb</code> que significa “reserve byte”, onde os 3 primeiros bytes são reservados para armazenar elementos do array e o último byte representando 0x0 que é o término do array.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">section .bss
+</div><div class="line" data-line="2">array: resb 4 ; 3 bytes + 1 byte de término
+</div></code></pre>
+<p>No gdb, podemos ver que o array está inicializado com os valores tudo a zero, o que indica que o array está vazio mas com 4 bytes reservados:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x/4xb <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00</span>    <span style="color: #d19a66;">0x00</span>    <span style="color: #d19a66;">0x00</span>    <span style="color: #d19a66;">0x00</span>
+</div></code></pre>
+<p>Para adicionar elementos no array, precisamos também utilizar aritmética de ponteiros, tal como fizemos no exemplo anterior para acessar um array com dados pré-inicializados.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">; Move o valor 1 para o primeiro byte do endereço de memória em array
+</div><div class="line" data-line="2">mov byte [array], 1  ; array[0] = 1
+</div></code></pre>
+<p>Com gdb confirmamos que no endereço 0x402000 que é onde está o array, foi adicionado o byte 1:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000001</span>
+</div></code></pre>
+<p>E se quisermos adicionar o valor 2 no próximo byte do array?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov byte [array + 1], 2
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000201</span>
+</div></code></pre>
+<p>Repare que o que modifica é o “índice” do array. Na posição inicial do array, é como se o índice fosse zero, e na posição subsequente, utilizamos o índice 1, podendo incrementar até o término array.</p>
+<p>Seria muito complicado ficar manipulando índice hard-coded. Precisamos de um <em>ponteiro</em> para representar este índice.</p>
+<h3><a href="#índice-para-o-resgate" aria-hidden="true" class="anchor" id="índice-para-o-resgate"></a>Índice para o resgate</h3>
+<p>Assumindo que o ponteiro do array começa com <em>zero</em>, que é o endereço de memória onde está o array, podemos declará-lo na seção de dados inicializados <code>.data</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">section</span> <span style="color: #e06c75;">.bss</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">array:</span> <span style="color: #e06c75;">resb</span> <span style="color: #d19a66;">4</span> <span style="color: #abb2bf;">;</span> <span style="color: #d19a66;">3</span> <span style="color: #e06c75;">bytes</span> <span style="color: #e06c75;">+</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">byte</span> <span style="color: #e06c75;">de</span> <span style="color: #e06c75;">término</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #61afef;">section</span> <span style="color: #e06c75;">.data</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pointer:</span> <span style="color: #e06c75;">db</span> <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>Logo, poderíamos adicionar o primeiro elemento da seguinte forma, certo?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov byte [array + pointer], 1   ; array + 0
+</div></code></pre>
+<p>Ao rodar o programa, temos o seguinte erro:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">src/live.asm:14: error: invalid effective address: multiple base segments
+</div></code></pre>
+<p><strong>Este erro indica que estamos tentando fazer manipulação de ponteiros a partir de múltiplos segmentos na memória</strong>, no caso o array e pointer.</p>
+<p>Para resolver isto, precisamos fazer manipulação de ponteiros com valores imediatos (que foi o caso anterior com número hard-coded) ou com registradores:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">; append(1)
+</div><div class="line" data-line="2">mov al, byte [pointer]
+</div><div class="line" data-line="3">mov byte [array + rax], 1   ; array + 0
+</div></code></pre>
+<ul>
+<li>a primeira instrução move o primeiro byte contido no endereço de <code>pointer</code> e armazena no registrador AL</li>
+<li>a segunda instrução move o valor imediato 1 (elemento do array) para o endereço de memória do array. Como em RAX (versão 64-bits de AL) temos o valor <code>0x0</code> que representa o ponteiro, então estamos fazendo a inserção no primeiro byte do array</li>
+</ul>
+<p>E para armazenar o segundo elemento no array?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">; append(2)
+</div><div class="line" data-line="2">mov al, byte [pointer]
+</div><div class="line" data-line="3">mov byte [array + rax], 2
+</div></code></pre>
+<p>No gdb, vamos verificar o que está acontecendo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000002</span>
+</div></code></pre>
+<p><em>Uh, oh…</em> Desta forma estamos sobrescrevendo o valor anterior. Queremos na verdade que o ponteiro “ande”, ou seja, precisa ser incrementado em um byte para que o <code>append(2)</code> resulte com os 2 elementos no array.</p>
+<p>Com a instrução <code>INC</code> podemos resolver este problema:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov al, byte [pointer]      ; pointer -&gt; 0
+</div><div class="line" data-line="2">mov byte [array + rax], 1   ; array + 0
+</div><div class="line" data-line="3">inc byte [pointer]          ; pointer -&gt; 1
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">mov al, byte [pointer]
+</div><div class="line" data-line="6">mov byte [array + rax], 2   ; array + 1
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000201</span>
+</div></code></pre>
+<p><em>Yay!</em> Que dia maravilhoso!</p>
+<h3><a href="#atingindo-o-limite-do-array" aria-hidden="true" class="anchor" id="atingindo-o-limite-do-array"></a>Atingindo o limite do array</h3>
+<p>E se continuarmos incrementando o ponteiro até atingir o limite do array?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov al, byte [pointer]
+</div><div class="line" data-line="2">mov byte [array + rax], 1   ; array + 0
+</div><div class="line" data-line="3">inc byte [pointer]
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">mov al, byte [pointer]
+</div><div class="line" data-line="6">mov byte [array + rax], 2   ; array + 1
+</div><div class="line" data-line="7">inc byte [pointer]
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">mov al, byte [pointer]
+</div><div class="line" data-line="10">mov byte [array + rax], 3   ; array + 2
+</div><div class="line" data-line="11">inc byte [pointer]
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Lendo os primeiros 4 hexabytes do array, temos a representação</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;"># do array cheio com todos os espaços ocupados, lembrando que</span>
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># o último byte é o término do array</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #e06c75;">/4xb</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x01</span>    <span style="color: #d19a66;">0x02</span>    <span style="color: #d19a66;">0x03</span>    <span style="color: #d19a66;">0x00</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># O ponteiro está no fim do array</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="9"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x03</span>
+</div></code></pre>
+<p>Maravilha, e se adicionar mais um elemento, nosso programa deveria permitir?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov al, byte [pointer]
+</div><div class="line" data-line="2">mov byte [array + rax], 4   ; array + 3
+</div><div class="line" data-line="3">inc byte [pointer]
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Não deveríamos permitir que mais um elemento fosse adicionado,</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;"># pois nosso array já estava cheio</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #e06c75;">/4xb</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x01</span>    <span style="color: #d19a66;">0x02</span>    <span style="color: #d19a66;">0x03</span>    <span style="color: #d19a66;">0x04</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># O ponteiro está para além da capacidade array (not good...)</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="8"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x04</span>
+</div></code></pre>
+<p>Vamos utilizar um jump condicional (explico mais sobre isto na <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">saga</a>) para não permitir que o elemento seja adicionado. Com isto, antes de fazer o append no array, devemos verificar se o ponteiro já não está no fim do array:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">cmp byte [pointer], 3   ; verifica se o array está cheio
+</div><div class="line" data-line="2">je .exit                ; salta para a rotina .exit caso a flag seja levantada
+</div></code></pre>
+<p>Assim fica o programa completo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_exit 60
+</div><div class="line" data-line="4">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">section .bss
+</div><div class="line" data-line="7">array: resb 4 ; 3 bytes + 1 byte de término
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">section .data
+</div><div class="line" data-line="10">pointer: db 0
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12">section .text
+</div><div class="line" data-line="13">_start:
+</div><div class="line" data-line="14">	cmp byte [pointer], 3   ; verifica se o array está cheio
+</div><div class="line" data-line="15">	je .exit
+</div><div class="line" data-line="16">	
+</div><div class="line" data-line="17">	mov al, byte [pointer]
+</div><div class="line" data-line="18">	mov byte [array + rax], 1   ; array + 0
+</div><div class="line" data-line="19">	inc byte [pointer]
+</div><div class="line" data-line="20">	
+</div><div class="line" data-line="21">	cmp byte [pointer], 3   ; verifica se o array está cheio
+</div><div class="line" data-line="22">	je .exit
+</div><div class="line" data-line="23">
+</div><div class="line" data-line="24">	mov al, byte [pointer]
+</div><div class="line" data-line="25">	mov byte [array + rax], 2   ; array + 1
+</div><div class="line" data-line="26">	inc byte [pointer]
+</div><div class="line" data-line="27">
+</div><div class="line" data-line="28">	cmp byte [pointer], 3   ; verifica se o array está cheio
+</div><div class="line" data-line="29">	je .exit
+</div><div class="line" data-line="30">
+</div><div class="line" data-line="31">	mov al, byte [pointer]
+</div><div class="line" data-line="32">	mov byte [array + rax], 3   ; array + 2
+</div><div class="line" data-line="33">	inc byte [pointer]
+</div><div class="line" data-line="34">
+</div><div class="line" data-line="35">	cmp byte [pointer], 3   ; verifica se o array está cheio
+</div><div class="line" data-line="36">	je .exit
+</div><div class="line" data-line="37">
+</div><div class="line" data-line="38">	; não deveria permitir adicionar o quarto elemento,
+</div><div class="line" data-line="39">	; pois o array suporta até 3 elementos. desta forma,
+</div><div class="line" data-line="40">	; estaríamos escrevendo no endereço de memória de outros
+</div><div class="line" data-line="41">	; dados do programa
+</div><div class="line" data-line="42">	mov al, byte [pointer]
+</div><div class="line" data-line="43">	mov byte [array + rax], 4   ; array + 3
+</div><div class="line" data-line="44">	inc byte [pointer]
+</div><div class="line" data-line="45">.exit:
+</div><div class="line" data-line="46">	mov rdi, EXIT_SUCCESS
+</div><div class="line" data-line="47">	mov rax, SYS_exit
+</div><div class="line" data-line="48">	syscall
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x00000003</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00030201</span>
+</div></code></pre>
+<p>Perfeito, vamos agora fazer um pequeno refactoring no código separando a lógica de append para uma subrotina:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_exit 60
+</div><div class="line" data-line="4">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="5">%define CAPACITY 3
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">section .bss
+</div><div class="line" data-line="8">array: resb CAPACITY + 1
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">section .data
+</div><div class="line" data-line="11">pointer: db 0
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">section .text
+</div><div class="line" data-line="14">_start:
+</div><div class="line" data-line="15">	mov rdi, 1
+</div><div class="line" data-line="16">	call .append
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18">	mov rdi, 2
+</div><div class="line" data-line="19">	call .append
+</div><div class="line" data-line="20">
+</div><div class="line" data-line="21">	mov rdi, 3
+</div><div class="line" data-line="22">	call .append
+</div><div class="line" data-line="23">
+</div><div class="line" data-line="24">	mov rdi, 4
+</div><div class="line" data-line="25">	call .append
+</div><div class="line" data-line="26">.exit:
+</div><div class="line" data-line="27">	mov rdi, EXIT_SUCCESS
+</div><div class="line" data-line="28">	mov rax, SYS_exit
+</div><div class="line" data-line="29">	syscall
+</div><div class="line" data-line="30">.append:
+</div><div class="line" data-line="31">	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
+</div><div class="line" data-line="32">	je .done
+</div><div class="line" data-line="33">
+</div><div class="line" data-line="34">	mov al, byte [pointer]
+</div><div class="line" data-line="35">	mov byte [array + rax], dil
+</div><div class="line" data-line="36">	inc byte [pointer]
+</div><div class="line" data-line="37">.done:
+</div><div class="line" data-line="38">	ret
+</div></code></pre>
+<blockquote>
+<p>Se você quer entender mais sobre conditional jump, rotinas, call, ret e flags, sugiro a leitura da minha saga que foi referenciada diversas vezes neste artigo</p>
+</blockquote>
+<p>Executando com gdb e…</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00030201</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x00000003</span>
+</div></code></pre>
+<p>Um grande <em>Yay!</em></p>
+<p>Entretanto, podem haver situações onde queremos que nosso array seja <em>redimensionado</em> para suportar mais elementos, ou seja, o tamanho do array seria dinâmico.</p>
+<p>Como adicionar mais elementos além da <em>capacidade inicial</em> de forma que não podemos escrever em outras áreas da memória que pertencem ao array?</p>
+<hr />
+<h2><a href="#heap-heap-hooray" aria-hidden="true" class="anchor" id="heap-heap-hooray"></a>Heap, heap, hooray!</h2>
+<p>Antes de falar sobre o heap, vamos relembrar como funciona o layout de memória de um programa de computador:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s81vxvgfylw0wfcf6if7.png" alt="layout de memória" /></p>
+<ul>
+<li>o layout é representado como uma área na memória do computador onde temos os endereços de memória mais baixos do programa em direção aos endereços mais altos que ficam no topo</li>
+<li>nos endereços de memória mais baixos, temos a seção <code>.text</code>, onde já vimos que é referente ao programa em si</li>
+<li>depois temos a <strong>seção de dados</strong> que contempla os dados inicializados <code>.data</code> e a seção a seguir que representa os dados não-inicializados <code>.bss</code></li>
+<li>nos endereços mais altos, temos a <em>stack</em> do programa, que armazena metadados tais como o nome do programa, seus argumentos e qualquer informação do programa que tenha um tamanho fixo cabendo dentro da stack, bem como chamadas de funções e seus respectivos argumentos</li>
+<li>a stack tem um formato de <em>pilha</em> e “cresce pra baixo”, ou seja, conforme adicionamos elementos na stack, esta cresce em direção aos endereços mais baixos na memória</li>
+</ul>
+<p>No “meio” do layout, entre a seção de dados e a stack, temos uma grande área na memória que muitos acabam associando como <em>heap</em>. No heap, podemos alocar dados de forma dinâmica, diferente da forma estática que fazemos na seção de dados.</p>
+<p>Para acomodar um array de tamanho dinâmico que suporte redimensionamento (resize), temos de alocar memória nesta área.</p>
+<blockquote>
+<p>Neste artigo, vamos chamar esta região no meio da memória que fica entre a seção de dados e a stack de <strong>heap</strong></p>
+</blockquote>
+<h3><a href="#alocação-dinâmica-de-memória-com-brk" aria-hidden="true" class="anchor" id="alocação-dinâmica-de-memória-com-brk"></a>Alocação dinâmica de memória com brk</h3>
+<p>Uma das formas de manipular esta área da memória é através da <a href="https://man7.org/linux/man-pages/man2/brk.2.html">syscall brk</a>, que muda o <em>program break</em>, que é <strong>onde termina a seção de dados</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3c703vs0c7bl1eosh5i8.png" alt="program break" /></p>
+<p>Com <code>brk</code>, podemos modificar esse <em>program break</em> para endereços mais altos, ou seja, permitindo a manipulação de áreas na memória que vão além da seção de programa e dados.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jh2x79f2nb1m1v4dcaxe.png" alt="program break visualizado" /></p>
+<p>A primeira coisa que precisamos fazer é mapear a syscall e fazer a chamada que traz o endereço do break atual:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define SYS_brk 12
+</div><div class="line" data-line="2">....
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">section .text
+</div><div class="line" data-line="5">_start:
+</div><div class="line" data-line="6">; syscall para acessar o program break (0x403000), que é onde termina 
+</div><div class="line" data-line="7">; a seção de dados e começa o heap
+</div><div class="line" data-line="8">mov rdi, 0
+</div><div class="line" data-line="9">mov rax, SYS_brk
+</div><div class="line" data-line="10">syscall
+</div><div class="line" data-line="11">....
+</div></code></pre>
+<p>Com gdb, vamos analisar o estado do programa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Breakpoint na linha da syscall brk</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">b</span> <span style="color: #d19a66;">18</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">run</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># O início do programa fica na seção .text e começa com </span>
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># 0x401000</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #e06c75;">_start</span>
+</div><div class="line" data-line="8"><span style="color: #d19a66;">0x401000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">_start</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>      <span style="color: #61afef;">0x000000bf</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;"># O pointer está na seção .data um pouco mais acima e começa com</span>
+</div><div class="line" data-line="11"><span style="color: #7f848e;"># 0x402000</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="13"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #7f848e;"># O array está na seção .bss um pouco mais acima e começa com </span>
+</div><div class="line" data-line="16"><span style="color: #7f848e;"># 0x402004</span>
+</div><div class="line" data-line="17"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="18"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20"><span style="color: #7f848e;"># Executa a syscall brk</span>
+</div><div class="line" data-line="21"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23"><span style="color: #7f848e;"># A syscall brk armazena em RAX o endereço de memória do program break, </span>
+</div><div class="line" data-line="24"><span style="color: #7f848e;"># no caso um pouco mais acima em 0x403000</span>
+</div><div class="line" data-line="25"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">i</span> <span style="color: #e06c75;">r</span> <span style="color: #e06c75;">rax</span>
+</div><div class="line" data-line="26"><span style="color: #61afef;">rax</span>            <span style="color: #d19a66;">0x403000</span>            <span style="color: #d19a66;">4206592</span>
+</div></code></pre>
+<ul>
+<li><code>0x401000</code>: seção <code>.text</code> que é onde começa o programa</li>
+<li><code>0x402000</code>: seção <code>.data</code> onde ficam os dados inicializados</li>
+<li><code>0x402004</code>: seção <code>.bss</code> onde ficam os dados não-inicializados</li>
+<li><code>0x403000</code>: program break, que é onde termina a seção de dados e começa o nosso “heap”</li>
+</ul>
+<p>Com isto, a partir do endereço <code>0x403000</code> é onde vamos colocar os elementos do nosso array, pelo que o endereço do array pode utilizar apenas um byte, que aponta para o endereço onde começa o primeiro elemento no heap.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mkuui4ot8ta2ohpf05bx.png" alt="array no heap" /></p>
+<p>Na syscall que fizemos, se o argumento em RDI tiver zero, significa que brk vai retornar o program break atual, no caso <code>0x403000</code>. Mas podemos fazer mais syscalls brk com o argumento RDI diferente (incrementado), sinalizando que estamos mudando o program break.</p>
+<p>A partir de agora, na seção de dados <code>.bss</code>, não precisamos mais reservar 4 bytes para o array, pelo que é necessário apenas 1 byte que irá representar o endereço de memória do array no heap:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_brk 12
+</div><div class="line" data-line="4">%define SYS_exit 60
+</div><div class="line" data-line="5">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="6">%define CAPACITY 3
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">; inicialmente começa com 0x000000, mas depois irá conter 
+</div><div class="line" data-line="9">; o endereço 0x403000
+</div><div class="line" data-line="10">section .bss
+</div><div class="line" data-line="11">array: resb 1  
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">section .data
+</div><div class="line" data-line="14">pointer: db 0
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16">section .text
+</div><div class="line" data-line="17">_start:
+</div><div class="line" data-line="18">	mov rdi, 0
+</div><div class="line" data-line="19">	mov rax, SYS_brk
+</div><div class="line" data-line="20">	syscall
+</div><div class="line" data-line="21">
+</div><div class="line" data-line="22">	mov rdi, rax
+</div><div class="line" data-line="23">	add rdi, CAPACITY
+</div><div class="line" data-line="24">	mov rax, SYS_brk
+</div><div class="line" data-line="25">	syscall
+</div><div class="line" data-line="26">
+</div><div class="line" data-line="27">...
+</div><div class="line" data-line="28">...
+</div></code></pre>
+<p>Ao analisarmos com gdb:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Breakpoint na primeira syscall</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">b</span> <span style="color: #d19a66;">18</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">run</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># Executa a linha da syscall</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #7f848e;"># Em RAX a syscall armazena o endereço do program break, no caso</span>
+</div><div class="line" data-line="10"><span style="color: #7f848e;"># 0x403000</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">i</span> <span style="color: #e06c75;">r</span> <span style="color: #e06c75;">rax</span>
+</div><div class="line" data-line="12"><span style="color: #61afef;">rax</span>            <span style="color: #d19a66;">0x403000</span>            <span style="color: #d19a66;">4206592</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403000</span>
+</div><div class="line" data-line="15"><span style="color: #61afef;">0x403000:</span>       <span style="color: #e06c75;">Cannot</span> <span style="color: #e06c75;">access</span> <span style="color: #e06c75;">memory</span> <span style="color: #e06c75;">at</span> <span style="color: #e06c75;">address</span> <span style="color: #d19a66;">0x403000</span>
+</div></code></pre>
+<p>Neste momento, este endereço ainda não é acessível pois não reservamos novos bytes no heap. Vamos andar com a próxima syscall:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># Antes de executar a syscall, verificamos que o argumento RDI vai </span>
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># conter o endereço desejado para o novo program break, no caso com</span>
+</div><div class="line" data-line="6"><span style="color: #7f848e;"># 3 bytes adicionados, 0x403003</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">i</span> <span style="color: #e06c75;">r</span> <span style="color: #e06c75;">rdi</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">rdi</span>            <span style="color: #d19a66;">0x403003</span>            <span style="color: #d19a66;">4206595</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;"># Executa a syscall...</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14"><span style="color: #7f848e;"># Após a execução da segunda syscall, vemos que em RAX, o program break foi alterado para 0x403003</span>
+</div><div class="line" data-line="15"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">i</span> <span style="color: #e06c75;">r</span> <span style="color: #e06c75;">rax</span>
+</div><div class="line" data-line="16"><span style="color: #61afef;">rax</span>            <span style="color: #d19a66;">0x403003</span>            <span style="color: #d19a66;">4206595</span>
+</div></code></pre>
+<p>Agora, podemos acessar os endereços de memória entre <code>0x403000</code> e <code>0x403003</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403000</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">0x403000:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403001</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">0x403001:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403002</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">0x403002:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403003</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">0x403003:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div></code></pre>
+<p><em>Uau!</em> Agora temos no heap uma área reservada especialmente para o nosso querido array, olha que coisa!</p>
+<p>Como vamos manipular o array nesta região da memória?</p>
+<h3><a href="#ponteiros-ponteiros-everywhere" aria-hidden="true" class="anchor" id="ponteiros-ponteiros-everywhere"></a>Ponteiros, ponteiros everywhere</h3>
+<p>Após a primeira syscall, devemos pegar o endereço de memória <code>0x403000</code> que representa o primeiro program break e armazenar no ponteiro do array que está em <code>.bss</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">...
+</div><div class="line" data-line="2">mov rdi, 0
+</div><div class="line" data-line="3">mov rax, SYS_brk
+</div><div class="line" data-line="4">syscall
+</div><div class="line" data-line="5">mov [array], rax      ; &lt;---- breakpoint aqui
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">mov rdi, rax
+</div><div class="line" data-line="8">add rdi, CAPACITY
+</div><div class="line" data-line="9">mov rax, SYS_brk
+</div><div class="line" data-line="10">syscall
+</div><div class="line" data-line="11">...
+</div></code></pre>
+<p>Vamos verificar com gdb o breakpoint na linha que muda o ponteiro do array:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">b</span> <span style="color: #d19a66;">19</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">run</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00000000</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># Executa a linha que muda o ponteiro</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">n</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;"># Agora o ponteiro aponta para o endereço 0x403000, </span>
+</div><div class="line" data-line="11"><span style="color: #7f848e;"># é isto o que queremos</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="13"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00403000</span>
+</div></code></pre>
+<p><em>Importante notar</em> que <strong>array</strong> está no endereço <code>0x402004</code>, na seção <code>.bss</code>, pelo que seu valor representa outro endereço de memória <code>0x403000</code> que é onde deve começar o primeiro elemento do array no heap.</p>
+<p>Agora, quando fizermos a próxima syscall para alocar 3 bytes no heap, o program break será modificado e iremos conseguir manipular o array pois o ponteiro já aponta para o endereço correto.</p>
+<p>Após a segunda syscall, já não podemos mais manipular o <code>array</code> pelo seu valor, pois agora o valor do array já não é mais um elemento de fato, mas sim um endereço para outro lugar na memória.</p>
+<p>Vamos ao programa na versão atual:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_brk 12
+</div><div class="line" data-line="4">%define SYS_exit 60
+</div><div class="line" data-line="5">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="6">%define CAPACITY 3
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">section .bss
+</div><div class="line" data-line="9">array: resb 1   ; 0x403000
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">section .data
+</div><div class="line" data-line="12">pointer: db 0
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">section .text
+</div><div class="line" data-line="15">_start:
+</div><div class="line" data-line="16">	mov rdi, 0
+</div><div class="line" data-line="17">	mov rax, SYS_brk
+</div><div class="line" data-line="18">	syscall
+</div><div class="line" data-line="19">	mov [array], rax
+</div><div class="line" data-line="20">
+</div><div class="line" data-line="21">	mov rdi, rax
+</div><div class="line" data-line="22">	add rdi, CAPACITY
+</div><div class="line" data-line="23">	mov rax, SYS_brk
+</div><div class="line" data-line="24">	syscall
+</div><div class="line" data-line="25">
+</div><div class="line" data-line="26">	mov rbx, [array]
+</div><div class="line" data-line="27">
+</div><div class="line" data-line="28">	mov r8, 1
+</div><div class="line" data-line="29">	call .append
+</div><div class="line" data-line="30">
+</div><div class="line" data-line="31">	mov r8, 2
+</div><div class="line" data-line="32">	call .append
+</div><div class="line" data-line="33">
+</div><div class="line" data-line="34">	mov r8, 3
+</div><div class="line" data-line="35">	call .append
+</div><div class="line" data-line="36">
+</div><div class="line" data-line="37">	mov r8, 4
+</div><div class="line" data-line="38">	call .append
+</div><div class="line" data-line="39">.exit:
+</div><div class="line" data-line="40">	mov rdi, EXIT_SUCCESS
+</div><div class="line" data-line="41">	mov rax, SYS_exit
+</div><div class="line" data-line="42">	syscall
+</div><div class="line" data-line="43">.append:
+</div><div class="line" data-line="44">	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
+</div><div class="line" data-line="45">	je .done
+</div><div class="line" data-line="46">
+</div><div class="line" data-line="47">	mov sil, byte [pointer]
+</div><div class="line" data-line="48">	mov byte [rbx + rsi], r8b
+</div><div class="line" data-line="49">	inc byte [pointer]
+</div><div class="line" data-line="50">.done:
+</div><div class="line" data-line="51">	ret
+</div></code></pre>
+<p>Explicando cada bloco:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov rdi, 0
+</div><div class="line" data-line="2">mov rax, SYS_brk
+</div><div class="line" data-line="3">syscall
+</div><div class="line" data-line="4">mov [array], rax
+</div></code></pre>
+<ul>
+<li>busca o program break atual e armazena o endereço no ponteiro <code>array</code></li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov rdi, rax
+</div><div class="line" data-line="2">add rdi, CAPACITY
+</div><div class="line" data-line="3">mov rax, SYS_brk
+</div><div class="line" data-line="4">syscall
+</div></code></pre>
+<ul>
+<li>modifica o program break atual, incrementando 3 bytes que é a capacidade inicial do array no heap</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">; atribuir ao registrador o endereço de memória ao qual o
+</div><div class="line" data-line="2">; ponteiro &quot;array&quot; está apontando
+</div><div class="line" data-line="3">mov rbx, [array] 
+</div></code></pre>
+<ul>
+<li>armazena o endereço de memória do ponteiro no registrador RBX. Isto é necessário pois não queremos fazer aritmética diretamente no ponteiro da seção <code>.bss</code>, mas sim através de um registrador que permite</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">mov r8, 1
+</div><div class="line" data-line="2">call .append
+</div></code></pre>
+<ul>
+<li>como agora o RDI foi usado como argumento na syscall brk, não convém mais utilizarmos este registrador para representar o elemento a ser adicionado no array, pelo que trocamos pelo registrador R8</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.append:
+</div><div class="line" data-line="2">	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
+</div><div class="line" data-line="3">	je .done
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov sil, byte [pointer]
+</div><div class="line" data-line="6">	mov byte [rbx + rsi], r8b    ; indirect-mode addressing
+</div><div class="line" data-line="7">	inc byte [pointer]
+</div><div class="line" data-line="8">.done:
+</div><div class="line" data-line="9">	ret
+</div></code></pre>
+<p>Agora a rotina <code>.append</code> foi modificado para que a manipulação do array no heap seja através do registrador RBX. Também não podemos mais usar o registrador RAX para representar o ponteiro pois a syscall brk também utilizou como retorno do program break; neste caso trocamos para o RSI (que tem o SIL como sua representação de 8-bits menores).</p>
+<p>Ao executar com gdb, podemos verificar que os elementos estão sendo adicionados no endereço <code>0x403000</code> que fica no heap, através do ponteiro que foi armazenado no registrador RBX:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Array aponta para o endereço 0x403000</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">array</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">0x402004</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">array</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>       <span style="color: #d19a66;">0x00403000</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># No endereço, temos os elementos adicionados. Yay!</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403000</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">0x403000:</span>       <span style="color: #d19a66;">0x00030201</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #7f848e;"># E o ponteiro de &quot;índice&quot; corretamente representando o fim do array no heap</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">pointer</span>
+</div><div class="line" data-line="11"><span style="color: #d19a66;">0x402000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pointer</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x00000003</span>
+</div></code></pre>
+<p>Neste momento, o programa está com o mesmo comportamento do exemplo anterior com array estático em <code>.bss</code>, não permitindo adicionar mais elementos quando o array atinge seu limite.</p>
+<p>Vamos mudar isto, redimensionando o array e permitir que novos elementos sejam adicionados.</p>
+<h3><a href="#resize-com-brk" aria-hidden="true" class="anchor" id="resize-com-brk"></a>Resize com brk</h3>
+<p>A seguir, iniciamos os passos para que o redimensionamento do array seja feito quando <strong>este atingir o limite da capacidade</strong>. Começamos por alterar a rotina <code>.append</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.append:
+</div><div class="line" data-line="2">	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
+</div><div class="line" data-line="3">	je .resize
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov sil, byte [pointer]
+</div><div class="line" data-line="6">	mov byte [rbx + rsi], r8b
+</div><div class="line" data-line="7">	inc byte [pointer]
+</div><div class="line" data-line="8">.done:
+</div><div class="line" data-line="9">	ret
+</div><div class="line" data-line="10">.resize:
+</div><div class="line" data-line="11">	...
+</div></code></pre>
+<p>Ao invés de fazer jump para <code>.done</code> quando o array estiver cheio, fazemos jump para outra sub-rotina chamada <code>.resize</code>, que deverá fazer a syscall brk novamente, modificando assim o <strong>program break</strong> em uma nova área na memória, obedecendo a capacidade inicial do array:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.append:
+</div><div class="line" data-line="2">	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
+</div><div class="line" data-line="3">	je .resize
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov sil, byte [pointer]
+</div><div class="line" data-line="6">	mov byte [rbx + rsi], r8b
+</div><div class="line" data-line="7">	inc byte [pointer]
+</div><div class="line" data-line="8">.done:
+</div><div class="line" data-line="9">	ret
+</div><div class="line" data-line="10">.resize:
+</div><div class="line" data-line="11">	mov rdi, 0
+</div><div class="line" data-line="12">	mov rax, SYS_brk
+</div><div class="line" data-line="13">	syscall
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">	mov rdi, rax            ; RDI passa a representar o break atual
+</div><div class="line" data-line="16">	add rdi, CAPACITY       ; adiciona 3 bytes, ficando 0x403006
+</div><div class="line" data-line="17">	mov rax, SYS_brk
+</div><div class="line" data-line="18">	syscall
+</div><div class="line" data-line="19">	jmp .append
+</div></code></pre>
+<ul>
+<li>a primeira syscall de resize traz o break atual, no caso já sabemos que é <code>0x403003</code>, que foi alocado no início do programa para o array</li>
+<li>a segunda syscall de resize modifica o break atual, alocando assim mais 3 bytes no heap</li>
+<li>ao fim do resize, ao invés de retornar a função, vamos voltar para o início do <code>.append</code> e executar a lógica necessária para adicionar o elemento no array</li>
+</ul>
+<p>Desta forma, podemos manipular esta nova área na memória para adicionar mais elementos no array, modificando assim sua capacidade dinamicamente.</p>
+<p>Se executarmos o programa exatamente assim, vamos enfrentar um problema, pois:</p>
+<ul>
+<li>a cada vez que é feito o resize, salta para o início da rotina</li>
+<li>é verificado o tamanho do array (pointeiro) com a capacidade inicial, que no caso é 3. Como o ponteiro atingiu o valor 3, então vai entrar novamente no resize caracterizando assim um loop infinito com resize infinito até acabar a memória</li>
+</ul>
+<p>Para resolver isto, precisamos comparar o pointer com a capacidade atual (modificada), e portanto vamos adicionar um valor na seção <code>.data</code> que representa a capacidade atual:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">%define CAPACITY 3
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">section .data
+</div><div class="line" data-line="4">pointer: db 0
+</div><div class="line" data-line="5">currentCapacity: db CAPACITY ; começa com 3
+</div></code></pre>
+<p>Na rotina <code>.append</code>, vamos fazer a comparação com o <code>currentCapacity</code>, que vai ser modificado a cada resize, ao invés de ser com <code>CAPACITY</code>, que vai permanecer fixo com o valor inicial enquanto durar o programa.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.append:
+</div><div class="line" data-line="2">	mov r9, [currentCapacity]
+</div><div class="line" data-line="3">	cmp byte [pointer], r9b     ; verifica se o array está cheio
+</div><div class="line" data-line="4">	je .resize
+</div><div class="line" data-line="5">...
+</div></code></pre>
+<p>E, após o redimensionamento antes de voltar pro <code>.append</code>, vamos incrementar o valor da capacidade inicial à capacidade atual:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.resize:
+</div><div class="line" data-line="2">	mov rdi, 0
+</div><div class="line" data-line="3">	mov rax, SYS_brk
+</div><div class="line" data-line="4">	syscall
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">	mov rdi, rax
+</div><div class="line" data-line="7">	add rdi, CAPACITY
+</div><div class="line" data-line="8">	mov rax, SYS_brk
+</div><div class="line" data-line="9">	syscall
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	mov r10, currentCapacity
+</div><div class="line" data-line="12">	add byte [r10], CAPACITY
+</div><div class="line" data-line="13">	jmp .append
+</div></code></pre>
+<p>Ao executar o programa, podemos ver que o elemento 4 foi adicionado com sucesso no array após o redimensionamento:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">x</span> <span style="color: #d19a66;">0x403000</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">0x403000:</span>       <span style="color: #d19a66;">0x04030201</span>
+</div></code></pre>
+<p>E se adicionarmos mais e mais elementos?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">...
+</div><div class="line" data-line="2">	mov r8, 4
+</div><div class="line" data-line="3">	call .append
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">	mov r8, 5
+</div><div class="line" data-line="6">	call .append
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">	mov r8, 6
+</div><div class="line" data-line="9">	call .append
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">	mov r8, 7
+</div><div class="line" data-line="12">	call .append
+</div><div class="line" data-line="13">...
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Podemos ver que o currentCapacity é 9, ou seja, foram feitos </span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;"># 2 redimensionamentos. Nosso array consegue agora acomodar até 9 elementos, </span>
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># pelo que ao adicionar o décimo elemento, mais um resize seria feito.</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span> x <span style="color: #abb2bf;">&amp;</span><span style="color: #61afef;">currentCapacity</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">0x402001</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">currentCapacity</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>     <span style="color: #d19a66;">0x09</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># Buscando os 9 primeiros hexabytes no endereço do array no heap</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span><span style="color: #61afef;">gdb</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #61afef;">x/9xb</span>  <span style="color: #d19a66;">0x403000</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">0x403000:</span>       <span style="color: #d19a66;">0x01</span>    <span style="color: #d19a66;">0x02</span>    <span style="color: #d19a66;">0x03</span>    <span style="color: #d19a66;">0x04</span>    <span style="color: #d19a66;">0x05</span>    <span style="color: #d19a66;">0x06</span>    <span style="color: #d19a66;">0x07</span>    <span style="color: #d19a66;">0x00</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">0x403008:</span>       <span style="color: #d19a66;">0x00</span>
+</div></code></pre>
+<p><em>How cool is that?</em></p>
+<hr />
+<h2><a href="#o-programa-final" aria-hidden="true" class="anchor" id="o-programa-final"></a>O programa final</h2>
+<p>A seguir o programa final, com um array de capacidade inicial de 3 elementos no heap que pode ser redimensionado utilizando a syscall <code>brk</code>, conforme mais elementos vão sendo adicionados no array:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">global _start
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">%define SYS_brk 12
+</div><div class="line" data-line="4">%define SYS_exit 60
+</div><div class="line" data-line="5">%define EXIT_SUCCESS 0
+</div><div class="line" data-line="6">%define CAPACITY 3
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">section .bss
+</div><div class="line" data-line="9">array: resb 1
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">section .data
+</div><div class="line" data-line="12">pointer: db 0
+</div><div class="line" data-line="13">currentCapacity: db CAPACITY ; capacidade inicial é 3
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">section .text
+</div><div class="line" data-line="16">_start:
+</div><div class="line" data-line="17">	mov rdi, 0
+</div><div class="line" data-line="18">	mov rax, SYS_brk
+</div><div class="line" data-line="19">	syscall
+</div><div class="line" data-line="20">	mov [array], rax
+</div><div class="line" data-line="21">
+</div><div class="line" data-line="22">	mov rdi, rax
+</div><div class="line" data-line="23">	add rdi, CAPACITY
+</div><div class="line" data-line="24">	mov rax, SYS_brk
+</div><div class="line" data-line="25">	syscall
+</div><div class="line" data-line="26">
+</div><div class="line" data-line="27">	mov rbx, [array]
+</div><div class="line" data-line="28">
+</div><div class="line" data-line="29">	mov r8, 1
+</div><div class="line" data-line="30">	call .append
+</div><div class="line" data-line="31">
+</div><div class="line" data-line="32">	mov r8, 2
+</div><div class="line" data-line="33">	call .append
+</div><div class="line" data-line="34">
+</div><div class="line" data-line="35">	mov r8, 3
+</div><div class="line" data-line="36">	call .append
+</div><div class="line" data-line="37">
+</div><div class="line" data-line="38">	mov r8, 4
+</div><div class="line" data-line="39">	call .append
+</div><div class="line" data-line="40">
+</div><div class="line" data-line="41">	mov r8, 5
+</div><div class="line" data-line="42">	call .append
+</div><div class="line" data-line="43">
+</div><div class="line" data-line="44">	mov r8, 6
+</div><div class="line" data-line="45">	call .append
+</div><div class="line" data-line="46">
+</div><div class="line" data-line="47">	mov r8, 7
+</div><div class="line" data-line="48">	call .append
+</div><div class="line" data-line="49">.exit:
+</div><div class="line" data-line="50">	mov rdi, EXIT_SUCCESS
+</div><div class="line" data-line="51">	mov rax, SYS_exit
+</div><div class="line" data-line="52">	syscall
+</div><div class="line" data-line="53">.append:
+</div><div class="line" data-line="54">	mov r9, [currentCapacity]
+</div><div class="line" data-line="55">	cmp byte [pointer], r9b ; verifica se o array está cheio
+</div><div class="line" data-line="56">	je .resize
+</div><div class="line" data-line="57">
+</div><div class="line" data-line="58">	mov sil, byte [pointer]
+</div><div class="line" data-line="59">	mov byte [rbx + rsi], r8b
+</div><div class="line" data-line="60">	inc byte [pointer]
+</div><div class="line" data-line="61">.done:
+</div><div class="line" data-line="62">	ret
+</div><div class="line" data-line="63">.resize:
+</div><div class="line" data-line="64">	mov rdi, 0
+</div><div class="line" data-line="65">	mov rax, SYS_brk
+</div><div class="line" data-line="66">	syscall
+</div><div class="line" data-line="67">
+</div><div class="line" data-line="68">	mov rdi, rax
+</div><div class="line" data-line="69">	add rdi, CAPACITY
+</div><div class="line" data-line="70">	mov rax, SYS_brk
+</div><div class="line" data-line="71">	syscall
+</div><div class="line" data-line="72">
+</div><div class="line" data-line="73">	mov r10, currentCapacity
+</div><div class="line" data-line="74">	add byte [r10], CAPACITY
+</div><div class="line" data-line="75">	jmp .append
+</div></code></pre>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Neste artigo, mostramos a implementação de um array em Assembly x86, passando por conceitos importantes como layout de memória, manipulação de registradores e alocação dinâmica de memória com <code>brk</code>.</p>
+<p>Este artigo é base para artigos futuros sobre estruturas de dados, onde pretendo escrever sobre a implementação de filas e posteriormente listas ligadas.</p>
+<p><em>Stay tuned!</em></p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<sub>
+Addressing modes
+https://www.tutorialspoint.com/assembly_programming/assembly_addressing_modes.htm
+Syscall brk
+https://man7.org/linux/man-pages/man2/brk.2.html
+ASCII table
+https://www.asciicharstable.com/_site_media/ascii/ascii-chars-table-landscape.jpg
+</sub>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part II, pods - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In the [previous post](https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an introdu">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb.html">
+  <meta property="og:title" content="Kubernetes 101, part II, pods">
+  <meta property="og:description" content="In the [previous post](https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an introdu">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-03-01T05:14:08Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="k8s">
+      <meta property="article:tag" content="containers">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part II, pods",
+    "datePublished": "2023-03-01T05:14:08Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In the [previous post](https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an introdu",
+        "keywords": "kubernetes, docker, k8s, containers"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part II, pods</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 01 Mar 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">k8s</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">containers</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In the <a href="https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1">previous post</a> we’ve seen the <strong>fundamentals</strong> of Kubernetes as well as an introduction to its <strong>main architecture</strong>.</p>
+<p>Once we got introduced, it’s time to explore how we can run an application in Kubernetes.</p>
+<hr />
+<h2><a href="#a-wrapper-for-containers" aria-hidden="true" class="anchor" id="a-wrapper-for-containers"></a>A wrapper for containers</h2>
+<p>In Kubernetes, we aren’t able to create single containers directly. Instead, for the better, we can <strong>wrap containers into a single unit</strong> which comprises:</p>
+<ul>
+<li><strong>a specification</strong>: where multiple containers can use the same specification as deployable units</li>
+<li><strong>a shared storage</strong>: they can use a shared storage so the same volumes are mounted across multiple containers</li>
+<li><strong>a single network</strong>: containers under the same wrapper can share a single network, so they can communicate to each other</li>
+</ul>
+<p><em>Comparing to Docker</em>, such wrapper is similar to <code>docker-compose.yml</code>, where different services (containers) can share a common specification, volumes and network.</p>
+<p><em>Yes, we are talking about Pods</em>.</p>
+<hr />
+<h2><a href="#pods" aria-hidden="true" class="anchor" id="pods"></a>Pods</h2>
+<p><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods</a> are the <strong>smallest deployable unit</strong> you can create and manage in Kubernetes.</p>
+<p>Within Pods, we can group multiple containers that should communicate to each other somehow, either using the <strong>same network or through shared volumes</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/qgo3zzcmk3fm5dakin5l.png" alt="Different Pods using their containers" /></p>
+<p><em>Let’s create some Pods.</em></p>
+<h2><a href="#using-yaml-for-good" aria-hidden="true" class="anchor" id="using-yaml-for-good"></a>Using YAML for good</h2>
+<p>Up to this point, we’ve used <code>kubectl</code> in order to create pods, for instance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">container_name</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">--image=</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">some_image</span><span style="color: #56b6c2;">&gt;</span>
+</div></code></pre>
+<p>It works pretty well for running experimental Pods, creating temporary resources and other workloads in k8s (we’ll talk about workloads later).</p>
+<p>We could create multiple Pods using <code>kubectl run ...</code>, but what if we want to <em>share with other people, team or even the open-source community</em> how we <strong>declared our Pods</strong>?</p>
+<p>How about sharing in a <em>VCS repository like Git</em> the representation of the <strong>desired state of our application</strong> in k8s using a standard <em>serialization format</em>?</p>
+<p>Kubernetes brings a serialization format which can be used to represent our Pods, and yes, you may like it or not, it’s the well known <a href="https://en.wikipedia.org/wiki/YAML">YAML</a>.</p>
+<h2><a href="#creating-a-pod" aria-hidden="true" class="anchor" id="creating-a-pod"></a>Creating a Pod</h2>
+<p>With YAML, we can declare Kubernetes objects using the <code>kind</code> attribute. K8s employs many different kind of objects which we’ll explore on later posts, but at this moment we’ll start with the most common and smallest unit in Kubernetes: <strong>a Pod</strong>.</p>
+<p>Our <em>Pod specification</em> should be composed by:</p>
+<ul>
+<li>
+<p>a container called “server”, backed by the <code>ubuntu</code> image, that <em>shares a volume with the Pod</em>. This container will create in the shared volume a <a href="https://en.wikipedia.org/wiki/Named_pipe">UNIX named pipe</a>, <em>a.k.a</em> FIFO, listening for some message coming into the FIFO.</p>
+</li>
+<li>
+<p>a container called “client”, also backed by an <code>ubuntu</code> image, that <em>shares a volume with the Pod</em>. This container will write to the shared volume a simple message called “Hey”.</p>
+</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hfhviqo9frxk5v7e1eyc.png" alt="A Pod sharing a volume with its internal containers" /></p>
+<h3><a href="#expectation" aria-hidden="true" class="anchor" id="expectation"></a>Expectation</h3>
+<p>When the server is started, <strong>the FIFO will be created in the shared volume</strong>. The server keeps waiting for some message arriving into the FIFO.</p>
+<p>When the client is started, it will write the message “Hey” into the shared volume.</p>
+<p>Afterwards, we <em>look at the container server logs</em>, as it should <strong>print the message Hey that was sent by the client</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4pyk7zsywhi2gdul9ylo.png" alt="a more detailed overview of Pods using shared volumes" /></p>
+<p>Let’s declare the YAMl file <code>fifo-pod.yml</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Pod</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">fifo-pod</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">volumes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">queue</span>
+</div><div class="line" data-line="8">      <span style="color: #e06c75;">emptyDir</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">server</span>
+</div><div class="line" data-line="11">      <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ubuntu</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">queue</span>
+</div><div class="line" data-line="14">          <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/lib/queue</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">command</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;/bin/sh&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="16">      <span style="color: #e06c75;">args</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;-c&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;mkfifo /var/lib/queue/fifo; cat /var/lib/queue/fifo&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="17">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">client</span>
+</div><div class="line" data-line="18">      <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ubuntu</span>
+</div><div class="line" data-line="19">      <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="20">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">queue</span>
+</div><div class="line" data-line="21">          <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/lib/queue</span>
+</div><div class="line" data-line="22">      <span style="color: #e06c75;">command</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;/bin/sh&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="23">      <span style="color: #e06c75;">args</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;-c&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;echo Hey &gt; /var/lib/queue/fifo&quot;</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<ul>
+<li><strong>kind</strong>: the object kind. In this case, simply Pod</li>
+<li><strong>metadata name</strong>: the name of the Pod in the cluster, under the current default namespace (we’ll talk about namespaces in later posts)</li>
+<li><strong>volumes</strong>: the shared volume of the Pod. We’re using <code>emptyDir</code> which will share any empty directory in the Pod’s filesystem</li>
+<li><strong>volumeMounts</strong>: <em>mounting the Pod’s shared volume</em> into some directory of the <strong>container’s filesystem</strong></li>
+<li><strong>command</strong>: the command to be executed in the container</li>
+</ul>
+<p>After declaration, we can share the YAMl file with our friends, co-workers etc using Git. But the object is yet to be created in our cluster. We do this by using the command <code>kubectl apply</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">fifo-pod.yml</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">pod/fifo-pod</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<p>Let’s check the logs of the <code>server</code> container. We can use the command <code>kubectl logs &lt;pod&gt;</code> so we get the logs of every container in the Pod. However we want to fetch logs from the <code>server</code> container only:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">logs</span> <span style="color: #e06c75;">fifo-pod</span> <span style="color: #e06c75;">-c</span> <span style="color: #e06c75;">server</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Hey</span>
+</div></code></pre>
+<p><strong>Yay! It works!</strong> :rocket:</p>
+<h2><a href="#getting-the-list-of-pods" aria-hidden="true" class="anchor" id="getting-the-list-of-pods"></a>Getting the list of Pods</h2>
+<p>Using <code>kubectl</code> we can get the list of Pods in our cluster:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>         <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>      <span style="color: #e06c75;">RESTARTS</span>      <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">nginx</span>        <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>     <span style="color: #d19a66;">1</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">92m</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>   <span style="color: #61afef;">6d3h</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">fifo-pod</span>     <span style="color: #e06c75;">0/2</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>             <span style="color: #e06c75;">64m</span>
+</div></code></pre>
+<p>We have a Pod called <code>nginx</code> which is <code>Running</code> for 6 days. It’s quite <em>comprehensible</em>, since I’ve run the <code>kubectl run nginx --image=nginx</code> 6 days ago. Also, it’s well known that NGINX is a web server that keeps running (listening for TCP connections), so that’s why the Pod is still in a <strong>Running</strong> status.</p>
+<p>But the Pod <code>fifo-pod</code> we just created is returning a <code>Completed</code> status. Why?</p>
+<h2><a href="#pod-lifecycle" aria-hidden="true" class="anchor" id="pod-lifecycle"></a>Pod Lifecycle</h2>
+<p><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pods follow a lifecycle</a> in Kubernetes.</p>
+<p>Like <em>containers in Docker</em>, Pods are <strong>designed to be ephemeral</strong>. Once a Pod is scheduled (assigned) to a Node, the Pod runs on that Node until it stops or is terminated.</p>
+<p>A Pod lifecycle works by <strong>phases</strong>. Let’s understand each phase.</p>
+<h3><a href="#pending" aria-hidden="true" class="anchor" id="pending"></a>Pending</h3>
+<p>It’s when a Pod is <strong>accepted by the cluster</strong> but its <em>containers are not ready yet</em>. The Pod is <strong>NOT yet scheduled</strong> to any Node.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/t7n25239y1mv4liyu047.png" alt="pod phase pending" /></p>
+<h3><a href="#running" aria-hidden="true" class="anchor" id="running"></a>Running</h3>
+<p>All <strong>containers are created</strong> and the <strong>Pod has been scheduled</strong> to a Node.</p>
+<p><em>At least one of the containers are still running or being started.</em></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/z2uhvhf087pc4f0xl6z9.png" alt="pod phase running" /></p>
+<h3><a href="#succeeded--failed" aria-hidden="true" class="anchor" id="succeeded--failed"></a>Succeeded / Failed</h3>
+<p>If all containers are <code>Terminated</code> in success, then the Pod status is <code>Succeeded</code>.</p>
+<p>But in case all containers have terminated but at least 1 container terminated in failure, the Pod status is <code>Failed</code>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jewnvxtqlqnir6ad7hw3.png" alt="pod phase succeeded/failed" /></p>
+<h3><a href="#terminated--completed" aria-hidden="true" class="anchor" id="terminated--completed"></a>Terminated / Completed</h3>
+<p>Indicates that all the containers are <strong>terminated</strong> (internally by Kubernetes) or <strong>completed</strong>.</p>
+<hr />
+<h2><a href="#more-about-pod-lifecycle" aria-hidden="true" class="anchor" id="more-about-pod-lifecycle"></a>More about Pod Lifecycle</h2>
+<p><em>Pods lifecycle</em> is a quite big topic in Kubernetes, covering Pod conditions, readiness, liveness and so on. We’ll dig into further details about lifecycles in later posts.</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>This post showed a bit more about <em>Pods</em>, which are the <strong>smallest and main deployable unit</strong> in Kubernetes.</p>
+<p>On top of that, we also created a Pod with two containers communicating to each other using FIFO and a <strong>shared volume</strong>.</p>
+<p>In addition, we’ve seen a bit about <strong>Pod lifecycle</strong>. Hence, the Pod lifecycle and its lifetime will be crucial to understand the subject of the upcoming post: <em>self-healing capabilities</em> in Kubernetes.</p>
+<p>Stay tuned, and Cheers!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

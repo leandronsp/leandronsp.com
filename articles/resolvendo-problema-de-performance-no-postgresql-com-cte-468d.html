@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resolvendo problema de performance no PostgreSQL com CTE - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="**Spoiler**: *a query ficou 23x mais rápida com CTE's apenas transformando o problema quadrático em linear. Sem índices*.
+
+Um dos [cenários mais comuns](https://">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html">
+  <meta property="og:title" content="Resolvendo problema de performance no PostgreSQL com CTE">
+  <meta property="og:description" content="**Spoiler**: *a query ficou 23x mais rápida com CTE's apenas transformando o problema quadrático em linear. Sem índices*.
+
+Um dos [cenários mais comuns](https://">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-06-13T16:41:39Z">
+  <meta property="article:tag" content="sql">
+      <meta property="article:tag" content="postgres">
+      <meta property="article:tag" content="cte">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Resolvendo problema de performance no PostgreSQL com CTE",
+    "datePublished": "2022-06-13T16:41:39Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "**Spoiler**: *a query ficou 23x mais rápida com CTE's apenas transformando o problema quadrático em linear. Sem índices*.
+
+Um dos [cenários mais comuns](https://",
+        "keywords": "sql, postgres, cte"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Resolvendo problema de performance no PostgreSQL com CTE</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 13 Jun 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">sql</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">postgres</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">cte</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><strong>Spoiler</strong>: <em>a query ficou 23x mais rápida com CTE’s apenas transformando o problema quadrático em linear. Sem índices</em>.</p>
+<p>Um dos <a href="https://dev.to/leandronsp/how-to-reduce-the-time-complexity-of-nested-loops-1lkd">cenários mais comuns</a> de problemas de performance em software é o famoso <strong>nested loop</strong>.</p>
+<p>Com o banco de dados não é diferente. Por vezes podemos acabar por escrever queries que apresentam complexidade quadrática, onde nossa primeira solução óbvia para melhorar a performance seria através da criação de <strong>índices</strong>.</p>
+<p>Neste artigo vou mostrar uma alternativa para este problema de nested loops em queries sem criar índices, apenas utilizando <a href="https://www.postgresql.org/docs/current/queries-with.html">CTE’s</a>, ou <em>Common Table Expressions</em>.</p>
+<h2><a href="#setup" aria-hidden="true" class="anchor" id="setup"></a>Setup</h2>
+<p>O setup deste artigo contém basicamente 3 tabelas contendo:</p>
+<ul>
+<li>200 users</li>
+<li>20 bancos</li>
+<li>4000 contas bancárias</li>
+<li>4000 transferências feitas entre diferentes contas</li>
+</ul>
+<p><strong>Nota</strong>: no final do artigo compartilho o link para o Gist com o código completo.</p>
+<h2><a href="#desafio" aria-hidden="true" class="anchor" id="desafio"></a>Desafio</h2>
+<p>A ideia é que a query retorne a lista com todas as contas de diferentes bancos com seus respectivos saldos calculados:<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uckhspgfy565thdj41nr.png" alt="setup de dados" /></p>
+<h2><a href="#query-com-múltiplos-joins-e-sum-aggregate" aria-hidden="true" class="anchor" id="query-com-múltiplos-joins-e-sum-aggregate"></a>Query com múltiplos JOIN’s e SUM aggregate</h2>
+<p>A princípio, podemos escrever uma query que, a partir da tabela de <strong>users</strong>, faça <code>JOIN</code> com as tabelas <strong>banco</strong>, <strong>accounts</strong> e <strong>transfers</strong>, tal como a seguir:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">    <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">    <span style="color: #e5c07b;">banks</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">bank</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">SUM</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">CASE</span>
+</div><div class="line" data-line="5">		<span style="color: #c678dd;">WHEN</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">source_account_id</span>
+</div><div class="line" data-line="6">			<span style="color: #c678dd;">THEN</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">amount</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;"><span style="color: #56b6c2;">-</span>1</span>
+</div><div class="line" data-line="7">		<span style="color: #c678dd;">WHEN</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">target_account_id</span>
+</div><div class="line" data-line="8">			<span style="color: #c678dd;">THEN</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">amount</span>
+</div><div class="line" data-line="9">		<span style="color: #c678dd;">ELSE</span>
+</div><div class="line" data-line="10">			<span style="color: #98c379;">0.00</span>
+</div><div class="line" data-line="11">		<span style="color: #c678dd;">END</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="12">	<span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="13"><span style="color: #c678dd;">FROM</span>
+</div><div class="line" data-line="14">    <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="15"><span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">accounts</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="16"><span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">banks</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">banks</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank_idq</span>
+</div><div class="line" data-line="17"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">transfers</span> <span style="color: #c678dd;">ON</span>
+</div><div class="line" data-line="18">    <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">source_account_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="19">    <span style="color: #c678dd;">OR</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">target_account_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="20"><span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">banks</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="21"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">username</span> <span style="color: #c678dd;">ASC</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">balance</span> <span style="color: #c678dd;">ASC</span>
+</div></code></pre>
+<p>Ao executarmos a query com <code>EXPLAIN</code> no PgAdmin4, temos esta imagem que mostra o nested loop sendo utilizado e seu custo associado:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/nsx0c233gptlsrex2ije.png" alt="explain" /></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hkv4m1prur10l5g2al9e.png" alt="total cost" /></p>
+<p>Com um total cost de <strong>280k</strong> no <code>JOIN</code> com <em>transfers</em>. Ou seja, é mesmo ali que está o gargalo na nossa query, que totaliza uma demora de <strong>7000ms</strong> (7 segundos) em média.</p>
+<h2><a href="#índices" aria-hidden="true" class="anchor" id="índices"></a>Índices?</h2>
+<p>Uma possível solução passa por criar <a href="https://www.postgresql.org/docs/current/indexes.html">índices</a>. Neste nosso exemplo, cheguei a criar o índice na tabela de transfers (onde está acontecendo o nested loop):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">DROP</span> <span style="color: #c678dd;">INDEX</span> <span style="color: #c678dd;">IF</span> <span style="color: #c678dd;">EXISTS</span> transfers_in<span style="color: #abb2bf;">,</span> transfers_out<span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">INDEX</span> transfers_in <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">transfers</span> <span style="color: #c678dd;">(</span>target_account_id<span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">INDEX</span> transfers_out <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">transfers</span> <span style="color: #c678dd;">(</span>source_account_id<span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>…o que reduziu a query de 7000ms para 400ms (melhoria gigante), mas o índice tem um custo: a cada escrita na tabela transfer, o índice é atualizado.</p>
+<p>Ok, mas há alternativa para este caso <em>específico</em> sem criação de índices?</p>
+<p><strong>Nota:</strong> em apps de produção, é muito comum a utilização de índices. Mas não podemos abusar de índices por causa do impacto na escrita, pelo que estes têm de ser analisados e utilizados com parcimônia.</p>
+<h2><a href="#reduzindo-a-complexidade-do-nested-loop" aria-hidden="true" class="anchor" id="reduzindo-a-complexidade-do-nested-loop"></a>Reduzindo a complexidade do nested loop</h2>
+<p>Como já podemos saber, a melhor forma de resolver um algoritmo de complexidade quadrática (nested loops) é reduzindo-o para linear, logarítmica ou até mesmo, constante.</p>
+<p>Neste caso, analisamos que o melhor que podemos conseguir é reduzindo para linear, ou seja, <strong>percorrendo a tabela transfers 1 ou 2 ou 3 vezes se for o caso, mas não de forma aninhada (nested)</strong>.</p>
+<p>Como podemos então fazer? Criar uma query com SELECTs e Sub-SELECTs? Talvez, mas a query ficaria <em>enorme</em> e bastante difícil de manter.</p>
+<h2><a href="#ctes-for-the-rescue" aria-hidden="true" class="anchor" id="ctes-for-the-rescue"></a>CTE’s for the rescue</h2>
+<p>Sabemos que com <a href="https://www.postgresql.org/docs/current/queries-with.html">CTE’s</a>, podemos organizar melhor nossas queries, quebrando uma query grande em diversas queries pequenas, facilitando a compreensão da mesma.</p>
+<p>E de quebra, isto pode ajudar a melhorar a performance, se conseguirmos escrever bem a query de forma linear (e não nested).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">WITH</span> 
+</div><div class="line" data-line="2">accounts_idx <span style="color: #c678dd;">AS</span><span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="3">    <span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="4">        <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">account_id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">        <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">        <span style="color: #e5c07b;">banks</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">bank</span>
+</div><div class="line" data-line="7">    <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">accounts</span>
+</div><div class="line" data-line="8">    <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">users</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="9">    <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">banks</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">banks</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">accounts</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank_id</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="11">accounts_from <span style="color: #c678dd;">AS</span> <span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="12">    <span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="13">        <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="14">        <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="15">        <span style="color: #e5c07b;">SUM</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">amount</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;"><span style="color: #56b6c2;">-</span>1</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="16">    <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">transfers</span>
+</div><div class="line" data-line="17">    <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">accounts_idx</span> <span style="color: #e06c75;">idx</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">account_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">source_account_id</span>
+</div><div class="line" data-line="18">    <span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank</span>
+</div><div class="line" data-line="19"><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="20">accounts_to <span style="color: #c678dd;">AS</span> <span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="21">    <span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="22">        <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="23">        <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="24">        <span style="color: #e5c07b;">SUM</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">amount</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="25">    <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">transfers</span>
+</div><div class="line" data-line="26">    <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">accounts_idx</span> <span style="color: #e06c75;">idx</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">account_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">transfers</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">target_account_id</span>
+</div><div class="line" data-line="27">    <span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">idx</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">bank</span>
+</div><div class="line" data-line="28"><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="29">results <span style="color: #c678dd;">AS</span> <span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="30">    <span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">accounts_from</span>
+</div><div class="line" data-line="31">    <span style="color: #c678dd;">UNION</span>
+</div><div class="line" data-line="32">    <span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">accounts_to</span>
+</div><div class="line" data-line="33"><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="34"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="35">    <span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="36">    <span style="color: #e06c75;">bank</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="37">    <span style="color: #e5c07b;">SUM</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">balance</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="38"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">results</span>
+</div><div class="line" data-line="39"><span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">username</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">bank</span>
+</div><div class="line" data-line="40"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">username</span> <span style="color: #c678dd;">ASC</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">balance</span> <span style="color: #c678dd;">ASC</span>
+</div></code></pre>
+<p>Com o <code>WITH</code> do PostgreSQL, estamos criando 4 tabelas temporárias que estarão ativas apenas durante a execução da transação da query:</p>
+<ul>
+<li><strong>accounts_idx</strong>, guarda a info dos users e bancos em uma hash</li>
+<li><strong>accounts_from</strong>, percorre a tabela “transfers” buscando por saídas em contas</li>
+<li><strong>accounts_to</strong>, percorre a tabela “transfers” buscando por entradas em contas</li>
+<li><strong>results</strong>, que faz a UNION das CTE’s</li>
+</ul>
+<p>Esta é a técnica por trás da escrita de um código linear. O JOIN com <code>OR</code> na tabela <code>transfers</code> foi completamente removido!</p>
+<p>E sobre o <strong>UNION</strong>, o truque é que, ao garantirmos que as CTE’s têm a mesma quantidade de colunas, podemos projetar como um append, exatamente como na <em>união</em> de conjuntos.</p>
+<h2><a href="#analisando-a-query-com-ctes" aria-hidden="true" class="anchor" id="analisando-a-query-com-ctes"></a>Analisando a query com CTE’s</h2>
+<p>Agora podemos novamente analisar com EXPLAIN no PgAdmin4:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6w7iddgklcbhc2ioaf3y.png" alt="explain cte" /><br />
+Podemos reparar que já não há mais o node de <em>Nested Loop</em>, pelo que é feito um <strong>CTE scan</strong> primeiro, que garante que os dados serão materializados de forma linear e posteriormente agregados e filtrados na query.</p>
+<p>Com isto, a query <strong>reduziu de 7000ms para 300ms</strong>! Sem necessidade de índices!</p>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Apesar de haver drawbacks com o uso de CTE’s, pois podem ser materializadas sem necessidade e ocupar espaço demasiado, o uso consciente com query planner (EXPLAIN) pode ser um bom aliado para terminarmos com um código modular e performático sem abusar de índices!</p>
+<p>Segue <a href="https://gist.github.com/leandronsp/0f93c79ba70c2d44d150011a4c747604">link para o gist</a>.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

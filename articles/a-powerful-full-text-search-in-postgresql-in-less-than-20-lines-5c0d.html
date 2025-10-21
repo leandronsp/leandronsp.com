@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A powerful full-text search in PostgreSQL in less than 20 lines - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="This blogpost will guide you to understand the fundamental pieces needed to implement a **good enough** [full-text search](https://en.wikipedia.org/wiki/Full-tex">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html">
+  <meta property="og:title" content="A powerful full-text search in PostgreSQL in less than 20 lines">
+  <meta property="og:description" content="This blogpost will guide you to understand the fundamental pieces needed to implement a **good enough** [full-text search](https://en.wikipedia.org/wiki/Full-tex">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-09-16T18:15:57Z">
+  <meta property="article:tag" content="postgres">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "A powerful full-text search in PostgreSQL in less than 20 lines",
+    "datePublished": "2021-09-16T18:15:57Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "This blogpost will guide you to understand the fundamental pieces needed to implement a **good enough** [full-text search](https://en.wikipedia.org/wiki/Full-tex",
+        "keywords": "postgres"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">A powerful full-text search in PostgreSQL in less than 20 lines</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 16 Sep 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">postgres</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>This blogpost will guide you to understand the fundamental pieces needed to implement a <strong>good enough</strong> <a href="https://en.wikipedia.org/wiki/Full-text_search">full-text search</a> using <a href="https://www.postgresql.org/docs/13/textsearch-intro.html">PostgreSQL</a>.</p>
+<p><strong>Spoiler alert</strong>: for those curious people looking for a “okay, just show me a full-text search with ranking and fuzzy search in Postgres in less than 20 lines”, so here you go:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">	<span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">	<span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="7">	<span style="color: #e06c75;">similarity</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="9">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="10">	<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">document</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="11">	<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;sales&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">query</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="12">	<span style="color: #e5c07b;">NULLIF</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="13">	<span style="color: #e5c07b;">NULLIF</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="14">	<span style="color: #e5c07b;">SIMILARITY</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;sales&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">similarity</span>
+</div><div class="line" data-line="15"><span style="color: #c678dd;">WHERE</span> <span style="color: #e06c75;">query</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e06c75;">document</span> <span style="color: #c678dd;">OR</span> <span style="color: #e06c75;">similarity</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="16"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">similarity</span> <span style="color: #c678dd;">DESC</span> <span style="color: #c678dd;">NULLS</span> <span style="color: #c678dd;">LAST</span>
+</div></code></pre>
+<p>But if you need to understand what the heck is the above SQL statement doing, let me explain you a bit of context and FTS (Full-text search) fundamentals in PostgreSQL.</p>
+<h3><a href="#context-matters" aria-hidden="true" class="anchor" id="context-matters"></a>Context matters</h3>
+<p>A bunch of years ago I read <a href="http://rachbelaid.com/postgres-full-text-search-is-good-enough/">this awesome blogpost</a> called “Postgres full-text search is good enough”. It’s really worth reading, I could get many insights, since I was already using PostgreSQL as my standard database.</p>
+<p>By the time, I was comfortable using ElasticSearch for text searching (and if we go even before that back to 2009, I have experience using Apache Lucene, from which ElasticSearch is based on).</p>
+<p>However, managing ElasticSearch deployment <a href="https://qbox.io/blog/memory-considerations-in-elasticsearch-deployment/">is not easy</a>. It requires a lot of patience and memory 🍪.</p>
+<p>Then back to 2014 I wrote <a href="https://medium.com/@leandronsp/a-practical-look-at-postgresql-text-search-part-i-aee3f65e3b79#.qza7vxlet">this article</a> explaining the reasons why I decided to experiment on PG text search as well as showing a practical example in a Ruby application.</p>
+<p>In this guide, I’ll focus on a simpler yet powerful example using only SQL, so if you want to follow me in this adventure, make sure you have <a href="https://www.postgresqltutorial.com/postgresql-getting-started/">PostgreSQL installed</a>.</p>
+<p>That’s the only requirement. No more tools to install or setup. Postgres solely.</p>
+<h3><a href="#seeding-data" aria-hidden="true" class="anchor" id="seeding-data"></a>Seeding data</h3>
+<p>In order to explain further the fundamentals of textual search, relevance and results ranking, we have to seed our database with real data and compare different search strategies.</p>
+<p>Let’s create a table called <code>courses</code> containing only a <code>title</code> and <code>description</code> columns. Those columns will be our “searchable” columns in which we will perform a text search against:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">TABLE</span> <span style="color: #e5c07b;">courses</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #e06c75;">id</span> <span style="color: #e5c07b;">SERIAL</span> <span style="color: #c678dd;">PRIMARY</span> <span style="color: #c678dd;">KEY</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="3"><span style="color: #e06c75;">title</span> <span style="color: #e5c07b;">VARCHAR</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">80</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">NOT</span> <span style="color: #e5c07b;">NULL</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="4"><span style="color: #e06c75;">description</span> <span style="color: #e5c07b;">VARCHAR</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">200</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">NOT</span> <span style="color: #e5c07b;">NULL</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Next, we will populate the table with some dummy data:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">INSERT</span> <span style="color: #c678dd;">INTO</span> <span style="color: #e5c07b;">courses</span> <span style="color: #c678dd;">(</span>title<span style="color: #abb2bf;">,</span> description<span style="color: #c678dd;">)</span> <span style="color: #c678dd;">VALUES</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Improve your sales skills&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;A complete course that will help you to improve your sales skills&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Intro to Computer Science&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Understant how computers work&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Law 101&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Have you ever wondered doing some Law?&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Natural Sciences the easy way&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Your guide to understand the world&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Mathematics: a gentle introduction&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Numbers are easy&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;The crash course of Data Science&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Be a data scientist in 5 weeks&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="8">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Sales crash course&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Yet another course on Sales&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Learn Java in 21 days&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="10">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Ruby programming language&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;DDH sales Ruby, but could you buy it?&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="11">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Sales matter&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Really?&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;History in 3 pages&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Can you learn history in 3 pages?&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="13">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Mastering Git&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Git history will no longer bother you&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="14">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Cooking like a boss&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Be the next master chef&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="15">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Master Chef 3.0&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Cooking revisited&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="16">  <span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Functional Programming in a nutshell&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Learn FP in 4 days&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Check the data was properly created:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631802829883/tVvB-a46n.png" alt="Screenshot 2021-09-16 at 15.32.50.png" /></p>
+<p>Cool. Now, before going to “full-text search”, let’s perform a simple textual search as used in many SQL systems: <a href="https://www.postgresql.org/docs/12/functions-matching.html">pattern matching</a></p>
+<h3><a href="#textual-search-using-like-and-ilike" aria-hidden="true" class="anchor" id="textual-search-using-like-and-ilike"></a>Textual search using LIKE and ILIKE</h3>
+<p>Textual search using LIKE is pretty straightforward as doing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="6">	<span style="color: #e5c07b;">courses</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">WHERE</span>  
+</div><div class="line" data-line="8">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #c678dd;">LIKE</span> <span style="color: #98c379;">&#39;%java%&#39;</span> <span style="color: #c678dd;">OR</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span> <span style="color: #c678dd;">LIKE</span> <span style="color: #98c379;">&#39;%java%&#39;</span>
+</div></code></pre>
+<p>But it returned no results, since the <code>LIKE</code> is <strong>case-sensitive</strong>, which means we have to specify the upcase letter as saved in the table:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="2">courses<span style="color: #abb2bf;">.</span>title LIKE &#39;%Java%&#39; <span style="color: #c678dd;">OR</span> courses<span style="color: #abb2bf;">.</span>description LIKE &#39;%Java%&#39;
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">8	&quot;Java in a nutshell&quot;	&quot;Learn Java in 21 days&quot;
+</div></code></pre>
+<p>We are lucky today, then let’s use the <code>ILIKE</code> which is <strong>case-insensitive</strong>, so there’s no need to upcase as it will perform pattern matching on either capital and non-capital letters:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="2">courses<span style="color: #abb2bf;">.</span>title ILIKE &#39;%java%&#39; <span style="color: #c678dd;">OR</span> courses<span style="color: #abb2bf;">.</span>description ILIKE &#39;%java%&#39;
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">8	&quot;Java in a nutshell&quot;	&quot;Learn Java in 21 days&quot;
+</div></code></pre>
+<h4><a href="#considerations-on-likeilike" aria-hidden="true" class="anchor" id="considerations-on-likeilike"></a>Considerations on LIKE/ILIKE</h4>
+<p>Many systems use the <em>pattern matching</em> feature to implement very simple text searches. It can be enough for many scenarios but the more the platform grows in demanding users, the more search needs to return <strong>better</strong> results, with a more accurate relevance and ranking.</p>
+<p>According to the <a href="https://www.postgresql.org/docs/13/textsearch-intro.html">official Postgres documentation</a>, the pattern matching <code>LIKE | ILIKE</code> lacks essential properties required by modern systems:</p>
+<blockquote>
+<p>They provide no ordering (ranking) of search results, which makes them ineffective when thousands of matching documents are found.</p>
+</blockquote>
+<blockquote>
+<p>They tend to be slow because there is no index support, so they must process all documents for every search.</p>
+</blockquote>
+<blockquote>
+<p>There is no linguistic support, even for English. Regular expressions are not sufficient because they cannot easily handle derived words…</p>
+</blockquote>
+<p>For a more practical example, and being that we give more relevance for the <em>title over description</em>, let’s see in action the <code>ILIKE</code> lacking such a requirement:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">courses</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">WHERE</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #c678dd;">ILIKE</span> <span style="color: #98c379;">&#39;%sales%&#39;</span> <span style="color: #c678dd;">OR</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span> <span style="color: #c678dd;">ILIKE</span> <span style="color: #98c379;">&#39;%sales%&#39;</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631806733291/r_xe-29yG.png" alt="Screenshot 2021-09-16 at 16.38.31.png" /><br />
+Not good.</p>
+<p><em>We want the course 10, which contains the word “Sales” in its title, to appear before the course 9, which holds the word in its description.</em></p>
+<p>Furthermore, which would be our <strong>order criteria</strong>? How about ordering by a “score” so we can build a rank of our results?</p>
+<p><em>Full-text search for the rescue</em>.</p>
+<h3><a href="#full-text-search-in-postgresql" aria-hidden="true" class="anchor" id="full-text-search-in-postgresql"></a>Full-text search in PostgreSQL</h3>
+<p><strong>Full-text searching</strong> (FTS) allows documents to be preprocessed and an index saved for later rapid searching and ranking. Please refer to the <a href="https://www.postgresql.org/docs/13/textsearch-intro.html">official documentation</a> which is quite complete and provides all the information needed to understand and implement a FTS.</p>
+<p>The main building blocks for FTS in PG (Postgres) are:</p>
+<ul>
+<li><code>tsvector</code>, which represents a searchable <strong>document</strong></li>
+<li><code>tsquery</code>, which is the <strong>search query</strong> to perform against a document</li>
+</ul>
+<h4><a href="#tsvector" aria-hidden="true" class="anchor" id="tsvector"></a>tsvector</h4>
+<p>The <code>to_tsvector</code> function parses an input text and converts it to the search type that represents a searchable document. For instance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>…will give the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">&quot;&#39;java&#39;:1 &#39;nutshel&#39;:4&quot;
+</div></code></pre>
+<ul>
+<li>the result is a list of lexemes ready to be searched</li>
+<li>stop words (“in”, “a”, “the”, etc) were removed</li>
+<li>the numbers are the position of the lexemes in the document: <code>java:1</code> starts at the 1st position whereas <code>nutshell:4</code> starts at the 4th position</li>
+</ul>
+<h4><a href="#tsquery" aria-hidden="true" class="anchor" id="tsquery"></a>tsquery</h4>
+<p>The <code>to_tsquery</code> function parses an input text and converts it to the search type that represents a query. For instance, the user wants to search “java in a nutshell”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java &amp; in &amp; a &amp; nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>…will give the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">&quot;&#39;java&#39; &amp; &#39;nutshel&#39;&quot;
+</div></code></pre>
+<ul>
+<li>the result is a list of tokens ready to be queried</li>
+<li>stop words (“in”, “a”, “the”, etc) were removed</li>
+</ul>
+<p>So, how to match a query against a document?</p>
+<h3><a href="#the--operator" aria-hidden="true" class="anchor" id="the--operator"></a>The @@ operator</h3>
+<p>The <code>@@</code>  operator allows to match a query against a document and returns true or false. Simple as that.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">/* true */</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java &amp; in &amp; a &amp; nutshell&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span> 
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;">/* true */</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span> 
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">/* true */</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;nutshell&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span> 
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;">/* false */</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;batatas&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span> 
+</div></code></pre>
+<p>Yay! As for now, we have the essential requirements to implement FTS on our courses table.</p>
+<h3><a href="#search-against-courses" aria-hidden="true" class="anchor" id="search-against-courses"></a>Search against courses</h3>
+<p>Let’s perform the basic full-text search, looking for courses containing “java” in their titles:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> 
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">courses</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">WHERE</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">8	&quot;Java in a nutshell&quot;	&quot;Learn Java in 21 days&quot;
+</div></code></pre>
+<p>Great. Let’s perform the search “sales” against the title and description as well:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> 
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">courses</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">WHERE</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;sales&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>or</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> 
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">document</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">WHERE</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;sales&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e06c75;">document</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631807292499/XK_VPsV6H.png" alt="Screenshot 2021-09-16 at 16.38.31.png" /></p>
+<p>At this moment, the results are similar to our <code>ILIKE</code> version. Let’s see where the FTS really shines.</p>
+<h4><a href="#ts_rank" aria-hidden="true" class="anchor" id="ts_rank"></a>ts_rank</h4>
+<p>The <code>ts_rank</code> function takes the document and query as arguments attempts to measure <strong>how relevant are documents to a particular query</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="3">		<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">		<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java&#39;</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">	<span style="color: #c678dd;">)</span> 
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">&quot;0.06079271&quot;
+</div></code></pre>
+<p>Checking multiple variations:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">/* 0.06079271 */</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;">/* 0 */</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">SELECT</span> <span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;batatas&#39;</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span> 
+</div></code></pre>
+<p>A more sophisticated simulating a rank of potential titles and descriptions:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="3">		<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">		<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java&#39;</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">	<span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="7">		<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Learn in 21 days&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="8">		<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;java&#39;</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9">	<span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">rank_description</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631808567146/d36sLDZap.png" alt="Screenshot 2021-09-16 at 17.09.11.png" /></p>
+<p>Great! Now we have all the needed to implement a better textual search with proper ranking against our courses.</p>
+<h3><a href="#search-courses-with-ranking" aria-hidden="true" class="anchor" id="search-courses-with-ranking"></a>Search courses with ranking</h3>
+<p>Ranking results means that we have to split the document in different rankings so we can perform <strong>ordering</strong> accordingly.</p>
+<p>We basically need to export the ranking fields:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">    <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">as</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">as</span> <span style="color: #e06c75;">rank_description</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div></code></pre>
+<p>…and perform the query against the whole document containing either title and description:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">FROM 
+</div><div class="line" data-line="2">	<span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="3">	to_tsvector<span style="color: #c678dd;">(</span>courses<span style="color: #abb2bf;">.</span>title || courses<span style="color: #abb2bf;">.</span>description<span style="color: #c678dd;">)</span> document<span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	to_tsquery<span style="color: #c678dd;">(</span>&#39;sales&#39;<span style="color: #c678dd;">)</span> query
+</div><div class="line" data-line="5"><span style="color: #c678dd;">WHERE</span> query <span style="color: #56b6c2;">@@</span> document
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div></code></pre>
+<p>Then we are ready to perform the correct ordering:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> rank_description<span style="color: #abb2bf;">,</span> rank_title <span style="color: #c678dd;">DESC</span>
+</div></code></pre>
+<h3><a href="#the-implementation-with-ranking" aria-hidden="true" class="anchor" id="the-implementation-with-ranking"></a>The implementation with ranking</h3>
+<p>So here we have a implementation of a <strong>full-text search with ranking in PostgreSQL</strong> in just 12 lines of SQL code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">as</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">	<span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">as</span> <span style="color: #e06c75;">rank_description</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="8">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="9">	<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">document</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="10">	<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;sales&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">query</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">WHERE</span> <span style="color: #e06c75;">query</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e06c75;">document</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rank_title</span> <span style="color: #c678dd;">DESC</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631809230312/sihdXAjU-.png" alt="Screenshot 2021-09-16 at 17.20.19.png" /></p>
+<h3><a href="#is-it-fast" aria-hidden="true" class="anchor" id="is-it-fast"></a>Is it fast?</h3>
+<p>Depending on the amount of data, such a query may face performance issues, since it needs to convert data to searchable documents <strong>on the fly</strong>.</p>
+<h4><a href="#index-for-the-rescue" aria-hidden="true" class="anchor" id="index-for-the-rescue"></a>Index for the rescue</h4>
+<p>Creating the <a href="https://www.postgresql.org/docs/13/textsearch-indexes.html">proper index</a> (a GIN index for text search), it can improve the performance by orders of magnitude.</p>
+<p><a href="https://github.com/leandronsp/yacs">In this project</a> I made a proof of concept in which 12 millions of cities could be searched in just a <strong>few milliseconds</strong>. GIN index only. No materialized view needed.</p>
+<p>Let’s see how a GIN index could be created for our courses table:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">INDEX</span> courses_search_idx <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">courses</span> <span style="color: #c678dd;">USING</span> <span style="color: #61afef;">GIN</span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>And we are good.</p>
+<p><em>Just sit down, relax and enjoy a search across millions of courses with no performance issues.</em></p>
+<h3><a href="#how-about-fuzzy-searching" aria-hidden="true" class="anchor" id="how-about-fuzzy-searching"></a>How about fuzzy searching?</h3>
+<p><a href="https://en.wikipedia.org/wiki/Approximate_string_matching">Fuzzy search</a>, or “string approximation matching”, is the technique used to calculate the approximation of two strings. It’s commonly used to anticipate mispellings on the queries and so on.</p>
+<p>Unfortunately, the Postgres built-in FTS doesn’t support fuzzy searching, however, by using an extension, we can combine full-text search and fuzzy search in the same SQL query.</p>
+<p>Let’s create the extension:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">EXTENSION</span> pg_trgm
+</div></code></pre>
+<p>Now we can see the differences in action:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;jova&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">search</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">SIMILARITY</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;jova&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Java in a nutshell&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">as</span> <span style="color: #e06c75;">similarity</span>
+</div></code></pre>
+<p><img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1631810732379/g20lyQ171.png" alt="Screenshot 2021-09-16 at 17.45.23.png" /></p>
+<p>Note that searching for “jova” against a a text “Java in a nutshell”, the full-text search match operator returns false whilst the <code>SIMILARITY</code> function, provided by the <code>pg_trgm</code> extension, returns a value <code>0.09</code>.</p>
+<p>**In a scale from 0 to 1, similar strings tend to be close to 1. **</p>
+<h3><a href="#the-final-implementation-using-ranking-and-fuzzy-search" aria-hidden="true" class="anchor" id="the-final-implementation-using-ranking-and-fuzzy-search"></a>The final implementation, using ranking and fuzzy search</h3>
+<p>So here we have a implementation of a <strong>full-text search with ranking and fuzzy search in PostgreSQL</strong> in just 16 lines of SQL code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">	<span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">	<span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="7">	<span style="color: #e06c75;">similarity</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="9">	<span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">,</span> 
+</div><div class="line" data-line="10">	<span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">document</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="11">	<span style="color: #e5c07b;">to_tsquery</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;curse&#39;</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">query</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="12">	<span style="color: #e5c07b;">NULLIF</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="13">	<span style="color: #e5c07b;">NULLIF</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">ts_rank</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">to_tsvector</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">query</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="14">	<span style="color: #e5c07b;">SIMILARITY</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;curse&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">courses</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">description</span><span style="color: #c678dd;">)</span> <span style="color: #e06c75;">similarity</span>
+</div><div class="line" data-line="15"><span style="color: #c678dd;">WHERE</span> <span style="color: #e06c75;">query</span> <span style="color: #56b6c2;">@@</span> <span style="color: #e06c75;">document</span> <span style="color: #c678dd;">OR</span> <span style="color: #e06c75;">similarity</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="16"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e06c75;">rank_title</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rank_description</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">similarity</span> <span style="color: #c678dd;">DESC</span> <span style="color: #c678dd;">NULLS</span> <span style="color: #c678dd;">LAST</span>
+</div></code></pre>
+<p>Highlights:</p>
+<ul>
+<li>we apply the similarity function against the title and description</li>
+<li>when the search has no match, we filter the results which have a similarity above 0</li>
+<li>added the <code>NULLIF</code> function so when the <code>rank_*</code> is zero, we cast the value to <code>NULL</code> so the <strong>ordering</strong> can consider NULL values to be the last in ranking results</li>
+</ul>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>This guide was quite heavy but it covered only the very basics of full-text search in Postgres. In the official documentation you can see much more features and capabilities, such as <em>highlight documents, weights, query tree, query rewrite, dictionaries, triggers</em> and so on.</p>
+<p>It’s reliable and fast, which means that it can be used in a wide range of requirements, from simple search systems to complex ones. In case you already have PostgreSQL in your stack, it’s worth considering to experiment on it before going to an external/expensive alternative which will demand more attention to operations complexity.</p>
+<p>I hope you could enjoy this ride of implementing FTS in PostgreSQL. <em>Happy searching!</em></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

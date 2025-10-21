@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winning at floating-point issues: a survival guide - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="## TL;DR
+
+For precise calculations, favor arbitrary-precision decimals or equivalents like BigDecimal over floating-point numbers.
+
+Additionally, avoid unnecessa">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html">
+  <meta property="og:title" content="Winning at floating-point issues: a survival guide">
+  <meta property="og:description" content="## TL;DR
+
+For precise calculations, favor arbitrary-precision decimals or equivalents like BigDecimal over floating-point numbers.
+
+Additionally, avoid unnecessa">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-06-01T04:29:59Z">
+  <meta property="article:tag" content="computerscience">
+      <meta property="article:tag" content="programming">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Winning at floating-point issues: a survival guide",
+    "datePublished": "2023-06-01T04:29:59Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "## TL;DR
+
+For precise calculations, favor arbitrary-precision decimals or equivalents like BigDecimal over floating-point numbers.
+
+Additionally, avoid unnecessa",
+        "keywords": "computerscience, programming"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Winning at floating-point issues: a survival guide</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 01 Jun 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">computerscience</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">programming</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <h2><a href="#tldr" aria-hidden="true" class="anchor" id="tldr"></a>TL;DR</h2>
+<p>For precise calculations, favor arbitrary-precision decimals or equivalents like BigDecimal over floating-point numbers.</p>
+<p>Additionally, avoid unnecessary rounding. When required, limit rounding to the final step to maintain as much accuracy as possible.</p>
+<hr />
+<h2><a href="#table-of-contents" aria-hidden="true" class="anchor" id="table-of-contents"></a>Table of contents</h2>
+<ul>
+<li><a href="#prologue">Prologue</a></li>
+<li><a href="#first-things-first">First things first</a></li>
+<li><a href="#bits-are-not-enough">Bits are not enough</a></li>
+<li><a href="#bits-and-integers">Bits and integers</a></li>
+<li><a href="#bits-and-other-real-numbers">Bits and other real numbers</a></li>
+<li><a href="#fixedpoint-representation">Fixed-point representation</a></li>
+<li><a href="#floatingpoint-representation">Floating-point representation</a></li>
+<li><a href="#issues-and-standards">Issues and standards</a></li>
+<li><a href="#floatingpoint-data-types">Floating-point data types</a></li>
+<li><a href="#floatingpoint-issues-in-action">Floating-point issues</a></li>
+<li><a href="#decimals-to-the-rescue">Decimals to the rescue</a></li>
+<li><a href="#beware-of-rounding">Beware of rounding</a></li>
+<li><a href="#decimals-in-other-technologies">Decimals in other technologies</a></li>
+<li><a href="#wrapping-up">Wrapping Up</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<hr />
+<h2><a href="#-prologue" aria-hidden="true" class="anchor" id="-prologue"></a>📜 Prologue</h2>
+<p>Oh yes, <strong>floating-point</strong> numbers.</p>
+<p>They frequently appear in technical content, full of scientific notations and complex explanations.</p>
+<p>It’s almost certain that every programmer has already faced the notion that working with floating-point numbers can be <strong>perilous</strong>, resulting in <strong>imprecise</strong> arithmetic outcomes, among other issues.</p>
+<p>However, comprehending all the underlying reasons behind this <em>crucial topic in computer science</em> can be challenging for many.</p>
+<p>In today’s post, we will delve into the <strong>problems that floating-point numbers address</strong> and explore the <strong>involved caveats</strong>.</p>
+<p>So, grab a refreshing bottle of water, and let’s embark on yet another journey into the realm of <em>floating-point</em> numbers.</p>
+<hr />
+<h2><a href="#-first-things-first" aria-hidden="true" class="anchor" id="-first-things-first"></a>👍🏼 First things first</h2>
+<p>Computers can only understand <strong>machine language</strong>.</p>
+<p><em>Machine language</em> is a collection of “bits” that contain data and instructions for the CPU. We represent those bits as <strong>binary bits</strong> and as such, it’s called the <strong>base-2 numeral system</strong> (0 and 1).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">01001001 01001000 11001011 01000001 01001000 10001000
+</div><div class="line" data-line="2">01011001 01001000 01000001 01101001 01001000 01001001
+</div><div class="line" data-line="3">11000001 10001000 01001001 11001010 10001000 01001000
+</div><div class="line" data-line="4">11001001 01001000 11001001 01001000 01001000 01001001
+</div></code></pre>
+<p>Programming directly in machine language is highly <em>error-prone</em> and often inefficient in many scenarios. To address this, <strong>assembly languages</strong> were introduced over the years, serving as a bridge between CPU architecture specifics and a higher-level set of instructions.</p>
+<p><strong>Assembly languages</strong> are translated into machine code through a dedicated program called “assembler.” Each CPU architecture typically has its own assembler associated with it.</p>
+<p>This allows programmers to work with a more manageable and human-readable instruction set that is then translated into machine code specific to the target architecture.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">section</span> .data
+</div><div class="line" data-line="2">    <span style="color: #e5c07b;">number1</span> <span style="color: #e5c07b;">dd</span> <span style="color: #d19a66;">10</span>      <span style="color: #7f848e;">; Define the first number as a 32-bit float</span>
+</div><div class="line" data-line="3">    <span style="color: #e5c07b;">number2</span> <span style="color: #e5c07b;">dd</span> <span style="color: #d19a66;">20</span>      <span style="color: #7f848e;">; Define the second number as a 32-bit float</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e5c07b;">section</span> .text
+</div><div class="line" data-line="6">    <span style="color: #e5c07b;">global</span> <span style="color: #e5c07b;">_start</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">_start</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #7f848e;">; Load the first number into xmm0 register</span>
+</div><div class="line" data-line="9">    <span style="color: #e5c07b;">movss</span> <span style="color: #e5c07b;">xmm0</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">dword</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">number1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="10">    
+</div><div class="line" data-line="11">    <span style="color: #7f848e;">; Load the second number into xmm1 register</span>
+</div><div class="line" data-line="12">    <span style="color: #e5c07b;">movss</span> <span style="color: #e5c07b;">xmm1</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">dword</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">number2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="13">.....
+</div><div class="line" data-line="14">.....
+</div></code></pre>
+<p>Advancements in the field of computer engineering have paved the way for the development of increasingly high-level programming languages that can directly translate into machine code instructions.</p>
+<p>Over the course of the following decades, languages like <strong>C, Java, and Python</strong>, among others, emerged, enabling individuals with limited knowledge of computer internals to write programs for computers.</p>
+<p>This significant accomplishment has had a profound impact on the industry, as computers became more compact and faster, empowering modern software engineering practices to deliver substantial value to businesses worldwide.</p>
+<hr />
+<h2><a href="#-bits-are-not-enough" aria-hidden="true" class="anchor" id="-bits-are-not-enough"></a>🔵 Bits are not enough</h2>
+<p>As mentioned earlier, computers solely comprehend <strong>binary bits</strong>.</p>
+<p>Nothing else in this world can be interpreted by computers.</p>
+<p><em>Only. Bits.</em></p>
+<blockquote>
+<p>💡 Actually, CPUs in electronic computers comprehend only the absence or presence of voltage, allowing us to represent information using 0 and 1 (off and on)</p>
+</blockquote>
+<p>However, real-life scenarios present challenges where computer programs, which are created <strong>by people for people</strong>, need to represent a broader range of characters beyond just 0s and 1s. This includes letters, decimal numbers, hexadecimal numbers, special characters, punctuation marks, and even emojis like 😹.</p>
+<p>Standard character sets such as <strong>ASCII</strong> and <strong>Unicode</strong> schemes solve the challenge of representing numbers, letters, special characters, emojis, and more within the binary system.</p>
+<blockquote>
+<p>⚠️ Delving into the intricacies of character encoding is beyond the scope of this article. It will be covered in future posts</p>
+</blockquote>
+<p><em>Here, our focus will be specifically on how computers work with numbers in memory</em>, particularly <strong>integers</strong>.</p>
+<hr />
+<h2><a href="#-bits-and-integers" aria-hidden="true" class="anchor" id="-bits-and-integers"></a>🔵 Bits and integers</h2>
+<p>Let’s take the number <em>65</em> as an example. It is represented in the <strong>base 10</strong> numeral system, making it a real number.</p>
+<p>Moreover, it is classified as an <strong>integer</strong>.</p>
+<p>By performing conversions based on powers of 2, we can represent the integer 65 as <code>01000001</code> in an 8-bit binary format. This binary representation can be converted back and forth to the decimal value 65.</p>
+<p>From a <em>mathematical perspective</em>, since <strong>65 is an integer</strong>, it fits within a single byte (8 bits). Moreover, performing powers of 2, we know that a single byte can accomodate 256 numbers:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">8</span> = <span style="color: #d19a66;">256</span>
+</div></code></pre>
+<p>Naively speaking, one might assume that a single byte can represent integers ranging from 0 to 255.</p>
+<p>However, integers must represent both <em>negative and positive</em> numbers. How should we evenly distribute those integers in a single byte?</p>
+<p>We should employ a technique called <strong>two’s complement</strong>.</p>
+<h3><a href="#-twos-complement" aria-hidden="true" class="anchor" id="-twos-complement"></a>👉 Two’s complement</h3>
+<p>To evenly distribute negative and positive non-fractional integers within 8 bits, we can use a technique called <strong>two’s complement</strong>. In this technique:</p>
+<ul>
+<li>the leftmost bit serves as the <strong>sign bit</strong>, indicating whether the number is positive or negative</li>
+<li>all the bits are <em>flipped or inverted</em></li>
+<li>we then <strong>add 1</strong> to the resulting value</li>
+</ul>
+<p>This way, a single byte represents integers ranging from -128 to 127.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">8</span> = <span style="color: #d19a66;">256</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">-</span>127<span style="color: #abb2bf;">,</span> -126<span style="color: #abb2bf;">,</span> -125...127<span style="color: #abb2bf;">,</span> 128
+</div></code></pre>
+<h3><a href="#-using-two-bytes" aria-hidden="true" class="anchor" id="-using-two-bytes"></a>👉 Using two bytes</h3>
+<p>By employing the two’s complement technique, we can also represent a range of integers using two bytes (16 bits). Utilizing the concept of powers of 2, we can observe that two bytes can accommodate a total of 65536 different values:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">16</span> = <span style="color: #d19a66;">65536</span>
+</div></code></pre>
+<p>Considering negative numbers, the range extends from -32768 to 32767, inclusive.</p>
+<p>Now, let’s explore some examples using <strong>PostgreSQL</strong>. If you prefer to work with containers, setting up a quick <code>psql</code> terminal is straightforward. You can achieve it by running the following commands:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--rm</span> <span style="color: #e06c75;">-d</span> \
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">postgres</span> \
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">-e</span> <span style="color: #e06c75;">POSTGRES_HOST_AUTH_METHOD=trust</span> \
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">postgres</span> 
+</div></code></pre>
+<p>Then, access the <code>psql</code> terminal with the following command:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span>
+</div></code></pre>
+<p>In PostgreSQL, the data type that represents a two-byte integer is called <strong>int2</strong> or <strong>smallint</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">65</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> int2
+</div><div class="line" data-line="3"><span style="color: #7f848e;">------</span>
+</div><div class="line" data-line="4">   65
+</div></code></pre>
+<p>To check the data type, we can use the function <code>pg_typeof</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">pg_typeof</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">65</span>::<span style="color: #e5c07b;">int2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> pg_typeof
+</div><div class="line" data-line="3"><span style="color: #7f848e;">-----------</span>
+</div><div class="line" data-line="4"> smallint
+</div></code></pre>
+<p>As <strong>smallint</strong> uses two bytes, it can only accommodate the range we mentioned earlier in terms of bits and integers:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">32767</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> int2
+</div><div class="line" data-line="3"><span style="color: #7f848e;">-------</span>
+</div><div class="line" data-line="4"> 32767
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>32767</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="7"> int2
+</div><div class="line" data-line="8"><span style="color: #7f848e;">-------</span>
+</div><div class="line" data-line="9"> <span style="color: #56b6c2;">-</span>32767
+</div></code></pre>
+<p>However, if we attempt to exceed the range:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">32768</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">ERROR:  smallint <span style="color: #c678dd;">out</span> <span style="color: #c678dd;">of</span> <span style="color: #c678dd;">range</span>
+</div></code></pre>
+<p>Pretty neat, <em>isn’t it</em>?</p>
+<p>In addition to <strong>smallint</strong>, PostgreSQL offers a variety of other integer data types:</p>
+<table>
+<thead>
+<tr>
+<th>Data Type</th>
+<th>Description</th>
+<th>Range of Integers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>smallint</td>
+<td>Two-byte integer</td>
+<td>-32,768 to 32,767</td>
+</tr>
+<tr>
+<td>integer</td>
+<td>Four-byte integer</td>
+<td>-2,147,483,648 to 2,147,483,647</td>
+</tr>
+<tr>
+<td>bigint</td>
+<td>Eight-byte integer</td>
+<td>-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807</td>
+</tr>
+</tbody>
+</table>
+<p>However, we all know that the world is not only integers. Integers are a subset of a broader set of numbers, called <strong>real numbers</strong>.</p>
+<hr />
+<h2><a href="#-bits-and-other-real-numbers" aria-hidden="true" class="anchor" id="-bits-and-other-real-numbers"></a>🔵 Bits and other real numbers</h2>
+<p><strong>Real numbers</strong> can include integers, fractions, and decimals, both rational and irrational.</p>
+<p>For instance, <em>3.14159</em> represents the real <strong>number π</strong> (pi), which is an irrational number. It is a <em>non-repeating and non-terminating decimal</em>. The value of π extends infinitely without any pattern in its decimal representation.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">3<span style="color: #abb2bf;">.</span>14159265358979323846<span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div></code></pre>
+<hr />
+<p>Suppose we have two bytes (16 bits), which can represent 65536 integers ranging from -32768 to 32767.</p>
+<p>When it comes to representing other real numbers, such as decimals, we can use a technique called <strong>fixed-point</strong>.</p>
+<hr />
+<h2><a href="#-fixed-point-representation" aria-hidden="true" class="anchor" id="-fixed-point-representation"></a>🔵 Fixed-point representation</h2>
+<p>In fixed-point representation, we split the provided 16 bits into three sections:</p>
+<h3><a href="#-sign-bit" aria-hidden="true" class="anchor" id="-sign-bit"></a>👉 Sign bit</h3>
+<p>The first bit (leftmost) represents the sign, being 1 for negative and 0 for positive.</p>
+<h3><a href="#-decimal-part" aria-hidden="true" class="anchor" id="-decimal-part"></a>👉 Decimal part</h3>
+<p>The next 7 bits represent the decimal (fracional) part, which can have a precision of up to <code>0.992188</code> in our simulation:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>7 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>6 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>1 <span style="color: #56b6c2;">=</span>
+</div><div class="line" data-line="2">0<span style="color: #abb2bf;">.</span>992188
+</div></code></pre>
+<h3><a href="#-integer-part" aria-hidden="true" class="anchor" id="-integer-part"></a>👉 Integer part</h3>
+<p>The remaining 8 bits represent the integer part, which can go up to <code>127</code> using two’s complement :</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">two_complement<span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="2">    2<span style="color: #56b6c2;">^</span>7 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>6 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>1 <span style="color: #56b6c2;">=</span> 
+</div><div class="line" data-line="3">    127
+</div><div class="line" data-line="4"><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/56igr6mlwimkho6vlllk.png" alt="fixed point" /></p>
+<p>Considering that the integer part, using 8 bits with two’s complement, ranges from -128 to 127, we can conclude that, with <em>fixed-point representation</em>, decimals can range from <strong>-128.992188 to 128.992188</strong>.</p>
+<p>However, this technique may not always be the most efficient. Let’s explore another technique for representing decimals.</p>
+<p>Yes, we are talking about the widely used <strong>floating-point</strong> representation.</p>
+<hr />
+<h2><a href="#-floating-point-representation" aria-hidden="true" class="anchor" id="-floating-point-representation"></a>🔵 Floating-point representation</h2>
+<p>Taking 16 bits still as an example, in floating-point representation we also split the 16 bits into three groups:</p>
+<h3><a href="#-sign-bit-1" aria-hidden="true" class="anchor" id="-sign-bit-1"></a>👉 Sign bit</h3>
+<p>The first bit (leftmost) is used to represent whether the number is negative (1) or positive (0).</p>
+<h3><a href="#-exponent-part" aria-hidden="true" class="anchor" id="-exponent-part"></a>👉 Exponent part</h3>
+<p>This crucial component, known as the <em>floating-point</em>, is assigned the next X bits, signifying its importance.</p>
+<p>For our simulation, let’s allocate 7 bits for the exponent part, while utilizing the first exponent bit for the exponent sign.</p>
+<p>As a result, the range for the exponent extends from -63 to 63, accommodating both negative and positive values:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">2<span style="color: #56b6c2;">^</span>5 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>4 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> 2<span style="color: #56b6c2;">^</span>1 <span style="color: #56b6c2;">=</span>
+</div><div class="line" data-line="2">63
+</div></code></pre>
+<p><em>This part is crucial for defining arithmetic precision in floating-point representation.</em></p>
+<h3><a href="#-mantissa" aria-hidden="true" class="anchor" id="-mantissa"></a>👉 Mantissa</h3>
+<p>The <strong>Mantissa</strong> part, also known as the <em>significand</em>, takes the remaining 8 bits, allowing for a range of up to 255.</p>
+<p><em>As we are not representing the integer part in this simulation, there is no need to apply two’s complement to the mantissa.</em></p>
+<p>🔑 <strong>Now the key part</strong><br />
+To calculate the maximum positive floating-point number, we multiply the mantissa by the exponent.</p>
+<p>In this case, the maximum positive value would be obtained by <strong>multiplying 255 by 2^6</strong>, resulting in an exceedingly large number like <strong>2351959869397967831040.0</strong>.</p>
+<p>Conversely, the minimum positive number can be represented as 1 multiplied by <strong>2^-63</strong>, or <strong>0.00000000000000000010842021724855044340074528008699</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mof63oaed96584ajqvbg.png" alt="floating-point" /></p>
+<p>Please note that this simulation is a simplified representation with limited precision and may not reflect the accuracy of ideal or standardized floating-point formats.</p>
+<hr />
+<h2><a href="#-issues-and-standards" aria-hidden="true" class="anchor" id="-issues-and-standards"></a>🔵 Issues and standards</h2>
+<p>Indeed, as mentioned earlier, <strong>selecting an appropriate number of bits for the exponent part</strong> in floating-point representation is crucial to mitigate issues with rounding and truncation when handling fractional numbers.</p>
+<p>Standards like <strong>IEEE 754</strong> were established precisely to address these concerns and provide a consistent framework for floating-point representation. The IEEE 754 standard defines the number of bits allocated to the exponent, mantissa, and sign in both single precision (32 bits) and double precision (64 bits) formats.</p>
+<p>These standards determine the precise representation of the various components of a floating-point number, the <em>rules for arithmetic operations</em>, and how to handle exceptional cases.</p>
+<h3><a href="#-single-precision-4-bytes" aria-hidden="true" class="anchor" id="-single-precision-4-bytes"></a>👉 Single precision (4 bytes)</h3>
+<p><strong>Single precision</strong> numbers are represented using 32 bits of memory.</p>
+<p>They include:</p>
+<ul>
+<li>1 bit for the sign of the number</li>
+<li>8 bits for the exponent</li>
+<li>23 bits for the mantissa</li>
+</ul>
+<p>According to the IEEE standards, single precision can typically <strong>handle 6 to 9 decimal place precision</strong>.</p>
+<h3><a href="#-double-precision-8-bytes" aria-hidden="true" class="anchor" id="-double-precision-8-bytes"></a>👉 Double precision (8 bytes)</h3>
+<p><strong>Double precision</strong> numbers are represented using 64 bits of memory.</p>
+<p>They include:</p>
+<ul>
+<li>1 bit for the sign of the number</li>
+<li>11 bits for the exponent</li>
+<li>52 bits for the mantissa</li>
+</ul>
+<p>According to the IEEE standards, double precision can <strong>handle 15 to 17 decimal places of precision</strong>.</p>
+<p><em>Usually, double-precision fits better when high precision is mandatory, but it consumes more memory.</em></p>
+<hr />
+<h2><a href="#-floating-point-data-types" aria-hidden="true" class="anchor" id="-floating-point-data-types"></a>🔵 Floating-point data types</h2>
+<p>Many programming languages and database systems adhere to the IEEE 754 standards, and PostgreSQL is no exception.</p>
+<p>Let’s see how PostgreSQL implement float data types in action.</p>
+<p>The datatype <strong>float4</strong> conforms to the IEEE 754 single-precision standard, which allocates 1 bit for the sign, 8 bits for the exponent, and 23 bits for the mantissa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;"><span style="color: #e5c07b;">float4</span></span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> float4
+</div><div class="line" data-line="3"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="4">    0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p>Conversely, the datatype <strong>float8</strong> conforms to the IEEE 754 double-precision standard, which allocates 1 bit for the sign, 811bits for the exponent, and 52 bits for the mantissa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;">float8</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> float8
+</div><div class="line" data-line="3"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="4">    0<span style="color: #abb2bf;">.</span>3
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;">float</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="9"> float
+</div><div class="line" data-line="10"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="11">    0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p><em>The default <code>float</code> falls back to double-precision (float8).</em></p>
+<hr />
+<h2><a href="#️-floating-point-issues-in-action" aria-hidden="true" class="anchor" id="️-floating-point-issues-in-action"></a>☣️ Floating-point issues in action</h2>
+<p>Let’s dive into calculations with floating-point numbers and see the <strong>potential issues</strong> in action.</p>
+<p>Take a straightforward sum of <code>0.1 + 0.2</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">float</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;">0.2</span>::<span style="color: #e5c07b;">float</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"> 0<span style="color: #abb2bf;">.</span>30000000000000004
+</div></code></pre>
+<p>This result shows how precision issues can arise in double-precision floating-point numbers during arithmetic operations. Even when following standards, we are not immune to these floating-point calculation challenges.</p>
+<p>However, there’s an alternative strategy that involves a nifty trick using <strong>integers</strong>.</p>
+<h3><a href="#-a-trick-with-integers" aria-hidden="true" class="anchor" id="-a-trick-with-integers"></a>💡 A trick with integers</h3>
+<p>Instead of the float data type, we can work with <strong>integers</strong>. We incorporate a multiplier factor based on a <em>decimal scale</em> when storing values, and then divide by the same factor to restore the original decimal representation when retrieving the value.</p>
+<p>This method enables precise decimal calculations by leveraging integers and scaling. The multiplier factor should be chosen based on the required decimal precision.</p>
+<p>To demonstrate, let’s use this trick to perform <code>0.1 + 0.2</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">0.1</span> <span style="color: #56b6c2;">*</span> <span style="color: #98c379;">1000</span><span style="color: #c678dd;">)</span>::<span style="color: #e5c07b;">int</span> <span style="color: #56b6c2;">+</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">0.2</span> <span style="color: #56b6c2;">*</span> <span style="color: #98c379;">1000</span><span style="color: #c678dd;">)</span>::<span style="color: #e5c07b;">int</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">300
+</div></code></pre>
+<p>Here, each input is multiplied by <code>1000</code> and then converted to an integer. To retrieve the original value without losing precision, we divide by <code>1000</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">300</span> <span style="color: #56b6c2;">/</span> <span style="color: #98c379;">1000</span>::<span style="color: #e5c07b;">float</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p><em>Yay!</em> 🚀</p>
+<p>However, using a fixed multiplier factor may be inefficient when dealing with inputs that have varying decimal places.</p>
+<p>Instead, a variable-scale representation could be employed by converting the input into a string and parsing the number of decimal digits.</p>
+<p>But be aware, variable-scale decimal representations demand <strong>careful handling of complex calculations</strong>, precise decimal scaling, and various other intricacies of decimal arithmetic.</p>
+<p>This is where <strong>decimals</strong> come in.</p>
+<hr />
+<h2><a href="#-decimals-to-the-rescue" aria-hidden="true" class="anchor" id="-decimals-to-the-rescue"></a>🔵 Decimals to the rescue</h2>
+<p>Decimals address the challenges associated with complex arithmetic calculations involving decimals. They significantly reduce the precision issues commonly encountered with floating-point numbers.</p>
+<p>Various programming languages and database systems have implemented decimals. PostgreSQL provides the datatype <strong>decimal</strong>, which offers superior precision compared to floats.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">decimal</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;">0.2</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p>Decimals can also be configured for arbitrary precision and scale:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">#</span> Example: accepts numbers up <span style="color: #c678dd;">to</span> 999<span style="color: #abb2bf;">.</span>99
+</div><div class="line" data-line="2"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>10
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">999.99</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="6">999<span style="color: #abb2bf;">.</span>99
+</div></code></pre>
+<p>Handily, the default datatype for decimals in PostgreSQL is <strong>numeric</strong>, which is identical to <em>decimal</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">pg_typeof</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">0.1</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">numeric
+</div></code></pre>
+<hr />
+<h2><a href="#️-beware-of-rounding" aria-hidden="true" class="anchor" id="️-beware-of-rounding"></a>⚠️ Beware of rounding</h2>
+<p>Rounding decimal numbers programmatically can lead to imprecise results. For instance, the sum <code>25.986 + -0.4125 + -25.5735</code> should theoretically yield zero:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">25.986</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>0000
+</div></code></pre>
+<p>Let’s illustrate how we can round only the final sum to two decimal places:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">25.986</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>00
+</div></code></pre>
+<p>So far, so good, it works as expected.</p>
+<p>With proper datatypes such as <em>decimal</em>, the arithmetic issue inherent to floating-point numbers is already addressed.</p>
+<p>But <strong>rounding introduces its own set of challenges</strong>. Even if decimals are excellent for precision and arithmetic of decimal data, rounding operations inherently involve <em>some degree of approximation</em>.</p>
+<p>Now, let’s round each number before summing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">25.986</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">+</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">+</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>01
+</div></code></pre>
+<p><em>Uh, oh</em> 😭</p>
+<p>Every time we round some number, we’re adding a bit of imprecision. <em>Bit by bit</em>, the final result might be too far from the expected.</p>
+<p>These examples underline why <strong>unnecessary rounding should be avoided</strong>. As rounding is an approximation, it’s best to postpone it until the final step, i.e., <em>when presenting the data to the end user</em>.</p>
+<hr />
+<h2><a href="#-decimals-in-other-technologies" aria-hidden="true" class="anchor" id="-decimals-in-other-technologies"></a>➕ Decimals in other technologies</h2>
+<p>Every programming language or technical tool has its own data type for handling arbitrary precision, such as PostgreSQL’s decimals.</p>
+<p>Ruby offers the <a href="https://ruby-doc.org/stdlib-2.5.1/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a> class, which facilitates arbitrary-precision floating-point decimal arithmetic.</p>
+<p>Similarly, Java also includes a <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html">BigDecimal class</a>.</p>
+<p>Go language is no exception; it too has <a href="https://go.dev/src/math/big/decimal.go">arbitrary-precision decimal arithmetic</a>.</p>
+<p>It’s crucial to verify that the technology you’re using provides support for arbitrary precision. If you require greater accuracy, these solutions are often more suitable than using raw floating-point numbers.</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this post, we delved into the intricacies of <strong>floating-point</strong> numbers.</p>
+<p>We explored how computers comprehend information through the <strong>binary system</strong>, from integer representation and fixed-point representation’s inefficiency for decimals, to floating-point numbers and their <em>caveats</em>.</p>
+<p>We also investigated how <strong>arbitrary-precision</strong> data types like <strong>decimal</strong> address these precision issues.Furthermore, we discussed <strong>rounding issues</strong> and shared best practices for dealing with them.</p>
+<p>I hope these complex topics have been presented in a way that’s easy to understand, making floating-point issues no longer an issue!</p>
+<p><em>Cheers!</em></p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html">https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html</a><br />
+<a href="https://www.postgresql.org/docs/current/datatype.html">https://www.postgresql.org/docs/current/datatype.html</a><br />
+<a href="https://en.wikipedia.org/wiki/IEEE_754">https://en.wikipedia.org/wiki/IEEE_754</a><br />
+<a href="https://www.doc.ic.ac.uk/~eedwards/compsys/float/">https://www.doc.ic.ac.uk/~eedwards/compsys/float/</a><br />
+<a href="https://en.wikipedia.org/wiki/Floating-point_error_mitigation">https://en.wikipedia.org/wiki/Floating-point_error_mitigation</a><br />
+<a href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">https://en.wikipedia.org/wiki/Single-precision_floating-point_format</a><br />
+<a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">https://en.wikipedia.org/wiki/Double-precision_floating-point_format</a><br />
+<a href="https://en.wikipedia.org/wiki/Decimal_floating_point">https://en.wikipedia.org/wiki/Decimal_floating_point</a></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

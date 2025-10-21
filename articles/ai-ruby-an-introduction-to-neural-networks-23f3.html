@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI & Ruby: an introduction to neural networks - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Currently we find ourselves in the middle of the hype surrounding **Artificial Intelligence** (AI) and all its buzzwords.
+
+![ai hype](https://dev-to-uploads.s3.a">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html">
+  <meta property="og:title" content="AI & Ruby: an introduction to neural networks">
+  <meta property="og:description" content="Currently we find ourselves in the middle of the hype surrounding **Artificial Intelligence** (AI) and all its buzzwords.
+
+![ai hype](https://dev-to-uploads.s3.a">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-05-19T03:35:54Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="machinelearning">
+      <meta property="article:tag" content="ai">
+      <meta property="article:tag" content="neuralnetworks">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "AI & Ruby: an introduction to neural networks",
+    "datePublished": "2023-05-19T03:35:54Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Currently we find ourselves in the middle of the hype surrounding **Artificial Intelligence** (AI) and all its buzzwords.
+
+![ai hype](https://dev-to-uploads.s3.a",
+        "keywords": "ruby, machinelearning, ai, neuralnetworks"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">AI & Ruby: an introduction to neural networks</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 19 May 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">machinelearning</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ai</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">neuralnetworks</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Currently we find ourselves in the middle of the hype surrounding <strong>Artificial Intelligence</strong> (AI) and all its buzzwords.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/c8c5dodyhj4547mks3ht.png" alt="ai hype" /></p>
+<p>It’s natural to feel that terms related to AI can be complex and overwhelming to many individuals.</p>
+<hr />
+<p>This article aims to demystify AI applications, delve into <strong>Machine Learning</strong> (ML) through the creation of a basic <strong>Artificial Neural Network</strong> (ANN) in Ruby, and shed light on the ever-present “GPT” phenomenon.</p>
+<p>Join me on this enlightening journey!</p>
+<hr />
+<h2><a href="#-an-overview-of-ai" aria-hidden="true" class="anchor" id="-an-overview-of-ai"></a>🤖 An overview of AI</h2>
+<p><strong>Artificial Intelligence</strong> (AI) is a branch of computer science focused on creating “intelligent machines” capable of performing tasks that <em>simulate human intelligence</em>.</p>
+<p>The history of AI dates back to the 1950s, with the development of early AI programs and concepts.</p>
+<p>Some notable AI milestones include the development of expert systems in the 1970s, the rise of <strong>machine learning</strong> in the 1990s, and the recent advancements in <strong>deep learning and neural networks</strong>.</p>
+<p>AI has a wide range of real-world applications across various industries, including healthcare, finance, manufacturing, transportation, and entertainment. It is used in areas such as speech recognition, image classification, autonomous vehicles, virtual assistants, fraud detection, and recommendation systems.</p>
+<h3><a href="#-ai-algorithms" aria-hidden="true" class="anchor" id="-ai-algorithms"></a>🔵 AI algorithms</h3>
+<p>To address real-world problems, AI employs various algorithms designed to handle specific scenarios. Here are a few examples:</p>
+<p>👉 <strong>Rule-based systems</strong><br />
+These systems often rely on predefined rules to make decisions based on given conditions.</p>
+<p>They are commonly used in domains such as medical diagnosis and fraud detection.</p>
+<p>👉 <strong>Natural Language Processing</strong><br />
+<strong>NLP</strong> (Natural Language Processing) plays a crucial role in bridging the gap between computers and human language.</p>
+<p>Applications such as sentiment analysis and chatbots, including GPT (Generative Pre-trained Transformer), heavily rely on NLP techniques.</p>
+<p>👉 <strong>Search engines</strong><br />
+Search engines commonly employ AI techniques, including NLP (Natural Language Processing), used for tasks like tokenization and indexing.</p>
+<p>Major search engines like <em>Google Search</em> and Microsoft Bing make use of these techniques to enhance their functionality.</p>
+<p>👉 <strong>Machine Learning</strong><br />
+<strong>Machine Learning</strong> (ML) is another vital component of AI that empowers AI systems to automatically <strong>learn and improve from experience or data</strong>.</p>
+<p>It is widely applied in various domains, including pattern recognition, <strong>data prediction</strong>, and classification.</p>
+<p><em>Now, let’s delve into the realm of machine learning algorithms.</em></p>
+<hr />
+<h2><a href="#-an-overview-of-machine-learning" aria-hidden="true" class="anchor" id="-an-overview-of-machine-learning"></a>💡 An overview of Machine Learning</h2>
+<p><strong>Machine learning</strong> (ML) is a subfield of artificial intelligence (AI) that focuses on the development of algorithms and models that allow computer systems to <strong>learn and make predictions</strong> or decisions without being explicitly programmed.</p>
+<p>It is based on the idea that machines can analyze and interpret complex patterns and data, and use them to improve their performance or behavior over time.</p>
+<h3><a href="#-ml-algorithms" aria-hidden="true" class="anchor" id="-ml-algorithms"></a>🔵 ML algorithms</h3>
+<p>Below there are several ML algorithms along with their real-world applications that reap the benefits of machine learning:</p>
+<p>👉 <strong>Linear Regression</strong><br />
+<strong>Linear Regression</strong> is a statistical method used to determine the optimal linear relationship between input variables and their corresponding outputs.</p>
+<p>It finds extensive applications in fields such as economics and finance, enabling the prediction of house or stock prices and the estimation of sales revenue, among other uses.</p>
+<p>👉 <strong>K-Nearest Neighbors</strong><br />
+<strong>K-Nearest Neighbors</strong> (KNN) is an algorithm used for data classification, where the classification is based on the majority similarity among the “k nearest” neighbors.</p>
+<p><em>Recommendation systems</em> often leverage KNN to make personalized recommendations by identifying items or content with similar characteristics or behaviours.</p>
+<p>👉 <strong>Neural Networks</strong><br />
+<strong>Artificial Neural Networks</strong> (ANN’s) are powerful deep learning models that aim to simulate the structure and functionality of the human brain.</p>
+<p>They consist of interconnected layers of neurons that utilize mathematical <em>activation functions</em> to update weights <strong>based on proximity and learn from the data</strong>.</p>
+<p>ANN’s find extensive applications in various domains, including <strong>image recognition</strong>, where they excel in identifying and classifying objects within images. Additionally, ANNs are used for <strong>language translation</strong> tasks, leveraging their ability to process and <em>understand textual data</em>.</p>
+<p>Furthermore, ANN’s are extensively employed in conjunction with large language models (LLM’s) and NLP techniques, particularly in the development of chatbot systems based on models like GPT (Generative Pre-trained Transformer).</p>
+<p>These advanced neural network architectures enable chatbots to generate human-like responses and engage in natural language conversations with users.</p>
+<p><em>Yes, we are talking about you, ChatGPT!</em></p>
+<hr />
+<p>An overview of how AI, ML and neural networks are related:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rdqgjfjob1ugoj5hh5uk.png" alt="AI, ML and neural networks" /></p>
+<hr />
+<h2><a href="#-linear-and-non-linear-relationships" aria-hidden="true" class="anchor" id="-linear-and-non-linear-relationships"></a>📈 Linear and non-linear relationships</h2>
+<p>In mathematics, data relationships can be defined using a coordinate system with axes <code>x and y</code>.</p>
+<p>Where these relationships exhibit linear proportionality, meaning the output can be <em>predicted</em> by following a <strong>linear proportion with the inputs</strong>, we refer to such relationships as <strong>linear</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/h2b2xdkmn58o2uftlphr.png" alt="linear relation" /></p>
+<p>Some type of <strong>linear relationships</strong> can be listed as follows:</p>
+<ul>
+<li>Linear regression</li>
+<li>Identify function</li>
+<li>Linear equations</li>
+<li>Proportional relationship</li>
+</ul>
+<p>On the other hand, when the output cannot be predicted by following a linear proportion, meaning the line in the graph is not straight but curved instead, we classify to such relationships as <strong>non-linear</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/x7za66e0fd71yley45ze.png" alt="non-linear relation" /></p>
+<p>Below, we can list some types of <strong>non-linear relationships</strong>:</p>
+<ul>
+<li>Logarithmic function</li>
+<li>Quadratic function</li>
+<li>Exponential function</li>
+<li>Sigmoid function</li>
+</ul>
+<p><em>Now, time to go even further at this exciting journey into the realm of artificial neural networks.</em></p>
+<hr />
+<h2><a href="#-an-overview-of-artificial-neural-networks" aria-hidden="true" class="anchor" id="-an-overview-of-artificial-neural-networks"></a>🧠 An overview of Artificial Neural Networks</h2>
+<p>To understand <strong>Artificial Neural Networks</strong> (ANN), it is important to gain insight into the functioning of the <strong>human brain.</strong></p>
+<h3><a href="#-its-all-about-neurons" aria-hidden="true" class="anchor" id="-its-all-about-neurons"></a>🔵 It’s all about neurons</h3>
+<p>The human brain is composed of billions of interconnected neurons, linked together by synaptic connections:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/endagxxs7g5r84ji7lz2.png" alt="human brain" /></p>
+<p>Whenever our brain receives new information, it undergoes a process where <strong>the input is propagated forward</strong> through the interconnected neurons.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ioxfs62l8v8bu9q0rf4v.png" alt="fwd propagation brain" /></p>
+<p>Along the way, biases, <strong>acting as weights,</strong> are applied and <em>propagated back</em>, resulting in the generation of <strong>new knowledge</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/89xsub7b9c6k8i9vhn1r.png" alt="back propagation brain" /></p>
+<p>This iterative process is known as <strong>learning</strong>, or <em>training</em>.</p>
+<hr />
+<h2><a href="#-modeling-the-ann" aria-hidden="true" class="anchor" id="-modeling-the-ann"></a>🧠 Modeling the ANN</h2>
+<p>An ANN is essentially composed of multiple layers of interconnected neurons that contain weights or bias.</p>
+<p>Similar to the human brain, ANN’s follow a learning process that can be described as follows:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/99y9etmfmdngqahrdqtj.png" alt="learning process" /></p>
+<ul>
+<li>the inputs and targets are sent to the learning process</li>
+<li>an “activation function” is applied to the data going forward</li>
+<li>an “activation function derivative” is applied to the data being propagated back</li>
+</ul>
+<blockquote>
+<p>💡 Wait…<br />
+What is an <strong>activation function</strong> and its <em>derivative</em>?</p>
+</blockquote>
+<p>👉 <strong>ANN’s and data relationships</strong><br />
+In machine learning, data can exhibit either <em>linear or non-linear relationships</em>.</p>
+<p>Techniques like <em>linear regression</em> are suitable for capturing linear relationships, as they enable predictions based on the linear proportionality between inputs and outputs.</p>
+<p>However, linear regression may not be an ideal choice for predicting non-linear data like pattern recognition. This is where other ML techniques, such as ANN’s, come into play.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3yepwhvuxgwogs1xwdy3.png" alt="non-linear relationships" /></p>
+<p>👉 <strong>Activation function</strong><br />
+Activation functions act like transforming inputs into <em>non-linear relationships</em>, <strong>allowing the creation of new knowledge.</strong></p>
+<p>ANN’s offer a variety of non-linear functions that can be applied, including hyperbolic tangent, ReLU (Rectified Linear Unit), quadratic function, sigmoid function, among others.</p>
+<p>Each function brings unique properties and characteristics that make them suitable for different scenarios.</p>
+<p>For the sake of simplicity on this article, we’ll use the <strong>sigmoid function</strong>, also called the <em>logistic function</em>.</p>
+<p>The <strong>sigmoid function</strong> is a mathematical function that takes a real number as input and converts it into another number ranging from 0 to 1.</p>
+<p>It is characterized by an S-shaped curve, and its output value represents the probability or level of activation.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/11jcdu9pv542km4szict.png" alt="sigmoid curve" /></p>
+<p>When going propagated back, however, the <strong>derivative</strong> of the sigmoid function is applied. This derivative helps <strong>adjust the rate at which the resulting data deviates from the error margin</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Calc</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">sigmoid</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span> <span style="color: #56b6c2;">/</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span> <span style="color: #56b6c2;">+</span> <span style="color: #e5c07b;">Math</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">exp</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">-</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">def</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">sigmoid_derivative</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span> <span style="color: #56b6c2;">-</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<h3><a href="#-layers--neurons" aria-hidden="true" class="anchor" id="-layers--neurons"></a>🔵 Layers & neurons</h3>
+<p>In Ruby, we can start by modeling the layers and neurons using a simple <em>PORO</em> object:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Layer</span>
+</div><div class="line" data-line="2">  <span style="color: #e5c07b;">attr_reader</span> <span style="color: #e06c75;">:neurons</span>
+</div><div class="line" data-line="3">  <span style="color: #e5c07b;">attr_accessor</span> <span style="color: #e06c75;">:result</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">neurons</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">@neurons</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">neurons</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #7f848e;">###########################</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Neuron</span>
+</div><div class="line" data-line="13">  <span style="color: #e5c07b;">attr_reader</span> <span style="color: #e06c75;">:weights</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">weights</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="16">    <span style="color: #e06c75;">@weights</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">weights</span>
+</div><div class="line" data-line="17">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="18"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Next, we can define that our ANN is composed of 3 layers:</p>
+<ul>
+<li>an input layer consisting of 4 neurons, that contain 3 weights each</li>
+<li>a hidden layer consisting of 4 neurons, that contain 4 weights each</li>
+<li>and an output layer consisting of only 1 neuron, that contain 4 weights</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Input Layer (4 neurons -&gt; 3 weights)</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">neuron_a</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.16595599</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.70648822</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.20646505</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">neuron_b</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0.44064899</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.81532281</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.07763347</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">neuron_c</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.99977125</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.62747958</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.16161097</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">neuron_d</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.39533485</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.30887855</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.370439</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">input_layer</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Layer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">neuron_a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_b</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_c</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_d</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #7f848e;"># Hidden Layer (4 neurons -&gt; 4 weights)</span>
+</div><div class="line" data-line="9"><span style="color: #e06c75;">neuron_e</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.16595599</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.70648822</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.20646505</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.34093502</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10"><span style="color: #e06c75;">neuron_f</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0.44064899</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.81532281</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.07763347</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.44093502</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="11"><span style="color: #e06c75;">neuron_g</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.99977125</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.62747958</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.16161097</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.14093502</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="12"><span style="color: #e06c75;">neuron_h</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.39533485</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.30887855</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.370439</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.54093502</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="13"><span style="color: #e06c75;">hidden_layer</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Layer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">neuron_e</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_f</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_g</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">neuron_h</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #7f848e;"># Output Layer (1 neuron -&gt; 4 weights)</span>
+</div><div class="line" data-line="16"><span style="color: #e06c75;">neuron_i</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Neuron</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.5910955</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.75623487</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">0.94522481</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0.64093502</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="17"><span style="color: #e06c75;">output_layer</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Layer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">neuron_i</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8b438syik111sobqhcvz.png" alt="layers &amp; neurons" /></p>
+<h3><a href="#-defining-inputs-and-targets-for-a-xor-gate" aria-hidden="true" class="anchor" id="-defining-inputs-and-targets-for-a-xor-gate"></a>🔵 Defining inputs and targets for a XOR gate</h3>
+<p>In this article, we’re going to define that our ANN will predict the result of a XOR gate.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/citwz71nm74np08kl4f4.png" alt="the XOR gate" /></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">inputs</span>  <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">targets</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>Due to the nature of being categorized as <strong>machine learning</strong>, which learns and make predictions based on knowledge, an ANN essentially consists of two main processes:</p>
+<ul>
+<li>the learning process, which is the most important one</li>
+<li>the prediction process</li>
+</ul>
+<p><em>ANN modeled</em>, time to delve into the internal parts of the most important component: <strong>the learning process</strong>. Then, afterwards, we’ll finish this article by explaining the prediction process.</p>
+<hr />
+<h2><a href="#-the-learning-process" aria-hidden="true" class="anchor" id="-the-learning-process"></a>🧠 The learning process</h2>
+<p>Based on the inputs and targets already modeled, we can define the ANN usage as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">network</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">NeuralNetwork</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">input_layer</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">hidden_layer</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">output_layer</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">learn</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">inputs</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2_000</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Now, let’s see the <code>learn</code> implementation:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">NeuralNetwork</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layers</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">@layers</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">layers</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">learn</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">inputs</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">times</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">times</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">times</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="8">      <span style="color: #e06c75;">layers_with_results</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">ForwardPropagation</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">call</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">@layers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">inputs</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">@layers</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">BackPropagation</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">call</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">inputs</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">layers_with_results</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="11">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="12"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<ul>
+<li>First, the layers and inputs are sent to a component called <code>ForwardPropagation</code>, which returns the layers with calculated results for each layer</li>
+<li>Then, the layers with results are sent along with inputs and targets to another component called <code>BackPropagation</code>, which returns the layers adjusted, meaning that new knowledge has been created</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hej0ukv0ji6tx7x6h084.png" alt="learn process overview" /></p>
+<blockquote>
+<p>💡<br />
+Be aware that the next parts will exhibit a lot of operations on matrices (multidimensional arrays). ANN’s heavily rely on linear algebra during the learning process</p>
+</blockquote>
+<h2><a href="#-forward-propagation" aria-hidden="true" class="anchor" id="-forward-propagation"></a>🔵 Forward propagation</h2>
+<p><strong>Forward propagation</strong> can be understood as the process in which the neural network takes inputs and passes them through each layer.</p>
+<p>For every layer, the activation function (such as <em>sigmoid</em>) is applied to the multiplication between the received input and the biases (weights) associated with the current neuron.</p>
+<p>This calculation is performed sequentially for each layer, allowing the network to generate output predictions based on the given inputs.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">ForwardPropagation</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">args</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">args</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">inputs</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">@layers</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">layers</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">dup</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">@inputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">inputs</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">call</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">@layers</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">with_index</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">index</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="11">      <span style="color: #e06c75;">data</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">index</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">zero?</span> <span style="color: #56b6c2;">?</span> <span style="color: #e06c75;">@inputs</span> <span style="color: #56b6c2;">:</span> <span style="color: #e06c75;">@layers</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">index</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">      <span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">tap</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="14">        <span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">data</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">*</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_matrix</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e5c07b;">Calc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:sigmoid</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="15">      <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="16">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="17">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="18"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>And now, we can see the image representation of the forward propagation process:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6rsus6xd5iaj0ku5ysav.png" alt="fwd process" /></p>
+<p>After the forward propagation process, each layer has a new predicted result based on the non-linear normalization applied by the sigmoid function.</p>
+<p>But we have to compare those results with the targets, calculate the error margin and lastly discover how far the result is from the desired output (targets).</p>
+<p>You’re correct, we are talking about <strong>back propagation</strong>.</p>
+<h2><a href="#-back-propagation" aria-hidden="true" class="anchor" id="-back-propagation"></a>🔵 Back propagation</h2>
+<p><strong>Back propagation</strong> is a crucial process where the predicted results from the forward propagation are recalculated for each layer.</p>
+<p>This recalibration involves <strong>adjusting the weights and biases</strong> based on the <em>calculated errors</em>, with the aim of minimizing the distance between the predicted results and the target values.</p>
+<p>The entire process of forward and back propagation is repeated iteratively until the predicted results closely match the target values, or <strong>until a desired level of accuracy is achieved</strong>.</p>
+<p>This iterative repetition allows the neural network to continually improve its <em>predictions</em> by fine-tuning the weights and biases.</p>
+<p>👉 <strong>Calculating deltas</strong><br />
+Back propagation starts by calculating deltas, which basically uses the <code>sigmoid function derivative</code> and exhibit how far the targets are from the error margin for each layer.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">apply_sigmoid_derivative</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">result</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">result</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">array</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">array</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">value</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="4">      <span style="color: #e5c07b;">Calc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">sigmoid_derivative</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">value</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #e06c75;">@layers</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">with_index</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">index</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">result</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">index</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">zero?</span> <span style="color: #56b6c2;">?</span> <span style="color: #e06c75;">@inputs</span> <span style="color: #56b6c2;">:</span> <span style="color: #61afef;">previous_layer_of</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layer</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">layer</span> <span style="color: #56b6c2;">==</span> <span style="color: #e06c75;">output_layer</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">error</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">@target</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">-</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">output_layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #e5c07b;">NaiveMatrixMultiply</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">call</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">apply_sigmoid_derivative</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">output_layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">dup</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">error</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="16">  <span style="color: #c678dd;">else</span>
+</div><div class="line" data-line="17">    <span style="color: #e06c75;">factor</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">output_layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_matrix</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">transpose</span>
+</div><div class="line" data-line="18">    <span style="color: #e06c75;">error</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">delta_output_layer</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">*</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">factor</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20"><span style="color: #e5c07b;">NaiveMatrixMultiply</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">call</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">apply_sigmoid_derivative</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">dup</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">error</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="21">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="22"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Please note that:</p>
+<ul>
+<li>the error calculation may differ between layers</li>
+<li>the error for the output layer is calculated based on the target</li>
+<li>the error for the input and hidden layers is calculated based on the <strong>error of the output layer</strong></li>
+<li>the sigmoid derivative is applied, which returns how far the target is from the error margin at the moment (delta)</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zxhqmv3i023itxv6enn6.png" alt="back propagation" /></p>
+<p>👉 <strong>Adjusting weights</strong><br />
+After calculating the deltas during back propagation, the process concludes by adjusting the weights (biases) of each interconnected neuron throughout all the layers in the ANN.</p>
+<p>Leveraging the principles of linear algebra, these adjustments can be applied by performing matrix addition between the current weights matrix and the delta matrix, effectively updating the weights of the neurons in the network.</p>
+<p>This matrix addition operation ensures that the adjustments are propagated through the network, enabling the network to learn and predict over time.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">adjusted_layer</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">index</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">result</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">index</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">zero?</span> <span style="color: #56b6c2;">?</span> <span style="color: #e06c75;">@inputs</span> <span style="color: #56b6c2;">:</span> <span style="color: #61afef;">previous_layer_of</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layer</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">delta</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">delta</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layer</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">adjustment</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">result</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">transpose</span> <span style="color: #56b6c2;">*</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">delta</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">adjusted</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">layer</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_matrix</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">adjustment</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">  <span style="color: #e5c07b;">Layer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">from_matrix</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">adjusted</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/fhq5tg9p4jd03yyne1sk.png" alt="adjusted weights" /></p>
+<p>The following image describes an overview of back propagation process:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uctc5smqjyrq51girkox.png" alt="bg process overview" /></p>
+<hr />
+<p>In the below image representation, we can visualize an overview of the entire learning process:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/n4g0fovthfiw455nl2j7.png" alt="learning process overview final" /></p>
+<blockquote>
+<p>💡<br />
+Our ANN can learn, but can it make predictions?</p>
+</blockquote>
+<p><em>Simply using the forward propagation process.</em></p>
+<hr />
+<h2><a href="#-the-prediction-process" aria-hidden="true" class="anchor" id="-the-prediction-process"></a>🧠 The prediction process</h2>
+<p>The <strong>prediction process</strong> is indeed simpler compared to the learning process.</p>
+<p>During prediction, we only need to retrieve the predicted results from the output layer, which is the final layer of the network, obtained during the forward propagation.</p>
+<p>This allows us to quickly obtain the model’s predictions for a given input without the need for the extensive calculations involved in the learning process.</p>
+<p>It is simple as doing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Predict</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">args</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">*</span><span style="color: #e06c75;">args</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">layers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">inputs</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">@layers</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">layers</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">dup</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">@inputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">inputs</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">call</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">layers_with_results</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">ForwardPropagation</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">call</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">@layers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">@inputs</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">output_layer_result</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">layers_with_results</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">last</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">result</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">output_layer_result</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">first</span>
+</div><div class="line" data-line="14">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="15"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>If the learning process can be described as follows:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xya3w28vdn3k1eqrs8cu.png" alt="learning process final" /></p>
+<p>Then the prediction process gets the following representation:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/f1a2cpjr3b0gen9vjxte.png" alt="prediction process final" /></p>
+<p><em>Yay!</em></p>
+<hr />
+<h2><a href="#-some-test-cases-in-ruby" aria-hidden="true" class="anchor" id="-some-test-cases-in-ruby"></a>🧠 Some test cases in Ruby</h2>
+<p>In the following sections, there are two examples of test cases in Ruby, showing the capabilities of the ANN built in this article.</p>
+<p>👉 <strong>Predicting XOR gate</strong></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">TrainXORTest</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">TestCase</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_train_xor_gate</span>
+</div><div class="line" data-line="3">    <span style="color: #7f848e;"># Setup...</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">inputs</span>  <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">targets</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">transpose</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">network</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">NeuralNetwork</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">layer_a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">layer_b</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">layer_c</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">learn</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">inputs</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2_000</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">    <span style="color: #61afef;">assert_equal</span> <span style="color: #d19a66;">0.05</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">predict</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">round</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="13"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>👉 <strong>Predicting fruits and vegetables</strong></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">TrainFruitsTest</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">TestCase</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_train_fruits_and_vegetables</span>
+</div><div class="line" data-line="3">    <span style="color: #7f848e;"># Setup...</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">    <span style="color: #7f848e;"># Prepare data model</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">fruits_func</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">-&gt;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="7">      <span style="color: #c678dd;">[</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">shuffle</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">take</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="8">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">vegetables_func</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">-&gt;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="11">      <span style="color: #c678dd;">[</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">7</span><span style="color: #56b6c2;">..</span><span style="color: #d19a66;">9</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">shuffle</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">take</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="12">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">fruits_inputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">50</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">times</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">vegetables_inputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">50</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">times</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="16">    <span style="color: #e06c75;">inputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">fruits_inputs</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">keys</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">vegetables_inputs</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">keys</span>
+</div><div class="line" data-line="17">    <span style="color: #e06c75;">outputs</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">fruits_inputs</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">values</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">vegetables_inputs</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">values</span>
+</div><div class="line" data-line="18">    <span style="color: #e06c75;">targets</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Matrix</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">outputs</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">transpose</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_a</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20">    <span style="color: #e06c75;">network</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">NeuralNetwork</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">layer_a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">layer_b</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">layer_c</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="21">    <span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">learn</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">inputs</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2_000</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23">    <span style="color: #e06c75;">fruits_and_vegetables</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="24">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Apple</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="25">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Banana</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="26">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Carrot</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="27">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Orange</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="28">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Tomato</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="29">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Pineapple</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="30">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Potato</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="31">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Cherry</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="32">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Garlic</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="33">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Broccoli</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="34">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Peach</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="35">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Pear</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">fruits_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="36">      <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Lettuce</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">vegetables_func</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="37">    <span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="38">
+</div><div class="line" data-line="39">    <span style="color: #e06c75;">fruits</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">%w[</span><span style="color: #98c379;">Apple</span> <span style="color: #98c379;">Banana</span> <span style="color: #98c379;">Orange</span> <span style="color: #98c379;">Pineapple</span> <span style="color: #98c379;">Cherry</span> <span style="color: #98c379;">Peach</span> <span style="color: #98c379;">Pear</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="40">    <span style="color: #e06c75;">vegetables</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">%w[</span><span style="color: #98c379;">Carrot</span> <span style="color: #98c379;">Tomato</span> <span style="color: #98c379;">Potato</span> <span style="color: #98c379;">Garlic</span> <span style="color: #98c379;">Broccoli</span> <span style="color: #98c379;">Lettuce</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="41">
+</div><div class="line" data-line="42">    <span style="color: #e06c75;">fruits</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">each</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">fruit</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="43">      <span style="color: #61afef;">assert</span> <span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">predict</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">fruits_and_vegetables</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">fruit</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">0.5</span>
+</div><div class="line" data-line="44">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="45">
+</div><div class="line" data-line="46">    <span style="color: #e06c75;">vegetables</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">each</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">vegetable</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="47">      <span style="color: #61afef;">assert</span> <span style="color: #e06c75;">network</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">predict</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">fruits_and_vegetables</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_h</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">vegetable</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">0.95</span>
+</div><div class="line" data-line="48">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="49">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="50"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this article, we have covered the fundamental concepts of artificial intelligence, machine learning, and <strong>neural networks</strong>, exploring how they are related.</p>
+<p>Additionally, we delved into the inner workings of a neural network while building a simple ANN that is capable of predicting things like XOR gate and fruits/vegetables using Ruby.</p>
+<p>You can find all the code written in this article in my ANN project called <a href="https://github.com/leandronsp/citrine">citrine</a>. I have an ANN <a href="https://github.com/leandronsp/morphine">written in Elixir</a> too. Feel free to fork, clone, and experiment with the fascinating world of ANN’s on your own.</p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://stevenmiller888.github.io/mind-how-to-build-a-neural-network/">https://stevenmiller888.github.io/mind-how-to-build-a-neural-network/</a></p>
+<p><a href="https://medium.com/technology-invention-and-more/how-to-build-a-simple-neural-network-in-9-lines-of-python-code-cc8f23647ca1#.voyy4g51x">https://medium.com/technology-invention-and-more/how-to-build-a-simple-neural-network-in-9-lines-of-python-code-cc8f23647ca1#.voyy4g51x</a></p>
+<p><a href="https://iamtrask.github.io/2015/07/12/basic-python-network/">https://iamtrask.github.io/2015/07/12/basic-python-network/</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Linear_relation">https://en.wikipedia.org/wiki/Linear_relation</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Linear_algebra">https://en.wikipedia.org/wiki/Linear_algebra</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Sigmoid_function">https://en.wikipedia.org/wiki/Sigmoid_function</a></p>
+<hr />
+<p><em>This post was written with the assistance of ChatGPT, which helped with some “eye candy” on grammar.</em></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

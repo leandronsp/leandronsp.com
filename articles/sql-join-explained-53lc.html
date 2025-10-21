@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL JOIN explained - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In this post we're going to see how the **SQL JOIN** works, guided by a practical example while covering SQL and [Set theory](https://en.wikipedia.org/wiki/Set_t">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/sql-join-explained-53lc.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/sql-join-explained-53lc.html">
+  <meta property="og:title" content="SQL JOIN explained">
+  <meta property="og:description" content="In this post we're going to see how the **SQL JOIN** works, guided by a practical example while covering SQL and [Set theory](https://en.wikipedia.org/wiki/Set_t">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-03-17T00:39:12Z">
+  <meta property="article:tag" content="sql">
+      <meta property="article:tag" content="database">
+      <meta property="article:tag" content="postgres">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "SQL JOIN explained",
+    "datePublished": "2023-03-17T00:39:12Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In this post we're going to see how the **SQL JOIN** works, guided by a practical example while covering SQL and [Set theory](https://en.wikipedia.org/wiki/Set_t",
+        "keywords": "sql, database, postgres"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">SQL JOIN explained</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 17 Mar 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">sql</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">database</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">postgres</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In this post we’re going to see how the <strong>SQL JOIN</strong> works, guided by a practical example while covering SQL and <a href="https://en.wikipedia.org/wiki/Set_theory">Set theory</a> basics.</p>
+<p>Even though you’re not familiar with SQL, you can follow along as this post covers the very basics.</p>
+<hr />
+<h2><a href="#a-little-disclaimer" aria-hidden="true" class="anchor" id="a-little-disclaimer"></a>A little disclaimer</h2>
+<p>As you may already know, every time I want to explain something, it’s my <em>modus operandi</em> to take a step back and deep dive into the fundamentals.</p>
+<p>But if you are comfortable with set theory and SQL basics such as CREATE TABLE, INSERT INTO, <em>generate_series</em>, SELECT and FROM, you may want to jump to the “JOIN to the world” section.</p>
+<p>So fasten your seat belts and let’s go into the journey of <strong>understanding SQL JOIN</strong>.</p>
+<hr />
+<h2><a href="#first-things-first" aria-hidden="true" class="anchor" id="first-things-first"></a>First things first</h2>
+<p>The examples described here were tested using PostgreSQL 15.</p>
+<p>Despite <a href="https://en.wikipedia.org/wiki/SQL">SQL</a> being a standard DSL that should work on any RDBMS, please review the examples before running on other RDBMS but PostgreSQL.</p>
+<p>Without further ado, let’s start the journey to <strong>understanding SQL JOINs</strong>.</p>
+<hr />
+<h2><a href="#️-back-to-the-basics" aria-hidden="true" class="anchor" id="️-back-to-the-basics"></a>🗝️ Back to the basics</h2>
+<p>In SQL, tables are related to <a href="https://en.wikipedia.org/wiki/Set_theory">set theory</a> in mathematics. Usually, a <strong>set</strong> is a collection of different things, for instance:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7qf1g4n1tjrx2eqnir93.png" alt="a set of different things" /></p>
+<p>Expressing the set above as a <a href="https://en.wikipedia.org/wiki/Tuple">tuple</a>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">(Ana, Star Wars, Star Trek, Kate, John)
+</div></code></pre>
+<p>However, we can also represent users and movies as two distinct sets:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mfwgkyw2t82696clvkzl.png" alt="two distinct sets" /></p>
+<p>Which can be expressed as tuples as well:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">users = (Ana, Kate, John)
+</div><div class="line" data-line="2">movies = (Star Wars, Star Trek)
+</div></code></pre>
+<p>Using sets, we can perform some mathematical operations such as:</p>
+<ul>
+<li><strong>UNION</strong>: users ∪ movies</li>
+<li><strong>INTERSECTION</strong>: users ∩ movies</li>
+<li><strong>DIFFERENCE</strong>: users - movies</li>
+<li><strong>CARTESIAN PRODUCT</strong>: users × movies</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2cltv1x43z7hhm2et20r.png" alt="set operations" /></p>
+<p>We’ll take a closer look at set operations in the upcoming sections as we <em>relate them to SQL</em>.</p>
+<hr />
+<h2><a href="#-sql-basics" aria-hidden="true" class="anchor" id="-sql-basics"></a>👉 SQL basics</h2>
+<p>In SQL, tables are relations that are physically persisted. An SQL table can be seen as a <a href="https://en.wikipedia.org/wiki/Set_(mathematics)">set</a> in set theory.</p>
+<p>But how do structure a set in SQL <em>without persisting</em> physical tables?</p>
+<h3><a href="#-select" aria-hidden="true" class="anchor" id="-select"></a>🔵 SELECT</h3>
+<p>With the <a href="https://www.w3schools.com/sql/sql_select.asp">SELECT</a> keyword, we can structure a set as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">postgres<span style="color: #56b6c2;">=</span><span style="color: #56b6c2;">#</span>  <span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">&#39;John&#39;</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">?</span><span style="color: #c678dd;">column</span><span style="color: #e06c75;">?</span>
+</div><div class="line" data-line="4"><span style="color: #7f848e;">----------</span>
+</div><div class="line" data-line="5"> John
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span>1 <span style="color: #c678dd;">row</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<blockquote>
+<p>💡 <strong>Note</strong><br />
+In PostgreSQL, we can <a href="https://www.postgresql.org/docs/current/sql-select.html#id-1.9.3.172.10">omit the FROM clause</a> from the SELECT keyword</p>
+</blockquote>
+<p>But that’s a one-element set. We should add more items to the collection.</p>
+<p>PostgreSQL provides a <a href="https://www.postgresql.org/docs/current/functions-srf.html">set-returning function</a> called <strong>generate_series</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">postgres<span style="color: #56b6c2;">=</span><span style="color: #56b6c2;">#</span> <span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"> generate_series
+</div><div class="line" data-line="4"><span style="color: #7f848e;">-----------------</span>
+</div><div class="line" data-line="5">               1
+</div><div class="line" data-line="6">               2
+</div><div class="line" data-line="7">               3
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>We could add more and more information to the SELECT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">    <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">    <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"> generate_series | generate_series
+</div><div class="line" data-line="6"><span style="color: #7f848e;">-----------------+-----------------</span>
+</div><div class="line" data-line="7">               1 |               1
+</div><div class="line" data-line="8">               2 |               2
+</div><div class="line" data-line="9">               3 |               3
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>However we’re not yet satisfied. The SELECT should be capable of “projecting fields” coming <em>from</em> a structure that is already a set.</p>
+<p>Meet SQL <a href="https://www.w3schools.com/sql/sql_ref_from.asp">FROM</a>.</p>
+<h3><a href="#-from" aria-hidden="true" class="anchor" id="-from"></a>🔵 FROM</h3>
+<p>SQL <strong>FROM</strong> is a keyword used to specify a set of elements and, combined with  the <strong>SELECT</strong>, we could define our first set:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">    <span style="color: #56b6c2;">*</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="4">    <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"> id
+</div><div class="line" data-line="7"><span style="color: #7f848e;">----</span>
+</div><div class="line" data-line="8">  1
+</div><div class="line" data-line="9">  2
+</div><div class="line" data-line="10">  3
+</div><div class="line" data-line="11"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Using a single FROM we can project multiple columns with SELECT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> 
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">    <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="5">    <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which should print the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+-------</span>
+</div><div class="line" data-line="3">  1 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>1
+</div><div class="line" data-line="4">  2 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>2
+</div><div class="line" data-line="5">  3 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>3
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Take for instance that we have two sets:</p>
+<ul>
+<li>the first set containing <code>(User-1, User-2, User-3)</code></li>
+<li>and a second set containing <code>(User-2, User-3, User-4, User-5)</code></li>
+</ul>
+<p>Now, time to explore some <strong>operations</strong> using the two sets.</p>
+<h3><a href="#-union-and-union-all" aria-hidden="true" class="anchor" id="-union-and-union-all"></a>🔵 UNION and UNION ALL</h3>
+<p>The SQL <a href="https://www.w3schools.com/sql/sql_union.asp">UNION</a> operator <strong>combines the result of two or more sets</strong>, i.e <em>SELECT</em> statements:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">UNION</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which outputs:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+-------</span>
+</div><div class="line" data-line="3">  2 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>2
+</div><div class="line" data-line="4">  3 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>3
+</div><div class="line" data-line="5">  1 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>1
+</div><div class="line" data-line="6">  5 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>5
+</div><div class="line" data-line="7">  4 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>4
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>5 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>The UNION operator removes all duplicates in the result. But in case we want to also return duplicates, we can use <strong>UNION ALL</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">UNION</span> <span style="color: #c678dd;">ALL</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+-------</span>
+</div><div class="line" data-line="3">  1 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>1
+</div><div class="line" data-line="4">  2 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>2
+</div><div class="line" data-line="5">  3 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>3
+</div><div class="line" data-line="6">  2 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>2
+</div><div class="line" data-line="7">  3 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>3
+</div><div class="line" data-line="8">  4 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>4
+</div><div class="line" data-line="9">  5 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>5
+</div><div class="line" data-line="10"><span style="color: #c678dd;">(</span>7 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>The result outputs 7 rows: 3 from the first SELECT and 4 from the second SELECT, including the <strong>duplicates</strong> <em>User-2 and User-3</em>.</p>
+<p>Also, keep in mind some rules about <strong>SQL UNION</strong>:</p>
+<ul>
+<li>every set <strong>must have the same number</strong> of columns</li>
+<li>the columns in both sets must be in the same order</li>
+</ul>
+<p>An illustrated example:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oekbrkrjcu7ewrq06csq.png" alt="union" /></p>
+<h3><a href="#-intersect" aria-hidden="true" class="anchor" id="-intersect"></a>🔵 INTERSECT</h3>
+<p>The SQL <a href="https://www.tutorialspoint.com/sql/sql-intersect-clause.htm#:~:text=The%20SQL%20INTERSECT%20clause%2Foperator,by%20the%20two%20SELECT%20statements.">INTERSECT</a> operator also combines the result of two or more sets, but only return rows from the first set (first SELECT) <strong>that are identical</strong> to a row in the second set (second SELECT).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">INTERSECT</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id |  <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+--------</span>
+</div><div class="line" data-line="3">  3 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>3
+</div><div class="line" data-line="4">  2 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>2
+</div><div class="line" data-line="5"><span style="color: #c678dd;">(</span>2 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Here, the query returned only the identical rows found in both sets. That’s exactly the “intersection” between the two sets.</p>
+<p>An illustrated example:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u4212qqe8h1bxfn427a6.png" alt="intersection" /></p>
+<h3><a href="#-except" aria-hidden="true" class="anchor" id="-except"></a>🔵 EXCEPT</h3>
+<p>Another important operator is the SQL <a href="https://www.tutorialspoint.com/sql/sql-except-clause.htm">EXCEPT</a>, which in the set theory is the <em>DIFFERENCE</em> (A - B).</p>
+<p>This operator also combines the result of two or more sets, but only return rows of the first set (first SELECT) <strong>that are not present</strong> in the second set (second SELECT).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">EXCEPT</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id |  <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+--------</span>
+</div><div class="line" data-line="3">  1 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>1
+</div><div class="line" data-line="4"><span style="color: #c678dd;">(</span>1 <span style="color: #c678dd;">row</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Just 1 row. The only one that is present in the first set (left) but not in the second (right). We can also invert the sets and get the differences in reverse:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">EXCEPT</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;User-&#39;</span> <span style="color: #56b6c2;">||</span> <span style="color: #e06c75;">id</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">generate_series</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which are the <strong>User-5 and User-4</strong> respectively:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id |  <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+--------</span>
+</div><div class="line" data-line="3">  5 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>5
+</div><div class="line" data-line="4">  4 | <span style="color: #c678dd;">User</span><span style="color: #56b6c2;">-</span>4
+</div><div class="line" data-line="5"><span style="color: #c678dd;">(</span>2 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>An illustrated example:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ijac3114j1k0ot2ishrj.png" alt="except" /></p>
+<p>Once we understand <em>some SQL basics and how those relate to set theory in mathematics</em>, it’s time to go beyond and explore a more sophisticated example.</p>
+<hr />
+<h2><a href="#-a-more-sophisticated-example" aria-hidden="true" class="anchor" id="-a-more-sophisticated-example"></a>💡 A more sophisticated example</h2>
+<p>So far, we’ve been experimenting SQL operators with sets on the fly by using the <code>generate_series</code> PostgreSQL function.</p>
+<p>Did you notice that <em>we haven’t create any table</em>? That’s a good alternative to experiment and learn ad hoc.</p>
+<p>But for a more sophisticated example we’ll start persisting data into pyshical tables.</p>
+<h3><a href="#-create-table" aria-hidden="true" class="anchor" id="-create-table"></a>🔵 CREATE TABLE</h3>
+<p>Using <code>CREATE TABLE</code>, we can define a structure for a particular set of elements.</p>
+<p>Such table structure is represented by a matrix of <strong>rows and columns</strong>, where rows are essentially a <strong>collection of values</strong> whereas columns define the <strong>type of values</strong>.</p>
+<p>Let’s create a table called <em>users</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">TABLE</span> <span style="color: #e5c07b;">users</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">id</span> <span style="color: #e5c07b;">INTEGER</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">name</span> <span style="color: #e5c07b;">VARCHAR</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">250</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<ul>
+<li><strong>id</strong> is the name of the first column. It only allows values of type <em>integer</em></li>
+<li><strong>name</strong> is the name of the second column. It only allows values of type “character varying up to 250 bytes” <code>(VARCHAR(250))</code></li>
+</ul>
+<p>Now, we can query the table using FROM and SELECT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">FROM</span> 
+</div><div class="line" data-line="5">    <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">(</span>0 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Of course, there’s no <em>data inserted</em> into the table. <strong>Let’s insert some data</strong>.</p>
+<h3><a href="#-insert-into" aria-hidden="true" class="anchor" id="-insert-into"></a>🔵 INSERT INTO</h3>
+<p>The command <code>INSERT INTO</code> allows to insert a collection of values into an existing table.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">INSERT</span> <span style="color: #c678dd;">INTO</span> <span style="color: #e5c07b;">users</span> <span style="color: #c678dd;">(</span>id<span style="color: #abb2bf;">,</span> name<span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="2"><span style="color: #c678dd;">VALUES</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;John&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Ana&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Kate&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p><em>Note that</em> the <code>VALUES</code> clause accepts a collection of tuples. Each tuple matches the columns <code>(id, name)</code> respectively.</p>
+<p>Now, if we execute the query again, we get the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------</span>
+</div><div class="line" data-line="3">  1 | John
+</div><div class="line" data-line="4">  2 | Ana
+</div><div class="line" data-line="5">  3 | Kate
+</div></code></pre>
+<p><strong>Yay!</strong> Our first table was created!</p>
+<p>Now let’s create another table called <strong>movies</strong>, which will contain <em>the same number of columns</em> as users, id and name respectively.</p>
+<p>Afterwards, we follow inserting some data into the movies table.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">TABLE</span> <span style="color: #e5c07b;">movies</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">id</span> <span style="color: #e5c07b;">INTEGER</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">name</span> <span style="color: #e5c07b;">VARCHAR</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">250</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">INSERT</span> <span style="color: #c678dd;">INTO</span> <span style="color: #e5c07b;">movies</span> <span style="color: #c678dd;">(</span>id<span style="color: #abb2bf;">,</span> name<span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="4"><span style="color: #c678dd;">VALUES</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Star Wars&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;Star Trek&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<blockquote>
+<p>💡 Tip<br />
+If we want to SELECT <strong>all the columns</strong> from a table, we can use the symbol *</p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"> id |   <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="4"><span style="color: #7f848e;">----+-----------</span>
+</div><div class="line" data-line="5">  1 | Star Wars
+</div><div class="line" data-line="6">  2 | Star Trek
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span>2 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Until now, we learned some <strong>basic operations</strong> that are used to <em>combine data</em> between two simple sets:</p>
+<ul>
+<li>UNION</li>
+<li>INTERSECT</li>
+<li>EXCEPT</li>
+</ul>
+<p>Next, it’s time to explore some <strong>other operations</strong> between <em>users and movies</em>.</p>
+<hr />
+<h2><a href="#-a-cartesian-product" aria-hidden="true" class="anchor" id="-a-cartesian-product"></a>👉 A Cartesian Product</h2>
+<p>In <em>set theory</em>, a <a href="https://en.wikipedia.org/wiki/Cartesian_product">cartesian product</a> is a combination of every element from one set to every element of another set.</p>
+<p>As for our example, it’s like combining every pair <strong>user-movie</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">users <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">(</span>John<span style="color: #abb2bf;">,</span> Ana<span style="color: #abb2bf;">,</span> Kate<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">movies <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">(</span>Star Wars<span style="color: #abb2bf;">,</span> Star Trek<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span> The cartesian product
+</div><div class="line" data-line="5"><span style="color: #c678dd;">(</span>John<span style="color: #abb2bf;">,</span> Star Wars<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span>John<span style="color: #abb2bf;">,</span> Star Trek<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span>Ana<span style="color: #abb2bf;">,</span> Star Wars<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>Ana<span style="color: #abb2bf;">,</span> Star Trek<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">(</span>Kate<span style="color: #abb2bf;">,</span> Star Wars<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">(</span>Kate<span style="color: #abb2bf;">,</span> Star Trek<span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>In SQL, it’s the operator <a href="https://www.sqlshack.com/sql-cross-join-with-examples/">CROSS JOIN</a>.</p>
+<h3><a href="#-cross-join" aria-hidden="true" class="anchor" id="-cross-join"></a>🔵 CROSS JOIN</h3>
+<p>The SQL <strong>CROSS JOIN</strong> keyword is used to build a cartesian product, a.k.a the cartesian join.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">CROSS</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>It outputs every combination between the two tables:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span> | id |   <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------+----+-----------</span>
+</div><div class="line" data-line="3">  1 | John |  1 | Star Wars
+</div><div class="line" data-line="4">  1 | John |  2 | Star Trek
+</div><div class="line" data-line="5">  2 | Ana  |  1 | Star Wars
+</div><div class="line" data-line="6">  2 | Ana  |  2 | Star Trek
+</div><div class="line" data-line="7">  3 | Kate |  1 | Star Wars
+</div><div class="line" data-line="8">  3 | Kate |  2 | Star Trek
+</div><div class="line" data-line="9"><span style="color: #c678dd;">(</span>6 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w2y2ht6ikcglc2skzdw2.png" alt="cartesian product" /></p>
+<p>🥁 <em>It’s all good, man!</em> 🥁</p>
+<hr />
+<h2><a href="#-an-even-more-sophisticated-example" aria-hidden="true" class="anchor" id="-an-even-more-sophisticated-example"></a>💡 An even more sophisticated example</h2>
+<p>Suppose that users can give a rating (not mandatory) for every movie they watch.</p>
+<p>Let’s create another table called <code>movies_ratings</code> that associates:</p>
+<ul>
+<li>a user</li>
+<li>a movie</li>
+<li>a rating</li>
+</ul>
+<p>In SQL, it’s a good practice <strong>using relationships</strong>, thus avoiding redundancy and stale data.</p>
+<p>Such relationships are defined using ID’s as “foreign keys”. So, in the <code>movies_rating</code> table, a <strong>user is represented by its ID</strong> and a <strong>movie is represented by its ID</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">CREATE</span> <span style="color: #c678dd;">TABLE</span> <span style="color: #e5c07b;">movies_ratings</span> 
+</div><div class="line" data-line="2"><span style="color: #c678dd;">(</span><span style="color: #e06c75;">user_id</span> <span style="color: #e5c07b;">INTEGER</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">movie_id</span> <span style="color: #e5c07b;">INTEGER</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rating</span> <span style="color: #e5c07b;">INTEGER</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>And insert some data into it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">INSERT</span> <span style="color: #c678dd;">INTO</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">(</span>user_id<span style="color: #abb2bf;">,</span> movie_id<span style="color: #abb2bf;">,</span> rating<span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">VALUES</span>
+</div><div class="line" data-line="4">	<span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">7</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="5">	<span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="6">	<span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">6</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="7">	<span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">10</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>When we query this table, we get the following output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> user_id | movie_id | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">---------+----------+--------</span>
+</div><div class="line" data-line="3">       1 |        1 |      7
+</div><div class="line" data-line="4">       1 |        2 |      8
+</div><div class="line" data-line="5">       2 |        1 |      6
+</div><div class="line" data-line="6">       2 |        2 |     10
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span>4 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>The schema should look like the following:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ypewkj49z9bsf5xpdwha.png" alt="schema" /></p>
+<p>For reporting, we’d like to combine the data of <code>movies_ratings</code> with users and movies so we can display their names, something like that:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> name |   movie    | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">------+-----------+--------</span>
+</div><div class="line" data-line="3"> Ana  | Star Trek |     10
+</div><div class="line" data-line="4"> John | Star Trek |      8
+</div><div class="line" data-line="5"> John | Star Wars |      7
+</div><div class="line" data-line="6"> Ana  | Star Wars |      6
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span>4 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Once we got a third table into the game - the <code>movies_ratings</code> table -, and because its structure differs form the other two tables, we can no longer use basic set operators such as <em>UNION, INTERSECT or EXCEPT</em> to combine data between different tables.</p>
+<p>We need something like a <em>cartesian product</em>, but not doing every combination, only under certain conditions, <strong>based on a related column</strong>.</p>
+<p>That’s what we’re going to explore in the next section: a <strong>world of JOINs</strong>.</p>
+<hr />
+<h2><a href="#-join-to-the-world" aria-hidden="true" class="anchor" id="-join-to-the-world"></a>🥁 JOIN to the world</h2>
+<p>With SQL <a href="https://www.w3schools.com/sql/sql_join.asp">JOIN</a>, we can combine rows across different tables but applying a specific condition.</p>
+<p>The clause may have <strong>different types of JOIN</strong> depending on the situation.</p>
+<p>In case we want to combine all data from the first table (left) with the second table (right), <strong>but discarding the rows that do not appear in both tables</strong>, we use <strong>INNER JOIN</strong>.</p>
+<h3><a href="#-inner-join" aria-hidden="true" class="anchor" id="-inner-join"></a>🔵 INNER JOIN</h3>
+<p>Should we combine all the values from <code>users</code> with <code>movies_ratings</code>, discarding rows that don’t appear in both tables:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">INNER</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span> | user_id | movie_id | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------+---------+----------+--------</span>
+</div><div class="line" data-line="3">  1 | John |       1 |        1 |      7
+</div><div class="line" data-line="4">  1 | John |       1 |        2 |      8
+</div><div class="line" data-line="5">  2 | Ana  |       2 |        1 |      6
+</div><div class="line" data-line="6">  2 | Ana  |       2 |        2 |     10
+</div><div class="line" data-line="7"><span style="color: #c678dd;">(</span>4 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Note that:</p>
+<ul>
+<li>John voted two times</li>
+<li>Ana too</li>
+<li>Kate haven’t registered any vote, so Kate was discarded in the <em>INNER JOIN</em></li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/0qhye55p7pdas7v1z2ui.png" alt="inner join" /></p>
+<blockquote>
+<p>💡 Note<br />
+In PostgreSQL, we can use <code>INNER JOIN</code> or simply <code>JOIN</code>. By default, without specifying the JOIN type, PostgreSQL will perform an <strong>INNER JOIN</strong></p>
+</blockquote>
+<p>But what if we wanted to display even Kate in the JOIN but with <em>null values</em>? In other words, how to <strong>keep every row in both tables</strong> even if the condition wasn’t satisfied?</p>
+<h3><a href="#-full-outer-join" aria-hidden="true" class="anchor" id="-full-outer-join"></a>🔵 FULL OUTER JOIN</h3>
+<p>The SQL <strong>FULL OUTER JOIN</strong> will keep every row from both tables even if the condition wasn’t satisfied.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">FULL</span> <span style="color: #c678dd;">OUTER</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which produces the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span> | user_id | movie_id | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------+---------+----------+--------</span>
+</div><div class="line" data-line="3">  1 | John |       1 |        1 |      7
+</div><div class="line" data-line="4">  1 | John |       1 |        2 |      8
+</div><div class="line" data-line="5">  2 | Ana  |       2 |        1 |      6
+</div><div class="line" data-line="6">  2 | Ana  |       2 |        2 |     10
+</div><div class="line" data-line="7">  3 | Kate |         |          |
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>5 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ogwig30ggqg9u8xt413i.png" alt="full join" /></p>
+<blockquote>
+<p>💡 Note<br />
+In PostgreSQL, we can use <code>FULL OUTER JOIN</code> or simply <code>FULL JOIN</code></p>
+</blockquote>
+<p>Also, SQL provides another type of JOIN, which combines two tables (left and right) but <strong>keeps all rows from the left table only</strong>, even if they do not appear in the right table.</p>
+<p>Yes, we are talking about the <strong>LEFT OUTER JOIN</strong>.</p>
+<h3><a href="#-left-outer-join" aria-hidden="true" class="anchor" id="-left-outer-join"></a>🔵 LEFT OUTER JOIN</h3>
+<p>The SQL <strong>LEFT OUTER JOIN</strong> will <strong>keep every row from the left table</strong> even if they do not appear in the right table.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">OUTER</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which produces the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> id | <span style="color: #c678dd;">name</span> | user_id | movie_id | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">----+------+---------+----------+--------</span>
+</div><div class="line" data-line="3">  1 | John |       1 |        1 |      7
+</div><div class="line" data-line="4">  1 | John |       1 |        2 |      8
+</div><div class="line" data-line="5">  2 | Ana  |       2 |        1 |      6
+</div><div class="line" data-line="6">  2 | Ana  |       2 |        2 |     10
+</div><div class="line" data-line="7">  3 | Kate |         |          |
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>5 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s4mt6we9y4w6t4u85tyc.png" alt="left join" /></p>
+<blockquote>
+<p>💡 Note<br />
+In PostgreSQL, we can use <code>LEFT OUTER JOIN</code> or simply <code>LEFT JOIN</code></p>
+</blockquote>
+<p>On the other hand, there’s also the opposite direction: <strong>RIGHT OUTER JOIN</strong>.</p>
+<h3><a href="#-right-outer-join" aria-hidden="true" class="anchor" id="-right-outer-join"></a>🔵 RIGHT OUTER JOIN</h3>
+<p>The SQL <strong>RIGHT OUTER JOIN</strong> will <strong>keep every row from the right table</strong> even if they do not appear in the left table.</p>
+<p>Please note that we’ll invert the tables, <code>movies_ratings</code> will be the <strong>left table</strong> whereas <code>users</code> will be the <strong>right table</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #56b6c2;">*</span> <span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">movies_ratings</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">RIGHT</span> <span style="color: #c678dd;">OUTER</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">users</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which produces the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> user_id | movie_id | rating | id | <span style="color: #c678dd;">name</span>
+</div><div class="line" data-line="2"><span style="color: #7f848e;">---------+----------+--------+----+------</span>
+</div><div class="line" data-line="3">       1 |        1 |      7 |  1 | John
+</div><div class="line" data-line="4">       1 |        2 |      8 |  1 | John
+</div><div class="line" data-line="5">       2 |        1 |      6 |  2 | Ana
+</div><div class="line" data-line="6">       2 |        2 |     10 |  2 | Ana
+</div><div class="line" data-line="7">         |          |        |  3 | Kate
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>5 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>With the tables inverted, in case we applied <code>LEFT JOIN</code>, Kate would be discarded.</p>
+<p>But as we applied <code>RIGHT JOIN</code> (<em>users</em> are in the right-side), <strong>Kate was kept</strong> in the JOIN even not appearing in the left table <em>movies_ratings</em>.</p>
+<blockquote>
+<p>💡 Note<br />
+In PostgreSQL, we can use <code>RIGHT OUTER JOIN</code> or simply <code>RIGHT JOIN</code></p>
+</blockquote>
+<hr />
+<h2><a href="#putting-all-together" aria-hidden="true" class="anchor" id="putting-all-together"></a>Putting all together</h2>
+<p>Now that we understand about different JOIN strategies in SQL, let’s build a query where we display:</p>
+<ul>
+<li>the user name</li>
+<li>the movie title</li>
+<li>the rating</li>
+</ul>
+<p>…<strong>keeping users who didn’t vote</strong>.</p>
+<p><em>Let’s write the query in baby steps</em>.</p>
+<p>First, we project the fields in SELECT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div></code></pre>
+<p>As such, we should JOIN <strong>movies</strong> and <strong>movies_ratings</strong> tables.</p>
+<p>Next, we’ll perform a <code>LEFT JOIN</code> with the movies_ratings, because we want to <strong>keep all users</strong> even those who didn’t vote.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div></code></pre>
+<p>The following step consists of joining the <strong>movies table</strong> as well.</p>
+<p>But keep in mind that at this moment, the <strong>left table is the result of the first join</strong> and the <strong>right table will be the movies table</strong>.</p>
+<p>So if we apply <code>JOIN</code>, Kate will be discarded as she doesn’t appear in the movies table. We then should use <code>LEFT JOIN</code> as well:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">movie_id</span>
+</div></code></pre>
+<p>Lastly, let’s order the results by <em>rating</em> in <strong>descending order</strong>.</p>
+<p>Also, in the <code>ORDER</code> clause, we’ll perform the <code>NULLS LAST</code>, so Kate will appear at the bottom of the results, and not at the top:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">user</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">movie</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4">	<span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">movies</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">movie_id</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span> <span style="color: #c678dd;">DESC</span> <span style="color: #c678dd;">NULLS</span> <span style="color: #c678dd;">LAST</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>Which outputs:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> user |   movie   | rating
+</div><div class="line" data-line="2"><span style="color: #7f848e;">------+-----------+--------</span>
+</div><div class="line" data-line="3"> Ana  | Star Trek |     10
+</div><div class="line" data-line="4"> John | Star Trek |      8
+</div><div class="line" data-line="5"> John | Star Wars |      7
+</div><div class="line" data-line="6"> Ana  | Star Wars |      6
+</div><div class="line" data-line="7"> Kate |           |
+</div><div class="line" data-line="8"><span style="color: #c678dd;">(</span>5 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Such a <strong>big Yay!</strong></p>
+<blockquote>
+<p>☢️ <em>Wait!</em><br />
+What if I wanted to discard users who didn’t vote in the results?</p>
+</blockquote>
+<p>No problem, you just need to perform an <strong>INNER JOIN</strong>, remember?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">JOIN</span> movies_ratings <span style="color: #c678dd;">ON</span> users<span style="color: #abb2bf;">.</span>id <span style="color: #56b6c2;">=</span> movies_ratings<span style="color: #abb2bf;">.</span>user_id
+</div><div class="line" data-line="3"><span style="color: #c678dd;">JOIN</span> movies <span style="color: #c678dd;">ON</span> movies<span style="color: #abb2bf;">.</span>id <span style="color: #56b6c2;">=</span> movies_ratings<span style="color: #abb2bf;">.</span>movie_id
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div></code></pre>
+<h3><a href="#-more" aria-hidden="true" class="anchor" id="-more"></a>➕ More</h3>
+<p>Moreover, we want to display a query which only brings the number of votes for each user. Then it should display as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> user | votes
+</div><div class="line" data-line="2"><span style="color: #7f848e;">------+-------</span>
+</div><div class="line" data-line="3"> Ana  |     2
+</div><div class="line" data-line="4"> John |     2
+</div><div class="line" data-line="5"> Kate |     0
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>First, we return all <strong>users</strong> <em>JOINed</em> with <strong>movies_ratings</strong>, projecting the <code>users.name</code> field:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> movies_ratings<span style="color: #abb2bf;">.</span><span style="color: #e5c07b;">user_id</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"> name
+</div><div class="line" data-line="7"><span style="color: #7f848e;">------</span>
+</div><div class="line" data-line="8"> John
+</div><div class="line" data-line="9"> John
+</div><div class="line" data-line="10"> Ana
+</div><div class="line" data-line="11"> Ana
+</div><div class="line" data-line="12"> Kate
+</div><div class="line" data-line="13"><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span> <span style="color: #e06c75;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Now, we want to group users by their names. In SQL, we can use the clause <strong>GROUP BY</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> users<span style="color: #abb2bf;">.</span><span style="color: #e5c07b;">name</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"> name
+</div><div class="line" data-line="8"><span style="color: #7f848e;">------</span>
+</div><div class="line" data-line="9"> Kate
+</div><div class="line" data-line="10"> Ana
+</div><div class="line" data-line="11"> John
+</div><div class="line" data-line="12"><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span> <span style="color: #e06c75;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Next, we want to project another field in the SELECT, which are the <strong>count of votes of each user</strong>.</p>
+<p>PostgreSQL provides a function called <strong>COUNT</strong>, which does the job: you can <em>count on an arbitrary field</em> that belongs to a selected projection.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">COUNT</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">votes</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span>
+</div></code></pre>
+<p>Last but not least, let’s order by the counter of votes, so Kate with 0 votes will appear at the bottom:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span>
+</div><div class="line" data-line="2">	<span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">	<span style="color: #e5c07b;">COUNT</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">AS</span> <span style="color: #e06c75;">votes</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">FROM</span> <span style="color: #e5c07b;">users</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">LEFT</span> <span style="color: #c678dd;">JOIN</span> <span style="color: #e5c07b;">movies_ratings</span> <span style="color: #c678dd;">ON</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">id</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">user_id</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">GROUP</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">users</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">name</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">ORDER</span> <span style="color: #c678dd;">BY</span> <span style="color: #e5c07b;">COUNT</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">movies_ratings</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rating</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">DESC</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>And, <em>voilà</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"> name | votes
+</div><div class="line" data-line="2"><span style="color: #7f848e;">------+-------</span>
+</div><div class="line" data-line="3"> Ana  |     2
+</div><div class="line" data-line="4"> John |     2
+</div><div class="line" data-line="5"> Kate |     0
+</div><div class="line" data-line="6"><span style="color: #c678dd;">(</span>3 <span style="color: #c678dd;">rows</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>This post was a try to explain the basics of SQL and set theory, along with a practical example towards an explanation of different JOIN strategies.</p>
+<p>I hope you could learn a bit more about SQL JOIN and SQL in general.</p>
+<p>Cheers!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

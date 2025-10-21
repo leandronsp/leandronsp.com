@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy to Kubernetes using Github Actions (including Slack notification) - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="---
+title: Deploy to Kubernetes using Github Actions (including Slack notification)
+published: true
+description: Deploy to Kubernetes using Github Actions
+tags:">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification-11je.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification-11je.html">
+  <meta property="og:title" content="Deploy to Kubernetes using Github Actions (including Slack notification)">
+  <meta property="og:description" content="---
+title: Deploy to Kubernetes using Github Actions (including Slack notification)
+published: true
+description: Deploy to Kubernetes using Github Actions
+tags:">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-04-14T23:48:05Z">
+  <meta property="article:tag" content="github">
+      <meta property="article:tag" content="aws">
+      <meta property="article:tag" content="eks">
+      <meta property="article:tag" content="kubernetes">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Deploy to Kubernetes using Github Actions (including Slack notification)",
+    "datePublished": "2021-04-14T23:48:05Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "---
+title: Deploy to Kubernetes using Github Actions (including Slack notification)
+published: true
+description: Deploy to Kubernetes using Github Actions
+tags:",
+        "keywords": "github, aws, eks, kubernetes"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Deploy to Kubernetes using Github Actions (including Slack notification)</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 14 Apr 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">github</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">aws</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">eks</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <hr />
+<h2><a href="#title-deploy-to-kubernetes-using-github-actions-including-slack-notification-published-true-description-deploy-to-kubernetes-using-github-actions-tags-githubawsekskubernetes-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticlesamdtmuxrrcu6gtwjbsagpng" aria-hidden="true" class="anchor" id="title-deploy-to-kubernetes-using-github-actions-including-slack-notification-published-true-description-deploy-to-kubernetes-using-github-actions-tags-githubawsekskubernetes-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticlesamdtmuxrrcu6gtwjbsagpng"></a>title: Deploy to Kubernetes using Github Actions (including Slack notification)<br />
+published: true<br />
+description: Deploy to Kubernetes using Github Actions<br />
+tags: github,aws,eks,kubernetes<br />
+cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/amdtmuxrrcu6gtwjbsag.png">https://dev-to-uploads.s3.amazonaws.com/uploads/articles/amdtmuxrrcu6gtwjbsag.png</a></h2>
+<p>In this guide we’ll cover the full cycle of deploying to Kubernetes using <a href="https://github.com/features/actions">Github Actions</a>. Batteries included:</p>
+<ul>
+<li>Kubernetes cluster running in <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">AWS EKS</a></li>
+<li>Docker images stored in <a href="https://aws.amazon.com/ecr/">AWS ECR</a></li>
+<li><strong>Bonus:</strong> notification to <em>Slack</em></li>
+</ul>
+<p>The Github workflow will be triggered at <em>every commit on pull request</em>, and its steps are described as follows:</p>
+<ul>
+<li>git checkout</li>
+<li>login to AWS ECR (credentials needed)</li>
+<li>build Docker image</li>
+<li>push Docker image to ECR</li>
+<li>deploy to EKS using <code>kubectl</code></li>
+<li>send notification to Slack (needs webhook URL)</li>
+</ul>
+<h2><a href="#github-action" aria-hidden="true" class="anchor" id="github-action"></a>Github Action</h2>
+<p>Let’s place our file under <code>.github/workflows/release.yml</code>. Then, we start by configuring the workflow trigger:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Release</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">on</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">pull_request</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">branches</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">main</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>Such trigger will run right after we open and at every commit on the pull request.</p>
+<p>Next, we define the env variables that will be used across steps:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">RELEASE_REVISION</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;pr-$&lbrace;&lbrace; github.event.pull_request.number &rbrace;&rbrace;-$&lbrace;&lbrace; github.event.pull_request.head.sha &rbrace;&rbrace;&quot;</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">AWS_ACCESS_KEY_ID</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.AWS_ACCESS_KEY_ID &rbrace;&rbrace;</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">AWS_SECRET_ACCESS_KEY</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.AWS_SECRET_ACCESS_KEY &rbrace;&rbrace;</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">AWS_REGION</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.AWS_REGION &rbrace;&rbrace;</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">KUBE_CONFIG_DATA</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.KUBE_CONFIG_DATA &rbrace;&rbrace;</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">KUBE_NAMESPACE</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">production</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">ECR_REPOSITORY</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-cool-application</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">SLACK_WEBHOOK_URL</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.SLACK_WEBHOOK_URL &rbrace;&rbrace;</span>
+</div></code></pre>
+<p>Env explained:</p>
+<ul>
+<li><code>RELEASE_REVISION</code>: the tag that we’ll use on the Docker image</li>
+<li><code>AWS_ACCESS_KEY_ID | AWS_SECRET_ACCESS_KEY</code>: used in <a href="https://github.com/aws-actions/configure-aws-credentials">configure aws credentials action</a></li>
+<li><code>KUBE_CONFIG_DATA</code>: used in <a href="https://github.com/kodermax/kubectl-aws-eks">kubectl aws eks action</a></li>
+<li><code>ECR_REPOSITORY</code>: used in <a href="https://github.com/aws-actions/amazon-ecr-login">aws ecr action</a></li>
+<li><code>SLACK_WEBHOOK_URL</code>: used in <a href="https://github.com/rtCamp/action-slack-notify">slack notification action</a></li>
+</ul>
+<p>Now, let’s start writing the job, after which we’ll declare the steps:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">jobs</span><span style="color: #abb2bf;">:</span>                                            
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">release</span><span style="color: #abb2bf;">:</span>                                       
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Release</span>                                
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">runs-on</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ubuntu-latest</span>                       
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">steps</span><span style="color: #abb2bf;">:</span>                                       
+</div><div class="line" data-line="6">     <span style="color: #98c379;">... [steps be at this level]</span>
+</div></code></pre>
+<h4><a href="#step---cancel-previous-runs" aria-hidden="true" class="anchor" id="step---cancel-previous-runs"></a>Step - Cancel Previous Runs</h4>
+<p>This step instructs Github to cancel any current run for this job on this very repository.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Cancel Previous Runs</span>               
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">styfle/cancel-workflow-action@0.4.1</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                    
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">access_token</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; github.token &rbrace;&rbrace;</span>      
+</div></code></pre>
+<h4><a href="#step---checkout" aria-hidden="true" class="anchor" id="step---checkout"></a>Step - Checkout</h4>
+<p>Performs the git checkout at this specific commit.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Checkout</span>                                  
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">actions/checkout@v2</span>                       
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                           
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">ref</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; github.event.pull_request.head.sha &rbrace;&rbrace;</span>
+</div></code></pre>
+<h4><a href="#step---configure-aws-credentials" aria-hidden="true" class="anchor" id="step---configure-aws-credentials"></a>Step - Configure AWS credentials</h4>
+<p>This steps uses the AWS credentials defined in the <code>env</code> section.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Configure AWS credentials</span>                          
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">aws-actions/configure-aws-credentials@v1</span>           
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                                    
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">aws-access-key-id</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; env.AWS_ACCESS_KEY_ID &rbrace;&rbrace;</span>        
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">aws-secret-access-key</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; env.AWS_SECRET_ACCESS_KEY &rbrace;&rbrace;</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">aws-region</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; env.AWS_REGION &rbrace;&rbrace;</span>
+</div></code></pre>
+<h4><a href="#step---login-to-aws-ecr" aria-hidden="true" class="anchor" id="step---login-to-aws-ecr"></a>Step - Login to AWS ECR</h4>
+<p>Performs the login to AWS ECR, using the AWS credentials configured in the previous step.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Login to Amazon ECR</span>            
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">login-ecr</span>                        
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">aws-actions/amazon-ecr-login@v1</span>
+</div></code></pre>
+<h4><a href="#step---setup-docker-buildx-cache" aria-hidden="true" class="anchor" id="step---setup-docker-buildx-cache"></a>Step - Setup Docker buildx cache</h4>
+<p>These two steps are very important for the performance of building image. A few key notes:</p>
+<ul>
+<li>Github Actions, like every CI runner in the cloud, is <em>ephemeral</em>, which means a new instance is virtualized every time we perform a new workflow job</li>
+<li>Due to this ephemerality, we cannot rely on the native Docker layer caching</li>
+</ul>
+<p>The above constraints would make our build time very slow, since every layer in <strong>Dockerfile</strong> will be evaluated across builds.</p>
+<p>But thanks to this <a href="https://github.com/docker/setup-buildx-action">action</a>, we can make use of the <a href="https://github.com/moby/buildkit">buildkit CLI</a> to cache Docker layers. Then, in combination with <a href="https://github.com/actions/cache">native Github actions cache</a>, we can rely on this cache strategy, thus optimizing build time.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Set up Docker Buildx</span>                             
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">id</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">buildx</span>                                             
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">docker/setup-buildx-action@master</span>                
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Docker cache layers</span>                              
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">actions/cache@v2</span>                                 
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                                  
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/tmp/.buildx-cache</span>                             
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">key</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; runner.os &rbrace;&rbrace;-single-buildx-$&lbrace;&lbrace; github.sha &rbrace;&rbrace;</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">restore-keys</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span>                                      </span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">      $&lbrace;&lbrace; runner.os &rbrace;&rbrace;-single-buildx                     </span>
+</div><div class="line" data-line="11"><span style="color: #98c379;"></span>
+</div></code></pre>
+<h4><a href="#step---build--push-the-image-to-the-registry" aria-hidden="true" class="anchor" id="step---build--push-the-image-to-the-registry"></a>Step - Build & Push the image to the registry</h4>
+<p>This step covers building the Docker image with <code>buildx</code> to optimize build time, and pushing it to AWS ECR, which was previously configured in “Login to Amazon ECR”.</p>
+<p>The example assumes we have a target named “release” in the Dockerfile.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Build &amp; Push Image</span>                                                                                      
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>                                                                                                          
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">ECR_REGISTRY</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; steps.login-ecr.outputs.registry &rbrace;&rbrace;</span>                                                       
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">RELEASE_IMAGE</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; steps.login-ecr.outputs.registry &rbrace;&rbrace;/$&lbrace;&lbrace; env.ECR_REPOSITORY &rbrace;&rbrace;:$&lbrace;&lbrace; env.RELEASE_REVISION &rbrace;&rbrace;</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">run</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">    <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">buildx</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">--use</span></span>
+</div><div class="line" data-line="7"><span style="color: #98c379;"></span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">    <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">buildx</span> <span style="color: #e06c75;">build</span> \                                </span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">      <span style="color: #61afef;">--cache-from=type=local,src=/tmp/.buildx-cache</span> \   </span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">      <span style="color: #61afef;">--cache-to=type=local,dest=/tmp/.buildx-cache-new</span> \</span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">      <span style="color: #e06c75;">--tag</span> $&lbrace;&lbrace; env.RELEASE_IMAGE <span style="color: #c678dd;">&rbrace;</span><span style="color: #c678dd;">&rbrace;</span> \                           </span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">      --<span style="color: #e06c75;">target</span> <span style="color: #e06c75;">release</span> \                                 </span>
+</div><div class="line" data-line="13"><span style="color: #98c379;">      <span style="color: #61afef;">--push</span> \                                           </span>
+</div><div class="line" data-line="14"><span style="color: #98c379;">      <span style="color: #e5c07b;">.</span>                                                  </span>
+</div><div class="line" data-line="15"><span style="color: #98c379;">    </span>
+</div><div class="line" data-line="16"><span style="color: #98c379;">    <span style="color: #61afef;">rm</span> <span style="color: #e06c75;">-rf</span> <span style="color: #e06c75;">/tmp/.buildx-cache</span></span>
+</div><div class="line" data-line="17"><span style="color: #98c379;">    <span style="color: #61afef;">mv</span> <span style="color: #e06c75;">/tmp/.buildx-cache-new</span> <span style="color: #e06c75;">/tmp/.buildx-cache</span></span>
+</div><div class="line" data-line="18"><span style="color: #98c379;"></span>
+</div></code></pre>
+<p>Step explained:</p>
+<ul>
+<li><code>docker buildx create --use</code>: creates a new build context for buildx and sets it as the current context</li>
+<li><code>docker buildx build ...</code>: builds the image using the cache configured/restored in the previous steps “Docker cache layers”. After build, it uploads the image to the pre-configured registry using the <code>--push</code> option</li>
+<li><code>rm | mv ...</code>: we have to renew the cache at every run, otherwise we may reach the 5GB limit of storage on Githb Actions</li>
+</ul>
+<h4><a href="#step---deploy-to-kubernetes-cluster" aria-hidden="true" class="anchor" id="step---deploy-to-kubernetes-cluster"></a>Step - Deploy to Kubernetes cluster</h4>
+<p>Once we have the image uploaded to the registry, we can send a command to kubernetes to perform the deploy.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Deploy to Kubernetes cluster</span>                                                                            
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kodermax/kubectl-aws-eks@master</span>                                                                         
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>                                                                                                          
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">RELEASE_IMAGE</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; steps.login-ecr.outputs.registry &rbrace;&rbrace;/$&lbrace;&lbrace; env.ECR_REPOSITORY &rbrace;&rbrace;:$&lbrace;&lbrace; env.RELEASE_REVISION &rbrace;&rbrace;</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                                                                                         
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">args</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">set image deployment/my-pod app=$&lbrace;&lbrace; env.RELEASE_IMAGE &rbrace;&rbrace; --record -n $KUBE_NAMESPACE</span>   
+</div></code></pre>
+<p>Here we are using <code>kubectl set image</code> but it could be <code>kubectl rollout</code> or any other command, as needed.</p>
+<p>Additionally, we can include a step to check the deployment:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Verify Kubernetes deployment</span>                               
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kodermax/kubectl-aws-eks@master</span>                            
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">with</span><span style="color: #abb2bf;">:</span>                                                            
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">args</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rollout status deploy my-pod -n $KUBE_NAMESPACE</span> 
+</div></code></pre>
+<h4><a href="#step---slack-notification" aria-hidden="true" class="anchor" id="step---slack-notification"></a>Step - Slack notification</h4>
+<p>After a succeeded deployment, we can use <a href="https://github.com/rtCamp/action-slack-notify">this action</a> to send a notification to Slack.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Slack notification</span>                                
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">uses</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rtCamp/action-slack-notify@master</span>                 
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>                                                    
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">SLACK_CHANNEL</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my_cool_channel</span>                   
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">SLACK_MESSAGE</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&#39;Just deployed our cool application!&#39;</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">SLACK_TITLE</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&#39;Deploy&#39;</span>                         
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">SLACK_USERNAME</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&#39;Some Bot&#39;</span>                           
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">SLACK_ICON</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;[icon URL]&quot;</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">SLACK_COLOR</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&#39;#228B22&#39;</span>                                
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">SLACK_WEBHOOK</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$&lbrace;&lbrace; secrets.SLACK_WEBHOOK_URL &rbrace;&rbrace;</span>       
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">MSG_MINIMAL</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">true</span>  
+</div></code></pre>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>In this guide we configured the full cycle of building a Docker image, uploading it to a registry, performing the deployment to Kubernetes and sending a notification to Slack.</p>
+<p>In the upcoming posts we’ll see how to optimize build time of dependencies’ installation inside the Docker image (a.k.a <code>bundle install</code> for Ruby developers), using a cache strategy that relies on AWS S3.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vencendo os números de ponto flutuante: um guia de sobrevivência - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="## TL;DR
+
+Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html">
+  <meta property="og:title" content="Vencendo os números de ponto flutuante: um guia de sobrevivência">
+  <meta property="og:description" content="## TL;DR
+
+Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-06-06T04:05:36Z">
+  <meta property="article:tag" content="computerscience">
+      <meta property="article:tag" content="braziliandevs">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Vencendo os números de ponto flutuante: um guia de sobrevivência",
+    "datePublished": "2023-06-06T04:05:36Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "## TL;DR
+
+Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de",
+        "keywords": "computerscience, braziliandevs"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Vencendo os números de ponto flutuante: um guia de sobrevivência</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 06 Jun 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">computerscience</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <h2><a href="#tldr" aria-hidden="true" class="anchor" id="tldr"></a>TL;DR</h2>
+<p>Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de números de ponto flutuante.</p>
+<p>Além disso, evite arredondamentos desnecessários. Quando necessário, limite o arredondamento apenas na etapa final para manter o máximo de precisão possível.</p>
+<blockquote>
+<p>Se você tá sem tempo, pode parar por aqui pois estas dicas já são suficientes para a maioria das pessoas</p>
+</blockquote>
+<p><em>Mas se você tem curiosidade em entender mais sobre este assunto, sugiro continuar nesta viagem aos números de ponto flutuante</em>.</p>
+<hr />
+<h2><a href="#sumário" aria-hidden="true" class="anchor" id="sumário"></a>Sumário</h2>
+<ul>
+<li><a href="#pr%C3%B3logo">Prólogo</a></li>
+<li><a href="#first-things-first">First things first</a></li>
+<li><a href="#bits-n%C3%A3o-s%C3%A3o-suficientes">Bits não são suficientes</a></li>
+<li><a href="#bits-e-inteiros">Bits e inteiros</a></li>
+<li><a href="#bits-e-outros-n%C3%BAmeros-reais">Bits e outros números reais</a></li>
+<li><a href="#representa%C3%A7%C3%A3o-de-ponto-fixo">Representação de ponto fixo</a></li>
+<li><a href="#representa%C3%A7%C3%A3o-de-ponto-flutuante">Representação de ponto flutuante</a></li>
+<li><a href="#problemas-e-padr%C3%B5es">Problemas e padrões</a></li>
+<li><a href="#tipos-de-dados-de-ponto-flutuante">Tipos de dados de ponto flutuante</a></li>
+<li><a href="#problemas-de-ponto-flutuante-na-pr%C3%A1tica">Problemas de ponto flutuante na prática</a></li>
+<li><a href="#decimais-ao-resgate">Decimais ao resgate</a></li>
+<li><a href="#cuidado-com-o-arredondamento">Cuidado com o arredondamento</a></li>
+<li><a href="#decimais-em-outras-tecnologias">Decimais em outras tecnologias</a></li>
+<li><a href="#conclus%C3%A3o">Conclusão</a></li>
+<li><a href="#refer%C3%AAncias">Referências</a></li>
+</ul>
+<hr />
+<h2><a href="#-prólogo" aria-hidden="true" class="anchor" id="-prólogo"></a>📜 Prólogo</h2>
+<p>Ah, sim, números de <strong>ponto flutuante</strong>.</p>
+<p>Essas coisinhas que frequentemente aparecem em conteúdos técnicos, cheios de notações científicas e explicações complexas.</p>
+<p>É quase certo que toda pessoa que está envolvida com software já tenha se deparado com a noção de que trabalhar com números de ponto flutuante pode ser <strong>perigoso</strong>, resultando em resultados de aritmética <strong>imprecisos</strong>, entre outros problemas.</p>
+<p>No entanto, compreender todas as razões subjacentes por trás desse <em>tópico crucial em ciência da computação</em> pode ser desafiador para muitos.</p>
+<p>No post de hoje, iremos aprofundar nos <strong>problemas que os números de ponto flutuante abordam</strong> e explorar as <strong>armadilhas envolvidas</strong>.</p>
+<p>Então, pegue uma garrafa de água refrescante e embarque nesta jornada rumo à essência dos números de <em>ponto flutuante</em>.</p>
+<hr />
+<h2><a href="#-first-things-first" aria-hidden="true" class="anchor" id="-first-things-first"></a>👍🏼 First things first</h2>
+<p>Computadores só entendem <strong>linguagem de máquina</strong>.</p>
+<p><em>Linguagem de máquina</em> é uma coleção de “bits” que contém dados e instruções para a CPU. Representamos esses bits como <strong>bits binários</strong> e, como tal, é chamado de <strong>sistema numérico binário</strong> (0 e 1).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">01001001 01001000 11001011 01000001 01001000 10001000
+</div><div class="line" data-line="2">01011001 01001000 01000001 01101001 01001000 01001001
+</div><div class="line" data-line="3">11000001 10001000 01001001 11001010 10001000 01001000
+</div><div class="line" data-line="4">11001001 01001000 11001001 01001000 01001000 01001001
+</div></code></pre>
+<p>Programar diretamente em linguagem de máquina é altamente propenso a erros e muitas vezes ineficiente em diversos cenários. Para lidar com isso, as <strong>linguagens assembly</strong> foram introduzidas ao longo dos anos, servindo como uma ponte entre as especificidades da arquitetura da CPU e um conjunto de instruções de alto nível.</p>
+<p>Uma <strong>linguagem assembly</strong> (ou simplesmente <strong>Assembly</strong>) é traduzida em código de máquina por meio de um programa dedicado chamado <strong>Assembler</strong>. Cada arquitetura de CPU geralmente tem seu próprio assembler associado a ela.</p>
+<p>Isso permite que programadores trabalhem com um conjunto de instruções mais gerenciável e legível para humanos, que é então traduzido em código de máquina específico para a arquitetura do processador.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">section</span> .data
+</div><div class="line" data-line="2">    <span style="color: #e5c07b;">number1</span> <span style="color: #e5c07b;">dd</span> <span style="color: #d19a66;">10</span>      <span style="color: #7f848e;">; Define o primeiro número como um float de 32 bits</span>
+</div><div class="line" data-line="3">    <span style="color: #e5c07b;">number2</span> <span style="color: #e5c07b;">dd</span> <span style="color: #d19a66;">20</span>      <span style="color: #7f848e;">; Define o segundo número como um float de 32 bits</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e5c07b;">section</span> .text
+</div><div class="line" data-line="6">    <span style="color: #e5c07b;">global</span> <span style="color: #e5c07b;">_start</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">_start</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #7f848e;">; Carrega o primeiro número no registro xmm0</span>
+</div><div class="line" data-line="9">    <span style="color: #e5c07b;">movss</span> <span style="color: #e5c07b;">xmm0</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">dword</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">number1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="10">    
+</div><div class="line" data-line="11">    <span style="color: #7f848e;">; Carrega o segundo número no registro xmm1</span>
+</div><div class="line" data-line="12">    <span style="color: #e5c07b;">movss</span> <span style="color: #e5c07b;">xmm1</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">dword</span> <span style="color: #c678dd;">[</span><span style="color: #e5c07b;">number2</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="13">.....
+</div><div class="line" data-line="14">.....
+</div></code></pre>
+<p>Os avanços no campo da engenharia de computação abriram caminho para o desenvolvimento de linguagens de programação cada vez mais de alto nível que podem ser traduzidas diretamente em instruções de código de máquina.</p>
+<p>Ao longo das décadas seguintes, surgiram linguagens como <strong>C, Java e Python</strong>, entre outras, permitindo que cada vez mais pessoas pudessem escrever programas para computador sem necessariamente saber os detalhes de sua arquitetura de CPU.</p>
+<p>Essa conquista significativa teve um impacto profundo na indústria, à medida que os computadores se tornaram mais compactos e rápidos, capacitando práticas modernas de engenharia de software para oferecer um valor substancial aos negócios em todo o mundo.</p>
+<p>Computadores entendem <strong>bits</strong>, mas seres humanos se comunicam muito além de bits.</p>
+<hr />
+<h2><a href="#-bits-não-são-suficientes" aria-hidden="true" class="anchor" id="-bits-não-são-suficientes"></a>🔵 Bits não são suficientes</h2>
+<p>Como mencionado anteriormente, os computadores entendem apenas <strong>bits binários</strong>.</p>
+<p>Nada mais neste mundo pode ser interpretado por computadores.</p>
+<p>Bits. Nada mais.</p>
+<blockquote>
+<p>💡 Na verdade, CPUs de computadores eletrônicos entendem apenas a ausência ou presença de tensão, permitindo-nos representar informações usando 0 e 1 (desligado e ligado).</p>
+</blockquote>
+<p>No entanto, a vida real traz desafios em que programas de computador, criados <strong>por pessoas para pessoas</strong>, precisam representar um conjunto mais amplo de caracteres além de apenas 0s e 1s. Isso inclui letras, números decimais, números hexadecimais, caracteres especiais, sinais de pontuação e até mesmo emojis como este 😹.</p>
+<p>Conjuntos de caracteres padrão, como os esquemas <strong>ASCII</strong> e <strong>Unicode</strong>, resolvem o desafio de representar números, letras, caracteres especiais, emojis e muito mais dentro do sistema binário.</p>
+<blockquote>
+<p>⚠️ Explorar as complexidades da codificação de caracteres com ASCII e Unicode está além do escopo deste artigo. Isto será abordado em futuros posts</p>
+</blockquote>
+<p><em>Aqui, nosso foco será especificamente como os computadores trabalham com números na memória</em>, particularmente números <strong>inteiros</strong>.</p>
+<hr />
+<h2><a href="#-bits-e-inteiros" aria-hidden="true" class="anchor" id="-bits-e-inteiros"></a>🔵 Bits e inteiros</h2>
+<p>Vamos utilizar o número <em>65</em> como exemplo. Ele é representado no sistema de numeração <strong>decimal</strong> (base 10), tornando-o um <em>número real</em>.</p>
+<p>Além disso, ele é classificado como um <strong>número inteiro</strong>.</p>
+<p>Ao realizar conversões com base em potências de 2, podemos representar o inteiro 65 como <code>01000001</code> em formato binário de 8 bits. Essa representação binária pode ser convertida de volta e para o valor decimal 65.</p>
+<p>De uma <em>perspectiva matemática</em>, como <strong>65 é um número inteiro</strong>, ele cabe em um único byte (8 bits). Além disso, realizando potências de 2, sabemos que um único byte pode acomodar 256 números:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">8</span> = <span style="color: #d19a66;">256</span>
+</div></code></pre>
+<p>Falando de forma simplificada, alguém pode assumir que um único byte pode representar inteiros de 0 a 255.</p>
+<p>No entanto, inteiros devem representar números <em>negativos e positivos</em>. Com isso, como devemos distribuir igualmente esses inteiros em um único byte?</p>
+<p>Empregando uma técnica chamada <strong>complemento de dois</strong>.</p>
+<h3><a href="#-complemento-de-dois" aria-hidden="true" class="anchor" id="-complemento-de-dois"></a>👉 Complemento de dois</h3>
+<p>Para distribuir igualmente números inteiros negativos e positivos não fracionários dentro de 8 bits, podemos usar uma técnica chamada <strong>complemento de dois</strong>. Nesta técnica:</p>
+<ul>
+<li>o bit mais à esquerda serve como o <strong>bit de sinal</strong>, indicando se o número é positivo ou negativo</li>
+<li>todos os bits são <em>invertidos</em> ou <em>complementados</em></li>
+<li>em seguida, <strong>adicionamos 1</strong> ao valor resultante</li>
+</ul>
+<p>Desta forma, um único byte representa inteiros que variam de -128 a 127.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">8</span> = <span style="color: #d19a66;">256</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">-</span>127<span style="color: #abb2bf;">,</span> -126<span style="color: #abb2bf;">,</span> -125...127<span style="color: #abb2bf;">,</span> 128
+</div></code></pre>
+<h3><a href="#-utilizando-dois-bytes-para-representar-inteiros" aria-hidden="true" class="anchor" id="-utilizando-dois-bytes-para-representar-inteiros"></a>👉 Utilizando dois bytes para representar inteiros</h3>
+<p>Ao empregar a técnica do complemento de dois, também podemos representar um intervalo de inteiros usando dois bytes (16 bits).</p>
+<p>Utilizando o conceito de potências de 2, podemos observar que <strong>dois bytes podem acomodar um total de 65536 valores</strong> diferentes:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-assembly" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">2</span><span style="color: #56b6c2;">^</span><span style="color: #d19a66;">16</span> = <span style="color: #d19a66;">65536</span>
+</div></code></pre>
+<p>Considerando números negativos, o intervalo se estende de -32768 a 32767, inclusive.</p>
+<p>Agora, vamos explorar alguns exemplos utilizando o <strong>PostgreSQL</strong>.</p>
+<p>Se você, como eu, é da turma dos <em>containers</em>, ter um PostgreSQL server prontinho pra ser utilizado é mamão com açúcar:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--rm</span> <span style="color: #e06c75;">-d</span> \
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">postgres</span> \
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">-e</span> <span style="color: #e06c75;">POSTGRES_HOST_AUTH_METHOD=trust</span> \
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">postgres</span> 
+</div></code></pre>
+<p>Em seguida, acesse o terminal <code>psql</code> com o seguinte comando:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">postgres</span> <span style="color: #e06c75;">psql</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">postgres</span>
+</div></code></pre>
+<blockquote>
+<p>O quê você está esperando para ir logo aprender sobre <a href="https://dev.to/leandronsp/thinking-like-containers-3k24">containers</a>?</p>
+</blockquote>
+<p>No PostgreSQL, o tipo de dado que representa um inteiro de dois bytes é chamado <strong>int2</strong> ou <strong>smallint</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">65</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> int2
+</div><div class="line" data-line="3"><span style="color: #7f848e;">------</span>
+</div><div class="line" data-line="4">   65
+</div></code></pre>
+<p>Para verificar o tipo de dado, podemos usar a função <code>pg_typeof</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">pg_typeof</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">65</span>::<span style="color: #e5c07b;">int2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> pg_typeof
+</div><div class="line" data-line="3"><span style="color: #7f848e;">-----------</span>
+</div><div class="line" data-line="4"> smallint
+</div></code></pre>
+<p>Como <strong>smallint</strong> usa dois bytes, ele só pode acomodar o intervalo que mencionamos anteriormente em termos de bits e inteiros:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">32767</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> int2
+</div><div class="line" data-line="3"><span style="color: #7f848e;">-------</span>
+</div><div class="line" data-line="4"> 32767
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>32767</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="7"> int2
+</div><div class="line" data-line="8"><span style="color: #7f848e;">-------</span>
+</div><div class="line" data-line="9"> <span style="color: #56b6c2;">-</span>32767
+</div></code></pre>
+<p>No entanto, se tentarmos exceder o intervalo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">32768</span>::<span style="color: #e5c07b;">int2</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">ERROR:  smallint <span style="color: #c678dd;">out</span> <span style="color: #c678dd;">of</span> <span style="color: #c678dd;">range</span>
+</div></code></pre>
+<p><em>Incrível, não?</em></p>
+<p>Além do <strong>smallint</strong>, Postgres oferece uma variedade de outros tipos de dados inteiros:</p>
+<table>
+<thead>
+<tr>
+<th>Tipo de Dado</th>
+<th>Descrição</th>
+<th>Intervalo de Inteiros</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>smallint</td>
+<td>Inteiro de dois bytes</td>
+<td>-32.768 a 32.767</td>
+</tr>
+<tr>
+<td>integer</td>
+<td>Inteiro de quatro bytes</td>
+<td>-2.147.483.648 a 2.147.483.647</td>
+</tr>
+<tr>
+<td>bigint</td>
+<td>Inteiro de oito bytes</td>
+<td>-9.223.372.036.854.775.808 a 9.223.372.036.854.775.807</td>
+</tr>
+</tbody>
+</table>
+<p>No entanto, todos nós sabemos que o mundo não é apenas composto por inteiros. Inteiros são um subconjunto de um conjunto mais amplo de números chamados <strong>números reais</strong>.</p>
+<hr />
+<h2><a href="#-bits-e-outros-números-reais" aria-hidden="true" class="anchor" id="-bits-e-outros-números-reais"></a>🔵 Bits e outros números reais</h2>
+<p><strong>Números reais</strong> podem incluir inteiros, frações e decimais, tanto racionais quanto irracionais.</p>
+<p>Por exemplo, <em>3.14159</em> representa o número real <strong>π</strong> (pi), que é um número irracional. É um decimal <em>não repetitivo e não terminante</em>. O valor de π se estende infinitamente sem qualquer padrão em sua representação decimal.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">3<span style="color: #abb2bf;">.</span>14159265358979323846<span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span>
+</div></code></pre>
+<hr />
+<p>Suponha que tenhamos dois bytes (16 bits), que podem representar 65536 inteiros variando de -32768 a 32767.</p>
+<p>Quando se trata de representar outros números reais, como decimais, podemos usar uma técnica chamada <strong>ponto fixo</strong> que, apesar de não ser eficiente, pode ser utilizada para fins didáticos neste post.</p>
+<hr />
+<h2><a href="#-representação-de-ponto-fixo" aria-hidden="true" class="anchor" id="-representação-de-ponto-fixo"></a>🔵 Representação de ponto fixo</h2>
+<p>Na representação de ponto fixo, dividimos os 16 bits fornecidos em três partes:</p>
+<h3><a href="#-bit-de-sinal" aria-hidden="true" class="anchor" id="-bit-de-sinal"></a>👉 Bit de sinal</h3>
+<p>O primeiro bit (mais à esquerda) representa o sinal, sendo 1 para negativo e 0 para positivo.</p>
+<h3><a href="#-parte-decimal" aria-hidden="true" class="anchor" id="-parte-decimal"></a>👉 Parte decimal</h3>
+<p>Os próximos 7 bits representam a parte decimal (fracionária), que pode ter uma precisão de até <code>0.992188</code> em nossa simulação:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>7 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>6 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span><span style="color: #56b6c2;">-</span>1 <span style="color: #56b6c2;">=</span>
+</div><div class="line" data-line="2">0<span style="color: #abb2bf;">.</span>992188
+</div></code></pre>
+<h3><a href="#-parte-inteira" aria-hidden="true" class="anchor" id="-parte-inteira"></a>👉 Parte inteira</h3>
+<p>Os 8 bits restantes representam a parte inteira, que podem ir de -128 a 127 usando complemento de dois:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">complemento_de_dois<span style="color: #c678dd;">(</span>
+</div><div class="line" data-line="2">    2<span style="color: #56b6c2;">^</span>7 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>6 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>1 <span style="color: #56b6c2;">=</span> 
+</div><div class="line" data-line="3">    127
+</div><div class="line" data-line="4"><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/56igr6mlwimkho6vlllk.png" alt="ponto fixo" /></p>
+<p>Considerando que a parte inteira, usando 8 bits com complemento de dois, varia de -128 a 127, podemos concluir que, com a <strong>representação de ponto fixo</strong>, os decimais podem variar de <strong>-128.992188 a 127.992188</strong>.</p>
+<p>No entanto, essa técnica pode nem sempre ser a mais eficiente.</p>
+<p>Portanto, vamos explorar outra técnica para representar decimais. Sim, estamos falando da mundialmente e amplamente utilizada <strong>representação de ponto flutuante</strong>.</p>
+<hr />
+<h2><a href="#-representação-de-ponto-flutuante" aria-hidden="true" class="anchor" id="-representação-de-ponto-flutuante"></a>🔵 Representação de ponto flutuante</h2>
+<p>Tomando como exemplo 16 bits, na representação de ponto flutuante, também dividimos os 16 bits em três grupos:</p>
+<h3><a href="#-bit-de-sinal-1" aria-hidden="true" class="anchor" id="-bit-de-sinal-1"></a>👉 Bit de sinal</h3>
+<p>O primeiro bit (mais à esquerda) é usado para representar se o número é negativo (1) ou positivo (0).</p>
+<h3><a href="#-parte-do-expoente" aria-hidden="true" class="anchor" id="-parte-do-expoente"></a>👉 Parte do expoente</h3>
+<p>A parte do expoente é atribuída aos próximos X bits. Em nossa simulação, vamos alocar 7 bits para esta parte, enquanto utilizamos o <em>primeiro bit do expoente</em> como sendo o <strong>sinal do expoente</strong>.</p>
+<p>Assim, a faixa para o expoente se estende de -63 a 63, acomodando valores negativos e positivos:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">2<span style="color: #56b6c2;">^</span>5 <span style="color: #56b6c2;">+</span> 2<span style="color: #56b6c2;">^</span>4 <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span><span style="color: #abb2bf;">.</span> 2<span style="color: #56b6c2;">^</span>1 <span style="color: #56b6c2;">=</span>
+</div><div class="line" data-line="2">63
+</div></code></pre>
+<p><em>Esta parte é crucial para definir a precisão aritmética na representação de ponto flutuante.</em></p>
+<h3><a href="#-mantissa" aria-hidden="true" class="anchor" id="-mantissa"></a>👉 Mantissa</h3>
+<p>A parte da <strong>mantissa</strong>, também conhecida como <em>significante</em>, usa os 8 bits restantes na nossa simulação, permitindo uma faixa de 1 até 255.</p>
+<p><em>Como não estamos representando a parte inteira nesta simulação, não é necessário aplicar complemento de dois à mantissa.</em></p>
+<p>🔑 <strong>Agora a parte importante</strong><br />
+Para calcular o maior número de ponto flutuante positivo, multiplicamos a mantissa pelo expoente. É aqui que entra o tal do “ponto flutuante”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1">mantissa X 2<span style="color: #56b6c2;">^</span>expoente
+</div></code></pre>
+<p>Neste caso, o valor máximo positivo seria obtido multiplicando-se <strong>255 por 2^6</strong>, resultando em um número extremamente grande como <strong>2351959869397967831040.0</strong>.</p>
+<p>Por outro lado, o número mínimo maior que zero pode ser representado como 1 multiplicado por <strong>2^-63</strong>, ou <strong>0.00000000000000000010842021724855044340074528008699</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mof63oaed96584ajqvbg.png" alt="ponto flutuante" /></p>
+<p>Observe que esta simulação é uma representação simplificada com precisão limitada e pode não refletir a precisão de formatos de ponto flutuante ideais ou padronizados.</p>
+<hr />
+<h2><a href="#-problemas-e-padrões" aria-hidden="true" class="anchor" id="-problemas-e-padrões"></a>🔵 Problemas e padrões</h2>
+<p>De fato, como mencionado anteriormente, <strong>selecionar um número adequado de bits para a parte do expoente</strong> na representação de ponto flutuante é crucial para mitigar problemas de arredondamento e truncamento ao lidar com números fracionários.</p>
+<p>Padrões como o <strong>IEEE 754</strong> foram estabelecidos exatamente para abordar essas preocupações e fornecer um framework consistente para a representação de ponto flutuante. O padrão IEEE 754 define o número de bits alocados para o expoente, mantissa e sinal em formatos de precisão simples (32 bits) e dupla precisão (64 bits).</p>
+<p>Esses padrões determinam a representação precisa dos vários componentes de um número de ponto flutuante, as <em>regras para operações aritméticas</em> e como lidar com casos excepcionais.</p>
+<h3><a href="#-precisão-simples-4-bytes" aria-hidden="true" class="anchor" id="-precisão-simples-4-bytes"></a>👉 Precisão simples (4 bytes)</h3>
+<p>Os números de <strong>precisão simples</strong> são representados usando 32 bits de memória.</p>
+<p>Eles incluem:</p>
+<ul>
+<li>1 bit para o sinal do número</li>
+<li>8 bits para o expoente</li>
+<li>23 bits para a mantissa</li>
+</ul>
+<p>De acordo com os padrões do IEEE, a precisão simples normalmente <strong>manipula de 6 a 9 casas decimais de precisão</strong>.</p>
+<h3><a href="#-dupla-precisão-8-bytes" aria-hidden="true" class="anchor" id="-dupla-precisão-8-bytes"></a>👉 Dupla precisão (8 bytes)</h3>
+<p>Os números de <strong>dupla precisão</strong> são representados usando 64 bits de memória.</p>
+<p>Eles incluem:</p>
+<ul>
+<li>1 bit para o sinal do número</li>
+<li>11 bits para o expoente</li>
+<li>52 bits para a mantissa</li>
+</ul>
+<p>De acordo com os padrões do IEEE, a dupla precisão pode <strong>manipular de 15 a 17 casas decimais de precisão</strong>.</p>
+<p><em>Geralmente, a dupla precisão se encaixa melhor quando a alta precisão é necessária, mas esta por sua vez consome mais memória.</em></p>
+<hr />
+<h2><a href="#-tipos-de-dados-de-ponto-flutuante" aria-hidden="true" class="anchor" id="-tipos-de-dados-de-ponto-flutuante"></a>🔵 Tipos de dados de ponto flutuante</h2>
+<p>Muitas linguagens de programação e sistemas de banco de dados aderem aos padrões do IEEE 754, e com o PostgreSQL isto não é exceção.</p>
+<p>Vamos ver como o Postgres implementa os tipos de dados de ponto flutuante na prática.</p>
+<p>O tipo de dado <strong>float4</strong> segue o padrão de precisão simples do IEEE 754, que aloca 1 bit para o sinal, 8 bits para o expoente e 23 bits para a mantissa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;"><span style="color: #e5c07b;">float4</span></span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> float4
+</div><div class="line" data-line="3"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="4">    0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p>Por outro lado, o tipo de dado <strong>float8</strong> segue o padrão de dupla precisão do IEEE 754, que aloca 1 bit para o sinal, 11 bits para o expoente e 52 bits para a mantissa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;">float8</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"> float8
+</div><div class="line" data-line="3"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="4">    0<span style="color: #abb2bf;">.</span>3
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span><span style="color: #56b6c2;">#</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.3</span>::<span style="color: #e5c07b;">float</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="9"> float
+</div><div class="line" data-line="10"><span style="color: #7f848e;">--------</span>
+</div><div class="line" data-line="11">    0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p><em>O tipo <code>float</code> padrão é equivalente à dupla precisão (float8).</em></p>
+<hr />
+<h2><a href="#️-problemas-de-ponto-flutuante-na-prática" aria-hidden="true" class="anchor" id="️-problemas-de-ponto-flutuante-na-prática"></a>☣️ Problemas de ponto flutuante na prática</h2>
+<p>Vamos mergulhar em cálculos com números de ponto flutuante e ver os <strong>possíveis problemas</strong> na prática.</p>
+<p>Considere uma simples soma de <code>0.1 + 0.2</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">float</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;">0.2</span>::<span style="color: #e5c07b;">float</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"> 0<span style="color: #abb2bf;">.</span>30000000000000004
+</div></code></pre>
+<p>Este resultado mostra como problemas de precisão podem surgir em números de ponto flutuante de dupla precisão durante operações aritméticas.</p>
+<p>Mesmo seguindo padrões, não estamos imunes a esses desafios de cálculo com ponto flutuante.</p>
+<p>No entanto, há uma estratégia alternativa que envolve um truque maroto utilizando <strong>inteiros</strong>.</p>
+<h3><a href="#-um-truque-com-inteiros" aria-hidden="true" class="anchor" id="-um-truque-com-inteiros"></a>💡 Um truque com inteiros</h3>
+<p>Em vez do tipo de dado <em>float</em>, podemos trabalhar com <strong>inteiros</strong>. Incorporamos um fator multiplicador com base em uma <em>escala decimal</em> ao armazenar valores e, em seguida, dividimos pelo mesmo fator para restaurar a representação decimal original ao recuperar o valor.</p>
+<p>Esse método permite cálculos decimais precisos usando inteiros e escala. O fator multiplicador deve ser escolhido com base na precisão decimal necessária.</p>
+<p>Para demonstrar, vamos usar esse truque para realizar <code>0.1 + 0.2</code>, com o fator multiplicador <strong>1000</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">0.1</span> <span style="color: #56b6c2;">*</span> <span style="color: #98c379;">1000</span><span style="color: #c678dd;">)</span>::<span style="color: #e5c07b;">int</span> <span style="color: #56b6c2;">+</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">0.2</span> <span style="color: #56b6c2;">*</span> <span style="color: #98c379;">1000</span><span style="color: #c678dd;">)</span>::<span style="color: #e5c07b;">int</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">300
+</div></code></pre>
+<p>Aqui, cada entrada é multiplicada por <code>1000</code> e convertida para um inteiro. Para recuperar o valor original sem perder a precisão, dividimos por <code>1000</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #c678dd;">(</span><span style="color: #98c379;">300</span> <span style="color: #56b6c2;">/</span> <span style="color: #98c379;">1000</span>::<span style="color: #e5c07b;">float</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p><em>Uau, que técnica incrível!</em> 🚀</p>
+<p>No entanto, o uso de um fator multiplicador fixo pode ser ineficiente ao lidar com entradas que possuem diferentes casas decimais.</p>
+<p>Em vez disso, uma <strong>representação de escala variável</strong> pode ser usada convertendo a entrada em uma string e analisando o número de dígitos decimais, fazendo assim com que o fator multiplicador seja dinâmico para cada número real.</p>
+<p>Mas tenha cuidado, representações decimais de escala variável exigem <strong>manipulação cuidadosa de cálculos complexos</strong>, escala decimal precisa e várias outras sutilezas da aritmética decimal, que não é tão trivial.</p>
+<p>É aqui que entram os <strong>decimais</strong>.</p>
+<hr />
+<h2><a href="#-decimais-ao-resgate" aria-hidden="true" class="anchor" id="-decimais-ao-resgate"></a>🔵 Decimais ao resgate</h2>
+<p>Decimais lidam com os desafios associados a cálculos aritméticos complexos envolvendo decimais. Ao passo em que eles <em>reduzem significativamente</em> os problemas de precisão comumente encontrados em números de ponto flutuante.</p>
+<p>Diversas linguagens de programação e sistemas de banco de dados implementam decimais. PostgreSQL oferece o tipo de dado <strong>decimal</strong>, que oferece uma precisão superior em comparação com floats.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">decimal</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;">0.2</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">0<span style="color: #abb2bf;">.</span>3
+</div></code></pre>
+<p>Os decimais também podem ser configurados para <strong>precisão e escala arbitrárias</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">#</span> Exemplo: aceita números de até 999<span style="color: #abb2bf;">.</span>99
+</div><div class="line" data-line="2"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">0.1</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>10
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">999.99</span>::<span style="color: #e5c07b;">decimal</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="6">999<span style="color: #abb2bf;">.</span>99
+</div></code></pre>
+<p>Convenientemente, o tipo de dado padrão para decimais no PostgreSQL é <strong>numeric</strong>, que é idêntico a <em>decimal</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">pg_typeof</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">0.1</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">numeric
+</div></code></pre>
+<hr />
+<h2><a href="#️-cuidado-com-o-arredondamento" aria-hidden="true" class="anchor" id="️-cuidado-com-o-arredondamento"></a>⚠️ Cuidado com o arredondamento</h2>
+<p>Arredondar números decimais programaticamente pode levar a resultados imprecisos. Por exemplo, a soma <code>25.986 + -0.4125 + -25.5735</code> teoricamente deveria resultar em zero:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #98c379;">25.986</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>0000
+</div></code></pre>
+<p>Vamos ilustrar como podemos <strong>arredondar apenas a soma final</strong> para duas casas decimais:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">25.986</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span> <span style="color: #56b6c2;">+</span> <span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>00
+</div></code></pre>
+<p><em>So far, so good</em>. Tudo funcionando como esperado.</p>
+<p>Com tipos de dados adequados, como decimais, o problema aritmético inerente aos números de ponto flutuante já é resolvido.</p>
+<p>Todavia, o <strong>arredondamento introduz seu próprio conjunto de desafios</strong>. Mesmo que os decimais sejam excelentes para a precisão e aritmética de dados decimais, as operações de arredondamento envolvem <em>algum grau de aproximação</em>.</p>
+<p>Para simular um problema com arredondamentos desnecessários, vamos arredondar cada número decimal antes de somá-los:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-sql" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">SELECT</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">25.986</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">+</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;"><span style="color: #56b6c2;">-</span>0.4125</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">+</span> <span style="color: #e5c07b;">ROUND</span><span style="color: #c678dd;">(</span><span style="color: #98c379;"><span style="color: #56b6c2;">-</span>25.5735</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">0<span style="color: #abb2bf;">.</span>01
+</div></code></pre>
+<p><em>OMG e agora?</em> 😭</p>
+<p>Cada vez que arredondamos um número, estamos adicionando um pouco de imprecisão. <em>Bit a bit</em>, o resultado final pode ficar longe do esperado, <strong>pois a memória do computador é finita</strong> e não é possível representar todas as casas decimais possíveis resultantes de uma aritmética arbitrária de números reais.</p>
+<blockquote>
+<p>Lembra do resultado da <code>mantissa X 2^expoente</code>?<br />
+Pois então…</p>
+</blockquote>
+<p>Esses exemplos destacam por que <strong>o arredondamento desnecessário deve ser evitado</strong>. Como o arredondamento é uma aproximação, é melhor adiá-lo até a etapa final, ou seja, apenas quando formos <em>apresentar os dados ao usuário final</em>.</p>
+<hr />
+<h2><a href="#decimais-em-outras-tecnologias" aria-hidden="true" class="anchor" id="decimais-em-outras-tecnologias"></a>Decimais em outras tecnologias</h2>
+<p>Cada linguagem de programação ou ferramenta possui seu próprio tipo de dados para lidar com precisão arbitrária, como os decimais do PostgreSQL.</p>
+<p>Ruby oferece a classe <a href="https://ruby-doc.org/stdlib-2.5.1/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a>, que facilita a aritmética decimal de ponto flutuante de precisão arbitrária.</p>
+<p>Da mesma forma, Java também inclui uma <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html">classe BigDecimal</a> para este mesmo propósito.</p>
+<p>Golang também não é exceção. Ela possui <a href="https://go.dev/src/math/big/decimal.go">aritmética decimal de precisão arbitrária</a> que resolve os mesmos problemas.</p>
+<p>É crucial verificar se a tecnologia que você está usando oferece suporte a precisão arbitrária como decimais. Se você precisar de uma precisão maior, estas soluções costumam ser mais adequadas do que o uso de números de ponto flutuante brutos.</p>
+<p>Ao limite, se precisão for algo crítico para teu negócio e a tecnologia utilizada <em>não fornece tipos como os big decimals</em> de precisão arbitrária, prefira então utilizar <strong>números inteiros com fator multiplicador (100, 1000, 10000, etc)</strong> que contemple as casas decimais suficientes para a precisão necessária.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Neste post, exploramos as complexidades dos números de <strong>ponto flutuante</strong>.</p>
+<p>Investigamos também como os computadores compreendem informações por meio do <strong>sistema binário</strong>, desde a representação de inteiros e a ineficiência da representação de ponto fixo para decimais, até chegar aos números de ponto flutuante e suas <em>limitações</em>.</p>
+<p>Além disso, discutimos como os tipos de dados de precisão arbitrária, como os <strong>decimais</strong>, abordam esses problemas de precisão inerentes aos pontos flutuantes.</p>
+<p>Por fim, discutimos e compartilhamos as melhores práticas para lidar com problemas de <em>arredondamento</em> de números decimais.</p>
+<p>Espero que esses tópicos tenham sido apresentados de forma didática, tornando os problemas de ponto flutuante não mais um problema!</p>
+<p><em>Cheers!</em></p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<p><a href="https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html">https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html</a><br />
+<a href="https://www.postgresql.org/docs/current/datatype.html">https://www.postgresql.org/docs/current/datatype.html</a><br />
+<a href="https://en.wikipedia.org/wiki/IEEE_754">https://en.wikipedia.org/wiki/IEEE_754</a><br />
+<a href="https://www.doc.ic.ac.uk/~eedwards/compsys/float/">https://www.doc.ic.ac.uk/~eedwards/compsys/float/</a><br />
+<a href="https://en.wikipedia.org/wiki/Floating-point_error_mitigation">https://en.wikipedia.org/wiki/Floating-point_error_mitigation</a><br />
+<a href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">https://en.wikipedia.org/wiki/Single-precision_floating-point_format</a><br />
+<a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">https://en.wikipedia.org/wiki/Double-precision_floating-point_format</a><br />
+<a href="https://en.wikipedia.org/wiki/Decimal_floating_point">https://en.wikipedia.org/wiki/Decimal_floating_point</a></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

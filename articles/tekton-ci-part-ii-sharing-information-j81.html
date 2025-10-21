@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tekton CI, part II, sharing information - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="[In the previous post](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview through it">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81.html">
+  <meta property="og:title" content="Tekton CI, part II, sharing information">
+  <meta property="og:description" content="[In the previous post](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview through it">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-02-19T15:49:26Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="ci">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Tekton CI, part II, sharing information",
+    "datePublished": "2023-02-19T15:49:26Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "[In the previous post](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview through it",
+        "keywords": "kubernetes, ci, linux, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Tekton CI, part II, sharing information</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 19 Feb 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ci</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><a href="https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj">In the previous post</a>, we viewed an introduction to Tekton and a brief overview through its main components: <em>Steps, Tasks and Pipelines</em>.</p>
+<p>Now, let’s keep exploring the <strong>Tekton building blocks</strong> as we see a complete journey from <em>development to production</em>.</p>
+<hr />
+<h2><a href="#bulb-first-things-first" aria-hidden="true" class="anchor" id="bulb-first-things-first"></a>:bulb: First things first</h2>
+<p>We’ve been using the <code>kubectl</code> CLI and, despite it’s good enough to work and visualize Tekton components, Tekton provides <a href="https://tekton.dev/docs/cli/">its own CLI</a> that makes the job a little easier:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">tkn</span> <span style="color: #e06c75;">pipelinerun</span> <span style="color: #e06c75;">list</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                   <span style="color: #e06c75;">STARTED</span>          <span style="color: #e06c75;">DURATION</span>   <span style="color: #e06c75;">STATUS</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">hello-pipeline-x2s8p</span>   <span style="color: #d19a66;">26</span> <span style="color: #e06c75;">minutes</span> <span style="color: #e06c75;">ago</span>   <span style="color: #e06c75;">8s</span>         <span style="color: #e06c75;">Succeeded</span>
+</div></code></pre>
+<p>Even better, Tekton provides <a href="https://tekton.dev/docs/dashboard/">a nice UI dashboard</a> so we can have a better user experience:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/cngjhqi3yvz8raz48t74.png" alt="Dashboard" /></p>
+<p>The good part is that we can <code>port-forward</code> the Dashboard since to localhost it’s a <code>service</code> in Kubernetes. Furthermore, we could deploy an <code>Ingress</code> and create our own DNS in production environments.</p>
+<p><em>For me, that’s a great advantage, as I’m having my own CI/CD system under my own DNS.</em></p>
+<h2><a href="#heart-community-matters" aria-hidden="true" class="anchor" id="heart-community-matters"></a>:heart: Community matters</h2>
+<p>Because the Tekton community takes very seriously its adoption and development, many tasks can be reused by the community, so <a href="https://hub.tekton.dev/">Tekton Hub</a> was created.</p>
+<p>One such common task is <strong>cloning an arbitrary Git repository</strong>, then it’s time to add this Task to our cluster:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/kg98w0pbz452ohq5fqqs.png" alt="git clone" /></p>
+<p>Using <code>kubectl</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-clone/0.9/git-clone.yaml</span>
+</div></code></pre>
+<p>Or simply <code>tkn</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">tkn</span> <span style="color: #e06c75;">hub</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">task</span> <span style="color: #e06c75;">git-clone</span>
+</div></code></pre>
+<p>Cool, but how do we use this task?</p>
+<hr />
+<h2><a href="#a-simple-pipeline" aria-hidden="true" class="anchor" id="a-simple-pipeline"></a>A simple pipeline</h2>
+<p>Our pipeline will be defined by two main tasks:</p>
+<ul>
+<li>git clone (using the Task we imported form the Tekton Hub)</li>
+<li>list directory after clone, issuing a dead simple <code>ls</code> command</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Pipeline</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pipeline</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">string</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">string</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">tasks</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">fetch-source</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">git-clone</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">url</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(params.repo-url)</span>
+</div><div class="line" data-line="18">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="19">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(params.revision)</span>
+</div><div class="line" data-line="20">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">list-source</span>
+</div><div class="line" data-line="21">    <span style="color: #e06c75;">runAfter</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;fetch-source&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="22">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="23">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">list-source</span>
+</div></code></pre>
+<ul>
+<li>Pipelines and Tasks allow to declare <strong>params</strong>, that are sent by <strong>PipelineRuns</strong> in <em>runtime</em>. In our case, the <code>repo-url</code> to clone from and the <code>revision</code> (commit or branch)</li>
+<li>The first task is called <code>fetch-source</code> which refers to the <code>git-clone</code> we imported</li>
+<li>The second task runs after <code>fetch-source</code> and is called <code>list-source</code>, which refers to another Task called <code>list-source</code></li>
+</ul>
+<p>Let’s check out the Task <code>list-source</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Task</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">list-source</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">steps</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ls</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ubuntu</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">script</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">&gt;</span></span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">      <span style="color: #61afef;">ls</span></span>
+</div><div class="line" data-line="11"><span style="color: #98c379;"></span>
+</div></code></pre>
+<p>It’s just a Pod having an <code>ubuntu</code> container which issues the <code>ls</code> command. <em>Very simple, uh?</em></p>
+<h3><a href="#tasks-need-to-share-information-through-volumes" aria-hidden="true" class="anchor" id="tasks-need-to-share-information-through-volumes"></a>Tasks need to share information through Volumes</h3>
+<p>But remember one important thing: <strong>Pods don’t share Volumes by default</strong>. Therefore, different tasks do not share information. By which means the task <code>list-source</code> won’t “see” the cloned repository from the <code>fetch-source</code> Task.</p>
+<p><em>How does Tekton solve this problem?</em> Enter <strong>Workspaces</strong>.</p>
+<h2><a href="#package-workspaces" aria-hidden="true" class="anchor" id="package-workspaces"></a>:package: Workspaces</h2>
+<p><a href="https://tekton.dev/docs/pipelines/workspaces/">Workspaces</a> in Tekton are similar to Volumes in Kubernetes and Docker. Different <strong>Tasks</strong> can share workspaces so data goes over the <strong>Pipeline</strong>.</p>
+<p>According to <a href="https://hub.tekton.dev/tekton/task/git-clone">its documentation</a>, the <code>git-clone</code> Task requires two params at least: a <strong>url</strong> for fetching the repository and a <em>Workspace</em> named <strong>output</strong>.</p>
+<p>The pipeline/task usually declares the workspace and at runtime (through a <strong>PipelineRun</strong> or a <strong>TaskRun</strong>) the <em>workspace is mounted</em> in Kubernetes.</p>
+<p>Workspaces can be <strong>ConfigMaps, Secrets, Persistent Volumes or even a volume EmptyDir</strong> which is discarded when the <em>TaskRun completes</em>.</p>
+<h3><a href="#pencil-a-note-to-emptydir" aria-hidden="true" class="anchor" id="pencil-a-note-to-emptydir"></a>:pencil: A note to emptyDir</h3>
+<p>This kind of volume only works <strong>through steps within a Task</strong>, but they <em>do not work across different Tasks</em> within a Pipeline. <strong>For Pipelines use Persistent Volumes instead</strong>.</p>
+<p>Let’s change our pipeline and task definitions. Add the following to the <code>spec</code> node in Pipeline:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">  <span style="color: #98c379;">...</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">  workspaces</span>:
+</div><div class="line" data-line="3">    - name: shared-data
+</div></code></pre>
+<p>It basically declares that the Pipeline will use a workspace called <code>shared-data</code>.</p>
+<p>Next, in the <code>tasks</code> node, declare the workspace required by the task <code>git-clone</code> as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">    <span style="color: #98c379;">...</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">    workspaces</span>:
+</div><div class="line" data-line="3">      - name: output
+</div><div class="line" data-line="4">        workspace: shared-data
+</div></code></pre>
+<p>The name of the task workspace is <code>output</code> and it refers to the workspace <code>shared-data</code> declared in the pipeline section.</p>
+<p>Repeat the previous step for the <code>list-source</code> task definition, but in this case, let’s name the task workspace as <code>source</code>, pointing to the <code>shared-data</code> workspace declared in the pipeline:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">    <span style="color: #98c379;">...</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">    workspaces</span>:
+</div><div class="line" data-line="3">      - name: source
+</div><div class="line" data-line="4">        workspace: shared-data
+</div></code></pre>
+<p>And now, within the Task <code>list-source</code>, we must declare the workspace <code>source</code> which will come through the pipeline. So, the Task yaml looks like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Task</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">list-source</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">source</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">steps</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ls</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ubuntu</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">workingDir</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(workspaces.source.path)</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">script</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">&gt;</span></span>
+</div><div class="line" data-line="13"><span style="color: #98c379;">      <span style="color: #61afef;">ls</span></span>
+</div><div class="line" data-line="14"><span style="color: #98c379;"></span>
+</div></code></pre>
+<h2><a href="#running-time-to-run" aria-hidden="true" class="anchor" id="running-time-to-run"></a>:running: Time to run!</h2>
+<p>As for now, we apply all the changes but we only have declarations, pipeline and tasks. In order to perform a <strong>PipelineRun</strong>, we must declare how the pipeline workspace <code>shared-data</code> will look like.</p>
+<p>In this case, we cannot use <code>emptyDir</code>, that’s why we’ll provide a <code>volumeClaimTemplate</code> which uses the standard storage class configured in our cluster, <strong>requesting 1Gb of space</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PipelineRun</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">generateName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pipeline-</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">pipelineRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-pipeline</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">https://github.com/leandronsp/chespirito.git</span>
+</div><div class="line" data-line="11">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">main</span>
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">shared-data</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">volumeClaimTemplate</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="18">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteOnce</span>
+</div><div class="line" data-line="19">        <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="20">          <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="21">            <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div></code></pre>
+<ul>
+<li>providing the <code>repo-url</code>, which points to the repository <code>https://github.com/leandronsp/chespirito.git</code></li>
+<li>also provising the <code>revision</code>, so the Task performs checkout from the main branch</li>
+<li>and least, but very important, the pipeline workspace <code>shared-data</code>, using a <code>volumeClaimTemplate</code></li>
+</ul>
+<p><em>Run the pipeline and…</em></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/63xmm4no9kg9id9yz0w4.png" alt="Pipeline dash" /></p>
+<p>:rocket: <strong>How cool is that?</strong> :rocket:</p>
+<hr />
+<p>In this post we’ve got into the <strong>Tekton CLI, Dashboard and Tekton Hub</strong>, going through a simple pipeline that uses a Task built by the community to clone an arbitrary repository from Github and list its files in the screen.</p>
+<p>During the journey we learned about <strong>Workspaces</strong> and how they solve the problem of <em>sharing information</em> through Steps and Tasks within a Pipeline.</p>
+<p>Stay tuned because the upcoming posts will explore how to <strong>listen to Github events</strong> and <em>trigger our Pipeline</em> instead of running it manually.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

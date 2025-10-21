@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to reduce the time complexity of nested loops - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In this post I'll demonstrate a way to understand, analyse and reduce the time complexity on algorithms, specially on **nested loops**.
+
+The examples will use Ru">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html">
+  <meta property="og:title" content="How to reduce the time complexity of nested loops">
+  <meta property="og:description" content="In this post I'll demonstrate a way to understand, analyse and reduce the time complexity on algorithms, specially on **nested loops**.
+
+The examples will use Ru">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-12-04T22:11:13Z">
+  <meta property="article:tag" content="programming">
+      <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="algorithms">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "How to reduce the time complexity of nested loops",
+    "datePublished": "2021-12-04T22:11:13Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In this post I'll demonstrate a way to understand, analyse and reduce the time complexity on algorithms, specially on **nested loops**.
+
+The examples will use Ru",
+        "keywords": "programming, ruby, algorithms"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">How to reduce the time complexity of nested loops</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 04 Dec 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">programming</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">algorithms</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In this post I’ll demonstrate a way to understand, analyse and reduce the time complexity on algorithms, specially on <strong>nested loops</strong>.</p>
+<p>The examples will use Ruby but it can be translated to any programming language.</p>
+<h2><a href="#problem" aria-hidden="true" class="anchor" id="problem"></a>Problem</h2>
+<p>Working throughout a variety of projects, it’s not rare to stumble on pieces of code like the following, a “nested loop”, which is a loop under another loop:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">group</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">groups</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">user</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">users</span>
+</div><div class="line" data-line="3">    <span style="color: #7f848e;"># do something with the group and user</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Analysing the above code, and assuming we have 100 groups and 100 users:</p>
+<ul>
+<li>for each group (100 times) we iterate over all users (100 times), which leads <code>100 * 100 = 10000</code> iterations</li>
+<li>each iteration <a href="https://en.wikipedia.org/wiki/Central_processing_unit#Clock_rate">has a cost to the CPU</a>, so the more iterations we do, the more our algorithm will perform worse</li>
+<li>if the lists grow over time, we can face serious performance issues on such algorithm</li>
+</ul>
+<p>In <a href="https://www.freecodecamp.org/news/big-o-notation-why-it-matters-and-why-it-doesnt-1674cfa8a23c/">the Big O notation</a> analysis, this algorithm may end up having a <code>squared</code> time complexity, or <code>O(n²)</code>, because <code>100 * 100 = 100²</code>.</p>
+<h2><a href="#can-we-improve-it" aria-hidden="true" class="anchor" id="can-we-improve-it"></a>Can we improve it?</h2>
+<p>With regard to reducing the time complexity of <code>O(n²)</code> <strong>squared</strong>, we can work to reduce to <code>O(n)</code> <strong>linear</strong> or <code>O(log(n))</code> in most cases, which would make our algorithm to perform faster.</p>
+<p>There are some category of problems where it’s not possible to reduce in optimal ways, but in our example it’s perfectly possible to reduce.</p>
+<p>Let’s see how to improve it.</p>
+<h2><a href="#reducing-iterations" aria-hidden="true" class="anchor" id="reducing-iterations"></a>Reducing iterations</h2>
+<p>Remember that at this point, our algorithm will perform 10.000 iterations, <code>100²</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">groups</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">...</span><span style="color: #abb2bf;">.</span><span style="color: #d19a66;">100</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">users</span>  <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">...</span><span style="color: #abb2bf;">.</span><span style="color: #d19a66;">100</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">group</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">groups</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">user</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">users</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">...</span>
+</div></code></pre>
+<p>A naive solution is to remove the nested loop:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">group</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">groups</span>
+</div><div class="line" data-line="2">  <span style="color: #7f848e;"># do something with group and user</span>
+</div><div class="line" data-line="3">  <span style="color: #7f848e;"># now we are missing the user, but we need to fetch the user information from another data structure</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<ul>
+<li>the algorithm will perform only 100 iterations, much faster</li>
+<li>which means it’s <strong>linear</strong>, or <code>O(n)</code></li>
+</ul>
+<p>However our algorithm is lo longer working, because we have to fetch the user information <em>from inside the groups loop</em>.</p>
+<p>Ideally, for each group we want the fetch the user information in <strong>constant time</strong>, no matter how big is the user’s list.</p>
+<h2><a href="#long-live-the-hash-tables" aria-hidden="true" class="anchor" id="long-live-the-hash-tables"></a>Long live the hash tables</h2>
+<p>In computer science, <a href="https://www.geeksforgeeks.org/data-structures/">data structures</a> are a VERY important topic to study and understand. In order to fetch the user information in constant time <code>O(1)</code>, we can use a <a href="https://en.wikipedia.org/wiki/Hash_table">hash table</a>.</p>
+<p>Ruby provides this data structure out of the box, which is called <a href="https://ruby-doc.org/core-3.0.3/Hash.html">Hash</a>.</p>
+<h3><a href="#building-a-hash" aria-hidden="true" class="anchor" id="building-a-hash"></a>Building a hash</h3>
+<p>How can we build a hash containing all the information <em>required</em> in the groups loop? We must <strong>iterate over all users</strong> and <em>build the hash</em> with the needed information.</p>
+<p>Such technique is widely used for creating structure like “indices” where the information is accessed via a <strong>key</strong> in constant time <code>O(1)</code>. Example:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">users_idx</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">user</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">users</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">users_idx</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">user</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">:id</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">...</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">end</span>
+</div></code></pre>
+<p>Then wherever we have to fetch the user information, we are able to do it be accessing via <code>users_idx</code> and the respective keys.</p>
+<h2><a href="#putting-all-together" aria-hidden="true" class="anchor" id="putting-all-together"></a>Putting all together</h2>
+<p>Continuing on the challenge to reduce the iterations on our algorithm, we have to perform the following steps:</p>
+<ul>
+<li>build the “index” with the information to be accessed later</li>
+<li>iterate over the loop and fetch the additional information from the previously created “index”</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">users_idx</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">user</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">users</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">users_idx</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">user</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">:group_id</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">...</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">end</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #c678dd;">for</span> <span style="color: #e06c75;">group</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">groups</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">user_information</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">users_idx</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">group</span><span style="color: #c678dd;">[</span><span style="color: #e06c75;">:id</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="9">  <span style="color: #7f848e;"># do something with group AND user information</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>But wait, two loops? Isn’t it still <strong>squared</strong> <code>O(n²)</code>? Let’s compare it.</p>
+<p>The first solution performs <code>100 * 100 = 10.000</code> iterations, whereas the second performs <em>100 iterations for building the index plus 100 iterations</em> for iterating over groups, <code>100 + 100 = 200</code>. Put simply:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">nested</span> <span style="color: #e06c75;">loop:</span>    <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">*</span> <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">10.000</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">index</span> <span style="color: #e06c75;">AND</span> <span style="color: #e06c75;">loop:</span> <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">+</span> <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">=</span> <span style="color: #d19a66;">200</span>
+</div></code></pre>
+<p>It’s still WAY lower than the initial <code>10.000</code>. We could write even more loops, three, four, five times. It doesn’t matter, it will be <strong>linear</strong> <code>O(n)</code>, because in terms of time complexity, <code>O(n) = O(2n) = O(3n)</code> and so on…</p>
+<h2><a href="#comparing-both-solutions" aria-hidden="true" class="anchor" id="comparing-both-solutions"></a>Comparing both solutions</h2>
+<p>In <a href="https://gist.github.com/leandronsp/70f9effd63007a9d55d29527788d3181">this Gist</a> I created the dummy data and the benchmark in order to compare both solutions.</p>
+<p>For small list sizes, there are no practical differences. But with bigger lists, the improvement is perceived.</p>
+<p>Here are the results, on <strong>how faster is using the index</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">10</span> <span style="color: #e06c75;">groups</span>   <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">10</span> <span style="color: #e06c75;">users</span>   <span style="color: #e06c75;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">2x</span>   <span style="color: #61afef;">faster</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">100</span> <span style="color: #e06c75;">groups</span>  <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">users</span>  <span style="color: #e06c75;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">3x</span>   <span style="color: #61afef;">faster</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">100</span> <span style="color: #e06c75;">groups</span>  <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">100</span> <span style="color: #e06c75;">users</span>  <span style="color: #e06c75;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">31x</span>  <span style="color: #61afef;">faster</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">1000</span> <span style="color: #e06c75;">groups</span> <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">1000</span> <span style="color: #e06c75;">users</span> <span style="color: #e06c75;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">70x</span>  <span style="color: #61afef;">faster</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">5000</span> <span style="color: #e06c75;">groups</span> <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">5000</span> <span style="color: #e06c75;">users</span> <span style="color: #e06c75;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">510x</span> <span style="color: #61afef;">faster</span>
+</div></code></pre>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>This post is a demonstration on how to analyse, understand and reduce time complexity on algorithms, specifically when we face situations of <em>nested loops</em>.</p>
+<p>Most of times, instead of trying to look to another complex solutions such as caching and even more complex ones, understanding algorithms analysis can help us to write good and cheaper solutions.</p>
+<p>Moreover, in case the loops perform <strong>database queries using ORM</strong>, many nested loops can be improved by just using <strong>SQL JOINS</strong>.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

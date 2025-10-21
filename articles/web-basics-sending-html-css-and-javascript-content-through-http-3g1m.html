@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web basics: sending HTML, CSS and Javascript content through HTTP - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Now that we have [an HTTP server](https://dev.to/leandronsp/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance the se">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html">
+  <meta property="og:title" content="Web basics: sending HTML, CSS and Javascript content through HTTP">
+  <meta property="og:description" content="Now that we have [an HTTP server](https://dev.to/leandronsp/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance the se">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-05-09T01:23:45Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="html">
+      <meta property="article:tag" content="css">
+      <meta property="article:tag" content="javascript">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Web basics: sending HTML, CSS and Javascript content through HTTP",
+    "datePublished": "2021-05-09T01:23:45Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Now that we have [an HTTP server](https://dev.to/leandronsp/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance the se",
+        "keywords": "ruby, html, css, javascript"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Web basics: sending HTML, CSS and Javascript content through HTTP</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 09 May 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">html</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">css</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">javascript</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Now that we have <a href="https://dev.to/leandronsp/web-basics-a-simple-http-server-in-ruby-2jj4">an HTTP server</a> sending plain text content, it’s time to enhance the server so it can respond in a more appropriate content type for Web browsers.</p>
+<h2><a href="#web-standards" aria-hidden="true" class="anchor" id="web-standards"></a>Web standards</h2>
+<p>In the very beginning of Web, websites did not follow a standard, besides such constraints could take users to a bad navigation experience.</p>
+<p>To mitigate this, the <a href="https://www.w3.org/wiki/The_web_standards_model_-_HTML_CSS_and_JavaScript">web standards model</a> was created, which then became the foundation of Web, composed by the building blocks HTML, CSS and Javascript.</p>
+<p>The idea behind these standards is to establish a well-defined set of <em>elements, rules and behaviours</em> for webpages hence providing a better experience for users navigating on Web.</p>
+<h2><a href="#enhance-the-http-server-to-respond-html-content" aria-hidden="true" class="anchor" id="enhance-the-http-server-to-respond-html-content"></a>Enhance the HTTP server to respond HTML content</h2>
+<p>Aiming to respond HTML, we should do no more than using <a href="https://en.wikipedia.org/wiki/HTML">HTML structured elements</a>. Let’s change our test to expect HTML content from the server response:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>                                                                               
+</div><div class="line" data-line="2"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">test/unit</span><span style="color: #98c379;">&#39;</span>                                                                            
+</div><div class="line" data-line="3">                                                                                               
+</div><div class="line" data-line="4"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">ServerTest</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">TestCase</span>                                                        
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_client_42</span>                                                                           
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">server</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPSocket</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">open</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">localhost</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">80</span><span style="color: #c678dd;">)</span>                                                    
+</div><div class="line" data-line="7">                                                                                               
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">request</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">GET /users/42 HTTP/1.1</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">&quot;</span>                                                 
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">request</span><span style="color: #c678dd;">)</span>                                                                       
+</div><div class="line" data-line="10">                                                                                               
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">&#39;</span>                                                                              
+</div><div class="line" data-line="12">                                                                                               
+</div><div class="line" data-line="13">    <span style="color: #c678dd;">while</span> <span style="color: #e06c75;">line</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>                                                                   
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">+=</span> <span style="color: #e06c75;">line</span>                                                                         
+</div><div class="line" data-line="15">    <span style="color: #c678dd;">end</span>                                                                                        
+</div><div class="line" data-line="16">                                                                                               
+</div><div class="line" data-line="17">    <span style="color: #61afef;">assert_equal</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">HTTP/1.1 200</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">Content-Type: text/html</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">&lt;h1&gt;Hey, 42!&lt;/h1&gt;</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">response</span>
+</div><div class="line" data-line="18">                                                                                               
+</div><div class="line" data-line="19">    <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                                                                               
+</div><div class="line" data-line="20">  <span style="color: #c678dd;">end</span>                                                                                          
+</div><div class="line" data-line="21"><span style="color: #c678dd;">end</span>                                                                                            
+</div></code></pre>
+<p>Note the assertion:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">HTTP</span><span style="color: #56b6c2;">/</span><span style="color: #d19a66;">1.1</span> <span style="color: #d19a66;">200</span>\r\<span style="color: #e06c75;">n</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">Content</span><span style="color: #56b6c2;">-</span><span style="color: #e5c07b;">Type</span><span style="color: #56b6c2;">:</span> <span style="color: #e06c75;">text</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">html</span>\r\<span style="color: #e06c75;">n</span>
+</div><div class="line" data-line="3">\r\<span style="color: #e06c75;">n</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">&lt;</span><span style="color: #e06c75;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #e5c07b;">Hey</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">42</span><span style="color: #56b6c2;">!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">h1</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span> <span style="color: #e5c07b;">HTMl</span> <span style="color: #e06c75;">content</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">response</span> <span style="color: #e06c75;">body</span>
+</div></code></pre>
+<p>That’s enough to go changing the server:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">...</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">loop</span> <span style="color: #c678dd;">do</span>                                                                                  
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">client</span>        <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">socket</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">accept</span>                                                          
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">first_line</span>    <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>                                                            
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">verb</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">first_line</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">split</span>                                                       
+</div><div class="line" data-line="6">                                                                                         
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">verb</span> <span style="color: #56b6c2;">==</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">GET</span><span style="color: #98c379;">&#39;</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e06c75;">matched</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">match</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">/</span><span style="color: #abb2bf;">^</span><span style="color: #56b6c2;">\/</span><span style="color: #61afef;">customers</span><span style="color: #56b6c2;">\/</span><span style="color: #c678dd;"><span style="color: #61afef;">(</span><span style="color: #e5c07b;">.</span><span style="color: #56b6c2;">*</span><span style="color: #56b6c2;">?</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">$</span></span><span style="color: #c678dd;">/</span><span style="color: #c678dd;">)</span>                       
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">user_id</span>  <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">matched</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>                                                                
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">HTTP/1.1 200</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">Content-Type: text/html</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">&lt;h1&gt;Hey, </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">user_id</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">!&lt;/h1&gt;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="10">                                                                                         
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">response</span><span style="color: #c678dd;">)</span>                                                                
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">end</span>                                                                                    
+</div><div class="line" data-line="13">                                                                                         
+</div><div class="line" data-line="14">  <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                                                                           
+</div><div class="line" data-line="15"><span style="color: #c678dd;">end</span>                                                                                      
+</div><div class="line" data-line="16"><span style="color: #56b6c2;">...</span>
+</div></code></pre>
+<p>Important to note that the header <code>Content-Type: text/html</code> is very strict then necessary for some web browsers.</p>
+<p>Now, run the test using <code>make test</code> which should <em>pass</em>. Additionally, test the HTML using curl:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">curl</span> <span style="color: #e06c75;">http</span><span style="color: #abb2bf;">:</span><span style="color: #c678dd;">/</span><span style="color: #c678dd;">/localhost</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">users</span><span style="color: #56b6c2;">/</span><span style="color: #d19a66;">42</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #e06c75;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #e5c07b;">Hey</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">42</span><span style="color: #56b6c2;">!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">h1</span><span style="color: #56b6c2;">&gt;</span>
+</div></code></pre>
+<p>Open the web browser at <code>http://localhost/users/42</code> too and see the content being rendered properly:<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/m2lap93d9bbtpn6qt6uq.png" alt="Alt Text" /><br />
+Unlike curl, a web browser is capable of using the header <code>Content-Type</code> to render the correct type. Try removing the header from the server response and see that the text will be displayed in plain text:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Hey, 42!</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<h2><a href="#css-to-rule-them-all-" aria-hidden="true" class="anchor" id="css-to-rule-them-all-"></a>CSS to “rule” them all 🥁</h2>
+<p>What if we wanted to add layout characteristics to our HTML elements? For instance, how to assign the color <em>red</em> to the <code>h1</code> title?</p>
+<p>We can use <a href="https://en.wikipedia.org/wiki/CSS">CSS</a> to apply layout rules.</p>
+<h4><a href="#css-inline" aria-hidden="true" class="anchor" id="css-inline"></a>CSS inline</h4>
+<p>The most common, despite not encouraged way to write CSS is <em>inline</em> along with the HTMl element, by using the <code>style</code> HTMl attribute:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">body</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">&lt;h1 style=&#39;color: red&#39;&gt;Hey, </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">user_id</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">!&lt;/h1&gt;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">status</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">200</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">HTTP/1.1 </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">status</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">Content-Type: text/html</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">body</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">response</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">...</span>
+</div></code></pre>
+<h4><a href="#css-in-head" aria-hidden="true" class="anchor" id="css-in-head"></a>CSS in head</h4>
+<p>It works, but we can separate CSS from the HTML elements so it can be reused for other elements too!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">h1</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">color</span><span style="color: #abb2bf;">:</span> red<span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="6">  <span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">body</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="10">  <span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Hey, 42!</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="11"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">body</span><span style="color: #abb2bf;">&gt;</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/q9fnxzeafxz9f79njvc7.png" alt="Alt Text" /></p>
+<h2><a href="#adding-behaviour-with-javascript" aria-hidden="true" class="anchor" id="adding-behaviour-with-javascript"></a>Adding behaviour with Javascript</h2>
+<p><a href="https://en.wikipedia.org/wiki/JavaScript">Javascript</a> is a programming language used to add runtime behaviour to the HTML elements.</p>
+<p><em>Runtime behaviour</em> means when the HTMl content was already served by the server, as the server closed the connection with the client (web browser), so that the client can leverage on the solely power dynamycs of Javascript.</p>
+<p>It can manipulate at various ways, since adding new elements to the page (DOM), removing existing ones, changing their layout rules (CSS), communicating to other websites and so on.</p>
+<p>Every modern web browser comes with a runtime tool for Javascript, so the easiest way to start is opening the <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_are_browser_developer_tools">web browser developer tools</a> and start using it to learn and experiment.</p>
+<h3><a href="#changing-the-element-color-using-javascript" aria-hidden="true" class="anchor" id="changing-the-element-color-using-javascript"></a>Changing the element color using Javascript</h3>
+<p>Let’s give the user the ability to click on a button that will change the title’s color to blue. Initially, our HTML will look like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>                                                            
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>                                                         
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">h1</span> <span style="color: #c678dd;">&lbrace;</span>                                                          
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">color</span><span style="color: #abb2bf;">:</span> red<span style="color: #abb2bf;">;</span>                                                 
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">&rbrace;</span>                                                             
+</div><div class="line" data-line="6">  <span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>                                                        
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>                                                           
+</div><div class="line" data-line="8">                                                                  
+</div><div class="line" data-line="9"><span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Hey, 42!</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>                                                 
+</div><div class="line" data-line="10"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">button</span> <span style="color: #e06c75;">onclick</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;<span style="color: #61afef;">changeTitleColor</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span>&quot;</span><span style="color: #abb2bf;">&gt;</span>Change color to blue<span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">button</span><span style="color: #abb2bf;">&gt;</span>
+</div><div class="line" data-line="11">                                                                  
+</div><div class="line" data-line="12"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">script</span><span style="color: #abb2bf;">&gt;</span>                                                          
+</div><div class="line" data-line="13"> <span style="color: #c678dd;">function</span> <span style="color: #61afef;">changeTitleColor</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>                                    
+</div><div class="line" data-line="14">   <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">document</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">querySelector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;h1&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>                      
+</div><div class="line" data-line="15">   <span style="color: #e06c75;">title</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">color</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;blue&#39;</span><span style="color: #abb2bf;">;</span>                                    
+</div><div class="line" data-line="16"> <span style="color: #c678dd;">&rbrace;</span>                                                                
+</div><div class="line" data-line="17"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">script</span><span style="color: #abb2bf;">&gt;</span>                                                         
+</div></code></pre>
+<ul>
+<li>all the Javascript code will be placed inside the HTML tag <code>script</code></li>
+<li>the <code>button</code> element has an <em>inline</em> Javascript listener, the <code>onclick</code>, which triggers the function <code>changeTitleColor</code> when the button is clicked by the user.</li>
+</ul>
+<h3><a href="#isolating-html-content-from-css-and-javascript" aria-hidden="true" class="anchor" id="isolating-html-content-from-css-and-javascript"></a>Isolating HTML content from CSS and Javascript</h3>
+<p>As for the CSS inline, HTML content <em>should not</em> know about CSS rules nor Javascript listeners. Being isolated, it can be reused across multiple HTML files once the application starts growing more.</p>
+<p>As such, the representation of our HTML content could be as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-html" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>                                                                        
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>                                                                     
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">h1</span> <span style="color: #c678dd;">&lbrace;</span>                                                                      
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">color</span><span style="color: #abb2bf;">:</span> red<span style="color: #abb2bf;">;</span>                                                             
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">&rbrace;</span>                                                                         
+</div><div class="line" data-line="6">  <span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">&gt;</span>                                                                    
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">head</span><span style="color: #abb2bf;">&gt;</span>                                                                       
+</div><div class="line" data-line="8">                                                                              
+</div><div class="line" data-line="9"><span style="color: #abb2bf;">&lt;</span>h1<span style="color: #abb2bf;">&gt;</span><span style="color: #e06c75; font-weight: bold;">Hey, 42!</span><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">h1</span><span style="color: #abb2bf;">&gt;</span>  <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">----</span> <span style="color: #e06c75;">isolated</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">CSS</span> <span style="color: #e06c75;">flavour</span><span style="color: #abb2bf;"></span>                                                            
+</div><div class="line" data-line="10"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">button</span><span style="color: #abb2bf;">&gt;</span>Change color to blue<span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">button</span><span style="color: #abb2bf;">&gt;</span> <span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">----</span> <span style="color: #e06c75;">isolated</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">Javascript</span> <span style="color: #e06c75;">flavour</span><span style="color: #abb2bf;"></span>                            
+</div><div class="line" data-line="11">                                                                              
+</div><div class="line" data-line="12"><span style="color: #abb2bf;">&lt;</span><span style="color: #e06c75;">script</span><span style="color: #abb2bf;">&gt;</span>                                                                      
+</div><div class="line" data-line="13"> <span style="color: #c678dd;">function</span> <span style="color: #61afef;">changeTitleColor</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>                                                
+</div><div class="line" data-line="14">   <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">title</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">document</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">querySelector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;h1&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>                                  
+</div><div class="line" data-line="15">   <span style="color: #e06c75;">title</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">style</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">color</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;blue&#39;</span><span style="color: #abb2bf;">;</span>                                                
+</div><div class="line" data-line="16"> <span style="color: #c678dd;">&rbrace;</span>                                                                            
+</div><div class="line" data-line="17">                                                                              
+</div><div class="line" data-line="18"> <span style="color: #e5c07b;">document</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">querySelector</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;button&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">addEventListener</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;click&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">changeTitleColor</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="19"><span style="color: #abb2bf;">&lt;/</span><span style="color: #e06c75;">script</span><span style="color: #abb2bf;">&gt;</span>                                                                     
+</div></code></pre>
+<ul>
+<li>CSS placed under <code>head</code></li>
+<li>HTML isolated from CSS and Javascript</li>
+<li>Javascript placed under <code>script</code></li>
+</ul>
+<p>This approach will allow us in the future to even import CSS and Javascript from <em>different files</em>*, so that we would end up having a file for HTML, other for CSS and yet another for Javascript!</p>
+<p>Let’s see it in action. In the <code>server.rb</code>, we define a “string template” for our structured HTMl, which now is much more rich and complex:</p>
+<p><code>server.rb</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>                                                               
+</div><div class="line" data-line="2">                                                                               
+</div><div class="line" data-line="3"><span style="color: #e06c75;">socket</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPServer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">80</span><span style="color: #c678dd;">)</span>                                                     
+</div><div class="line" data-line="4">                                                                               
+</div><div class="line" data-line="5"><span style="color: #e06c75;">template</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">&lt;&lt;STR</span>                                                               <span style="color: #98c379;"></span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">&lt;head&gt;                                                                         </span>
+</div><div class="line" data-line="7"><span style="color: #98c379;">  &lt;style&gt;                                                                      </span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">    h1 &lbrace;                                                                       </span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">      color: red;                                                              </span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">    &rbrace;                                                                          </span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">  &lt;/style&gt;                                                                     </span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">&lt;/head&gt;                                                                        </span>
+</div><div class="line" data-line="13"><span style="color: #98c379;">                                                                               </span>
+</div><div class="line" data-line="14"><span style="color: #98c379;">&lt;h1&gt;Hey, &lbrace;&lbrace;user_id&rbrace;&rbrace;!&lt;/h1&gt;                                                     </span>
+</div><div class="line" data-line="15"><span style="color: #98c379;">&lt;button&gt;Change color to blue&lt;/button&gt;                                          </span>
+</div><div class="line" data-line="16"><span style="color: #98c379;">                                                                               </span>
+</div><div class="line" data-line="17"><span style="color: #98c379;">&lt;script&gt;                                                                       </span>
+</div><div class="line" data-line="18"><span style="color: #98c379;">  function changeTitleColor() &lbrace;                                                </span>
+</div><div class="line" data-line="19"><span style="color: #98c379;">    let title = document.querySelector(&#39;h1&#39;);                                  </span>
+</div><div class="line" data-line="20"><span style="color: #98c379;">    title.style.color = &#39;blue&#39;;                                                </span>
+</div><div class="line" data-line="21"><span style="color: #98c379;">  &rbrace;                                                                            </span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">                                                                               </span>
+</div><div class="line" data-line="23"><span style="color: #98c379;">  document.querySelector(&#39;button&#39;).addEventListener(&#39;click&#39;, changeTitleColor);</span>
+</div><div class="line" data-line="24"><span style="color: #98c379;">&lt;/script&gt;                                                                      </span>
+</div><div class="line" data-line="25"><span style="color: #98c379;"></span><span style="color: #c678dd;">STR</span>                                                                            
+</div></code></pre>
+<p>Note the <code>&lbrace;&lbrace;user_id&rbrace;&rbrace;</code> “tag”. It’s not a valid HTML tag, which would make the web browser to render it in plain text. But we want to <em>replace it</em> using the real userID, <em>before the server sends the HTMl to the client</em>.</p>
+<p>In Ruby, we can do this by using <code>gsub</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">body</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gsub</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;</span><span style="color: #98c379;">&lbrace;&lbrace;user_id&rbrace;&rbrace;</span><span style="color: #98c379;">&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">user_id</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<h2><a href="#the-final-implementation" aria-hidden="true" class="anchor" id="the-final-implementation"></a>The final implementation</h2>
+<p>After all of those minor improvements, our server implementation looks like the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>                                                               
+</div><div class="line" data-line="2">                                                                               
+</div><div class="line" data-line="3"><span style="color: #e06c75;">socket</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPServer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">80</span><span style="color: #c678dd;">)</span>                                                     
+</div><div class="line" data-line="4">                                                                               
+</div><div class="line" data-line="5"><span style="color: #e06c75;">template</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">&lt;&lt;STR</span>                                                               <span style="color: #98c379;"></span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">&lt;head&gt;                                                                         </span>
+</div><div class="line" data-line="7"><span style="color: #98c379;">  &lt;style&gt;                                                                      </span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">    h1 &lbrace;                                                                       </span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">      color: red;                                                              </span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">    &rbrace;                                                                          </span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">  &lt;/style&gt;                                                                     </span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">&lt;/head&gt;                                                                        </span>
+</div><div class="line" data-line="13"><span style="color: #98c379;">                                                                               </span>
+</div><div class="line" data-line="14"><span style="color: #98c379;">&lt;h1&gt;Hey, &lbrace;&lbrace;user_id&rbrace;&rbrace;!&lt;/h1&gt;                                                     </span>
+</div><div class="line" data-line="15"><span style="color: #98c379;">&lt;button&gt;Change color to blue&lt;/button&gt;                                          </span>
+</div><div class="line" data-line="16"><span style="color: #98c379;">                                                                               </span>
+</div><div class="line" data-line="17"><span style="color: #98c379;">&lt;script&gt;                                                                       </span>
+</div><div class="line" data-line="18"><span style="color: #98c379;">  function changeTitleColor() &lbrace;                                                </span>
+</div><div class="line" data-line="19"><span style="color: #98c379;">    let title = document.querySelector(&#39;h1&#39;);                                  </span>
+</div><div class="line" data-line="20"><span style="color: #98c379;">    title.style.color = &#39;blue&#39;;                                                </span>
+</div><div class="line" data-line="21"><span style="color: #98c379;">  &rbrace;                                                                            </span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">  document.querySelector(&#39;button&#39;).addEventListener(&#39;click&#39;, changeTitleColor);</span>
+</div><div class="line" data-line="23"><span style="color: #98c379;">&lt;/script&gt;                                                                      </span>
+</div><div class="line" data-line="24"><span style="color: #98c379;"></span><span style="color: #c678dd;">STR</span>                                                                            
+</div><div class="line" data-line="25">                                                                               
+</div><div class="line" data-line="26"><span style="color: #61afef;">loop</span> <span style="color: #c678dd;">do</span>                                                                        
+</div><div class="line" data-line="27">  <span style="color: #e06c75;">client</span>        <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">socket</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">accept</span>                                                
+</div><div class="line" data-line="28">  <span style="color: #e06c75;">first_line</span>    <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>                                                  
+</div><div class="line" data-line="29">  <span style="color: #e06c75;">verb</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">first_line</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">split</span>                                             
+</div><div class="line" data-line="30">                                                                               
+</div><div class="line" data-line="31">  <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">verb</span> <span style="color: #56b6c2;">==</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">GET</span><span style="color: #98c379;">&#39;</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #e06c75;">matched</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">match</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">/</span><span style="color: #abb2bf;">^</span><span style="color: #56b6c2;">\/</span><span style="color: #61afef;">customers</span><span style="color: #56b6c2;">\/</span><span style="color: #c678dd;"><span style="color: #61afef;">(</span><span style="color: #e5c07b;">.</span><span style="color: #56b6c2;">*</span><span style="color: #56b6c2;">?</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">$</span></span><span style="color: #c678dd;">/</span><span style="color: #c678dd;">)</span>             
+</div><div class="line" data-line="32">    <span style="color: #e06c75;">user_id</span>  <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">matched</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>                                                      
+</div><div class="line" data-line="33">    <span style="color: #e06c75;">body</span>     <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gsub</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;</span><span style="color: #98c379;">&lbrace;&lbrace;user_id&rbrace;&rbrace;</span><span style="color: #98c379;">&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">user_id</span><span style="color: #c678dd;">)</span>                           
+</div><div class="line" data-line="34">    <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">HTTP/1.1 200</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">Content-Type: text/html</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #56b6c2;">\r</span><span style="color: #56b6c2;">\n</span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">body</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>        
+</div><div class="line" data-line="35">                                                                               
+</div><div class="line" data-line="36">    <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">response</span><span style="color: #c678dd;">)</span>                                                      
+</div><div class="line" data-line="37">  <span style="color: #c678dd;">end</span>                                                                          
+</div><div class="line" data-line="38">                                                                               
+</div><div class="line" data-line="39">  <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                                                                 
+</div><div class="line" data-line="40"><span style="color: #c678dd;">end</span>                                                                            
+</div></code></pre>
+<p>Then, after opening it in the web browser, we have the result:<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/of7xgn41xle24pank055.gif" alt="Alt Text" /></p>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>Understanding <a href="https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/How_the_Web_works">how web works</a> is very important for web developers. In this post we learned the third part of the serie of “Web basics 101”, which consists of sending HTML content through HTTP.</p>
+<p>HTML is no more than a simple string content following a standard format for webpages. Along with CSS and Javascript being sent over HTTP, they are all the foundation of Web powering modern websites with rich content and usability.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

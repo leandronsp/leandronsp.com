@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastering the Docker networking - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Few months ago I demonstrated [through a practical example](https://dev.to/leandronsp/mastering-docker-volumes-j7m) the reasons to understand and take advantage">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/mastering-the-docker-networking-2h57.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/mastering-the-docker-networking-2h57.html">
+  <meta property="og:title" content="Mastering the Docker networking">
+  <meta property="og:description" content="Few months ago I demonstrated [through a practical example](https://dev.to/leandronsp/mastering-docker-volumes-j7m) the reasons to understand and take advantage">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-07-05T03:04:00Z">
+  <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="nginx">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Mastering the Docker networking",
+    "datePublished": "2022-07-05T03:04:00Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Few months ago I demonstrated [through a practical example](https://dev.to/leandronsp/mastering-docker-volumes-j7m) the reasons to understand and take advantage",
+        "keywords": "docker, linux, nginx"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Mastering the Docker networking</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 05 Jul 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">nginx</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Few months ago I demonstrated <a href="https://dev.to/leandronsp/mastering-docker-volumes-j7m">through a practical example</a> the reasons to understand and take advantage of Docker volumes.</p>
+<p>In this one, I’ll try to do the same in regarding the Docker networking.</p>
+<p>If you want to master the <strong>Docker Networking</strong>, this post is for you.</p>
+<h1><a href="#containers-live-in-a-network" aria-hidden="true" class="anchor" id="containers-live-in-a-network"></a>Containers live in a network</h1>
+<p>Because of the <em>isolation</em> nature of containers, they <strong>do not share</strong> the <em>host</em> network, however Docker provides network for them.</p>
+<p>When the Docker Runtime starts, it creates 3 default networks:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">ls</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NETWORK</span> <span style="color: #e06c75;">ID</span>     <span style="color: #e06c75;">NAME</span>      <span style="color: #e06c75;">DRIVER</span>    <span style="color: #e06c75;">SCOPE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">5c65c2b3031b</span>   <span style="color: #e06c75;">bridge</span>    <span style="color: #e06c75;">bridge</span>    <span style="color: #e06c75;">local</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">cf446ef29441</span>   <span style="color: #e06c75;">host</span>      <span style="color: #e06c75;">host</span>      <span style="color: #e06c75;">local</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">50fd86384bb9</span>   <span style="color: #e06c75;">none</span>      <span style="color: #e06c75;">null</span>      <span style="color: #e06c75;">local</span>
+</div></code></pre>
+<p>Let’s understand each one of them.</p>
+<h2><a href="#the-bridge-network" aria-hidden="true" class="anchor" id="the-bridge-network"></a>The bridge network</h2>
+<p>First, we can check the configuration by inspecting the network:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">bridge</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="4">    <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="5">        <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;bridge&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">&quot;Id&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;5c65c2b3031b6d10f357f74f6cb5bf04af13819fca28b5458e00bb6b1d1718ec&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">        <span style="color: #98c379;">&quot;Created&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;2022-06-27T23:49:43.227773167Z&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">        <span style="color: #98c379;">&quot;Scope&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">        <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;bridge&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="10">        <span style="color: #98c379;">&quot;EnableIPv6&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="11">        <span style="color: #98c379;">&quot;IPAM&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="12">            <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;default&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="13">            <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">null,</span>
+</div><div class="line" data-line="14">            <span style="color: #98c379;">&quot;Config&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">[</span>
+</div><div class="line" data-line="15">                <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="16">                    <span style="color: #98c379;">&quot;Subnet&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;172.17.0.0/16&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="17">                    <span style="color: #98c379;">&quot;Gateway&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;172.17.0.1&quot;</span>
+</div><div class="line" data-line="18">                <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="19">            <span style="color: #61afef;">]</span>
+</div><div class="line" data-line="20">        <span style="color: #c678dd;">&rbrace;</span>,
+</div><div class="line" data-line="21">        <span style="color: #98c379;">&quot;Internal&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="22">        <span style="color: #98c379;">&quot;Attachable&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="23">        <span style="color: #98c379;">&quot;Ingress&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="24">        <span style="color: #98c379;">&quot;ConfigFrom&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="25">            <span style="color: #98c379;">&quot;Network&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="26">        <span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="27">        <span style="color: #98c379;">&quot;ConfigOnly&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="28">        <span style="color: #98c379;">&quot;Containers&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="29">        <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="30">            <span style="color: #98c379;">&quot;com.docker.network.bridge.default_bridge&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;true&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="31">            <span style="color: #98c379;">&quot;com.docker.network.bridge.enable_icc&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;true&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="32">            <span style="color: #98c379;">&quot;com.docker.network.bridge.enable_ip_masquerade&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;true&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="33">            <span style="color: #98c379;">&quot;com.docker.network.bridge.host_binding_ipv4&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;0.0.0.0&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="34">            <span style="color: #98c379;">&quot;com.docker.network.bridge.name&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;docker0&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="35">            <span style="color: #98c379;">&quot;com.docker.network.driver.mtu&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;1500&quot;</span>
+</div><div class="line" data-line="36">        <span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="37">        <span style="color: #98c379;">&quot;Labels&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="38">    <span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="39"><span style="color: #e06c75;">]</span>
+</div></code></pre>
+<p>We can see that the network, responding through the <em>Gateway</em> <code>172.17.0.1</code>, has no added containers at this moment.</p>
+<p><em>Bridge</em> networks provide <strong>bridge</strong> drivers so containers created in this network receive an <strong>IP address</strong>.</p>
+<p>To confirm that, we create an NGINX container:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">bridge</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div></code></pre>
+<p>Great. It’s just an NGINX web app running on the container port <code>80</code> and serving the traditional HTML page “Welcome to NGINX”.</p>
+<p>Was the container added to the network?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">bridge</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="4">        <span style="color: #98c379;">&quot;Containers&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="5">            <span style="color: #98c379;">&quot;bb283ee626dbc631281fc0c27a1f02f075ab1908800965008a315cedd7f9d438&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="6">                <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;nginx&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">                <span style="color: #98c379;">&quot;EndpointID&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;f12f67c1d7488f708027c2e948b204ce09743721095d4514c9c24bedf8167191&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">                <span style="color: #98c379;">&quot;MacAddress&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;02:42:ac:11:00:02&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">                <span style="color: #98c379;">&quot;IPv4Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;172.17.0.2/16&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="10">                <span style="color: #98c379;">&quot;IPv6Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="11">            <span style="color: #61afef;">&rbrace;</span>
+</div><div class="line" data-line="12">        <span style="color: #98c379;">&rbrace;</span><span style="color: #98c379;">,</span>
+</div></code></pre>
+<p>Yes. We can see that the recently created container was added to the <code>bridge</code> network and has got the IP Address <code>172.17.0.2</code>.</p>
+<p>How can we communicate to a such container using its IP, in other words, can we hit <code>http://172.17.0.2</code> and see the “Welcome to NGINX” HTML result?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">wget</span> <span style="color: #e06c75;">http://172.17.0.2</span> <span style="color: #e06c75;">-O</span> <span style="color: #e06c75;">-</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Connecting</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">172.17.0.2:80...</span>
+</div></code></pre>
+<p>Nope :(</p>
+<h3><a href="#containers-do-not-share-the-host-network" aria-hidden="true" class="anchor" id="containers-do-not-share-the-host-network"></a>Containers do not share the host network</h3>
+<p>Again, <strong>containers do not share the “host” network</strong>. Which means only other containers in the same network (bridge) can talk to each other.</p>
+<p>Okay, can we <em>run another container</em> and hit the NGINX then?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">bridge</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">alpine</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">sh</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;wget http://172.17.0.2 -O -&quot;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #61afef;">Connecting</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">172.17.0.2</span> <span style="color: #c678dd;">(</span>172.17.0.2:80)
+</div><div class="line" data-line="7">writing to stdout
+</div><div class="line" data-line="8">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="9">&lt;html&gt;
+</div><div class="line" data-line="10">&lt;head&gt;
+</div><div class="line" data-line="11">&lt;title&gt;Welcome to nginx!&lt;/title&gt;
+</div><div class="line" data-line="12">&lt;style&gt;
+</div><div class="line" data-line="13">html &lbrace; color-scheme: light dark; <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="14"><span style="color: #61afef;">body</span> <span style="color: #e06c75;">&lbrace;</span> <span style="color: #e06c75;">width:</span> <span style="color: #e06c75;">35em</span><span style="color: #abb2bf;">;</span> <span style="color: #61afef;">margin:</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">auto</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="15"><span style="color: #61afef;">font-family:</span> <span style="color: #e06c75;">Tahoma,</span> <span style="color: #e06c75;">Verdana,</span> <span style="color: #e06c75;">Arial,</span> <span style="color: #e06c75;">sans-serif</span><span style="color: #abb2bf;">;</span> <span style="color: #61afef;">&rbrace;</span>
+</div><div class="line" data-line="16"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/style</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="17"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/head</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="18"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">body</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="19"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Welcome</span> <span style="color: #61afef;">to</span> <span style="color: #e06c75;">nginx!</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="20"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">p</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">If</span> <span style="color: #61afef;">you</span> <span style="color: #61afef;">see</span> <span style="color: #61afef;">this</span> <span style="color: #61afef;">page,</span> <span style="color: #61afef;">the</span> <span style="color: #61afef;">nginx</span> <span style="color: #61afef;">web</span> <span style="color: #61afef;">server</span> <span style="color: #61afef;">is</span> <span style="color: #61afef;">successfully</span> <span style="color: #61afef;">installed</span> <span style="color: #61afef;">and</span>
+</div><div class="line" data-line="21"><span style="color: #61afef;">working.</span> <span style="color: #e06c75;">Further</span> <span style="color: #e06c75;">configuration</span> <span style="color: #e06c75;">is</span> <span style="color: #e06c75;">required.</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/p</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">p</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">For</span> <span style="color: #61afef;">online</span> <span style="color: #61afef;">documentation</span> <span style="color: #61afef;">and</span> <span style="color: #61afef;">support</span> <span style="color: #61afef;">please</span> <span style="color: #61afef;">refer</span> <span style="color: #61afef;">to</span>
+</div><div class="line" data-line="24"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">a</span> <span style="color: #e06c75;">href</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;http://nginx.org/&quot;</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">nginx.org</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/a</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">.</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">br/</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="25"><span style="color: #61afef;">Commercial</span> <span style="color: #61afef;">support</span> <span style="color: #e06c75;">is</span> <span style="color: #e06c75;">available</span> <span style="color: #e06c75;">at</span>
+</div><div class="line" data-line="26"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">a</span> <span style="color: #e06c75;">href</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">&quot;http://nginx.com/&quot;</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">nginx.com</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/a</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">.</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/p</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="27">
+</div><div class="line" data-line="28"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">p</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">em</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">Thank</span> <span style="color: #61afef;">you</span> <span style="color: #e06c75;">for</span> <span style="color: #e06c75;">using</span> <span style="color: #e06c75;">nginx.</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/em</span><span style="color: #56b6c2;">&gt;</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/p</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="29"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/body</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;"></span>
+</div><div class="line" data-line="30"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/html</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="31"><span style="color: #61afef;">-</span>                    <span style="color: #61afef;">100%</span> <span style="color: #56b6c2;">|</span><span style="color: #61afef;">********************************</span><span style="color: #56b6c2;">|</span>   <span style="color: #d19a66;">615</span>  <span style="color: #e06c75;">0:00:00</span> <span style="color: #e06c75;">ETA</span>
+</div><div class="line" data-line="32"><span style="color: #61afef;">written</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">stdout</span>
+</div></code></pre>
+<p>Yay! That’s pretty neat.</p>
+<h3><a href="#bridge-is-already-the-default-network" aria-hidden="true" class="anchor" id="bridge-is-already-the-default-network"></a>Bridge is already the default network</h3>
+<p>Just for a matter of saving time, whenever we create containers, they are automatically added to the <code>bridge</code> network.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">alpine</span> <span style="color: #e06c75;">sh</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;wget http://172.17.0.2 -O -&quot;</span>
+</div></code></pre>
+<p>It. Just. Works. How cool is that?</p>
+<h3><a href="#using-the-container-name-instead-of-ip-address" aria-hidden="true" class="anchor" id="using-the-container-name-instead-of-ip-address"></a>Using the container name instead of IP Address</h3>
+<p>But remembering the IP Address isn’t always good, right? How about using the container name instead of its IP?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">bridge</span> <span style="color: #e06c75;">alpine</span> <span style="color: #e06c75;">sh</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;wget http://nginx -O -&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">wget:</span> <span style="color: #e06c75;">bad</span> <span style="color: #e06c75;">address</span> <span style="color: #98c379;">&#39;nginx&#39;</span>
+</div></code></pre>
+<p>Uh oh :(, the bridge network <strong>does not resolve names to IP addresses</strong>.</p>
+<p>But today, is our lucky day. Docker allows us to use the <code>bridge</code> driver and create user-defined custom networks, as easy as doing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">saturno</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NETWORK</span> <span style="color: #e06c75;">ID</span>     <span style="color: #e06c75;">NAME</span>      <span style="color: #e06c75;">DRIVER</span>    <span style="color: #e06c75;">SCOPE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">5c65c2b3031b</span>   <span style="color: #e06c75;">bridge</span>    <span style="color: #e06c75;">bridge</span>    <span style="color: #e06c75;">local</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">cf446ef29441</span>   <span style="color: #e06c75;">host</span>      <span style="color: #e06c75;">host</span>      <span style="color: #e06c75;">local</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">50fd86384bb9</span>   <span style="color: #e06c75;">none</span>      <span style="color: #e06c75;">null</span>      <span style="color: #e06c75;">local</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">4216c3a16815</span>   <span style="color: #e06c75;">saturno</span>   <span style="color: #e06c75;">bridge</span>    <span style="color: #e06c75;">local</span>
+</div></code></pre>
+<p>The <code>saturno</code> network uses the same driver <code>bridge</code> used by the <strong>bridge</strong> default network. If we inspect the network using <code>docker network inspect saturno</code>, we can see that it has no containers yet and uses the Gateway IP <code>172.18.0.1</code>.</p>
+<p>Let’s create containers on the <em>saturno</em> network:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">saturno</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div></code></pre>
+<p>By inspecting the network again, the container has got the IP <code>172.18.0.2</code>. So let’s hit the container again:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">saturno</span> <span style="color: #e06c75;">alpine</span> <span style="color: #e06c75;">sh</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;wget http://172.18.0.2 -O -&quot;</span>
+</div></code></pre>
+<p>It works. Still we want to check using its name instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">saturno</span> <span style="color: #e06c75;">alpine</span> <span style="color: #e06c75;">sh</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;wget http://nginx -O -&quot;</span>
+</div></code></pre>
+<p>What a wonderful day, it works!</p>
+<h2><a href="#the-host-network" aria-hidden="true" class="anchor" id="the-host-network"></a>The host network</h2>
+<p>This network is useful when we need to expose the container to the <strong>host network</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">host</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">host</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="4">    <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="5">        <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;host&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">&quot;Id&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;cf446ef29441aeaaee2a40cfcf9ad120aedb7c51cf2dbc20cc23e567101d217c&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">        <span style="color: #98c379;">&quot;Created&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;2022-01-13T21:57:00.2326735Z&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">        <span style="color: #98c379;">&quot;Scope&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">        <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;host&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="10">        <span style="color: #98c379;">&quot;EnableIPv6&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="11">        <span style="color: #98c379;">&quot;IPAM&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="12">            <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;default&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="13">            <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">null,</span>
+</div><div class="line" data-line="14">            <span style="color: #98c379;">&quot;Config&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">]</span>
+</div><div class="line" data-line="15">        <span style="color: #c678dd;">&rbrace;</span>,
+</div><div class="line" data-line="16">        <span style="color: #98c379;">&quot;Internal&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="17">        <span style="color: #98c379;">&quot;Attachable&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="18">        <span style="color: #98c379;">&quot;Ingress&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="19">        <span style="color: #98c379;">&quot;ConfigFrom&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="20">            <span style="color: #98c379;">&quot;Network&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="21">        <span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="22">        <span style="color: #98c379;">&quot;ConfigOnly&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="23">        <span style="color: #98c379;">&quot;Containers&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="24">            <span style="color: #98c379;">&quot;668c12bbabb8cd28e8cc8666d074fc929214f7b9ddfddfa3d76c8476652c4091&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="25">                <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;nginx&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="26">                <span style="color: #98c379;">&quot;EndpointID&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;738ea09ee3d450e9f655440a303a52f219d9ca22fe011eb62dffe7d0351f31de&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="27">                <span style="color: #98c379;">&quot;MacAddress&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="28">                <span style="color: #98c379;">&quot;IPv4Address&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="29">                <span style="color: #98c379;">&quot;IPv6Address&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="30">            <span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="31"><span style="color: #e06c75;">        &rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="32">        <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="33">        <span style="color: #98c379;">&quot;Labels&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="34">    <span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="35"><span style="color: #e06c75;">]</span>
+</div></code></pre>
+<p>We can see the container added to the network, but it <strong>has no IP address</strong>, which means other containers cannot talk to it, <strong>only the host</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Linux only</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">wget</span> <span style="color: #e06c75;">http://localhost</span> <span style="color: #e06c75;">-O</span> <span style="color: #e06c75;">-</span>
+</div></code></pre>
+<p>It works.</p>
+<p><em>Note: this network works on Linux only. In Docker Desktop for Mac or Windows, we must use another way to expose containers to the host</em>.</p>
+<h3><a href="#the--p-option" aria-hidden="true" class="anchor" id="the--p-option"></a>The -p option</h3>
+<p>Another way to expose containers to the host goes by using the flag <code>-p</code>, which is NOT the host network <em>per se</em>, but it <strong>publishes the [container port] to the [host port]</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">80:80</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">wget</span> <span style="color: #e06c75;">http://localhost</span> <span style="color: #e06c75;">-O</span> <span style="color: #e06c75;">-</span>
+</div></code></pre>
+<p>It works!</p>
+<h2><a href="#the-none-network" aria-hidden="true" class="anchor" id="the-none-network"></a>The none network</h2>
+<p>Anytime we need to create a <strong>completely</strong> isolated container which <strong>do not talk</strong> to any other containers, we can add it to the <code>none</code> network, which uses the driver <code>null</code>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">--network</span> <span style="color: #e06c75;">none</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">none</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;none&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">        <span style="color: #98c379;">&quot;Id&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;50fd86384bb9cc90d953a624a5ab70b869357027d3cdc7ebc9b4043798dd4f6a&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">        <span style="color: #98c379;">&quot;Created&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;2022-01-13T21:57:00.224557375Z&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">        <span style="color: #98c379;">&quot;Scope&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="10">        <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;null&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="11">        <span style="color: #98c379;">&quot;EnableIPv6&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="12">        <span style="color: #98c379;">&quot;IPAM&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="13">            <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;default&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="14">            <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">null,</span>
+</div><div class="line" data-line="15">            <span style="color: #98c379;">&quot;Config&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">]</span>
+</div><div class="line" data-line="16">        <span style="color: #c678dd;">&rbrace;</span>,
+</div><div class="line" data-line="17">        <span style="color: #98c379;">&quot;Internal&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="18">        <span style="color: #98c379;">&quot;Attachable&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="19">        <span style="color: #98c379;">&quot;Ingress&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="20">        <span style="color: #98c379;">&quot;ConfigFrom&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="21">            <span style="color: #98c379;">&quot;Network&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="22">        <span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="23">        <span style="color: #98c379;">&quot;ConfigOnly&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">false,</span>
+</div><div class="line" data-line="24">        <span style="color: #98c379;">&quot;Containers&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="25">            <span style="color: #98c379;">&quot;90a6691b818e164bd2e1f67e8f3a62ce71eaddbe9ac215c370a8a6766204a2b0&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="26">                <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;nginx&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="27">                <span style="color: #98c379;">&quot;EndpointID&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;0ed9e33f051f2df2c37b96fc2fdf7df074b73359117a12a81ae4c28ef0ec6877&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="28">                <span style="color: #98c379;">&quot;MacAddress&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="29">                <span style="color: #98c379;">&quot;IPv4Address&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="30">                <span style="color: #98c379;">&quot;IPv6Address&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="31">            <span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="32"><span style="color: #e06c75;">        &rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="33">        <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="34">        <span style="color: #98c379;">&quot;Labels&quot;</span><span style="color: #e06c75;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="35">    <span style="color: #e06c75;">&rbrace;</span>
+</div><div class="line" data-line="36"><span style="color: #e06c75;">]</span>
+</div></code></pre>
+<p>This network has no Gateway IP hence <strong>do not associate</strong> IP addresses to containers.</p>
+<h2><a href="#bonus-points-connecting-containers-on-the-fly" aria-hidden="true" class="anchor" id="bonus-points-connecting-containers-on-the-fly"></a>Bonus points: connecting containers on-the-fly</h2>
+<p>Sometimes we already have running containers in the default network but for some reason we want to communicate using <strong>name</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">ruby</span> <span style="color: #e06c75;">-dit</span> <span style="color: #e06c75;">ruby</span> <span style="color: #e06c75;">irb</span>
+</div></code></pre>
+<p>They live in the default <code>bridge</code> network, they can talk to each other using IP but <strong>not using their names</strong>, remember?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">saturno</span>
+</div></code></pre>
+<p>The most obvious solution: first <em>stop them</em>, then create new ones using the <code>saturno</code> network. Correct?</p>
+<p>Kinda. But there’s no need to stop the containers! Just connect them to existing networks:</p>
+<p>How about:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">connect</span> <span style="color: #e06c75;">saturno</span> <span style="color: #e06c75;">nginx</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">connect</span> <span style="color: #e06c75;">saturno</span> <span style="color: #e06c75;">ruby</span>
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">network</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">saturno</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">        <span style="color: #98c379;">&quot;Containers&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="6">            <span style="color: #98c379;">&quot;15bcd3a425024c627a57bddb878a11fcd3f43cb4da4576ef05d89b45a96f49ad&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="7">                <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;nginx&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">                <span style="color: #98c379;">&quot;EndpointID&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;e0ef0bb83b1e553215cf24dcc6c20355a5ca5367e2d02f120b00b4a77c975964&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">                <span style="color: #98c379;">&quot;MacAddress&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;02:42:ac:13:00:02&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="10">                <span style="color: #98c379;">&quot;IPv4Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;172.19.0.2/16&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="11">                <span style="color: #98c379;">&quot;IPv6Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="12">            <span style="color: #98c379;">&rbrace;</span><span style="color: #98c379;">,</span>
+</div><div class="line" data-line="13">            <span style="color: #98c379;">&quot;6ab4256e8c808ebd16f2e9643e5636df03f58dbfc4778a939df0b286b829babd&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="14">                <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;ruby&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="15">                <span style="color: #98c379;">&quot;EndpointID&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;ab3a590379938f8654a0aada7cfab97cc47eb92f3fe89656a2feccc9bd52cbe1&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="16">                <span style="color: #98c379;">&quot;MacAddress&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;02:42:ac:13:00:03&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="17">                <span style="color: #98c379;">&quot;IPv4Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;172.19.0.3/16&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="18">                <span style="color: #98c379;">&quot;IPv6Address&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;&quot;</span>
+</div><div class="line" data-line="19">            <span style="color: #61afef;">&rbrace;</span>
+</div><div class="line" data-line="20">        <span style="color: #98c379;">&rbrace;</span><span style="color: #98c379;">,</span>
+</div></code></pre>
+<p>Oh my goodness, it made my day!</p>
+<h1><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h1>
+<p>This post was a try to explain the main aspects of Docker networking. I hope it helps you to understand a bit more and use it at your needs.</p>
+<p><a href="https://docs.docker.com/network/">The Docker official website</a> contains a great introduction to networking as well easy tutorials.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

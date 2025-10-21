@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="---
+title: Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar
+published: true
+description: Understanding the fundamentals of Ruby blocks">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48.html">
+  <meta property="og:title" content="Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar">
+  <meta property="og:description" content="---
+title: Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar
+published: true
+description: Understanding the fundamentals of Ruby blocks">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-04-10T23:25:52Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="programming">
+      <meta property="article:tag" content="softwaredevelopment">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar",
+    "datePublished": "2021-04-10T23:25:52Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "---
+title: Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar
+published: true
+description: Understanding the fundamentals of Ruby blocks",
+        "keywords": "ruby, programming, softwaredevelopment"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 10 Apr 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">programming</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">softwaredevelopment</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <hr />
+<h2><a href="#title-ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-published-true-description-understanding-the-fundamentals-of-ruby-blocks-tags-ruby-programming-softwaredevelopment-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticles9ob6kb11iq2ugylftplnpng" aria-hidden="true" class="anchor" id="title-ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-published-true-description-understanding-the-fundamentals-of-ruby-blocks-tags-ruby-programming-softwaredevelopment-cover_image-httpsdev-to-uploadss3amazonawscomuploadsarticles9ob6kb11iq2ugylftplnpng"></a>title: Ruby blocks made easy, part III <del>grand finale</del>, blocks and syntactic sugar<br />
+published: true<br />
+description: Understanding the fundamentals of Ruby blocks<br />
+tags: ruby, programming, softwaredevelopment<br />
+cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9ob6kb11iq2ugylftpln.png">https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9ob6kb11iq2ugylftpln.png</a></h2>
+<p>In this series of posts, we already covered that <a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-i-methods-and-procs-ji2"><em>methods can be transformed into procs</em></a> and as such, can be evaluated <strong>later</strong>. Furthermore, we’ve seen that <a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25">procs can be used as arguments to another methods</a> and that such procs can optionally use curried arguments.</p>
+<p>Until now, we have been using methods as a way to represent “blocks” of code:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">multiply</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Also, we learned that, in order to evaluate a method <strong>later</strong>, we must transform it into a proc (<code>method(:some_method)</code>). In Ruby, we can represent <em>blocks</em> of code to be <em>evaluated later</em> not only in methods, but also creating procs directly:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">current_time</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e5c07b;">Time</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">now</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">current_time</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span> <span style="color: #7f848e;"># =&gt; 2021-04-10 17:22:06</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># It&#39;s quite similar to using methods</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">current_time</span>
+</div><div class="line" data-line="7">  <span style="color: #e5c07b;">Time</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">now</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:current_time</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span> <span style="color: #7f848e;"># =&gt; 2021-04-10 17:22:10</span>
+</div></code></pre>
+<p>Then, blocks can represent any <strong>group of code</strong> which will be evaluated later. Blocks can be inline or multiline:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># inline block</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e5c07b;">Time</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">now</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># multine block</span>
+</div><div class="line" data-line="5"><span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="6">  <span style="color: #e5c07b;">Time</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">now</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Let’s take our example in the previous post about <code>map_numbers</code> and, instead of creating a method <code>multiply</code>, we define a <code>Proc</code> directly with a block:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">multiply</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span> <span style="color: #c678dd;">&rbrace;</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">multiply</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; 6</span>
+</div><div class="line" data-line="4"><span style="color: #e06c75;">multiply</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">curry</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; 8</span>
+</div></code></pre>
+<p>Right. Now, remember that the implementation of <code>map_numbers</code> takes a proc as the last argument? Then we have nothing to do in that method. It will simply work, because the object passed as argument should respond to a method <code>call</code>, so in this case procs already do!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">multiply</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span> <span style="color: #c678dd;">&rbrace;</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">multiply</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">curry</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; [2, 4, 6]</span>
+</div></code></pre>
+<p>We could also use another way of creating a proc, which is a <code>lambda</code>. There are <a href="https://www.rubyguides.com/2016/02/ruby-procs-and-lambdas/">slight differences between procs and lambdas</a>, but both belong to the same Ruby class: <a href="https://ruby-doc.org/core-2.6/Proc.html">Proc</a>, with lambda being a “type” of Proc.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">multiply_proc</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Proc</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span> <span style="color: #c678dd;">&rbrace;</span> 
+</div><div class="line" data-line="2"><span style="color: #e06c75;">multiply_proc</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; 6</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #e06c75;">multiply_lambda</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">-&gt;</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span><span style="color: #e06c75;">b</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span> <span style="color: #c678dd;">&rbrace;</span> 
+</div><div class="line" data-line="5"><span style="color: #e06c75;">multiply_lambda</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; 6</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># let&#39;s bring methods into play</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">multiply</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:multiply</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; 6</span>
+</div></code></pre>
+<p>“Meta” methods, procs, lambdas…they have little differences in practice but they all:</p>
+<ul>
+<li>take blocks</li>
+<li>respond to <code>.call</code></li>
+<li>respond to <code>.curry</code></li>
+<li>and share other similarities…<br />
+Take a look at the <a href="https://ruby-doc.org/core-2.4.0/Proc.html">Proc</a> and <a href="https://ruby-doc.org/core-2.4.0/Method.html">Method</a> documentation.</li>
+</ul>
+<p>YAY! That’s so much power!</p>
+<h3><a href="#a-syntactic-sugar" aria-hidden="true" class="anchor" id="a-syntactic-sugar"></a>A syntactic sugar</h3>
+<p>Our method <code>map_numbers</code> looks like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">numbers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">calculation_proc</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #7f848e;"># logic here</span>
+</div><div class="line" data-line="3">  <span style="color: #7f848e;">#  somewhere, it does `calculation_proc.call(number)`</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>The standard Ruby gives us a <em>syntactic sugar</em>, a keyword called <strong>yield</strong>, which is as similar as calling <code>some_proc.call</code>. If we choose to use <code>yield</code>, we can omit the <code>proc</code> parameter but we have to trust that whoever calls the method, they must <em>ensure</em> the proc was passed as the <strong>last</strong> argument.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">numbers</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">new_list</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">numbers</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">new_list</span> <span style="color: #56b6c2;">&lt;&lt;</span> <span style="color: #c678dd;">yield</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># &lt;--- similar as doing the proc call</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">new_list</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Now, if we try to call:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:multiply</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">curry</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Oh,oh:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">ArgumentError</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">wrong</span> <span style="color: #61afef;">number</span> <span style="color: #61afef;">of</span> <span style="color: #61afef;">arguments</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">given</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #61afef;">expected</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>That’s because, this syntactic sugar has a rule of thumb: the argument cannot be a proc, but a <strong>BLOCK</strong> instead. For doing so, we have to <em>transform</em> our proc into a block, upon the passing argument, by prepending a <code>&amp;</code> in the proc object:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">&amp;</span><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:multiply</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">curry</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">2</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># =&gt; [2, 4, 6]</span>
+</div></code></pre>
+<p><em>The <code>&amp;</code> prepend can be used to transform procs into blocks ONLY upon methods passing arguments!</em></p>
+<h3><a href="#passing-blocks-to-methods" aria-hidden="true" class="anchor" id="passing-blocks-to-methods"></a>Passing blocks to methods</h3>
+<p>Similar as using blocks to define procs and lambdas, we can also use blocks to be passed to methods. In case there’s a block being passed, Ruby <em>WILL always</em> take the block and use it as the <strong>last argument</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;">2</span> <span style="color: #c678dd;">&rbrace;</span> <span style="color: #7f848e;"># =&gt; [2, 4, 6]</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;">3</span> <span style="color: #c678dd;">&rbrace;</span> <span style="color: #7f848e;"># ...</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">+</span> <span style="color: #d19a66;">55</span> <span style="color: #c678dd;">&rbrace;</span> <span style="color: #7f848e;"># ...</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># multiline</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">map_numbers</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;">10</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Thankfully, we don’t need to create such a method <code>map_numbers</code> in our codebase. Ruby has a lot of useful methods in its standard library, and the method <code>map</code> is one of them, being part of the <a href="https://ruby-doc.org/core-2.7.0/Array.html">Array</a> class:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">number</span> <span style="color: #56b6c2;">*</span> <span style="color: #d19a66;">2</span> <span style="color: #c678dd;">&rbrace;</span> <span style="color: #7f848e;"># =&gt; [2, 4, 6]</span>
+</div></code></pre>
+<p>And, since we know that methods can be transformed into procs:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">multiply_by_two</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:*</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># 2 is an object, don&#39;t forget!</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">multiply_by_two</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>So, unleash the madness and abuse on the syntactic sugar!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:*</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># multiply by 2</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">map</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #d19a66;">6</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">method</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">:+</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># sum by 6</span>
+</div></code></pre>
+<h3><a href="#reducing-structures" aria-hidden="true" class="anchor" id="reducing-structures"></a>Reducing structures</h3>
+<p>What if we wanted to sum all numbers in a list? Well, that’s a simple algorithm:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">sum_all</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">numbers</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">sum</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">numbers</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">sum</span> <span style="color: #56b6c2;">+=</span> <span style="color: #e06c75;">number</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>But how can we write a more <em>flexible and robust</em> code that allows to apply any <em>transformation</em>, <strong>reducing</strong> the entire list into a single <strong>accumulated</strong> value, no matter if the desired output is a sum or the product of multiplication?</p>
+<p>Yes, we can rely on blocks!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">numbers</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">initial_acc</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">accumulator</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">initial_acc</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">in</span> <span style="color: #e06c75;">numbers</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">accumulator</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">yield</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">accumulator</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">accumulator</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Then, we can use our method to apply a bunch of reducers:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># sum all numbers</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">acc</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># multiply all numbers</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">acc</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># syntactic sugar</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">:+</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># sum all numbers</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">:*</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># multiply all numbers</span>
+</div></code></pre>
+<p>Similar to <code>map</code>, Ruby also provides a method <code>reduce</code> in the standard library:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">acc</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">+=</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #c678dd;">|</span><span style="color: #e06c75;">acc</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">number</span><span style="color: #c678dd;">|</span> <span style="color: #e06c75;">acc</span> <span style="color: #56b6c2;">*=</span> <span style="color: #e06c75;">number</span> <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">:+</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">reduce</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">:*</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>In this series of blogposts, we tried to cover the fundamentals behind Ruby blocks, such as:</p>
+<ul>
+<li>how Ruby evaluates expressions</li>
+<li>how we can use methods to evaluate expressions later</li>
+<li>methods and procs</li>
+<li>procs as arguments</li>
+<li>curry arguments in procs</li>
+<li>blocks in procs, lambdas and methods</li>
+<li>bonus point to syntactic sugar and the Ruby standard library</li>
+</ul>
+<p>I hope you could enjoy and understand a bit more on how Ruby blocks work and how to make a more effective use of them on a daily basis!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

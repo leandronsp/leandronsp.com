@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web basics: a TCP Server in Ruby - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="This series guide covers the very basics of Web and the building blocks of a Web server. 
+
+If you have ever wondered on how a Web server works and have a basic k">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html">
+  <meta property="og:title" content="Web basics: a TCP Server in Ruby">
+  <meta property="og:description" content="This series guide covers the very basics of Web and the building blocks of a Web server. 
+
+If you have ever wondered on how a Web server works and have a basic k">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-04-30T23:56:54Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="tcp">
+      <meta property="article:tag" content="http">
+      <meta property="article:tag" content="programming">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Web basics: a TCP Server in Ruby",
+    "datePublished": "2021-04-30T23:56:54Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "This series guide covers the very basics of Web and the building blocks of a Web server. 
+
+If you have ever wondered on how a Web server works and have a basic k",
+        "keywords": "ruby, tcp, http, programming"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Web basics: a TCP Server in Ruby</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 30 Apr 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">tcp</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">http</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">programming</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>This series guide covers the very basics of Web and the building blocks of a Web server.</p>
+<p>If you have ever wondered on how a Web server works and have a basic knowledge of Ruby, this guide is for you.</p>
+<p>Essentially, the <em>main</em> elementary units of a web server are:</p>
+<ul>
+<li>Client-server architecture model</li>
+<li>TCP - Transmission Control Protocol</li>
+<li>HTTP - Hypertext Transfer Protocol</li>
+<li>HTML/CSS/Javascript</li>
+</ul>
+<h2><a href="#client-server-model" aria-hidden="true" class="anchor" id="client-server-model"></a>Client-server model</h2>
+<p>Client-server model is a networking structure that allows different devices connecting to each other over a <strong>computer network</strong>, being <a href="https://en.wikipedia.org/wiki/Local_area_network">local</a> or <a href="https://en.wikipedia.org/wiki/Internet">public (Internet)</a>.</p>
+<p>Consider two different devices connected to a network:</p>
+<ul>
+<li>the client (web browser) requests a webpage to the server</li>
+<li>the server (another computer in the network) that <strong>serves</strong> the requested webpage to the client</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/p5j22eyx9s0yo7esonb5.png" alt="Alt Text" /></p>
+<p>In order to establish a client-server connection, it’s essential to indicate some kind of “agreement” among devices. Such agreement holds information like devices location, message being sent and so on.</p>
+<p>This is the <a href="https://en.wikipedia.org/wiki/Communication_protocol">communication protocol</a>, composed by <a href="https://en.wikipedia.org/wiki/OSI_model">layers</a> ranging from physical material up to application traits.</p>
+<p>We won’t dig further into all layers but focus only on layers that contain <a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">TCP</a> and <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a>. The following image illustrates the communication layers and its protocols:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1axhzvy9bn9tvjwkp638.png" alt="Alt Text" /></p>
+<h2><a href="#tcp" aria-hidden="true" class="anchor" id="tcp"></a>TCP</h2>
+<p><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">Transmission Control Protocol</a> is one of the main transport protocols in the OSI model. It embraces reliability and is responsible to deliver a message from one point to another.</p>
+<p>In each device, we have to open <strong>endpoints</strong> that will be used by the TCP to send and receive data. A single computer can open and close thousands of endpoints. Those endpoints are called <a href="https://en.wikipedia.org/wiki/Network_socket">Sockets</a>.</p>
+<p>In Ruby we can implement a TCP client-server by using the package <a href="https://ruby-doc.org/stdlib-2.7.0/libdoc/socket/rdoc/Socket.html">socket</a> which is included in the standard library.</p>
+<h3><a href="#tcp-client" aria-hidden="true" class="anchor" id="tcp-client"></a>TCP Client</h3>
+<p>Let’s create a <code>TCP client</code> using <code>test/unit</code>, which means: <em>the test will be the client</em>.</p>
+<p><code>tcp_test.rb</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">test/unit</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">ServerTest</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #e5c07b;">Test</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Unit</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">TestCase</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">test_tcp_request_response</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">server</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPSocket</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">open</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">localhost</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">4242</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7">    
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">request</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Hello, server!</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">request</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>
+</div><div class="line" data-line="12">    <span style="color: #61afef;">assert_equal</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Hey, client!</span><span style="color: #56b6c2;">\n</span><span style="color: #98c379;">&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">response</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>
+</div><div class="line" data-line="15">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="16"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<ul>
+<li>the test takes into account that we have opened a socket server in the port <code>4242</code></li>
+<li><code>localhost</code> refers to the same local machine, but it could be any valid <a href="https://en.wikipedia.org/wiki/IP_address">location address</a> in the internet</li>
+<li>the test (client) sends a request message to the server</li>
+<li>the test (client) reads the response message from the server</li>
+<li>the test (client) closes the socket connection to the server</li>
+</ul>
+<p>If we try to run the test (<code>ruby tcp_test.rb</code>), we’ll get the following error:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">SocketError</span><span style="color: #56b6c2;">:</span> <span style="color: #e06c75;">getaddrinfo</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Name</span> <span style="color: #c678dd;">or</span> <span style="color: #61afef;">service</span> <span style="color: #c678dd;">not</span> <span style="color: #e06c75;">known</span>
+</div></code></pre>
+<p>Which means there’s no opened socket server in the port 4242 of localhost. Let’s make the test pass.</p>
+<h3><a href="#tcp-server" aria-hidden="true" class="anchor" id="tcp-server"></a>TCP Server</h3>
+<p><code>tcp_server.rb</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">socket</span><span style="color: #98c379;">&#39;</span>            
+</div><div class="line" data-line="2">                            
+</div><div class="line" data-line="3"><span style="color: #e06c75;">socket</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">TCPServer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4242</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">                            
+</div><div class="line" data-line="5"><span style="color: #e06c75;">client</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">socket</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">accept</span>      
+</div><div class="line" data-line="6"><span style="color: #e06c75;">request</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">gets</span>       
+</div><div class="line" data-line="7">                            
+</div><div class="line" data-line="8"><span style="color: #e06c75;">response</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Hey, client!</span><span style="color: #98c379;">&#39;</span>       
+</div><div class="line" data-line="9"><span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">puts</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">response</span><span style="color: #c678dd;">)</span>       
+</div><div class="line" data-line="10">                            
+</div><div class="line" data-line="11"><span style="color: #e06c75;">client</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                
+</div><div class="line" data-line="12"><span style="color: #e06c75;">socket</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">close</span>                
+</div></code></pre>
+<ul>
+<li>server creates a new socket in the port 4242</li>
+<li>server accepts connections to the socket and waits for a new connection to come in</li>
+<li>when a new client connection arrives, server reads the request message from the client</li>
+<li>server sends a response message to the client</li>
+<li>server closes the connection with client</li>
+<li>server closes the socket and terminates itself</li>
+</ul>
+<p>Because the server must run in a separate process, we have to first:</p>
+<ul>
+<li>start the server, <code>ruby tcp_server.rb</code></li>
+<li>open a new tab or window, and run <code>ruby tcp_test.rb</code></li>
+</ul>
+<p>Expectation: the test should <em>pass</em> and the server should <em>terminate</em>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">1</span> <span style="color: #e06c75;">tests</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">assertions</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">failures</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">errors</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">pendings</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">omissions</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">notifications</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">100</span><span style="color: #56b6c2;">%</span> <span style="color: #e06c75;">passed</span>
+</div></code></pre>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>This post was the first part of series and an introduction to the client-server model along with building a simple TCP server in Ruby with TDD.</p>
+<p>In the upcoming posts we’ll learn about HTTP.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

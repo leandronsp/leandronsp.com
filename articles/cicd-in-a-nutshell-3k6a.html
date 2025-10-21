@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD in a nutshell - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="CI/CD is a popular practice that many companies and projects use today. However, sometimes we use these terms mistakenly, but in this article we'll dive into the">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html">
+  <meta property="og:title" content="CI/CD in a nutshell">
+  <meta property="og:description" content="CI/CD is a popular practice that many companies and projects use today. However, sometimes we use these terms mistakenly, but in this article we'll dive into the">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-02-19T02:44:42Z">
+  <meta property="article:tag" content="ci">
+      <meta property="article:tag" content="cd">
+      <meta property="article:tag" content="software">
+      <meta property="article:tag" content="engineering">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "CI/CD in a nutshell",
+    "datePublished": "2023-02-19T02:44:42Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "CI/CD is a popular practice that many companies and projects use today. However, sometimes we use these terms mistakenly, but in this article we'll dive into the",
+        "keywords": "ci, cd, software, engineering"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">CI/CD in a nutshell</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 19 Feb 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ci</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">cd</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">software</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">engineering</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>CI/CD is a popular practice that many companies and projects use today. However, sometimes we use these terms mistakenly, but in this article we’ll dive into the CI/CD fundamentals, understanding the problem that these practices solve as well as analysing how they fit in today’s cloud architecture.</p>
+<hr />
+<h2><a href="#fire-merge-hell" aria-hidden="true" class="anchor" id="fire-merge-hell"></a>:fire: Merge hell</h2>
+<p>In the early days of software development, developers used to merge their work with less frequency. <em>It was a manual job</em>, so once a month usually, developers would sit together to <strong>merge everything</strong> they worked during the month.</p>
+<p>Resolving conflicts was a <em>real pain</em>, not to mention performing tests against a ton of built features. Moreover, deploys and rollbacks used to come with a hell of problems, that’s why they call this process <strong>the merge hell</strong>.</p>
+<h2><a href="#pray-a-new-hope" aria-hidden="true" class="anchor" id="pray-a-new-hope"></a>:pray: A new hope</h2>
+<p>New ideas arose to overcome this problem. Instead of merging work once a month or even worse, developers should merge work <em>more frequently</em>, almost daily, why not <strong>multiple times a day</strong>.</p>
+<p>The work is merged in the main branch as soon as possible, and upon such a merge, we should ensure the <strong>integrated</strong> source code has <strong>quality, security and correctness.</strong></p>
+<p>These traits are performed using code style checker (linter), security checks and a good automated test suite.</p>
+<p>This process has a name and it is called <a href="https://martinfowler.com/articles/continuousIntegration.html">continuous integration</a>, or <strong>CI</strong>.</p>
+<h3><a href="#how-can-we-run-a-ci-process" aria-hidden="true" class="anchor" id="how-can-we-run-a-ci-process"></a>How can we run a CI process?</h3>
+<p>Because we work on teams with multiple people sharing a remote Git repository (i.e Github), we can run our CI wherever we want.</p>
+<p><em>Could be our computer?</em> Yes.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/je8yypahh3gg4lyduq5k.png" alt="Local CI" /></p>
+<p>In the above picture, we see a CI scenario where we pull the code from a remote repository (integration sync, fetch + merge) and then we perform the needed checks on our own computer.</p>
+<p><em>But we better run it in the cloud, right?</em></p>
+<h2><a href="#cloud-running-ci-in-the-cloud" aria-hidden="true" class="anchor" id="cloud-running-ci-in-the-cloud"></a>:cloud: Running CI in the cloud</h2>
+<p>The process of running CI in the Cloud could be implemented as follows:</p>
+<ul>
+<li>
+<p><strong>Code integration</strong>: the code repository runs in the cloud using some version control system (Git), for instance Github, Gitlab, etc.</p>
+</li>
+<li>
+<p><strong>Code quality, security and correctness</strong>: at every change, before going to the <em>main</em> branch, <strong>some computer or VM in the cloud</strong> should checkout the code from the repository and perform style/security checks and perform automated tests.</p>
+</li>
+</ul>
+<p>Many companies created CI tools in the cloud so we can use them to run our CI system. Big players specially <strong>Github</strong> and <strong>Gitlab</strong> employ their own CI tools along with code repository (Git) in the cloud.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/a8czygi5qn9ar7dozxei.png" alt="Github Actions" /></p>
+<p>But there are other tools in the cloud such as <strong>CircleCI</strong>, <strong>SemaphoreCI</strong> to name a few, that employ only the CI tooling.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dypibtfnmgnhn8mpk7i1.png" alt="CircleCI" /></p>
+<p>All these tools are paid somehow, we can use them for free but in case we increase the usage, they can be expensive eventually.</p>
+<h2><a href="#rocket-delivering-the-application" aria-hidden="true" class="anchor" id="rocket-delivering-the-application"></a>:rocket: Delivering the application</h2>
+<p>Okay, it’s all good with the “continous integration” part. We have a good CI system in the cloud and we might pay for it as we increase the usage.</p>
+<p><em>But how do we deliver the application?</em></p>
+<p>Assuming all the CI checks have been <strong>finished sucessfully</strong>, we can <strong>build/package</strong> our application in a newly generated version and <strong>deliver</strong> it to production, changing the old application to the new one, right?</p>
+<p>First, let’s say we build the application using our own machine:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xncg0sa6t9r69hf0psrj.png" alt="Build locally" /></p>
+<p>After building, we should send (push) the package to some sort of “package registry” in the cloud, from which the infrastructure in production will fetch (pull) the new package and “roll out” from the old package to the new one.</p>
+<p>This process of updating the application in production is called <strong>deployment</strong>, and all the process of building/packaging and ensuring the newly version is deployed in production in a sustainable way is called <a href="https://continuousdelivery.com/">continuous delivery</a>, or simply <strong>CD</strong>.</p>
+<p>How about offloading the CD process to the cloud, same as we do in CI?</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/xzy1qou5mdisiquokcyn.png" alt="CD Cloud" /></p>
+<p>This picture is very common nowadays, many projects are integrated and delivered using the architecture above. Tools such as Github and Gitlab play an important role employing CI/CD for startups and enterprises.</p>
+<h2><a href="#heart-community-matters" aria-hidden="true" class="anchor" id="heart-community-matters"></a>:heart: Community matters</h2>
+<p>The process of integrating and delivering an application is so common that many people and companies across the world joined together and created a non-profit open-source community called <a href="https://cd.foundation/">Continuous Delivery Foundation</a>, or <strong>CDF</strong>, that aims for incubating and graduating open-source projects that employ CI/CD systems in a sustainable way.</p>
+<p>This community is driven by the same values of other communities namely Linux Foundation, Apache Foundation, <a href="https://www.cncf.io/">Cloud Native Computing Foundation</a> (CNCF) etc.</p>
+<hr />
+<p>I hope you enjoyed the reading. In the upcoming posts, I’ll be talking about <a href="https://tekton.dev/">Tekton CI/CD</a>, which is a <strong>graduated CDF project</strong>, and how this open-source tool helps delivering cloud-native applications in the cloud.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

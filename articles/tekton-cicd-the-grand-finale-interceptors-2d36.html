@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tekton CI/CD, the grand finale, interceptors - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="We learned in [the previous article](https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and the `k">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html">
+  <meta property="og:title" content="Tekton CI/CD, the grand finale, interceptors">
+  <meta property="og:description" content="We learned in [the previous article](https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and the `k">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-02-22T02:28:13Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="agile">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Tekton CI/CD, the grand finale, interceptors",
+    "datePublished": "2023-02-22T02:28:13Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "We learned in [the previous article](https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and the `k",
+        "keywords": "kubernetes, docker, agile"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Tekton CI/CD, the grand finale, interceptors</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 22 Feb 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">agile</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>We learned in <a href="https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m">the previous article</a> how to delivery applications using Tekton and the <code>kubernetes-action</code> Task being part of our Pipeline.</p>
+<p>But let’s think about our process a little bit:</p>
+<ol>
+<li>We open/update some Pull Request</li>
+<li>The Event Listener listens to the Github event</li>
+<li>The pipeline is triggered</li>
+<li>The pipeline runs 3 tasks: <strong>clone, build and deploy</strong></li>
+</ol>
+<hr />
+<p>Everytime we <strong>change the PR</strong>, a new deploy is made. But what if we wanted to test the deploy in a “staging environment” first?</p>
+<p><em>That means</em>: we want to <strong>release</strong> our image to a <strong>staging area</strong>, <em>which is close to production but somewhat isolated using different data</em>, where we can perform manual tests in the application, and afterwards decide if we <strong>promote the image to production</strong> or <em>reject it</em>, sending back to the development process for bugfixes and so on.</p>
+<p>In Kubernetes, it’s quite easy to separate environments in the same cluster, where pods in staging area are “forbidden” to see the production area.</p>
+<h2><a href="#kubernetes-namespaces-for-the-rescue" aria-hidden="true" class="anchor" id="kubernetes-namespaces-for-the-rescue"></a>Kubernetes namespaces for the rescue</h2>
+<p>Let’s apply the <code>chespirito-pod</code> to the namespaces (staging and production), so we can keep on our CI/CD saga:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubernetes</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">namespace</span> <span style="color: #e06c75;">staging</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubernetes</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">namespace</span> <span style="color: #e06c75;">production</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubernetes</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">chespirito-pod.yml</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">staging</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubernetes</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">chespirito-pod.yml</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">production</span>
+</div></code></pre>
+<p>Great, now let’s re-think our pipeline a bit more.</p>
+<hr />
+<h2><a href="#the-main-branch-should-be-production-ready" aria-hidden="true" class="anchor" id="the-main-branch-should-be-production-ready"></a>The main branch should be production-ready</h2>
+<p>It’s almost mandatory in a variety of companies and projects, that the <code>main</code> branch should be <strong>production-ready</strong>. By doing this way, we keep the main branch safe which helps to decrease the number of bugs.</p>
+<p>Having that said, the <strong>feature branch behind the PR</strong> can be used to perform our CI tasks: build and <strong>staging deploy</strong>.</p>
+<p>And, as soon as the <strong>feature branch is merged</strong> to the main branch (PR merge), we should <strong>trigger another pipeline</strong>, which would perform a <em>rollout deploy to production</em>.</p>
+<p>Time to see the needed changes.</p>
+<hr />
+<h2><a href="#changing-the-event-listener" aria-hidden="true" class="anchor" id="changing-the-event-listener"></a>Changing the Event Listener</h2>
+<p>So far, our event listener is listening to events from Github and glueing trigger binding with trigger template.</p>
+<p>We have to “intercept” the event, thus being able to <strong>look at the payload</strong> and decide which pipeline to trigger: <em>staging pipeline or production pipeline</em>.</p>
+<h2><a href="#tekton-interceptors" aria-hidden="true" class="anchor" id="tekton-interceptors"></a>Tekton Interceptors</h2>
+<p>In Tekton, event listeners employ the concept of <a href="https://tekton.dev/docs/triggers/interceptors/">Interceptors</a>, which are event processors that allow to query/filter and manipulate payloads coming from the webhooks.</p>
+<p>Tekton delivers by default <strong>cluster interceptors</strong> for Github and Gitlab, but in order to have more flexibility to manipulate different scenarios, comparisons, calculations on-demand and so on, Tekton also brings <a href="https://tekton.dev/docs/triggers/cel_expressions/">CEL interceptors</a>, that stand for Common Expression Language, or <a href="https://github.com/google/cel-spec/blob/master/doc/langdef.md">CEL</a>.</p>
+<p>We’re going to use the <strong>CEL interceptor</strong>, because we want to check whether the payload refers to a Pull Request under certain conditions.</p>
+<h2><a href="#working-on-pull-requests" aria-hidden="true" class="anchor" id="working-on-pull-requests"></a>Working on Pull Requests</h2>
+<p>While working on Pull Requests, we want to trigger the <code>staging-pipeline</code> when the PR is ONLY <strong>opened or synchronized</strong> (a new commit on the PR branch).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">triggers.tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">EventListener</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-github-el</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">serviceAccountName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-service-account</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">triggers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">pr-trigger</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">interceptors</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">ref</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">            <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;cel&quot;</span>
+</div><div class="line" data-line="12">            <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ClusterInterceptor</span>
+</div><div class="line" data-line="13">            <span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">triggers.tekton.dev</span>
+</div><div class="line" data-line="14">          <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">            <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;filter&quot;</span>
+</div><div class="line" data-line="16">              <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">&gt;</span></span>
+</div><div class="line" data-line="17"><span style="color: #98c379;">                header.match(&#39;x-github-event&#39;, &#39;pull_request&#39;) &amp;&amp; body.action in [&#39;opened&#39;, &#39;synchronize&#39;]</span>
+</div><div class="line" data-line="18">      <span style="color: #e06c75;">bindings</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">ref</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">github-pr-trigger-binding</span>
+</div><div class="line" data-line="20">      <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="21">        <span style="color: #e06c75;">ref</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">github-pr-trigger-template</span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">........</span>
+</div></code></pre>
+<p>Note that:</p>
+<ul>
+<li>the <code>header</code> object in CEL brings a parsed HTTP header, so we can look at the <code>X-Github-Event</code> type</li>
+<li>the <code>body</code> object in CEL brings the parsed HTTP body</li>
+</ul>
+<p>Now, we create the trigger binding as previously, which will get the revision (commit) from <code>body.pull_request.head.sha</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">triggers.tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">TriggerBinding</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">github-pr-trigger-binding</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(body.pull_request.head.sha)</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(body.repository.clone_url)</span>
+</div></code></pre>
+<p>And the trigger template:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">triggers.tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">TriggerTemplate</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">github-pr-trigger-template</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">default</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">main</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">resourcetemplates</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PipelineRun</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">generateName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-staging-pipeline-</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #e06c75;">serviceAccountName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-service-account</span>
+</div><div class="line" data-line="17">      <span style="color: #e06c75;">pipelineRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="18">        <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-staging-pipeline</span>
+</div><div class="line" data-line="19">      <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="20">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">shared-data</span>
+</div><div class="line" data-line="21">        <span style="color: #e06c75;">volumeClaimTemplate</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="22">          <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="23">            <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="24">            <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteOnce</span>
+</div><div class="line" data-line="25">            <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="26">              <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="27">                <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div><div class="line" data-line="28">      <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="29">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="30">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(tt.params.repo-url)</span>
+</div><div class="line" data-line="31">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="32">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(tt.params.revision)</span>
+</div></code></pre>
+<p>Such template will start the <code>staging-pipeline</code> with the <strong>revision and repo-url</strong> coming from the binding. Hence, we’ll end up building an image using the <strong>revision</strong> as the image tag.</p>
+<p><em>This is a good practice, in which each deployed image has its own version leveraging on the git revision.</em></p>
+<h2><a href="#the-staging-pipeline" aria-hidden="true" class="anchor" id="the-staging-pipeline"></a>The Staging Pipeline</h2>
+<p>The <code>staging-pipeline</code> will do pretty much the same as previously, but we have to change the <code>kubectl</code> script allowing to use the <strong>git revision</strong> as the image tag version:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">export</span> <span style="color: #d19a66;">RELEASE_REVISION</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$(</span><span style="color: #61afef;">params.revision</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">export</span> <span style="color: #d19a66;">RELEASE_IMAGE</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">colima:31320/chespirito:</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RELEASE_REVISION</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #61afef;">kubectl</span> <span style="color: #e06c75;">set</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">deployment/chespirito-pod</span> <span style="color: #e06c75;">app=</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RELEASE_IMAGE</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">staging</span> <span style="color: #e06c75;">--record</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">kubectl</span> <span style="color: #e06c75;">rollout</span> <span style="color: #e06c75;">status</span> <span style="color: #e06c75;">deployment/chespirito-pod</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">staging</span> <span style="color: #e06c75;">--timeout</span> <span style="color: #e06c75;">5m</span>
+</div></code></pre>
+<p>In short, the staging pipeline:</p>
+<ul>
+<li>fetch source (clone)</li>
+<li>build (run tests)</li>
+<li>release (build an image for staging)</li>
+<li>rollout deploy the image to staging</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/f28mh9w4o59jcya799ya.png" alt="staging" /></p>
+<hr />
+<h2><a href="#are-we-ready" aria-hidden="true" class="anchor" id="are-we-ready"></a>Are we ready?</h2>
+<p>Once we validate Staging and everything is good, time to <strong>promote the same Staging image to production</strong>.</p>
+<p>We start looking at the second trigger in event listener:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #98c379;">....</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">    - name</span>: push-main-trigger
+</div><div class="line" data-line="3">      interceptors:
+</div><div class="line" data-line="4">        - ref:
+</div><div class="line" data-line="5">            name: &quot;cel&quot;
+</div><div class="line" data-line="6">            kind: ClusterInterceptor
+</div><div class="line" data-line="7">            apiVersion: triggers.tekton.dev
+</div><div class="line" data-line="8">          params:
+</div><div class="line" data-line="9">            - name: &quot;filter&quot;
+</div><div class="line" data-line="10">              value: &gt;
+</div><div class="line" data-line="11">                header.match(&#39;x-github-event&#39;, &#39;pull_request&#39;) &amp;&amp; body.action in [&#39;closed&#39;] &amp;&amp; body.pull_request.merged == true
+</div><div class="line" data-line="12">      bindings:
+</div><div class="line" data-line="13">        - ref: github-main-trigger-binding
+</div><div class="line" data-line="14">      template:
+</div><div class="line" data-line="15">        ref: github-main-trigger-template
+</div><div class="line" data-line="16">....
+</div></code></pre>
+<p>Note that this time, in addition to looking at the header to know if it’s a pull request event, we also look at the body. In case it’s a <code>closed</code> event <strong>AND</strong> it’s a merged PR, we proceed with the template that refers to the <code>production-pipeline</code>.</p>
+<h3><a href="#couldnt-we-look-at-push-events" aria-hidden="true" class="anchor" id="couldnt-we-look-at-push-events"></a>Couldn’t we look at push events?</h3>
+<p><em>That’s a good question</em>, we could look at <strong>push to main</strong> and would be enough. But we want the <code>revision</code> of the last commit in the PR.</p>
+<p>Thankfully, Github sends both <code>pull_request closed</code> and <code>push to main</code> events, that’s why it’s a better option looking at the closed PR which will have a flag <code>merged: true</code>, then there’s no need to look at the <code>push</code> event.</p>
+<p>Furthermore, we keep the Github webhook sending <em>only PR events</em>, <strong>that’s more efficient</strong> and use less resources over the network.</p>
+<h2><a href="#the-production-pipeline" aria-hidden="true" class="anchor" id="the-production-pipeline"></a>The Production Pipeline</h2>
+<p>PR closed (and merged), time to see how our pipeline will look like. That’s dead simple, there’s no need to build images and whatnot.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Pipeline</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-production-pipeline</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="8">      <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">string</span>
+</div><div class="line" data-line="9">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="10">      <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">string</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">tasks</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">production</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kubernetes-actions</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;script&quot;</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="18"><span style="color: #98c379;">          export RELEASE_REVISION=$(params.revision)</span>
+</div><div class="line" data-line="19"><span style="color: #98c379;">          export RELEASE_IMAGE=colima:31320/chespirito:$RELEASE_REVISION</span>
+</div><div class="line" data-line="20"><span style="color: #98c379;"></span>
+</div><div class="line" data-line="21"><span style="color: #98c379;">          kubectl set image deployment/chespirito-pod app=$RELEASE_IMAGE -n production --record</span>
+</div><div class="line" data-line="22"><span style="color: #98c379;">          kubectl rollout status deployment/chespirito-pod -n production --timeout 5m</span>
+</div><div class="line" data-line="23"><span style="color: #98c379;"></span>
+</div></code></pre>
+<p>The only thing here is looking at the <code>revision</code> - thanks to the <strong>PR closed</strong> event, we have the revision which is exactly the same we sent to Staging -, and using the same image to <strong>rollout update to production</strong>.</p>
+<p>The deploy time is <em>terrific</em>: <strong>11 seconds!</strong>.</p>
+<p>Why? You may wonder. We are building the image in the <code>staging-pipeline</code>. Using the same registry. In the same cluster.</p>
+<p><em>Just nothing more than a simple <code>kubectl rollout</code> action.</em></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/yuvvoha908aooixz214n.png" alt="production" /></p>
+<hr />
+<h2><a href="#okay-im-sold" aria-hidden="true" class="anchor" id="okay-im-sold"></a>Okay, I’m sold</h2>
+<p>That’s a huge achievement in terms of CI/CD. We have agility <em>without losing quality and security</em>. Using RBAC correctly, there’s no chance of staging “messing up” with production. <strong>Everything is isolated</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ol4m6xu9t5fhoeaplbny.png" alt="both" /></p>
+<hr />
+<h2><a href="#one-last-thing-security-matters" aria-hidden="true" class="anchor" id="one-last-thing-security-matters"></a>One last thing, security matters</h2>
+<p>In real production environments, it’s not good to use the public Git HTTP clone URL, because we work many times on private repositories.</p>
+<p>We can in fact use the <code>body.repository.ssh_url</code> instead of <code>body.repository.clone_url</code> in the trigger bindings.</p>
+<p>All we have to do is sharing a workspace across tasks. This workspace will be backed by a Kubernetes Secret.</p>
+<p>In the trigger template, declare the workspace in the <code>PipelineRun</code>, which reads from a Secret named <code>ssh-directory</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #98c379;">......</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">    workspaces</span>:
+</div><div class="line" data-line="3">      - name: ssh-directory
+</div><div class="line" data-line="4">        secret:
+</div><div class="line" data-line="5">          secretName: ssh-directory
+</div><div class="line" data-line="6">.......
+</div></code></pre>
+<p>Then, in the pipeline, at the taskRef <code>git-clone</code>, along with <code>output</code>, send the workspace <code>ssh-directory</code>, so the Task will do the job reading the Secret and configuring all the ssh credentials needed for SSH.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #98c379;">.......</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">    workspaces</span>:
+</div><div class="line" data-line="3">    - name: output
+</div><div class="line" data-line="4">      workspace: shared-data
+</div><div class="line" data-line="5">    - name: ssh-directory
+</div><div class="line" data-line="6">      workspace: ssh-directory
+</div><div class="line" data-line="7">........
+</div></code></pre>
+<p>Now, let’s see the secret part. Be aware that you have to generate a keypair using <code>openssh</code>, or reuse your current key. <strong>It’s up to you.</strong></p>
+<p>Place the <code>public key</code> in your Git repository account and create a <strong>generic Secret</strong> using the <code>private key</code>, something like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">kubectl</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">secret</span> <span style="color: #e06c75;">generic</span> \
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">ssh-directory</span> \
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">--from-file=id_ed25519=</span><span style="color: #abb2bf;">$</span><span style="color: #e5c07b;">HOME</span><span style="color: #e06c75;">/.ssh/id_ed25519</span> \
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">--dry-run=client</span> \
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">yaml</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">-</span>
+</div></code></pre>
+<p>I’m using <code>ed25519</code> but it can be <code>rsa</code> or other cryptographic algorithms too. <em>It’s totally up to you</em>, but it’s very important to <strong>configure the secret correctly</strong>, otherwise the Task won’t be able to authenticate via SSH hence the <code>git-clone</code> Task will fail.</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>That’s it. It’s been a journey, so let’s recap:</p>
+<ul>
+<li>We started talking about <a href="https://dev.to/leandronsp/cicd-in-a-nutshell-3k6a">CI/CD fundamentals</a> and “why we are here”</li>
+<li>Then, we covered <a href="https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj">an introduction to Tekton</a>, learning its main building block components</li>
+<li>The second part was about <a href="https://dev.to/leandronsp/tekton-ci-part-ii-sharing-information-j81">sharing information with Workspaces</a> which are very important to master if we want to explore the best on CI/CD pipelines</li>
+<li>Afterwards, we’ve seen how to <a href="https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i">listen to Github events</a>, making automation the first-class citizen</li>
+<li>The part IV talks about the <a href="https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m">continuous delivery</a>, where we created a pipeline that did a complete job testing, building and deploying an application in production</li>
+</ul>
+<p>And this post, the last one, was a demonstration of <strong>improving our pipeline</strong>, making it more reliable with <em>different environments</em>, where we could learn about <strong>Interceptors</strong>, which helped to achive our goal :rocket:</p>
+<hr />
+<p>I hope you enjoyed the journey. Feel free to hit me at <a href="https://twitter.com/leandronsp">Twitter</a> or <a href="https://www.linkedin.com/in/leandronsp/">LinkedIn</a>.</p>
+<p>Cheers! :beer:</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

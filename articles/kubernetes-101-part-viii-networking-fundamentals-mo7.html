@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part VIII, networking fundamentals - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="So far, we have gained an understanding of the primary workload objects in Kubernetes. 
+
+These objects enable us to effectively run and manage multiple applicati">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html">
+  <meta property="og:title" content="Kubernetes 101, part VIII, networking fundamentals">
+  <meta property="og:description" content="So far, we have gained an understanding of the primary workload objects in Kubernetes. 
+
+These objects enable us to effectively run and manage multiple applicati">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-05-13T01:56:54Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part VIII, networking fundamentals",
+    "datePublished": "2023-05-13T01:56:54Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "So far, we have gained an understanding of the primary workload objects in Kubernetes. 
+
+These objects enable us to effectively run and manage multiple applicati",
+        "keywords": "kubernetes, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part VIII, networking fundamentals</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 13 May 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>So far, we have gained an understanding of the primary workload objects in Kubernetes.</p>
+<p>These objects enable us to effectively run and manage multiple applications within the cluster. Additionally, we can get benefits from various deployment strategies, create stateful applications, as well as execute and schedule jobs.</p>
+<p>In order to function cohesively, applications (Pods) within the cluster rely on communication between each other.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/lmapl9zjy81nzhxiozhd.png" alt="client server communication" /></p>
+<p>Let’s create a Pod named <strong>server</strong> which runs an NGINX server within it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">server</span> <span style="color: #e06c75;">--image=nginx</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">pod/server</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<hr />
+<h2><a href="#-pods-internal-ip" aria-hidden="true" class="anchor" id="-pods-internal-ip"></a>🔵 Pod’s internal IP</h2>
+<p>Like everything on the internet, Pods in the Kubernetes cluster are assigned <strong>internal IP addresses</strong>, enabling communication between them using these IPs.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">describe</span> <span style="color: #e06c75;">pod/server</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">grep</span> <span style="color: #e06c75;">IP</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">172.17.0.5</span>
+</div></code></pre>
+<p>Now, let’s start a new Pod named <strong>client</strong>, that executes a <code>curl</code> command to communicate with the server, and then terminates.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">client</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--image=alpine/curl</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">-it</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--rm</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--restart=Never</span> \
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">--command</span> \
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://172.17.0.5/</span>
+</div></code></pre>
+<ul>
+<li>we are using the image <code>alpine/curl</code> so there’s no need to install the <code>curl</code> command</li>
+<li>the command <code>curl</code> performs and HTTP request to the server Pod, on the port 80 (HTTP)</li>
+<li>after finishing the <code>curl</code> command, the Pod is asked to <strong>nerver restart</strong>, otherwise Kubernetes will perform constant restarts</li>
+</ul>
+<p>Here’s the output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="2">&lt;html&gt;
+</div><div class="line" data-line="3">...
+</div><div class="line" data-line="4">&lt;body&gt;
+</div><div class="line" data-line="5">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="6">...
+</div></code></pre>
+<p>…and then:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">pod &quot;client&quot; deleted
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/avkwnd916cve7kledf4i.png" alt="pods communicating" /></p>
+<p><em>That’s pretty nice, uh</em>?</p>
+<hr />
+<blockquote>
+<p>🤔<br />
+Pods, similar to containers, are designed to be ephemeral. Whenever a Pod is restarted by a Deployment or another controller, there is no guarantee that the new Pod will receive the same IP address as before.</p>
+</blockquote>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jy1rwj3rv3kevvuqm6ag.png" alt="pods 2" /></p>
+<p>Pods should communicate with each other through a Kubernetes <strong>object</strong> that provides a more reliable internal IP address, rather than relying on the <strong>ephemeral nature</strong> of individual Pod IP addresses.</p>
+<p><em>Yes</em>, we are talking about <strong>Services</strong>.</p>
+<hr />
+<h2><a href="#-services" aria-hidden="true" class="anchor" id="-services"></a>🔵 Services</h2>
+<p>By placing Pods “behind” a Service, other Pods can communicate with them using the IP address of the Service rather than the individual Pod IP addresses.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">expose</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">server</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--name=server</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--type=ClusterIP</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--port=80</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--target-port=80</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #61afef;">service/server</span> <span style="color: #e06c75;">exposed</span>
+</div></code></pre>
+<p>The <code>kubectl expose</code> command requires the following parameters:</p>
+<ul>
+<li>the <code>name</code> of the service</li>
+<li>the <code>type</code> of the service, where the default type is <strong>ClusterIP</strong>. Other types will be discussed later in this post</li>
+<li>the <code>port</code> on which the service will listen</li>
+<li>the <code>target-port</code> of the Pod to which the service will forward messages</li>
+</ul>
+<p>Let’s check the service IP address:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">svc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>         <span style="color: #e06c75;">TYPE</span>        <span style="color: #e06c75;">CLUSTER-IP</span>    <span style="color: #e06c75;">EXTERNAL-IP</span>   <span style="color: #e06c75;">PORT</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">S</span><span style="color: #c678dd;">)</span>   <span style="color: #61afef;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">server</span>       <span style="color: #e06c75;">ClusterIP</span>   <span style="color: #e06c75;">10.43.205.0</span>   <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>        <span style="color: #61afef;">80/TCP</span>    <span style="color: #61afef;">7s</span>
+</div></code></pre>
+<p>The <strong>CLUSTER-IP</strong> obtained when exposing a service in Kubernetes should be used for communication. It provides a more reliable and stable IP address compared to individual Pod IPs, which can change frequently due to their ephemeral nature.</p>
+<blockquote>
+<p>⚠️<br />
+Unless you manually delete the Service using <code>kubectl delete</code>, creating a new Service will result in a change in the assigned <strong>CLUSTER-IP</strong>.</p>
+</blockquote>
+<p>Now, from a client Pod, let’s run the <strong>curl</strong> command to <code>10.42.205.0</code>, which is the Service’s IP address:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">client</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--image=alpine/curl</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">-it</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--rm</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--restart=Never</span> \
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">--command</span> \
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://10.43.205.0/</span>
+</div></code></pre>
+<p>Which outputs:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="2">&lt;html&gt;
+</div><div class="line" data-line="3">...
+</div><div class="line" data-line="4">&lt;body&gt;
+</div><div class="line" data-line="5">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="6">...
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/5o74witlsu94q955w0hq.png" alt="service IP" /></p>
+<h3><a href="#-dns-for-services" aria-hidden="true" class="anchor" id="-dns-for-services"></a>👉 DNS for Services</h3>
+<p>Kubernetes offers an <strong>internal DNS table</strong> for each Service, enabling us to use a fixed name instead of an IP address. By leveraging this DNS resolution, the Service can effectively forward messages to the underlying Pods.</p>
+<p>The pattern for the Service address is specified by:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">[service-name].[namespace].svc.cluster.local
+</div></code></pre>
+<p>Let’s update our example as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">$ curl http://server.default.svc.cluster.local/
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="4">&lt;html&gt;
+</div><div class="line" data-line="5">...
+</div><div class="line" data-line="6">&lt;body&gt;
+</div><div class="line" data-line="7">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="8">...
+</div></code></pre>
+<p><em>Super Yay!</em></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/vxnqmmkgv5gj4y91cne8.png" alt="service DNS" /></p>
+<blockquote>
+<p>🤔<br />
+There are situations where we may need to access a Service from an arbitrary port on the Kubernetes Node itself.</p>
+</blockquote>
+<p>This access allows communication with the Node <strong>through the specified port</strong>, which is then forwarded to the <em>Service</em>.</p>
+<p>The Service, in turn, <strong>forwards the message to the underlying Pods</strong> associated with it.</p>
+<p>This enables external access to the Service <strong>from outside the cluster</strong> via the Node’s port forwarding mechanism.</p>
+<h3><a href="#-service-nodeport" aria-hidden="true" class="anchor" id="-service-nodeport"></a>👉 Service NodePort</h3>
+<p>This type of Kubernetes Service is assigned an <em>internal cluster IP</em> and, in addition, <strong>opens a port</strong> within the range of <code>30000-32767</code> on <strong>every node in the cluster</strong>.</p>
+<p>For instance, let’s consider a scenario where our Service is configured to expose the node port <code>32420</code>, and we have a cluster consisting of 4 nodes:</p>
+<ul>
+<li>10.40.50.1</li>
+<li>10.40.50.2</li>
+<li>10.40.50.3</li>
+<li>10.40.50.4</li>
+</ul>
+<p>The Service ensures that the same port (32420 in this example) is opened on all nodes, and any traffic directed to that port will be forwarded to the Service, which is then forwarded to the underlying Pods.</p>
+<p><em>You’re right</em>, Services in Kubernetes act like <strong>load balancers</strong>!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">expose</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">server</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--name=server</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--type=NodePort</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--port=80</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--target-port=80</span>
+</div></code></pre>
+<p>Then, let’s get the port that was opened, in this case, the port <code>30942</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">svc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>         <span style="color: #e06c75;">TYPE</span>        <span style="color: #e06c75;">CLUSTER-IP</span>    <span style="color: #e06c75;">EXTERNAL-IP</span>   <span style="color: #e06c75;">PORT</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">S</span><span style="color: #c678dd;">)</span>        <span style="color: #61afef;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">server</span>       <span style="color: #e06c75;">NodePort</span>    <span style="color: #e06c75;">10.43.23.47</span>   <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>        <span style="color: #61afef;">80:30942/TCP</span>   <span style="color: #61afef;">103s</span>
+</div></code></pre>
+<p>Disclaimer:</p>
+<blockquote>
+<p>The following commands may not work on your environment, as it will depend where you’re running your Kubernetes cluster. In my case, I’m using colima in OSX.</p>
+</blockquote>
+<p>Let’s get the node name:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">nodes</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>     <span style="color: #e06c75;">STATUS</span>   <span style="color: #e06c75;">ROLES</span>                  <span style="color: #e06c75;">AGE</span>    <span style="color: #e06c75;">VERSION</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">colima</span>   <span style="color: #e06c75;">Ready</span>    <span style="color: #e06c75;">control-plane,master</span>   <span style="color: #e06c75;">111m</span>   <span style="color: #e06c75;">v1.25.0+k3s1</span>
+</div></code></pre>
+<p>Then, let’s figure out the Node IP address. As I’m using locally, it’s my “virtual machine” IP:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">describe</span> <span style="color: #e06c75;">node</span> <span style="color: #e06c75;">colima</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">grep</span> <span style="color: #e06c75;">InternalIP</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">192.168.106.2</span>
+</div></code></pre>
+<p>Now, we can perform the <code>curl</code> directly to the Node IP and Port:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">$ kubectl run ...
+</div><div class="line" data-line="2">    ...
+</div><div class="line" data-line="3">    curl http://192.168.106.2:30942/
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="6">&lt;html&gt;
+</div><div class="line" data-line="7">...
+</div><div class="line" data-line="8">&lt;body&gt;
+</div><div class="line" data-line="9">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="10">...
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2zxgkvkrp9jk3hivuygu.png" alt="service node port" /></p>
+<h3><a href="#-accessing-multiple-nodes-ips" aria-hidden="true" class="anchor" id="-accessing-multiple-nodes-ips"></a>👉 Accessing multiple Nodes IP’s</h3>
+<p><strong>Manually accessing</strong> each Node IP can be tedious and prone to errors. To simplify this process, we can introduce a “proxy” in front of our cluster.</p>
+<p>There are multiple solutions available, and <strong>NGINX</strong> is one of them. Before diving into Kubernetes-specific solutions, let’s first explore a potential approach with NGINX outside of the cluster.</p>
+<p>Once we understand that, we can move on to leveraging the features that Kubernetes offers.</p>
+<h3><a href="#-the-hard-way-an-nginx-reverse-proxy" aria-hidden="true" class="anchor" id="-the-hard-way-an-nginx-reverse-proxy"></a>👉 The hard way, an NGINX reverse proxy</h3>
+<p>A little disclaimer:</p>
+<blockquote>
+<p>I’m not going into details of NGINX features, you can check the NGINX documentation anytime.</p>
+</blockquote>
+<p>That said, let’s configure our <strong>site config</strong>, named “acme.conf”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">server &lbrace;
+</div><div class="line" data-line="2">  listen       80;
+</div><div class="line" data-line="3">  listen  [::]:80;
+</div><div class="line" data-line="4">  server_name  localhost;
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">  location / &lbrace;
+</div><div class="line" data-line="7">    proxy_set_header  X-Real-IP  $remote_addr;
+</div><div class="line" data-line="8">    proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+</div><div class="line" data-line="9">    proxy_set_header Host $http_host;
+</div><div class="line" data-line="10">    proxy_set_header X-Forwarded-Proto $scheme;
+</div><div class="line" data-line="11">    proxy_redirect off;
+</div><div class="line" data-line="12">    proxy_pass http://192.168.106.2:30942;
+</div><div class="line" data-line="13">  &rbrace;
+</div><div class="line" data-line="14">&rbrace;
+</div></code></pre>
+<p>Please note that our <strong>NGINX Load Balancer</strong> will proxy messages to the Node IP and Port, which we refer to as our “backend” in NGINX terminology.</p>
+<p>We have the flexibility to add as many “backends” as needed, in case we want to add more Kubernetes Nodes.</p>
+<p>Time to start the NGINX container, which will use the <code>host</code> network and will get a mounted volume for our site config:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">--rm</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">nginx-lb</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--net=host</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">/acme.conf:/etc/nginx/conf.d/acme.conf</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">nginx</span>
+</div></code></pre>
+<p>Now, we can <strong>curl</strong> to <code>localhost</code> as the NGINX will proxy to every node (site) in our cluster:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">$ curl localhost
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="4">&lt;html&gt;
+</div><div class="line" data-line="5">...
+</div><div class="line" data-line="6">&lt;body&gt;
+</div><div class="line" data-line="7">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="8">...
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2ciy09hspvg8e3snx4u3.png" alt="proxy with NGINX" /></p>
+<p>However, managing a separate proxy is not ideal in a cloud-native environment like Kubernetes.</p>
+<p>Luckily, Kubernetes provides a more native solution: the Service type <strong>LoadBalancer</strong>.</p>
+<h3><a href="#-service-loadbalancer" aria-hidden="true" class="anchor" id="-service-loadbalancer"></a>👉 Service LoadBalancer</h3>
+<p>On cloud providers that offer <strong>load balancer support</strong>, the <em>LoadBalancer</em> Service type in Kubernetes will automatically request a load balancer from the underlying provider.</p>
+<p>This setup provides a single entrypoint for our Service, and the load balancer will handle opening the necessary ports on every Node, ensuring efficient routing of traffic.</p>
+<blockquote>
+<p>In my development environment, <code>colima</code> brings a virtual integrated load balancer, which will expose my “localhost” to the underlying Service.</p>
+</blockquote>
+<p>Creating the Service:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">expose</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">server</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--name=server</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--type=LoadBalancer</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--port=80</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--target-port=80</span>
+</div></code></pre>
+<p>Thus, we can confirm that when utilizing the LoadBalancer Service type in Kubernetes, the Service will be assigned both a cluster IP for internal communication and a node port for external access:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">svc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">server</span>       <span style="color: #e06c75;">LoadBalancer</span>   <span style="color: #e06c75;">10.43.168.46</span>   <span style="color: #e06c75;">192.168.106.2</span>   <span style="color: #e06c75;">80:31995/TCP</span>   <span style="color: #e06c75;">79s</span>
+</div></code></pre>
+<p>We can curl to the cluster IP, Node as well as to the localhost:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Cluster IP, from internal resources such as Pods</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://10.43.168.46/</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># NodePort, from external host</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://192.168.106.2:31995/</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;"># LoadBalancer, from external host</span>
+</div><div class="line" data-line="8"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">localhost</span>
+</div></code></pre>
+<p>The three <code>curl</code> commands will get to the same output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">&lt;!DOCTYPE html&gt;
+</div><div class="line" data-line="2">&lt;html&gt;
+</div><div class="line" data-line="3">...
+</div><div class="line" data-line="4">&lt;body&gt;
+</div><div class="line" data-line="5">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;
+</div><div class="line" data-line="6">...
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hi9ryesrugf5rm1hhy90.png" alt="service load balancer" /></p>
+<h3><a href="#-the-limitations-of-using-service-loadbalancer" aria-hidden="true" class="anchor" id="-the-limitations-of-using-service-loadbalancer"></a>👉 The limitations of using Service LoadBalancer</h3>
+<p>However, it’s important to understand some limitations of using Services as LoadBalancers in Kubernetes.</p>
+<p>Let’s create another Pod named <code>other-server</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">other-server</span> <span style="color: #e06c75;">--image=nginx</span>
+</div></code></pre>
+<p>Now, expose the <code>other-server</code> as a Service LoadBalancer:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">expose</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">other-server</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">--name=other-server</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--type=LoadBalancer</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--port=80</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--target-port=80</span>
+</div></code></pre>
+<p>Then, check the services:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">svc</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>           <span style="color: #e06c75;">TYPE</span>           <span style="color: #e06c75;">CLUSTER-IP</span>     <span style="color: #e06c75;">EXTERNAL-IP</span>     <span style="color: #e06c75;">PORT</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">S</span><span style="color: #c678dd;">)</span>        <span style="color: #61afef;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">server</span>         <span style="color: #e06c75;">LoadBalancer</span>   <span style="color: #e06c75;">10.43.168.46</span>   <span style="color: #e06c75;">192.168.106.2</span>   <span style="color: #e06c75;">80:31995/TCP</span>   <span style="color: #e06c75;">15m</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">other-server</span>   <span style="color: #e06c75;">LoadBalancer</span>   <span style="color: #e06c75;">10.43.43.51</span>    <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">pending</span><span style="color: #56b6c2;">&gt;</span>       <span style="color: #61afef;">80:32344/TCP</span>   <span style="color: #61afef;">52s</span>
+</div></code></pre>
+<p>Please note that the <code>other-server</code> Service LoadBalancer does not get an external IP. That’s because the <code>localhost</code> address is already available to the previous Service called <code>server</code>.</p>
+<p>So, our <code>other-server</code> Service:</p>
+<ul>
+<li>can curl to cluster IP</li>
+<li>can curl to ports in the node</li>
+<li>cannot curl to localhost</li>
+</ul>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7yt5ycicgjwyh2z3gz30.png" alt="lb 2" /></p>
+<p>In short, the limitations of Service LoadBalancers can be described as follows:</p>
+<ul>
+<li>
+<p><strong>cloud provider dependency</strong>: as it relies on the underlying cloud provider’s load balancing capabilities, it may not be available or supported in all cloud environments.</p>
+</li>
+<li>
+<p><strong>limited protocol support</strong>: LoadBalancer Services typically support TCP and UDP protocols. Support for other protocols, such as SCTP or WebSocket, may vary depending on the cloud provider and Kubernetes version.</p>
+</li>
+<li>
+<p><strong>expensive cost</strong>: leveraging an external load balancer from the cloud provider can involve additional costs, as some providers charge for load balancer usage.</p>
+</li>
+</ul>
+<p>…among others.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/478l47gwih459str41wl.png" alt="lb 3" /></p>
+<h3><a href="#-lets-bring-nginx-back" aria-hidden="true" class="anchor" id="-lets-bring-nginx-back"></a>👉 Let’s bring NGINX back</h3>
+<p>Let’s recap our proposed solution using NGINX, an open-source solution that is not tied to any specific cloud provider. However, it’s important to note that our solution placed NGINX outside of the cluster, acting as a separate component.</p>
+<p>How about incorporating NGINX within the cluster? This would involve deploying NGINX as a part of the Kubernetes cluster, providing an architecture similar as follows:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/umo5td1pok409wue6kj8.png" alt="nginx in the cluster" /></p>
+<ul>
+<li>NGINX would act as a “controller” within the cluster, responsible for opening ports on every Node and receiving messages.</li>
+<li>some sort of “rules table”, similar to <strong>NGINX’s site configurations</strong>, would be employed to forward messages from NGINX to the appropriate internal Services (ClusterIP).</li>
+</ul>
+<p><em>Enter Ingress Controllers</em>.</p>
+<hr />
+<h2><a href="#-ingress-controllers" aria-hidden="true" class="anchor" id="-ingress-controllers"></a>🔵 Ingress Controllers</h2>
+<p>Kubernetes allows the creation of new controllers using Custom Resource Definitions (CRDs), which extend the functionality beyond the basic Workload controllers.</p>
+<p>An <strong>Ingress Controller</strong> must be installed in the cluster in order to offer capabilities of proxying like NGINX.</p>
+<p>Luckily, there’s a controller called <strong>NGINX Ingress Controller</strong>, which is open-source and widely used.</p>
+<p>It can be installed in various ways, including through <code>kubectl</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.0/deploy/static/provider/cloud/deploy.yaml</span>
+</div></code></pre>
+<p>Let’s check the Pods that were created in the namespace <code>ingress-nginx</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">ingress-nginx</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                                       <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>      <span style="color: #e06c75;">RESTARTS</span>        <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">ingress-nginx-admission-create-cvw5d</span>       <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>               <span style="color: #e06c75;">44h</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">ingress-nginx-admission-patch-nhhtr</span>        <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">1</span>               <span style="color: #e06c75;">44h</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">ingress-nginx-controller-8d8d76dd7-949dc</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>     <span style="color: #d19a66;">1</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">6h45m</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>   44h
+</div></code></pre>
+<p>If we dig into the Pod <code>ingress-nginx-controller-8d8d76dd7-949dc</code> details, we’ll find out that’s running an NGINX server within it!</p>
+<p>Also, by checking the services in the <code>ingress-nginx</code> namespace:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">svc</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">ingress-nginx</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                                 <span style="color: #e06c75;">TYPE</span>           <span style="color: #e06c75;">CLUSTER-IP</span>     <span style="color: #e06c75;">EXTERNAL-IP</span>     <span style="color: #e06c75;">PORT</span><span style="color: #abb2bf;"></span><span style="color: #c678dd;">(</span><span style="color: #61afef;">S</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span>                      <span style="color: #61afef;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">ingress-nginx-controller-admission</span>   <span style="color: #e06c75;">ClusterIP</span>      <span style="color: #e06c75;">10.43.26.101</span>   <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">none</span><span style="color: #56b6c2;">&gt;</span>          <span style="color: #61afef;">443/TCP</span>                      <span style="color: #61afef;">44h</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">ingress-nginx-controller</span>             <span style="color: #e06c75;">LoadBalancer</span>   <span style="color: #e06c75;">10.43.119.0</span>    <span style="color: #e06c75;">192.168.106.2</span>   <span style="color: #e06c75;">80:30834/TCP,443:31247/TCP</span>   <span style="color: #e06c75;">44h</span>
+</div></code></pre>
+<p>We can see that we have a Service LoadBalancer called <code>ingress-nginx-controller</code> that will route only to the ingress controller Pods.</p>
+<p><em>Pretty awesome, uh?</em></p>
+<p>Time to apply the rules that the NGINX Ingress Controller will use to forward messages to our underlying Services.</p>
+<p>Yes, <strong>let’s learn about Ingress</strong>.</p>
+<h3><a href="#-the-ingress-object" aria-hidden="true" class="anchor" id="-the-ingress-object"></a>👉 The Ingress object</h3>
+<p>In summary, Ingress is a Kubernetes object that is associated with an Ingress Controller (such as NGINX or any other controller).</p>
+<p>It enables the application of various controller-specific features to <em>backend services</em>, providing a way to manage external access and apply routing, load balancing, and other functionalities within the Kubernetes cluster.</p>
+<p>Let’s create an <code>IngressClass</code> that represents our IngressController:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">networking.k8s.io/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">IngressClass</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-ingress-class</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">controller</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">k8s.io/ingress-nginx</span>
+</div></code></pre>
+<p>Then, we create an <code>Ingress</code> object that associates with the appropriate <code>IngressClass</code> and applies a set of rules to the backend services.</p>
+<p>These rules define the desired behavior and configuration for routing and accessing the Services, in this case using the <strong>path</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">networking.k8s.io/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Ingress</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">server-ingress</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">annotations</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">nginx.ingress.kubernetes.io/rewrite-target</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">ingressClassName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">my-ingress-class</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">rules</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">host</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">localhost</span>
+</div><div class="line" data-line="11">      <span style="color: #e06c75;">http</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">        <span style="color: #e06c75;">paths</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">          <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/server</span>
+</div><div class="line" data-line="14">            <span style="color: #e06c75;">pathType</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Prefix</span>
+</div><div class="line" data-line="15">            <span style="color: #e06c75;">backend</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">              <span style="color: #e06c75;">service</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="17">                <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">server</span>
+</div><div class="line" data-line="18">                <span style="color: #e06c75;">port</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">                  <span style="color: #e06c75;">number</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">80</span>
+</div><div class="line" data-line="20">          <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">path</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/other-server</span>
+</div><div class="line" data-line="21">            <span style="color: #e06c75;">pathType</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Prefix</span>
+</div><div class="line" data-line="22">            <span style="color: #e06c75;">backend</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="23">              <span style="color: #e06c75;">service</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="24">                <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">other-server</span>
+</div><div class="line" data-line="25">                <span style="color: #e06c75;">port</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="26">                  <span style="color: #e06c75;">number</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">80</span>
+</div></code></pre>
+<p>Now, we can use <strong>curl</strong> with <code>localhost</code> as the endpoint since the Ingress Controller, in this case NGINX, is configured to handle different paths.</p>
+<p>NGINX will then forward the requests to their respective internal Services, which in turn will forward them to the underlying Pods serving the requested application or service.</p>
+<p>This allows us to easily test and access the different services within the cluster using the specified paths.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">$ curl localhost/server
+</div><div class="line" data-line="2">$ curl localhost/other-server
+</div></code></pre>
+<p>Yay!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/k1mmc6o2hf9wn01zgc42.png" alt="NGINX ingress controller" /></p>
+<h3><a href="#-a-note-about-ingress--controllers-in-the-cloud" aria-hidden="true" class="anchor" id="-a-note-about-ingress--controllers-in-the-cloud"></a>👉 A note about Ingress  Controllers in the Cloud</h3>
+<p>Please note that when using an Ingress Controller in a cloud environment, a <strong>load balancer will be provisioned</strong>.</p>
+<p>However, unlike <em>Services of type LoadBalancer</em> where each Service has its own dedicated load balancer, when using an Ingress Controller, typically <em>only one cloud load balancer will be created</em>, because a <strong>Service LoadBalancer is automatically created</strong>.</p>
+<p>This shared load balancer will handle the routing and load balancing for multiple backend services defined within the <strong>Ingress</strong> configuration. This approach helps optimize resource utilization and reduces the overhead of managing individual load balancers for each Service.</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this guide, we have explored the <strong>fundamentals of networking in Kubernetes</strong>.</p>
+<p>We covered the essential concepts of Pods with their <strong>internal IP addresses</strong>, different types of <strong>Services</strong>, and discussed certain limitations. We also explored how <strong>Ingress Controllers</strong> address those limitations.</p>
+<p>In the upcoming posts, we will continue to delve into the foundational aspects of Kubernetes.</p>
+<p><em>Stay tuned</em> for more insightful content on Kubernetes fundamentals!</p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://kubernetes.io/docs/concepts/services-networking/service/">Kubernetes Services</a><br />
+<a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Kubernetes Ingress</a><br />
+<a href="https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/">Ingress Controllers</a><br />
+<a href="https://nginx.org/en/docs/">NGINX documentation</a><br />
+<a href="https://hub.docker.com/r/nginx/nginx-ingress">NGINX ingress-controller Docker image</a></p>
+<hr />
+<p><em>This post was written with the assistance of ChatGPT, which helped with some “eye candy” on grammar.</em></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

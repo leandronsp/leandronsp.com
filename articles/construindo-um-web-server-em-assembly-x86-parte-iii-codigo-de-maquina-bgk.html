@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construindo um web server em Assembly x86, parte III, código de máquina - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html">
+  <meta property="og:title" content="Construindo um web server em Assembly x86, parte III, código de máquina">
+  <meta property="og:description" content="Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-04-23T23:18:02Z">
+  <meta property="article:tag" content="assembly">
+      <meta property="article:tag" content="braziliandevs">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Construindo um web server em Assembly x86, parte III, código de máquina",
+    "datePublished": "2024-04-23T23:18:02Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie",
+        "keywords": "assembly, braziliandevs"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, parte III, código de máquina</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 23 Apr 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">assembly</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Agora que já temos uma <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9">base de entendimento</a> sobre hierarquia de memória, arquitetura de CPU e registradores, vamos aplicar estes conceitos em exemplos práticos: construindo programas de computador.</p>
+<p><em>Mas o que é um programa de computador?</em></p>
+<p>Teremos a resposta para esta pergunta ao longo deste artigo. Vamos abordar muitos conceitos, desde código de máquina (o mais importante na minha opinião), a sistemas de numeração binário, decimal e hexadecimal.</p>
+<p>Iremos também compreender opcodes, chamadas de sistema, modo kernel, libc, ASCII, standard streams; e alterar arquivos binários em hexadecimal.</p>
+<p>Ao final deste artigo vamos estar em um patamar de entendimento mais holístico de como um programa é interpretado na CPU.</p>
+<p>Ainda não entraremos em Assembly. Foi escolhido desta forma pois o intuito com esta saga é detalhar ao máximo como as peças de encaixam, e acredito que trazer Assembly sem explicar outros conceitos primordiais pode confundir bastante.</p>
+<p>Também não é esperado que você escreva os códigos de máquina deste artigo, pois aqui <a href="https://github.com/leandronsp/monica/blob/main/example">neste link</a> providencio o binário já pronto para que você possa acompanhar com as ferramentas que irei utilizar. Basta apenas baixar o arquivo binário no link fornecido e atribuir permissão de execução com <code>chmod +x</code>, se necessário.</p>
+<blockquote>
+<p>Lembrando que é importante que esteja em um ambiente Linux, caso contrário não irá funcionar. Se estiver em outro ambiente e não puder virtualizar, poderá acompanhar esta saga apenas lendo, pois a ideia é também trazer muitos conceitos fundamentais de baixo-nível</p>
+</blockquote>
+<p>Ainda não será o código do web server, o programa proposto neste post é bastante simples, mas estamos quase lá. Vamos focar em conceitos fundamentais para que futuros artigos, que cobrem o desenvolvimento do web server, possam ser melhor compreendidos.</p>
+<p>Sem mais delongas, prepare-se para a partir de agora entrar numa espiral de código de máquina e manipulação de memória.</p>
+<hr />
+<h2><a href="#agenda" aria-hidden="true" class="anchor" id="agenda"></a>Agenda</h2>
+<ul>
+<li><a href="#o-que-%C3%A9-um-programa-de-computador">O que é um programa de computador</a>
+<ul>
+<li><a href="#sistemas-operacionais-e-processos">Sistemas Operacionais e Processos</a></li>
+<li><a href="#um-programa-deve-sempre-terminar">Um programa deve sempre terminar</a></li>
+</ul>
+</li>
+<li><a href="#nosso-primeiro-programa">Nosso primeiro programa</a>
+<ul>
+<li><a href="#a-linguagem-das-cpus-o-sistema-bin%C3%A1rio">A linguagem das CPU’s, o sistema binário</a></li>
+<li><a href="#o-famoso-sistema-decimal">O famoso sistema decimal</a></li>
+<li><a href="#hexadecimal-o-queridinho-dos-computadores">Hexadecimal, o queridinho dos computadores</a></li>
+<li><a href="#opcodes">Opcodes</a></li>
+<li><a href="#endianness">Endianness</a></li>
+</ul>
+</li>
+<li><a href="#nosso-segundo-programa">Nosso segundo programa</a>
+<ul>
+<li><a href="#alocando-dados-na-mem%C3%B3ria-do-programa">Alocando dados na memória do programa</a></li>
+<li><a href="#ascii">ASCII</a></li>
+<li><a href="#syscalls">Syscalls</a></li>
+<li><a href="#montando-a-syscall-write">Montando a syscall write</a></li>
+<li><a href="#montando-a-syscall-exit">Montando a syscall exit</a></li>
+</ul>
+</li>
+<li><a href="#manipulando-o-nosso-programa">Manipulando o nosso programa</a></li>
+<li><a href="#a-vida-de-quem-programa-%C3%A9-assim">A vida de quem programa é assim?</a></li>
+<li><a href="#conclus%C3%A3o">Conclusão</a></li>
+<li><a href="#refer%C3%AAncias">Referências</a></li>
+</ul>
+<hr />
+<h2><a href="#o-que-é-um-programa-de-computador" aria-hidden="true" class="anchor" id="o-que-é-um-programa-de-computador"></a>O que é um programa de computador</h2>
+<p>Como já vimos na parte II, a função primordial de uma CPU é ler uma instrução da memória, decodificar, executar e armazenar o resultado de volta na memória.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/74pip1fwevxzhlgtskrq.png" alt="CPU decodifica instrução" /></p>
+<p>Então a grosso modo, um programa de computador é um conjunto de instruções pra a CPU processar. Em um cenário típico, teríamos diversos programas diferentes <strong>lendo e escrevendo</strong> da mesma memória do computador:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/v04zatlsnnkesdegjknq.png" alt="programas e memória" /></p>
+<p>Mas um potencial problema, é que neste cenário poderíamos ter dois diferentes programas acessando ou modificando o mesmo endereço de memória:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rcdxz981arzq3d9h5e1b.png" alt="conflito em memória" /></p>
+<p>Pra resolver isto, precisamos agrupar as instruções de um programa de modo a “isolar” de outros programas que também estão rodando no computador.</p>
+<p>É aí que entra um dos papéis do <strong>sistema operacional</strong> com o conceito de <em>processos</em>.</p>
+<blockquote>
+<p>Lembrando que nesta saga, vamos focar apenas em sistemas UNIX-like, mais precisamente distruibuições GNU/Linux</p>
+</blockquote>
+<h3><a href="#-sistemas-operacionais-e-processos" aria-hidden="true" class="anchor" id="-sistemas-operacionais-e-processos"></a>🔵 Sistemas Operacionais e Processos</h3>
+<p>Cada programa executado no SO é encapsulado em uma estrutura chamada <em>processo</em>, que vai ter uma área virtual na memória principal.</p>
+<p>Na prática, cada programa vai ter seu próprio “0x10000”, isolado dos demais.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ra2p8vkdu9pu3tgthvsk.png" alt="sistemas operacionais e processos" /></p>
+<h3><a href="#-um-programa-deve-sempre-terminar" aria-hidden="true" class="anchor" id="-um-programa-deve-sempre-terminar"></a>🔵 Um programa deve sempre terminar</h3>
+<p>Como o SO aloca recursos de memória (dentre outros) para o processo, nosso programa precisa indicar quando termina.</p>
+<p>Desta forma aquele espaço reservado de memória fica livre para ser utilizado por outro processo. Isto evita problemas como vazamento de memória entre outros.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/bh2z34wvdqii8nz7w3bm.png" alt="program exit" /></p>
+<p>Caso isto não seja feito, o SO vai lançar uma exceção e o programa não pode ser admitido como processo.</p>
+<hr />
+<h2><a href="#nosso-primeiro-programa" aria-hidden="true" class="anchor" id="nosso-primeiro-programa"></a>Nosso primeiro programa</h2>
+<p>Vamos trabalhar inicialmente com um exemplo bastante simples. Um programa que <em>não faz nada</em>.</p>
+<blockquote>
+<p>Nossa Leandro, como assim um programa que não faz nada?</p>
+</blockquote>
+<p>Sim, parece estranho para linguagens de mais alto nível. Mas pensando em CPU isto já é alguma coisa, pelo que precisamos de ao menos algumas instruções para um programa que “não faz nada”: <strong>o programa precisa terminar</strong>, lembra?.</p>
+<h3><a href="#-a-linguagem-das-cpus-o-sistema-binário" aria-hidden="true" class="anchor" id="-a-linguagem-das-cpus-o-sistema-binário"></a>🔵 A linguagem das CPU’s, o sistema binário</h3>
+<p>Pensando na CPU como um dispositivo eletrônico, esta só entende pulso elétrico. Mas conseguimos abstrair tais pulsos como 0 ou 1.</p>
+<p>Consequentemente, quando falamos em código de máquina para uma CPU estamos falando em instruções que utilizam <em>sistema binário</em>, composto de 0 ou 1.</p>
+<p>Nosso programa que não faz nada além de “terminar” pode ser representado então pelo seguinte conjunto de instruções:</p>
+<blockquote>
+<p>Não se preocupe em escrever o programa. Por enquanto são só exemplos de código de máquina para que possamos entender bem os conceitos</p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">10111111 00000001 00000000 00000000 00000000   
+</div><div class="line" data-line="2">10111000 00111100 00000000 00000000 00000000  
+</div><div class="line" data-line="3">00001111 00000101                            
+</div></code></pre>
+<p>No sistema binário, cada símbolo é chamado de <strong>bit</strong>. Este simples programa tem 12 conjuntos de 8 bits cada. <em>Conte você mesmo para confirmar!</em></p>
+<p>O <strong>sistema binário</strong> tem esse nome porque só fornece dois tipos de símbolos para representar números. Vamos contar:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0
+</div><div class="line" data-line="2">1
+</div></code></pre>
+<p>Acabou. Com 1 dígito podemos ter 2 combinações apenas. Mas e se quisermos representar mais números? Aí nos resta ficar combinando com mais dígitos.</p>
+<p>Para 2 dígitos, conseguimos aumentar para 4 combinações:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">00
+</div><div class="line" data-line="2">01
+</div><div class="line" data-line="3">10
+</div><div class="line" data-line="4">11
+</div></code></pre>
+<p>Se quisermos continuar, temos que entrar com 3 dígitos, sempre começando com o mais à esquerda possível, o que nos dá 8 combinações:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">000 
+</div><div class="line" data-line="2">001 
+</div><div class="line" data-line="3">010 
+</div><div class="line" data-line="4">100
+</div><div class="line" data-line="5">100 
+</div><div class="line" data-line="6">101 
+</div><div class="line" data-line="7">110 
+</div><div class="line" data-line="8">111
+</div></code></pre>
+<p>Com isto, temos um padrão:</p>
+<ul>
+<li>1 dígito: 2 combinações</li>
+<li>2 dígitos: 4 combinações</li>
+<li>3 dígitos: 8 combinações</li>
+</ul>
+<p>Repare no padrão de exponenciação. Estamos pegando o número 2 como base e aplicando o número do dígito como expoente:</p>
+<p><em>numero de símbolos ^ número de dígitos</em></p>
+<ul>
+<li>2^1 = 2</li>
+<li>2^2 = 4</li>
+<li>2^3 = 8</li>
+</ul>
+<p>Extrapolando para 4 ou mais dígitos, podemos chegar na seguinte conclusão:</p>
+<ul>
+<li>2^4 = 16 combinações</li>
+<li>2^5 = 32 combinações</li>
+<li>2^6 = 64 combinações</li>
+<li>2^7 = 128 combinações</li>
+<li>2^8 = 256 combinações</li>
+</ul>
+<p>E assim por diante…</p>
+<blockquote>
+<p>Você tá brincando com minha cara, né Leandro? Vim aqui pra ficar escovando bit?</p>
+</blockquote>
+<p>Não exatamente. No programa, cada conjunto ali de 8 bits (chamado de <strong>byte</strong>) tem um significado para a CPU, o que faz nosso programa ter 12 bytes.</p>
+<p>E como não somos uma CPU, estamos nada preocupados em representar instruções em bits, vamos então converter para o sistema decimal para conseguirmos representar nosso <strong>mesmo programa</strong> de forma mais simples e intuitiva.</p>
+<h3><a href="#-o-famoso-sistema-decimal" aria-hidden="true" class="anchor" id="-o-famoso-sistema-decimal"></a>🔵 O famoso sistema decimal</h3>
+<p>Já estamos habituados com o sistema decimal. Muitos números no nosso dia-dia são representados através do sistema decimal.</p>
+<p>Falamos de números como “dez”, “cento e quinze”, “quarenta e dois” sem qualquer problema, pois foi o que aprendemos desde a primeira infância. Nosso cérebro já fixou o aprendizado tão intrinsicamente, que sequer pensamos que se trata de um sistema de numeração como qualquer outro.</p>
+<p>Vamos por um momento <em>esquecer</em> que sabemos sistema decimal e aplicar as mesmas regras que aplicamos para o sistema binário.</p>
+<p>Repetindo mais uma vez, no sistema binário temos à disposição apenas dois símbolos: 0 e 1.</p>
+<blockquote>
+<p>E no decimal?</p>
+</blockquote>
+<p>Temos <strong>dez</strong> símbolos à disposição, que são:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0 1 2 3 4 5 6 7 8 9
+</div></code></pre>
+<p>Tal como no sistema binário, com 1 dígito apenas temos essas 10 possibilidades acima.</p>
+<p>Já chegou no nove? Acabaram as combinações? Não tem problema, vamos subir pra <em>dois dígitos</em> sempre começando pelo dígito mais à equerda possível:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">00 01 02 03 04 05 06 07 08 09
+</div><div class="line" data-line="2">10 11 12 13 14 15 16 17 18 19
+</div><div class="line" data-line="3">20 21 22 23 24 25 26 27 28 29
+</div><div class="line" data-line="4">...
+</div><div class="line" data-line="5">...........................99
+</div></code></pre>
+<p>Olha só, com apenas dois dígitos no sistema decimal, podemos combinar 100 números diferentes!</p>
+<p>O padrão é o mesmo no sistema binário, podemos logo aplicar exponenciação da base, sendo:</p>
+<p><em>numero de símbolos ^ número de dígitos</em></p>
+<p>Portanto:</p>
+<ul>
+<li>10^2 = 100 combinações</li>
+<li>10^3 = 1000 combinações</li>
+<li>10^4 = 10000 combinações</li>
+<li>etc etc etc</li>
+</ul>
+<h3><a href="#convertendo-binário-em-decimal" aria-hidden="true" class="anchor" id="convertendo-binário-em-decimal"></a>Convertendo binário em decimal</h3>
+<p>Uma vez que entendendo sistemas de numeração binário e decimal, podemos “compactar” nosso programa inicial de binário para decimal de modo a termos uma leitura mais intuitiva, não?</p>
+<p>Aplicando a regra de exponenciação, não fica difícil fazer a conversão:</p>
+<ul>
+<li>0 é sempre 0, pois este símbolo está presente em ambos sistemas de numeração</li>
+<li>Mesmo vale para 1, pois está presente em ambos</li>
+</ul>
+<p>Se quisermos então converter <code>10</code> (que é o próximo número depois de 1 em binário) de binário pra decimal, vamos aplicar a seguinte regra:</p>
+<p><em>dígito x 2^posição do dígito</em></p>
+<p>…<em>somando o resultado</em> de cada operação em dígito, onde a posição <strong>mais à direita possível</strong> começa com <em>zero</em>, pois de acordo com a senhora matemática, qualquer número elevado a <em>zero</em> é <em>UM</em>*.</p>
+<p>Com isto:</p>
+<ul>
+<li>10 = <em>(1 x 2^1) + (0 x 2^0)</em> = 2 + 0 = <strong>2</strong></li>
+</ul>
+<p>Vamos extrapolar um pouquinho?</p>
+<ul>
+<li>11 = <em>(1 x 2^1) + (1 x 2^0)</em> = 2 + 1 = <strong>3</strong></li>
+<li>100 = <em>(1 x 2^2) + (0 x 2^1) + (0 x 2^0)</em> = 2 + 0 + 0 = <strong>4</strong></li>
+</ul>
+<p>Yay! <em>Nice, uh?</em></p>
+<p>Agora vamos converter <em>byte a byte</em> do nosso programa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">10111111 00000001 00000000 00000000 00000000   
+</div><div class="line" data-line="2">10111000 00111100 00000000 00000000 00000000  
+</div><div class="line" data-line="3">00001111 00000101                            
+</div></code></pre>
+<ul>
+<li>10111111 = <em>(1 x 2^7) + (0 x 2^6) …</em> = <strong>191</strong></li>
+<li>00000001 = <em>(0 x 2^7) + (0 x 2^6) … + (1 + 2^0)</em> = <strong>1</strong></li>
+<li>etc etc etc até chegar ao 12º byte</li>
+</ul>
+<p>Temos então um programa convertido para decimal da seguinte forma:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">191 1 0 0 0
+</div><div class="line" data-line="2">184 60 0 0 0
+</div><div class="line" data-line="3">15 5
+</div></code></pre>
+<p>Entretanto, não é comum representar sistema decimal para instruções de CPU, pois cada byte (8 bits) não seria dividido em partes iguais no sistema decimal, o que poderia causar um <em>desalinhamento</em>, criando buracos desnecessários na memória.</p>
+<blockquote>
+<p>Uma forma de ver este problema é que o sistema decimal composto de 10 símbolos não é divisível por 8 (resto 2), que é a quantidade de bits em um byte</p>
+</blockquote>
+<p>E se tivéssemos um sistema de numeração com uma <em>quantidade de dígitos</em> que fosse divisível por 8?</p>
+<p>Sabendo que 16 é divisível por 8 (resto 0) e não causaria desalinhamento entre bits pra representar um programa, será que existe um sistema de numeração de 16 símbolos para podermos <strong>compactar ainda mais</strong> a representação textual do nosso programa?</p>
+<p>Sim, estamos falando do <strong>sistema hexadecimal</strong>.</p>
+<h3><a href="#-hexadecimal-o-queridinho-dos-computadores" aria-hidden="true" class="anchor" id="-hexadecimal-o-queridinho-dos-computadores"></a>🔵 Hexadecimal, o queridinho dos computadores</h3>
+<p>Certamente você já ouviu falar, viu ou até praticou hexadecimal. Similar ao que fizemos com sistema decimal, vamos esquecer tudo o que sabemos sobre hexadecimal e aplicar algumas regras.</p>
+<p>Quantos símbolos temos à disposição? 16.</p>
+<blockquote>
+<p>Daí o nome: <strong>hexa</strong>, representando 6, e <strong>decimal</strong> representando 10. DEZ + SEIS!!!!!111</p>
+</blockquote>
+<p>Os primeiros 10 símbolos são exatamente como no decimal:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0 1 2 3 4 5 6 7 8 9
+</div></code></pre>
+<p>E quanto aos 6 <strong>símbolos</strong> restantes? Poderíamos representar emojis, gifs animados ou derivados de batata, mas seria muito mais simples representarmos as primeiras 6 letras do alfabeto, não?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0 1 2 3 4 5 6 7 8 9 A B C D E F
+</div></code></pre>
+<p>As regras pra combinar são as mesmas, sempre do mais à esquerda possível:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0 1 2 3 4 5 6 7 8 9 A B C D E F
+</div><div class="line" data-line="2">10 11 12 13 14 15 16 17 18 19 ?
+</div></code></pre>
+<p>Qual seria o próximo? 20?</p>
+<blockquote>
+<p>Não, jovem, vamos combinar com as letras restantes</p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">...
+</div><div class="line" data-line="2">19
+</div><div class="line" data-line="3">1A
+</div><div class="line" data-line="4">1B
+</div><div class="line" data-line="5">1C
+</div><div class="line" data-line="6">1D
+</div><div class="line" data-line="7">1E
+</div><div class="line" data-line="8">1F
+</div></code></pre>
+<p>Agora sim, as combinações com o dígito 2:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F 
+</div><div class="line" data-line="2">30 31 32 33 34 ............................. 3F 
+</div><div class="line" data-line="3">...........................99................9F
+</div><div class="line" data-line="4">100
+</div></code></pre>
+<p>Com apenas 2 dígitos no sistema hexadecimal, podemos ter 256 combinações de números diferentes!</p>
+<ul>
+<li>em binário, 2 dígitos = 4 combinações</li>
+<li>em decimal, 2 dígitos = 100 combinações</li>
+<li>em hexa, 2 dígitos = 256 combinações</li>
+</ul>
+<p>Por exemplo, para termos 256 combinações com 2 símbolos <code>FF</code>, precisaríamos de 8 símbolos <code>1111 1111</code> no sistema binário, <strong>obviamente ocupando mais espaço</strong> pra representar e visualizar programas.</p>
+<p><em>O céu é o limite 🚀</em></p>
+<p>Aplicando regra de exponenciação para convertermos pra decimal, vamos ter o seguinte:</p>
+<ul>
+<li>do 0 ao 9 é tudo igual</li>
+<li>A = 10, B = 11, C = 12, D = 13, E = 14, F = 15</li>
+</ul>
+<p>Onde:</p>
+<p><em>dígito do sistema * 16^posição do dígito</em></p>
+<p>Com isto, convertendo <code>1A</code> e <code>FF</code> para decimal, ficaria:</p>
+<ul>
+<li>1A = <em>(1 * 16^1) + (10 * 16^0)</em> = 16 + 10 = <strong>26</strong></li>
+<li>FF = <em>(15 * 16^1) + (15 * 16^0)</em> = 240 + 15 = <strong>255</strong></li>
+</ul>
+<blockquote>
+<p>Ok, mas precisamos converter de binário para hexa</p>
+</blockquote>
+<p>Com razão, como podemos converter o byte <strong>11111111</strong> para hexadecimal? Dá pra fazer por dedução da conversão decimal, por exemplo:</p>
+<ul>
+<li>sabendo que o byte <strong>11111111</strong> representa 255 em decimal, e sabendo que <code>FF</code> em decimal é 255,  portanto concluímos que <code>11111111 = FF</code></li>
+<li>se dividirmos o byte em 2 partes, podemos calcular que <code>1111 = F</code>, portanto chegamos no mesmo resultado</li>
+</ul>
+<p>Geralmente empregamos a técnica de dividir o byte em 2 partes de 4 bits cada. Assim fica mais fácil visualizar.</p>
+<p>O simples programa original escrito em binário, fica então convertido em hexadecimal da seguinte forma:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">BF 01 00 00 00 
+</div><div class="line" data-line="2">B8 3C 00 00 00 
+</div><div class="line" data-line="3">0F 05          
+</div></code></pre>
+<p>Opa! Já conseguimos ter uma leitura mais intuitiva, certo? Mas que raios significa <code>BF 01</code>, <code>B8 3C</code> ou <code>0F 05</code> na CPU?</p>
+<h3><a href="#-opcodes" aria-hidden="true" class="anchor" id="-opcodes"></a>🔵 Opcodes</h3>
+<p>Cada CPU possui uma arquitetura específica. Falando de x64 (ou x86_64), esta traz um conjunto de <strong>opcodes</strong> no manual que representam as instruções disponíveis, registradores entre outras operações de CPU.</p>
+<p>De acordo com o <a href="http://ref.x86asm.net/coder64.html">manual</a>:</p>
+<ul>
+<li>o opcode <code>BF</code> move um valor imediato para o registrador RDI</li>
+<li><code>01 00 00 00</code>: valor imediato hexa que representa <code>1</code> em decimal, mas na ordem inversa no formato <strong>little-endian</strong> (vamos falar de endianness mais a seguir)</li>
+<li>o opcode <code>B8</code> move um valor imediato para o registrador RAX</li>
+<li><code>3C 00 00 00</code>: valor imediato hexa que representa <code>60</code> em decimal, mas na ordem inversa no formato <strong>little-endian</strong></li>
+<li>o opcode <code>0F 05</code> entra no modo “kernel” do SO e aguarda a resposta de uma chamada de sistema (syscall)</li>
+</ul>
+<p>Mas por quê os bytes são representados na ordem inversa nesta arquitetura de CPU?</p>
+<h3><a href="#-endianness" aria-hidden="true" class="anchor" id="-endianness"></a>🔵 Endianness</h3>
+<p>O conceito de <strong>endianness</strong> está relacionado com a forma que CPU’s lêem e processam bytes na memória.</p>
+<p>Vamos trazer o exemplo de um byte em binário, <code>10000001</code>, que sabemos que é <code>129</code> em decimal. Prestando atenção nos expoentes:</p>
+<p><em>2^7 + 2^6 + 2^5 + 2^4 + 2^3 + 2^2 + 2^1 + 2^0</em></p>
+<ul>
+<li>o bit mais à esquerda, <em>1 x 2^7</em> = 128</li>
+<li>somado com o bit mais à direita, <em>1 x 2^0</em> = 1</li>
+<li>o restante dos bits está tudo a zero, não precisam entrar pra soma</li>
+</ul>
+<p>Podemos inferir que os bits mais à direita <em>não têm tanto peso</em> no valor final, por isso são chamados <strong>bits menos significativos</strong>.</p>
+<blockquote>
+<p>O bit da direita incorporou apenas o valor <strong>1</strong> pro resultado final</p>
+</blockquote>
+<p>Da mesma forma, os bits mais à esquerda <em>têm mais peso</em> no valor final, por isso são chamados de <strong>bits mais significativos</strong>.</p>
+<blockquote>
+<p>O bit da esquerda incorporou <strong>128</strong> pro resultado final, trazendo mais significância</p>
+</blockquote>
+<p>Esta propriedade de definir significância de bits é chamada de <em>endianness</em>. Diferentes arquiteturas de CPU podem decidir ler do mais significativo ao menos significativo (padrão intuitivo de leitura, big-endian) ou do menos significativo ao mais significativo (little-endian).</p>
+<p>A decisão passa por fatores históricos ou por facilitar manipulação de ponteiros. Diferentes sistemas podem decidir por inverter a leitura/escrita ou não dos bytes.</p>
+<p>Na CPU x86_64, o formato é <strong>little-endian</strong>, portanto em hexa o valor de 4 bytes <code>00 0D 00 3C</code> passa a ser <code>3C 00 0D 00</code> no formato little-endian.</p>
+<p>Concluindo, vamos adicionar comentários ao nosso pseudo-programa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">BF 01 00 00 00  ; MOVE 1 PARA RDI
+</div><div class="line" data-line="2">B8 3C 00 00 00  ; MOVE 60 PARA RAX
+</div><div class="line" data-line="3">0F 05           ; CHAMADA DE SISTEMA (SYSCALL)
+</div></code></pre>
+<p>Como a CPU sabe qual syscall deve executar? Por padrão, o número da syscall fica no registrador <code>RAX</code>. E como saber qual o número da syscall?</p>
+<p>Neste <a href="https://x64.syscall.sh/">link</a>, temos uma lista completa de todas as syscalls da arquitetura x64, e ali podemos conferir que a syscall <code>exit</code> do kernel representa o número 60 decimal, ou <em>3C</em> hexa. É exatamente o que a instrução <code>B8 3C</code> está fazendo!</p>
+<p>Mais a seguir neste artigo vamos aprofundar no mundo das syscalls e chamadas do kernel.</p>
+<hr />
+<h2><a href="#nosso-segundo-programa" aria-hidden="true" class="anchor" id="nosso-segundo-programa"></a>Nosso segundo programa</h2>
+<p>Até agora vimos apenas o código de máquina de um programa que não faz nada (apenas termina), mas foi bastante útil para entendermos sistema binário, hexadecimal e outros conceitos.</p>
+<blockquote>
+<p>Continuaremos ainda explorando código de máquina. Não precisa escrever nada, mas pode acompanhar com o <a href="https://github.com/leandronsp/monica/blob/main/example">código que disponibilizei</a> no início do artigo e rodar os comandos em Linux</p>
+</blockquote>
+<p>Vamos agora elaborar um hipotético programa que imprime “Hello, World” na saída (STDOUT). Para isto, devemos:</p>
+<ul>
+<li>alocar memória para a string “Hello, World”</li>
+</ul>
+<blockquote>
+<p>Sim, dados ficam na memória junto com o programa, lembra?</p>
+</blockquote>
+<ul>
+<li>escrever a string na saída STDOUT, que é a saída padrão do programa (em outras palavras, a “tela”)</li>
+</ul>
+<blockquote>
+<p>Se quiser mais detalhes do que é STDOUT, standard streams e redirecionamento de streams, sugiro ler <a href="https://dev.to/leandronsp/entendendo-unix-pipes-3k56">outros artigos</a> que escrevi sobre UNIX pipes</p>
+</blockquote>
+<ul>
+<li>terminar o programa</li>
+</ul>
+<p><em>Alocar, imprimir, terminar</em>. Escrever no STDOUT é uma chamada de sistema, e terminar o programa é <strong>outra</strong> chamada de sistema. Portanto, temos:</p>
+<ul>
+<li>uma alocação de dados na memória do programa</li>
+<li>2 chamadas de sistema</li>
+</ul>
+<h3><a href="#-alocando-dados-na-memória-do-programa" aria-hidden="true" class="anchor" id="-alocando-dados-na-memória-do-programa"></a>🔵 Alocando dados na memória do programa</h3>
+<p>Em linguagem de máquina, fazemos alocação byte a byte, e sabendo que queremos alocar “Hello, World” <em>literalmente</em>, como representar cada letra, o caracter <em>vírgula</em> e o caracter <em>espaço</em> na memória?</p>
+<p>Precisamos de uma tradução dos caracteres para representação decimal ou hexadecimal. É isso mesmo que você está lendo, vamos entrar em <strong>ASCII</strong>.</p>
+<h3><a href="#-ascii" aria-hidden="true" class="anchor" id="-ascii"></a>🔵 ASCII</h3>
+<p>ASCII (American Standard Code for Information Interchange), é um padrão para codificação de caracteres em comunicação eletrônica, criado nos anos 60.</p>
+<p>O padrão ASCII estabeleceu inicialmente 7 bits para cada caracter e foi concebido para suportar caracteres presentes somente na língua inglesa. Por conta desta limitação, tem suporte para um máximo de 128 caracteres (2^7) que abordam os dígitos decimais, caracteres especais e letras do alfabeto, maiúsculas e minúsculas.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/t80bwvjweywmtmghmnvt.png" alt="tabela ASCII" /></p>
+<p>Mais tarde veio uma extensão da tabela com um bit a mais portanto suportando mais caracteres como acentuações, porém ainda com limitações para suportar outros idiomas e caracteres especiais.</p>
+<p>Tempos depois surgiu o padrão <strong>Unicode</strong>, que adiciona a capacidade de codificação de tamanho variável, permitindo assim uma multitude de caracteres e alfabetos de diversos idiomas.</p>
+<blockquote>
+<p>Unicode também contempla a mesma tabela ASCII nos primeiros 128 caracteres por questões de retrocompatibilidade em sistemas. Portanto, apesar de sistemas modernos utilizarem esquemas de codificação Unicode tais como UTF-8, neste artigo focaremos na terminologia ASCII por ser suficiente nos nossos exemplos</p>
+</blockquote>
+<p>Podemos verificar na tabela ASCII que os códigos hexa de cada caractere da nossa string são:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">H: 0x48     
+</div><div class="line" data-line="2">e: 0x65     
+</div><div class="line" data-line="3">l: 0x6C     
+</div><div class="line" data-line="4">l: 0x6C     
+</div><div class="line" data-line="5">o: 0x6F
+</div><div class="line" data-line="6">,: 0x2C
+</div><div class="line" data-line="7">[space]: 0x20
+</div><div class="line" data-line="8">W: 0x57
+</div><div class="line" data-line="9">o: 0x6F
+</div><div class="line" data-line="10">r: 0x72
+</div><div class="line" data-line="11">l: 0x6C
+</div><div class="line" data-line="12">d: 0x64
+</div><div class="line" data-line="13">[newLine]: 0xA
+</div></code></pre>
+<blockquote>
+<p><strong>0x</strong> é uma notação, um prefixo para determinar que o número depois de <em>x</em> é um hexadecimal</p>
+</blockquote>
+<p>Com isto podemos então escrever os primeiros bytes hexa do nosso programa:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">48 65 6C 6C 6F 2C 20 57 6F 72 6C 64 0A
+</div></code></pre>
+<p>Nice, agora vamos “montar” as instruções para a syscall que <em>escreve no STDOUT</em>. Como o kernel faz isso?</p>
+<h3><a href="#-syscalls" aria-hidden="true" class="anchor" id="-syscalls"></a>🔵 Syscalls</h3>
+<p>Syscalls são <strong>chamadas de sistema</strong> onde o programa sai do modo “user” e entra no modo “kernel”. Basicamente, o programa fica à espera que o kernel do sistema operacional execute a função que foi solicitada.</p>
+<p>Apesar de <a href="https://x64.syscall.sh/">neste link</a> estar tudo compilado, temos que entender um fator muito importante sobre o kernel que estamos trabalhando, e se trata do <strong>kernel Linux</strong>.</p>
+<p>O <a href="https://en.wikipedia.org/wiki/Linux_kernel">kernel Linux</a> foi escrito em C na virada da década de 80 para 90, e por ser escrito em C, todas as chamadas de sistema são declaradas em C.</p>
+<p>Por exemplo, no <a href="https://man7.org/linux/man-pages/index.html">manual de system calls</a> do kernel podemos pesquisar sobre qualquer chamada de sistema ou comando utilitário.</p>
+<p>A chamada que queremos utilizar pra escrever no STDOUT se chama <a href="https://man7.org/linux/man-pages/man2/write.2.html">write</a>, e é definida pela função:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">ssize_t</span> <span style="color: #61afef;">write</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">int</span> <span style="color: #e06c75;">fd</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">const</span> <span style="color: #e5c07b;">void</span> <span style="color: #e06c75;"><span style="color: #e06c75;">buf</span><span style="color: #c678dd;">[</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">count</span><span style="color: #c678dd;">]</span></span><span style="color: #abb2bf;">,</span> <span style="color: #e5c07b;">size_t</span> <span style="color: #e06c75;">count</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>…que está presente na biblioteca padrão C (libc), que o kernel incorpora.</p>
+<p>Para distribuições GNU, que é o meu caso utilizando Ubuntu, há um repositório mirror do <code>glibc</code> que é a biblioteca padrão em C para sistemas GNU/Linux.</p>
+<p>Repara que a função <code>write</code> espera 3 argumentos:</p>
+<ul>
+<li><code>fd</code>, ou file descriptor, que no nosso caso é o STDOUT, representado pelo valor 1</li>
+</ul>
+<blockquote>
+<p>💡 <strong>STDIN</strong> representa 0 e <strong>STDERR</strong> representa 2. Tá lá no nosso outro artigo sobre Bash e UNIX pipes, corre dar uma olhada</p>
+</blockquote>
+<ul>
+<li><code>buf</code>, ou buffer, que é o ponteiro para o início do buffer de dados. No caso de escrever “Hello, World” com quebra de linha, o buf apontaria para o início da string “Hello, World\n” na memória.</li>
+<li><code>count</code>, que é o tamanho do buffer de dados a ser escrito. Para a string “Hello, World\n”, o count seria 13, pois isso inclui os 12 caracteres da string mais 1 byte para a quebra de linha.</li>
+</ul>
+<h3><a href="#-montando-a-syscall-write" aria-hidden="true" class="anchor" id="-montando-a-syscall-write"></a>🔵 Montando a syscall write</h3>
+<p>Para montar uma chamada de sistema, é necessário seguir uma <em>interface</em> que determina como um programa deve comunicar com o sistema operacional.</p>
+<p>Quem determina isto é a ABI (Application Binary Interface), que define como estruturas de dados ou funções computacionais conversam entre si.</p>
+<p>Como precisamos chamar uma função do kernel Linux, vamos utilizar as <a href="https://en.wikipedia.org/wiki/X86_calling_conventions">convenções determinadas</a> por este sistema operacional e a arquitetura da CPU em questão.</p>
+<p>Com isto, podemos montar as instruções utilizando registradores para a syscall <code>write</code>. Novamente seguindo <a href="https://x64.syscall.sh/">esta tabela</a> (que ajuda muito), vamos fazer instrução por instrução:</p>
+<p>👉 <strong>ARG0</strong><br />
+O primeiro argumento da função vai no registrador RDI, e aqui vamos colocar o valor <code>1</code> que representa o <em>file descriptor</em> STDOUT. Em hexa, o <a href="http://ref.x86asm.net/coder64.html">manual x86</a> diz que o opcode hexa é <code>BF</code>, seguido do hexa <code>00 00 00 01</code> em formato little-endian:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>
+</div></code></pre>
+<p>👉 <strong>ARG1</strong><br />
+O segundo argumento é o ponteiro para o buffer onde começa a string na memória, movido para o registrador RSI.</p>
+<p>Como a string fica no começo do programa, geralmente este endereço fica em <code>0x401000</code>. Portanto, o opcode para o <code>move</code> no registrador é <code>48 BE</code> e o valor do endereço de memoria no formato little-endian em hexa, <code>00 10 40</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">BE</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">10</span> <span style="color: #d19a66;">40</span> 
+</div></code></pre>
+<p>👉 <strong>ARG2</strong><br />
+Já o terceiro argumento da função vai para o registrador RDX, que representa o tamanho do buffer em bytes a ser escrito no file descriptor definido no registrador RDI (ARG0).</p>
+<p>O opcode é o <code>BA</code> e o valor é <code>13</code> em hexa, que é <code>00 00 00 0D</code> só que no formato little-endian:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">BA</span> <span style="color: #d19a66;">0D</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>
+</div></code></pre>
+<p>Agora, vamos colocar no registrador RAX o número da syscall <strong>write</strong>, que de acordo com <a href="https://x64.syscall.sh/">esta tabela</a> (sempre esta tabela, habitue-se a ela), é o número 1, mas em hexa e little-endian:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">B8</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>
+</div></code></pre>
+<blockquote>
+<p>Falei bastante desta tabela, de syscalls e little-endian aqui, nos próximos artigos vou falar cada vez menos. A ideia é focar em outras coisas e estes detalhes estarem já bem fundamentados</p>
+</blockquote>
+<p>Por último, vamos montar a instrução da syscall em si, que é o opcode:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">0F</span> <span style="color: #d19a66;">05</span>
+</div></code></pre>
+<p>Trecho final da syscall write:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">65</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">6F</span> <span style="color: #d19a66;">2</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">57</span> <span style="color: #d19a66;">6F</span> <span style="color: #d19a66;">72</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">64</span> <span style="color: #d19a66;">0</span><span style="color: #e5c07b;">A</span> <span style="color: #abb2bf;">;</span> <span style="color: #98c379;">&quot;Hello, World&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>                 <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">para</span> <span style="color: #d19a66;">RDI</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">BE</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">10</span> <span style="color: #d19a66;">40</span>                 <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">0x401000</span> <span style="color: #e06c75;">para</span> <span style="color: #d19a66;">RSI</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">BA</span> <span style="color: #d19a66;">0D</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>                 <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">13</span> <span style="color: #e06c75;">para</span> <span style="color: #d19a66;">RDX</span>
+</div><div class="line" data-line="6"><span style="color: #d19a66;">B8</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>                 <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">para</span> <span style="color: #61afef;">RAX</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">write</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7"><span style="color: #d19a66;">0F</span> <span style="color: #d19a66;">05</span>                          <span style="color: #abb2bf;">;</span> <span style="color: #d19a66;">SYSCALL</span>
+</div></code></pre>
+<p>A syscall <code>write</code> já tá montada, agora falta terminar o programa.</p>
+<h3><a href="#-montando-a-syscall-exit" aria-hidden="true" class="anchor" id="-montando-a-syscall-exit"></a>🔵 Montando a syscall exit</h3>
+<p>A API da chamada de sistema <strong>exit</strong> pode ser consultada no <a href="https://man7.org/linux/man-pages/man2/_exit.2.html">manual</a>, e tem a seguinte assinatura no <code>glibc</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">void</span> <span style="color: #61afef;">_exit</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">int</span> <span style="color: #e06c75;">status</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div></code></pre>
+<p>👉 <strong>ARG0</strong><br />
+O primeiro argumento é o status de término, que de acordo com a especificação <a href="https://en.wikipedia.org/wiki/POSIX">POSIX</a>, pode ser qualquer inteiro de 0 a 255 mas sendo o 0 indicando que o progama terminou sem erros.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>
+</div></code></pre>
+<p>Agora, vamos ao trecho final da syscall <em>exit</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>          <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">0</span> <span style="color: #e06c75;">para</span> <span style="color: #d19a66;">RDI</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">B8</span> <span style="color: #d19a66;">3</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>          <span style="color: #abb2bf;">;</span> <span style="color: #e5c07b;">MOV</span> <span style="color: #d19a66;">60</span> <span style="color: #e06c75;">para</span> <span style="color: #61afef;">RAX</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">exit</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #d19a66;">0F</span> <span style="color: #d19a66;">05</span>                   <span style="color: #abb2bf;">;</span> <span style="color: #d19a66;">SYSCALL</span>
+</div></code></pre>
+<p>Programa completo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">65</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">6F</span> <span style="color: #d19a66;">2</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">57</span> <span style="color: #d19a66;">6F</span> <span style="color: #d19a66;">72</span> <span style="color: #d19a66;">6</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">64</span> <span style="color: #d19a66;">0</span><span style="color: #e5c07b;">A</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> 
+</div><div class="line" data-line="3"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">BE</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">10</span> <span style="color: #d19a66;">40</span>
+</div><div class="line" data-line="4"><span style="color: #d19a66;">BA</span> <span style="color: #d19a66;">0D</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> 
+</div><div class="line" data-line="5"><span style="color: #d19a66;">B8</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> 
+</div><div class="line" data-line="6"><span style="color: #d19a66;">0F</span> <span style="color: #d19a66;">05</span>          
+</div><div class="line" data-line="7"><span style="color: #d19a66;">BF</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> 
+</div><div class="line" data-line="8"><span style="color: #d19a66;">B8</span> <span style="color: #d19a66;">3</span><span style="color: #e06c75;">C</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> 
+</div><div class="line" data-line="9"><span style="color: #d19a66;">0F</span> <span style="color: #d19a66;">05</span>          
+</div></code></pre>
+<p>Tomando como exemplo o <a href="https://github.com/leandronsp/monica/blob/main/example">binário que disponibilizei</a>, ele tem mais bytes por conta de headers necessários para o próprio sistema operacional admitir o programa.</p>
+<p>Vamos executar o binário:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1">$ <span style="color: #61afef;">./example</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">world</span>
+</div></code></pre>
+<p><em>Yay! Que dia, hein?</em></p>
+<hr />
+<h2><a href="#manipulando-o-nosso-programa" aria-hidden="true" class="anchor" id="manipulando-o-nosso-programa"></a>Manipulando o nosso programa</h2>
+<p>Com o arquivo binário em mãos, e sugiro baixar do <a href="https://github.com/leandronsp/monica/blob/main/example">repositório</a>, vamos utilizar o utilitário <code>xxd</code> que faz um dump de hexa de qualquer binário, e com ele podemos reparar que o binário vai ter, a partir do byte <em>4096</em>, a mesma quantidade de bytes que escrevemos aqui neste artigo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">xxd</span> <span style="color: #e06c75;">-s</span> <span style="color: #d19a66;">4096</span> <span style="color: #e06c75;">-g1</span> <span style="color: #e06c75;">-c8</span> <span style="color: #e06c75;">-l52</span> <span style="color: #e06c75;">example</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">00001000:</span> <span style="color: #d19a66;">48</span> <span style="color: #d19a66;">65</span> <span style="color: #e06c75;">6c</span> <span style="color: #e06c75;">6c</span> <span style="color: #e06c75;">6f</span> <span style="color: #e06c75;">2c</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">57</span>  <span style="color: #e06c75;">Hello,</span> <span style="color: #e06c75;">W</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">00001008:</span> <span style="color: #e06c75;">6f</span> <span style="color: #d19a66;">72</span> <span style="color: #e06c75;">6c</span> <span style="color: #d19a66;">64</span> <span style="color: #e06c75;">0a</span> <span style="color: #e06c75;">bf</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span>  <span style="color: #e06c75;">orld....</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">00001010:</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">be</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">10</span> <span style="color: #d19a66;">40</span> <span style="color: #d19a66;">00</span>  <span style="color: #e06c75;">..H...@.</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">00001018:</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #e06c75;">ba</span> <span style="color: #e06c75;">0d</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>  <span style="color: #e06c75;">........</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">00001020:</span> <span style="color: #d19a66;">00</span> <span style="color: #e06c75;">b8</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #e06c75;">0f</span> <span style="color: #d19a66;">05</span>  <span style="color: #e06c75;">........</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">00001028:</span> <span style="color: #e06c75;">bf</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #e06c75;">b8</span> <span style="color: #e06c75;">3c</span> <span style="color: #d19a66;">00</span>  <span style="color: #e06c75;">......</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">.</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">00001030:</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #e06c75;">0f</span> <span style="color: #d19a66;">05</span>              <span style="color: #e06c75;">....</span>
+</div></code></pre>
+<p><em>Maravilhoso, não?</em></p>
+<p>E por fim, antes de concluir este artigo que por si só dá quase uma saga, vamos alterar o binário direto em código de máquina utilizando o utilitário <code>hexedit</code>.</p>
+<blockquote>
+<p>Esta dica peguei em <a href="https://www.youtube.com/@debxp">vídeos do Blau Araújo</a>. Ele é realmente fantástico e traz conteúdo de primeira. Pra mim é a melhor referência para conteúdo de baixo nível em pt-BR</p>
+</blockquote>
+<p>Para mudar o binário, rodamos o comando:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">hexedit</span> <span style="color: #e06c75;">--color</span> <span style="color: #e06c75;">example</span>
+</div></code></pre>
+<p>Que vai abrir um editor bastante específico. Com <code>/</code>, podemos buscar por um hexa, por exemplo “48”, que vai levar para o início da string.</p>
+<p>Vamos trocar o “W” maiúsculo por “w” minúsculo, diretamente em código de máquina, que significa trocar o byte <strong>57</strong> da tabela ASCII por <strong>77</strong>:</p>
+<p>Então:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">65</span> <span style="color: #e06c75;">6C</span> <span style="color: #e06c75;">6C</span>  <span style="color: #e06c75;">6F</span> <span style="color: #e06c75;">2C</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">57</span>  <span style="color: #e06c75;">6F</span> <span style="color: #d19a66;">72</span> <span style="color: #e06c75;">6C</span> <span style="color: #d19a66;">64</span>  <span style="color: #e06c75;">0A</span> 
+</div></code></pre>
+<p>Passa a ser:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">48</span> <span style="color: #d19a66;">65</span> <span style="color: #e06c75;">6C</span> <span style="color: #e06c75;">6C</span>  <span style="color: #e06c75;">6F</span> <span style="color: #e06c75;">2C</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">77</span>  <span style="color: #e06c75;">6F</span> <span style="color: #d19a66;">72</span> <span style="color: #e06c75;">6C</span> <span style="color: #d19a66;">64</span>  <span style="color: #e06c75;">0A</span> 
+</div></code></pre>
+<p>Gravar o arquivo com <strong>ctrl+s</strong> e depois <strong>ctrl+c</strong> para sair. Executar novamente e:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1">$ <span style="color: #61afef;">./example</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">world</span>
+</div></code></pre>
+<p><em>MEO DEOS, impressionante!!!!111</em></p>
+<hr />
+<h2><a href="#a-vida-de-quem-programa-é-assim" aria-hidden="true" class="anchor" id="a-vida-de-quem-programa-é-assim"></a>A vida de quem programa é assim?</h2>
+<p>Leitores mais atentos devem estar se perguntando:</p>
+<blockquote>
+<p>É sempre assim a vida de quem programa? Ficar escovando bits e mudar diretamente código de máquina em hexadecimal?</p>
+</blockquote>
+<p>Para a maioria esmagadora dos casos, não.</p>
+<p>E se a gente criasse um programa tradutor que nos permitisse <em>montar as instruções</em> em uma linguagem mais <em>human-friendly</em> e traduzisse para o código de máquina tal o que vimos aqui neste artigo?</p>
+<p>Estamos falando de <strong>assemblers</strong>, que são montadores que permitem escrever em uma linguagem de montagem específica de uma arquitetura (um assembly) e converter para os opcodes, as instruções de CPU.</p>
+<p>Reforçando, nesta saga vamos focar no montador NASM para a linguagem Assembly x86 de 64-bits em sistemas GNU/Linux.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Jornada longa essa, hein? Este artigo cobriu diversos conceitos fundamentais, tais como sistema binário, hexadecimal, opcodes, syscalls, libc, ASCII…</p>
+<p>Estes conceitos fundamentam o entendimento para escrever código Assembly, que será o tema principal dos próximos artigos.</p>
+<p>No próximo artigo, vamos abordar conceitos básicos de Assembly, buscando converter o simples programa que fizemos neste artigo em um <strong>asm</strong> (atalho pra dizer “assembly”) bem organizadinho.</p>
+<p>Em seguida, iremos entrar nas syscalls de socket, bind e accept justamente para montarmos o código do nosso web server. Vamos também manipular buffer de arquivos, alocar dados dinamicamente na memória, trabalhar com threads, locks, criar fila na mão, enfim, ainda há muita coisa por vir. Isto aqui é apenas <em>a ponta do iceberg</em>.</p>
+<p>Não será um tutorial, mas vamos falar de mnemonics, endereçamento de memória, segmentos de memória, layout de memória de um programa, debugging com <strong>gdb</strong> entre outras coisas.</p>
+<p>Fiquem ligades!</p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<sub>
+Blau Araújo, material de curso de Assembly
+https://codeberg.org/blau_araujo/assembly-nasm-x86_64/raw/branch/main/pdf/aula01.pdf
+Felix Cloutier, "x86 instruction reference"
+https://www.felixcloutier.com/x86/
+ASCII Table
+https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/ASCII-Table-wide.svg/2560px-ASCII-Table-wide.svg.png
+POSIX, Wikipedia
+https://en.wikipedia.org/wiki/POSIX
+ASM x86 Manual
+http://ref.x86asm.net/coder64.html
+Syscalls table
+https://x64.syscall.sh/
+Linux Kernel, Wikipedia
+https://en.wikipedia.org/wiki/Linux_kernel
+ABI, Wikipedia
+https://en.wikipedia.org/wiki/Application_binary_interface
+x86 calling conventions
+https://en.wikipedia.org/wiki/X86_calling_conventions
+</sub>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

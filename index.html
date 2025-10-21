@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Software developer 15+ years building software for startups and enterprises worldwide.
+
+Language junkie specializing in Ruby, Elixir, Rust, and occasionally diving into Assembly and low-level programming.
+
+I write about systems programming, software architecture, concurrency patterns, and cloud infrastructure. You'll find deep dives into how computers actually work under the hood, building stuff nobody asked for, performance optimization, and everything DevOps.
+
+Posts written occasionally in Brazilian Portuguese or English.">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://leandronsp.com/">
+  <meta property="og:title" content="Leandro Proença">
+  <meta property="og:description" content="Software developer 15+ years building software for startups and enterprises worldwide.
+
+Language junkie specializing in Ruby, Elixir, Rust, and occasionally diving into Assembly and low-level programming.
+
+I write about systems programming, software architecture, concurrency patterns, and cloud infrastructure. You'll find deep dives into how computers actually work under the hood, building stuff nobody asked for, performance optimization, and everything DevOps.
+
+Posts written occasionally in Brazilian Portuguese or English.">
+  <meta property="og:site_name" content="Leandro Proença">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Leandro Proença",
+    "description": "Software developer 15+ years building software for startups and enterprises worldwide.
+
+Language junkie specializing in Ruby, Elixir, Rust, and occasionally diving into Assembly and low-level programming.
+
+I write about systems programming, software architecture, concurrency patterns, and cloud infrastructure. You'll find deep dives into how computers actually work under the hood, building stuff nobody asked for, performance optimization, and everything DevOps.
+
+Posts written occasionally in Brazilian Portuguese or English.",
+        "author": {
+          "@type": "Person",
+          "name": "Leandro Proença"
+        }
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="container mx-auto px-6 py-8 max-w-7xl">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Sidebar - Profile Section -->
+      <style>
+        @media (min-width: 1024px) {
+          .sidebar-column {
+            position: sticky;
+            top: 2rem;
+            align-self: start;
+          }
+        }
+      </style>
+      <div class="lg:col-span-4 sidebar-column">
+        <div class="space-y-6">
+          <h1 class="text-4xl font-bold">Leandro Proença</h1>
+          <p class="text-lg text-base-content/85 whitespace-pre-wrap">Software developer 15+ years building software for startups and enterprises worldwide.
+
+Language junkie specializing in Ruby, Elixir, Rust, and occasionally diving into Assembly and low-level programming.
+
+I write about systems programming, software architecture, concurrency patterns, and cloud infrastructure. You'll find deep dives into how computers actually work under the hood, building stuff nobody asked for, performance optimization, and everything DevOps.
+
+Posts written occasionally in Brazilian Portuguese or English.</p>
+
+          <div class="space-y-4 mt-4">
+            <div class="flex items-center gap-3">
+              <a href="https://linkedin.com/in/leandronsp" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-base-200 hover:bg-primary hover:text-primary-content transition-colors group" title="LinkedIn">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+              </a>
+              <a href="https://github.com/leandronsp" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-base-200 hover:bg-primary hover:text-primary-content transition-colors group" title="GitHub">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                </svg>
+              </a>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span class="inline-flex items-center gap-2">
+                  <span>Web 101</span>
+                  <span>🇧🇷</span>
+                </span>
+              </a>
+              <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span class="inline-flex items-center gap-2">
+                  <span>Concorrência 101</span>
+                  <span>🇧🇷</span>
+                </span>
+              </a>
+              <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span class="inline-flex items-center gap-2">
+                  <span>AWS 101</span>
+                  <span>🇧🇷</span>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content - Articles List -->
+      <div class="lg:col-span-8">
+        <div class="flex items-center gap-2 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <span class="text-sm text-base-content/50 font-mono" id="page-indicator">
+            <span id="current-page">1</span> / <span id="total-pages">7</span>
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <div class="w-full md:flex-1 md:max-w-lg">
+            <div class="relative">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search articles..."
+                class="w-full h-10 sm:h-12 pr-10 sm:pr-12 text-sm sm:text-base bg-base-100 border-2 border-base-300 rounded-lg px-3 sm:px-4 transition-all duration-200 ease-in-out focus:border-primary focus:outline-none hover:border-base-content/30 hover:shadow-sm"
+                autocomplete="off"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-3">
+            <span class="text-xs sm:text-sm text-base-content/80 font-medium whitespace-nowrap">Filter:</span>
+            <div class="flex rounded-lg border-2 border-base-300 overflow-hidden">
+              <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-blue-600 text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
+              <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
+              <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="en" onclick="setLanguageFilter('en')">🇺🇸 EN</button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            id="theme-toggle"
+            class="inline-flex items-center justify-center rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:bg-base-content/10 transition-colors flex-shrink-0"
+            title="Toggle theme"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 sm:h-6 sm:w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-4" id="articles-container">
+          <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals"
+     data-title="you don't need kafka: building a message queue with only two unix signals"
+     data-tags=""
+     onclick="window.location.href='/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          You don't need Kafka: Building a message queue with only two UNIX signals
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">21 Oct 2025</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="voltando-as-raizes-de-blogueiro"
+     data-title="voltando às raízes de blogueiro"
+     data-tags="blog"
+     onclick="window.location.href='/articles/voltando-as-raizes-de-blogueiro.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Voltando às raízes de blogueiro
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">18 Oct 2025</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">blog</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="um-resumo-do-meu-2024-1lf4"
+     data-title="um resumo do meu 2024"
+     data-tags="braziliandevs"
+     onclick="window.location.href='/articles/um-resumo-do-meu-2024-1lf4.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Um resumo do meu 2024
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">18 Oct 2025</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="arrays-em-assembly-x86-55hb"
+     data-title="arrays em assembly x86"
+     data-tags="assembly"
+     onclick="window.location.href='/articles/arrays-em-assembly-x86-55hb.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Arrays em Assembly x86
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">17 Aug 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp"
+     data-title="construindo um web server em assembly x86, the grand finale, multi-threading"
+     data-tags="braziliandevs assembly"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, the grand finale, multi-threading
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">14 Jul 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5"
+     data-title="construindo um web server em assembly x86, parte v, finalmente o server"
+     data-tags="braziliandevs assembly computerscience"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, parte V, finalmente o server
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">25 May 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif"
+     data-title="construindo um web server em assembly x86, parte iv, um assembly modesto"
+     data-tags="computerscience braziliandevs assembly"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, parte IV, um assembly modesto
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">13 May 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">computerscience</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk"
+     data-title="construindo um web server em assembly x86, parte iii, código de máquina"
+     data-tags="assembly braziliandevs"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, parte III, código de máquina
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">23 Apr 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9"
+     data-title="construindo um web server em assembly x86, parte ii, história e arquitetura"
+     data-tags="assembly braziliandevs"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, parte II, história e arquitetura
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">11 Apr 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5"
+     data-title="construindo um web server em assembly x86, parte i, introdução"
+     data-tags="assembly braziliandevs"
+     onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Construindo um web server em Assembly x86, parte I, introdução
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">09 Apr 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">assembly</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="superficial-basico-e-avancado-148n"
+     data-title="superficial, básico e avançado"
+     data-tags="webdev"
+     onclick="window.location.href='/articles/superficial-basico-e-avancado-148n.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Superficial, básico e avançado
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">09 Mar 2024</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="building-a-dead-simple-background-job-in-rust-4m1d"
+     data-title="building a dead simple background job in rust"
+     data-tags="rust"
+     onclick="window.location.href='/articles/building-a-dead-simple-background-job-in-rust-4m1d.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Building a dead simple background job in Rust
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">12 Nov 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">rust</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="understanding-the-basics-of-smart-pointers-in-rust-3dff"
+     data-title="understanding the basics of smart pointers in rust"
+     data-tags="rust datastructures"
+     onclick="window.location.href='/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Understanding the basics of Smart Pointers in Rust
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Nov 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">rust</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">datastructures</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="compiladores-trampolim-deque-e-thread-pool-dd1"
+     data-title="compiladores, trampolim, deque e thread pool"
+     data-tags="ruby webdev"
+     onclick="window.location.href='/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Compiladores, trampolim, deque e thread pool
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">17 Oct 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="rust-go-rinha-e-io-39o2"
+     data-title="rust, go, rinha e i/o"
+     data-tags="braziliandevs rust ruby go"
+     onclick="window.location.href='/articles/rust-go-rinha-e-io-39o2.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Rust, Go, Rinha e I/O
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">08 Sep 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">rust</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="entendendo-fundamentos-de-recursao-2ap4"
+     data-title="entendendo fundamentos de recursão"
+     data-tags="programming ruby braziliandevs"
+     onclick="window.location.href='/articles/entendendo-fundamentos-de-recursao-2ap4.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Entendendo fundamentos de recursão
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">23 Jun 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n"
+     data-title="vencendo os números de ponto flutuante: um guia de sobrevivência"
+     data-tags="computerscience braziliandevs"
+     onclick="window.location.href='/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Vencendo os números de ponto flutuante: um guia de sobrevivência
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">06 Jun 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">computerscience</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">braziliandevs</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="winning-at-floating-point-issues-a-survival-guide-4g1g"
+     data-title="winning at floating-point issues: a survival guide"
+     data-tags="computerscience programming"
+     onclick="window.location.href='/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Winning at floating-point issues: a survival guide
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Jun 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">computerscience</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="pt-br-fundamentos-do-git-um-guia-completo-2djh"
+     data-title="[pt-br] fundamentos do git, um guia completo"
+     data-tags="git linux braziliandevs"
+     onclick="window.location.href='/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          [pt-BR] Fundamentos do Git, um guia completo
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">24 May 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">git</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="ai-ruby-an-introduction-to-neural-networks-23f3"
+     data-title="ai & ruby: an introduction to neural networks"
+     data-tags="ruby machinelearning ai neuralnetworks"
+     onclick="window.location.href='/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          AI & Ruby: an introduction to neural networks
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">19 May 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">machinelearning</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-viii-networking-fundamentals-mo7"
+     data-title="kubernetes 101, part viii, networking fundamentals"
+     data-tags="kubernetes docker"
+     onclick="window.location.href='/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part VIII, networking fundamentals
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">13 May 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-vii-jobs-and-cronjobs-12kg"
+     data-title="kubernetes 101, part vii, jobs and cronjobs"
+     data-tags="kubernetes docker"
+     onclick="window.location.href='/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part VII, jobs and cronjobs
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">29 Apr 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-comprehensive-introduction-to-ruby-8o7"
+     data-title="a comprehensive introduction to ruby"
+     data-tags="ruby rails"
+     onclick="window.location.href='/articles/a-comprehensive-introduction-to-ruby-8o7.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A comprehensive introduction to Ruby
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">28 Apr 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">rails</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-vi-daemonsets-1ph0"
+     data-title="kubernetes 101, part vi, daemonsets"
+     data-tags="kubernetes docker"
+     onclick="window.location.href='/articles/kubernetes-101-part-vi-daemonsets-1ph0.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part VI, daemonsets
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">05 Apr 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-v-statefulsets-5dob"
+     data-title="kubernetes 101, part v, statefulsets"
+     data-tags="kubernetes docker"
+     onclick="window.location.href='/articles/kubernetes-101-part-v-statefulsets-5dob.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part V, statefulsets
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Apr 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="sql-join-explained-53lc"
+     data-title="sql join explained"
+     data-tags="sql database postgres"
+     onclick="window.location.href='/articles/sql-join-explained-53lc.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          SQL JOIN explained
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">17 Mar 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">sql</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">database</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="git-fundamentals-a-complete-guide-do7"
+     data-title="git fundamentals, a complete guide"
+     data-tags="git linux"
+     onclick="window.location.href='/articles/git-fundamentals-a-complete-guide-do7.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Git fundamentals, a complete guide
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">15 Mar 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">git</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-iv-deployments-20m3"
+     data-title="kubernetes 101, part iv, deployments"
+     data-tags="kubernetes docker"
+     onclick="window.location.href='/articles/kubernetes-101-part-iv-deployments-20m3.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part IV, deployments
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">12 Mar 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-iii-controllers-and-self-healing-4ki5"
+     data-title="kubernetes 101, part iii, controllers and self-healing"
+     data-tags="kubernetes docker k8s containers"
+     onclick="window.location.href='/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part III, controllers and self-healing
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">12 Mar 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-ii-pods-19pb"
+     data-title="kubernetes 101, part ii, pods"
+     data-tags="kubernetes docker k8s containers"
+     onclick="window.location.href='/articles/kubernetes-101-part-ii-pods-19pb.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part II, pods
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Mar 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="kubernetes-101-part-i-the-fundamentals-23a1"
+     data-title="kubernetes 101, part i, the fundamentals"
+     data-tags=""
+     onclick="window.location.href='/articles/kubernetes-101-part-i-the-fundamentals-23a1.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Kubernetes 101, part I, the fundamentals
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">23 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="tekton-cicd-the-grand-finale-interceptors-2d36"
+     data-title="tekton ci/cd, the grand finale, interceptors"
+     data-tags="kubernetes docker agile"
+     onclick="window.location.href='/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Tekton CI/CD, the grand finale, interceptors
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">22 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="tekton-cicd-part-iv-continuous-delivery-206m"
+     data-title="tekton ci/cd, part iv, continuous delivery"
+     data-tags="firstpost career discuss"
+     onclick="window.location.href='/articles/tekton-cicd-part-iv-continuous-delivery-206m.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Tekton CI/CD, part IV, continuous delivery
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">21 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">firstpost</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">career</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="tekton-ci-part-iii-listen-to-github-events-1h3i"
+     data-title="tekton ci, part iii, listen to github events"
+     data-tags="tutorial"
+     onclick="window.location.href='/articles/tekton-ci-part-iii-listen-to-github-events-1h3i.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Tekton CI, part III, listen to Github events
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">19 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">tutorial</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="tekton-ci-part-ii-sharing-information-j81"
+     data-title="tekton ci, part ii, sharing information"
+     data-tags="kubernetes ci linux docker"
+     onclick="window.location.href='/articles/tekton-ci-part-ii-sharing-information-j81.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Tekton CI, part II, sharing information
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">19 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ci</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="tekton-ci-part-i-a-gentle-introduction-ilj"
+     data-title="tekton ci, part i, a gentle introduction"
+     data-tags="discuss softwaredevelopment agile"
+     onclick="window.location.href='/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Tekton CI, part I, a gentle introduction
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">19 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">discuss</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">softwaredevelopment</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="cicd-in-a-nutshell-3k6a"
+     data-title="ci/cd in a nutshell"
+     data-tags="ci cd software engineering"
+     onclick="window.location.href='/articles/cicd-in-a-nutshell-3k6a.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          CI/CD in a nutshell
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">19 Feb 2023</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ci</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">cd</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="seu-dinheiro-nao-e-infinito-2l2k"
+     data-title="seu dinheiro não é infinito"
+     data-tags="leadership management technology"
+     onclick="window.location.href='/articles/seu-dinheiro-nao-e-infinito-2l2k.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Seu dinheiro não é infinito
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">21 Oct 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">leadership</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">management</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="lideranca-comeca-com-confianca-minha-trajetoria-4i68"
+     data-title="liderança começa com confiança: minha trajetória"
+     data-tags=""
+     onclick="window.location.href='/articles/lideranca-comeca-com-confianca-minha-trajetoria-4i68.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Liderança começa com confiança: minha trajetória
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">17 Sep 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="thinking-like-containers-3k24"
+     data-title="thinking like containers"
+     data-tags="docker linux"
+     onclick="window.location.href='/articles/thinking-like-containers-3k24.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Thinking like containers
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">09 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="simulating-oop-in-bash-3mop"
+     data-title="simulating oop in bash"
+     data-tags="oop bash linux"
+     onclick="window.location.href='/articles/simulating-oop-in-bash-3mop.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Simulating OOP in Bash
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">06 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">oop</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">bash</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="building-a-web-server-in-bash-the-grand-finale-n14"
+     data-title="building a web server in bash, the grand finale"
+     data-tags="webdev html css javasccript"
+     onclick="window.location.href='/articles/building-a-web-server-in-bash-the-grand-finale-n14.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Building a Web server in Bash, the grand finale
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">html</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="building-a-web-server-in-bash-part-iii-login-a03"
+     data-title="building a web server in bash, part iii - login"
+     data-tags="webdev linux html shellscript"
+     onclick="window.location.href='/articles/building-a-web-server-in-bash-part-iii-login-a03.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Building a Web server in Bash, part III - Login
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="building-a-web-server-in-bash-part-ii-parsing-http-14kg"
+     data-title="building a web server in bash, part ii - parsing http"
+     data-tags="webdev http linux shellscript"
+     onclick="window.location.href='/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Building a Web server in Bash, part II - parsing HTTP
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">http</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="building-a-web-server-in-bash-part-i-sockets-2n8b"
+     data-title="building a web server in bash, part i - sockets"
+     data-tags="webdev http linux shellscript"
+     onclick="window.location.href='/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Building a Web server in Bash, part I - sockets
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">01 Aug 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">webdev</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">http</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="inter-process-communication-pipes-52nj"
+     data-title="inter-process communication: pipes"
+     data-tags="unix linux"
+     onclick="window.location.href='/articles/inter-process-communication-pipes-52nj.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Inter-process communication: pipes
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">14 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">unix</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="inter-process-communication-files-1m34"
+     data-title="inter-process communication: files"
+     data-tags="unix linux"
+     onclick="window.location.href='/articles/inter-process-communication-files-1m34.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Inter-process communication: files
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">13 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">unix</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn"
+     data-title="a brief history of modern computers, multitasking and operating systems"
+     data-tags="unix linux operatingsystems threads"
+     onclick="window.location.href='/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A brief history of modern computers, multitasking and operating systems
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">12 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">unix</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng"
+     data-title="métricas cadvisor no kubernetes com prometheus e grafana"
+     data-tags="kubernetes prometheus grafana"
+     onclick="window.location.href='/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Métricas cAdvisor no Kubernetes com Prometheus e Grafana
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">06 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">prometheus</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="prometheus-on-kubernetes-101-296j"
+     data-title="prometheus on kubernetes 101"
+     data-tags="prometheus kubernetes docker"
+     onclick="window.location.href='/articles/prometheus-on-kubernetes-101-296j.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Prometheus on Kubernetes 101
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">06 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">prometheus</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">kubernetes</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="mastering-the-docker-networking-2h57"
+     data-title="mastering the docker networking"
+     data-tags="docker linux nginx"
+     onclick="window.location.href='/articles/mastering-the-docker-networking-2h57.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Mastering the Docker networking
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">05 Jul 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="implementando-um-simples-background-job-com-unix-named-pipes-3eja"
+     data-title="implementando um simples background job com unix named pipes"
+     data-tags="unix linux pipes"
+     onclick="window.location.href='/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Implementando um simples background job com UNIX named pipes
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">15 Jun 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">unix</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="entendendo-unix-pipes-3k56"
+     data-title="entendendo unix pipes"
+     data-tags="unix linux pipe"
+     onclick="window.location.href='/articles/entendendo-unix-pipes-3k56.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Entendendo UNIX pipes
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">15 Jun 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">unix</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">linux</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="resolvendo-problema-de-performance-no-postgresql-com-cte-468d"
+     data-title="resolvendo problema de performance no postgresql com cte"
+     data-tags="sql postgres cte"
+     onclick="window.location.href='/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Resolvendo problema de performance no PostgreSQL com CTE
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">13 Jun 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇧🇷</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">sql</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">postgres</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-very-simple-graphql-tutorial-in-ruby-54ck"
+     data-title="a very simple graphql tutorial in ruby"
+     data-tags="ruby graphql"
+     onclick="window.location.href='/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A very simple GraphQL tutorial in Ruby
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">03 Mar 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">graphql</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="mastering-docker-volumes-j7m"
+     data-title="mastering docker volumes"
+     data-tags="docker containers linux"
+     onclick="window.location.href='/articles/mastering-docker-volumes-j7m.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Mastering Docker Volumes
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">05 Feb 2022</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">containers</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="how-to-reduce-the-time-complexity-of-nested-loops-1lkd"
+     data-title="how to reduce the time complexity of nested loops"
+     data-tags="programming ruby algorithms"
+     onclick="window.location.href='/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          How to reduce the time complexity of nested loops
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">04 Dec 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d"
+     data-title="a powerful full-text search in postgresql in less than 20 lines"
+     data-tags="postgres"
+     onclick="window.location.href='/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A powerful full-text search in PostgreSQL in less than 20 lines
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">16 Sep 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">postgres</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-crud-journey-in-haskell-part-ii-socket-programming-2po1"
+     data-title="a crud journey in haskell, part ii, socket programming"
+     data-tags="haskell networking tcp ruby"
+     onclick="window.location.href='/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A CRUD journey in Haskell, part II, Socket programming
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">10 Aug 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">haskell</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">networking</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="a-crud-journey-in-haskell-part-i-introduction-2c3j"
+     data-title="a crud journey in haskell, part i, introduction"
+     data-tags="haskell programming functional"
+     onclick="window.location.href='/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          A CRUD journey in Haskell, part I, introduction
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">03 Aug 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">haskell</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="using-docker-in-development-the-right-way-15j3"
+     data-title="using docker in development the right way"
+     data-tags="docker containers"
+     onclick="window.location.href='/articles/using-docker-in-development-the-right-way-15j3.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Using Docker in development the right way
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">29 Jun 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">docker</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">containers</span>
+    
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="web-basics-sending-html-css-and-javascript-content-through-http-3g1m"
+     data-title="web basics: sending html, css and javascript content through http"
+     data-tags="ruby html css javascript"
+     onclick="window.location.href='/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Web basics: sending HTML, CSS and Javascript content through HTTP
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">09 May 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">html</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="web-basics-a-simple-http-server-in-ruby-2jj4"
+     data-title="web basics: a simple http server in ruby"
+     data-tags="ruby tdd http"
+     onclick="window.location.href='/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Web basics: a simple HTTP Server in Ruby
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">03 May 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">tdd</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="web-basics-a-tcp-server-in-ruby-947"
+     data-title="web basics: a tcp server in ruby"
+     data-tags="ruby tcp http programming"
+     onclick="window.location.href='/articles/web-basics-a-tcp-server-in-ruby-947.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Web basics: a TCP Server in Ruby
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">30 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">tcp</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="boilerplate-for-a-containerized-plain-ruby-application-3094"
+     data-title="boilerplate for a containerized plain ruby application"
+     data-tags="ruby tdd docker makefile"
+     onclick="window.location.href='/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Boilerplate for a containerized plain Ruby application
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">28 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">tdd</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="quicksort-a-ruby-implementation-using-test-driven-development-10ma"
+     data-title="quicksort, a ruby implementation using test-driven development"
+     data-tags="ruby quicksort algorithms tdd"
+     onclick="window.location.href='/articles/quicksort-a-ruby-implementation-using-test-driven-development-10ma.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Quicksort, a Ruby implementation using Test-driven development
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">16 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">quicksort</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="deploy-to-kubernetes-using-github-actions-including-slack-notification-11je"
+     data-title="deploy to kubernetes using github actions (including slack notification)"
+     data-tags="github aws eks kubernetes"
+     onclick="window.location.href='/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification-11je.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Deploy to Kubernetes using Github Actions (including Slack notification)
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">14 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">github</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">aws</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+2</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48"
+     data-title="ruby blocks made easy, part iii ~grand finale~, blocks and syntactic sugar"
+     data-tags="ruby programming softwaredevelopment"
+     onclick="window.location.href='/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">10 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25"
+     data-title="ruby blocks made easy, part ii, curry and procs as arguments"
+     data-tags="ruby programming softwaredevelopment"
+     onclick="window.location.href='/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Ruby blocks made easy, part II, curry and procs as arguments
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">10 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
+     data-slug="ruby-blocks-made-easy-part-i-methods-and-procs-ji2"
+     data-title="ruby blocks made easy, part i, methods and procs"
+     data-tags="ruby programming softwaredevelopment"
+     onclick="window.location.href='/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2.html'">
+  <div class="p-4 sm:p-6 h-full">
+    <div class="flex items-start gap-3 sm:gap-4 h-full">
+      <div class="flex-1 min-w-0 flex flex-col h-full">
+        <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
+          Ruby blocks made easy, part I, methods and procs
+        </h2>
+
+        <div class="mt-auto space-y-1.5 sm:space-y-2">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
+            <div class="flex items-center gap-1 sm:gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="truncate">10 Apr 2021</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>•</span>
+              <span class="text-base sm:text-lg">🇺🇸</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-1 flex-wrap">
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">ruby</span><span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">programming</span>
+    <span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+1</span>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </div>
+
+        <div id="no-results" class="hidden text-center text-base-content/85 py-16">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/50 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-lg font-semibold text-base-content/85 mb-2">No results found</h3>
+          <p class="text-base-content/50">Try a different search</p>
+        </div>
+
+        <div id="pagination-container" class="mt-8"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+  <script src="/static-search.js" defer></script>
+  <script src="/static-pagination.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

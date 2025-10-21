@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulating OOP in Bash - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Everyone knows that OOP stands for "Object-oriented programming". But what is **in fact** OOP? Is it a _Class_? Is it _inheritance_ and polymorphism like we lear">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html">
+  <meta property="og:title" content="Simulating OOP in Bash">
+  <meta property="og:description" content="Everyone knows that OOP stands for "Object-oriented programming". But what is **in fact** OOP? Is it a _Class_? Is it _inheritance_ and polymorphism like we lear">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-08-06T01:30:00Z">
+  <meta property="article:tag" content="oop">
+      <meta property="article:tag" content="bash">
+      <meta property="article:tag" content="linux">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Simulating OOP in Bash",
+    "datePublished": "2022-08-06T01:30:00Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Everyone knows that OOP stands for \"Object-oriented programming\". But what is **in fact** OOP? Is it a _Class_? Is it _inheritance_ and polymorphism like we lear",
+        "keywords": "oop, bash, linux"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Simulating OOP in Bash</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 06 Aug 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">oop</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">bash</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Everyone knows that OOP stands for “Object-oriented programming”. But what is <strong>in fact</strong> OOP? Is it a <em>Class</em>? Is it <em>inheritance</em> and polymorphism like we learned across hundreds of tutorials?</p>
+<p>Indeed, despite inheritance and polymorphism being <strong>important traits</strong> that complement OOP languages, none of them define the original concepts of OOP.</p>
+<p>In this post, I’ll try to demonstrate some elementary OOP concepts while we go together through a <em>bit of history</em> along with a very simple simulation of OOP in, you heard well, <strong>Bash script</strong>.</p>
+<hr />
+<h2><a href="#the-oop-definition" aria-hidden="true" class="anchor" id="the-oop-definition"></a>The OOP definition</h2>
+<p>According to the <a href="https://en.wikipedia.org/wiki/Object-oriented_programming">wikipedia</a>:</p>
+<blockquote>
+<p>OOP is a programming paradigm based on the concept of “objects”, which can contain data and code.</p>
+</blockquote>
+<p>In other words, OOP provides a <em>structure</em> where we can group related data or <em>state</em>, in the form of <strong>attributes</strong>; and code or <em>behaviour</em>, in the form of <strong>functions or methods</strong>.</p>
+<p>For instance, we could think of an object that <strong>represents</strong> a <em>Bank Account</em>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ilbt443omgvqpf9fs1yu.png" alt="object" /></p>
+<p>Everything related to a Bank Account could be grouped into this very single structure, <strong>an object</strong>.</p>
+<h2><a href="#how-is-oop-implemented" aria-hidden="true" class="anchor" id="how-is-oop-implemented"></a>How is OOP implemented?</h2>
+<p>In the early 60’s, a bunch of projects such as <a href="https://en.wikipedia.org/wiki/Simula">Simula</a> emerged with some implementations of “objects”. Basically it allowed to hold state and behaviour into a single unit called <em>object</em>.</p>
+<p>Later on the 70’s, Simula concepts influenced Alan Kay to create <a href="https://en.wikipedia.org/wiki/Smalltalk">Smalltalk</a>, an oriented-object programming language which opened a wide range of OO-based programming languages that came in the upcoming decades.</p>
+<p>Despite of many tutorials and courses prefer focusing on inheritance and polymorphism to explain OOP, I’d like to highlight 2 main traits that are exclusively <strong>elementary and enough</strong> for enabling OOP:</p>
+<ol>
+<li>objects must be able to <strong>hold a state</strong> (attributes)</li>
+<li>objects must be able to hold behaviour (functions) and <strong>execute/dispatch those functions dynamically</strong> at run time</li>
+</ol>
+<h2><a href="#why-bash" aria-hidden="true" class="anchor" id="why-bash"></a>Why Bash?</h2>
+<p>You may be wondering: <em>why in this world one would choose Bash to implement OOP</em>?</p>
+<p>I wanted to use a language which is not OOP by design. Also, such a language must not support <a href="https://en.wikipedia.org/wiki/Scope_(computer_science)#Lexical_scope">lexical scope</a>, which is a very important characteristic in order to have the 2nd trait (<a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">dynamic dispatch</a>) in place.</p>
+<p><a href="https://en.wikipedia.org/wiki/Bash_(Unix_shell)">Bash</a> is a command shell and <strong>script language</strong> that is implemented using simple <a href="https://en.wikipedia.org/wiki/Compiler">grammar rules</a> hence it does not support <em>lexical scope</em>.</p>
+<p>Don’t worry, we’ll understand what is <em>lexical scope</em> later in this post. Let’s start the implementation.</p>
+<hr />
+<h2><a href="#first-trait-objects-must-hold-state" aria-hidden="true" class="anchor" id="first-trait-objects-must-hold-state"></a>First trait: objects must hold state</h2>
+<p>Can we implement the first trait using Bash? <strong>Let’s try.</strong></p>
+<p>Objects must follow some sort of <em>template</em>. Then, we’re going to create an <code>Object</code> function that will represent the object template.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Pretty simple. Now, we have to call this function with some arguments. Suppose we want to create objects using the following syntax:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=500</span>
+</div></code></pre>
+<p>That would be great, wouldn’t it? May we explain the function arguments:</p>
+<ul>
+<li><code>$1</code>: the type of object, in this case, <code>account</code></li>
+<li><code>$2</code>: the reference to the object, <code>leandroAccount</code></li>
+<li><code>$3</code>+: a key-pair structure that should be parsed then saved into the object’s internal state</li>
+</ul>
+<p>Okay, time to implement the <code>Object</code> function. In bash, there’s no “internal state” of functions. Indeed, there’s a <em>local scope</em> but it can’t be used across different “objects” we may create.</p>
+<p><em>What should we do then?</em> <strong>Use global state.</strong></p>
+<p>It’s weird, I know, but it’s the only way to define an object’s state in Bash, since it has no <em>lexical scope</em>.</p>
+<blockquote>
+<p>Lexical scope is used to define a reserved area in memory for structures that may be evaluated with arbitrary arguments.</p>
+</blockquote>
+<p>But we can do a trick, by <strong>prepending the object’s reference</strong> at every attribute, for instance:</p>
+<ul>
+<li><code>leandroAccount_name</code> refers to the leandroAccount’s name</li>
+<li><code>leandroAccount_balance</code> refers to the leandroAccount’s balance</li>
+<li><code>carlosAccount_name</code> refers to the carlosAccount’s name</li>
+</ul>
+<p>…and so on.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span> <span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #7f848e;"># e.g account</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">kind</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span>
+</div><div class="line" data-line="4">  
+</div><div class="line" data-line="5">  <span style="color: #7f848e;"># e.g leandroAccount</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">self</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">2</span>
+</div><div class="line" data-line="7">  
+</div><div class="line" data-line="8">  <span style="color: #e5c07b;">shift</span> 
+</div><div class="line" data-line="9">  <span style="color: #e5c07b;">shift</span>
+</div><div class="line" data-line="10">  
+</div><div class="line" data-line="11">  <span style="color: #7f848e;"># iterates over the remaining args</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">for</span> <span style="color: #e06c75;">arg</span> <span style="color: #c678dd;">in</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">@</span>&quot;</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="13">    <span style="color: #7f848e;"># e.g name=Leandro becomes ARG_KEY=name ARG_VALUE=Leandro</span>
+</div><div class="line" data-line="14">    <span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">ARG_KEY</span> <span style="color: #e06c75;">ARG_VALUE</span> <span style="color: #56b6c2;">&lt;&lt;&lt;</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">arg</span>&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/(\w+)=(.*?)/\1 \2/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="15">    
+</div><div class="line" data-line="16">    <span style="color: #c678dd;">if</span> <span style="color: #c678dd;">[[</span> <span style="color: #56b6c2;">!</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ARG_KEY</span>&quot;</span> <span style="color: #c678dd;">]]</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #c678dd;">[[</span> <span style="color: #56b6c2;">!</span> <span style="color: #56b6c2;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ARG_VALUE</span>&quot;</span> <span style="color: #c678dd;">]]</span><span style="color: #abb2bf;">;</span> <span style="color: #c678dd;">then</span>
+</div><div class="line" data-line="17">      <span style="color: #7f848e;"># declare the object&#39;s state!!!!</span>
+</div><div class="line" data-line="18">      <span style="color: #7f848e;"># e.g export leandroAccount_balance=100</span>
+</div><div class="line" data-line="19">      <span style="color: #c678dd;">export</span> <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ARG_KEY</span><span style="color: #98c379;">=</span><span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">ARG_VALUE</span>&quot;</span>        
+</div><div class="line" data-line="20">    <span style="color: #c678dd;">fi</span>
+</div><div class="line" data-line="21">  <span style="color: #c678dd;">done</span>
+</div><div class="line" data-line="22"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Super nice! Let’s play a bit:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=500</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">leandroAccount_name</span>    <span style="color: #7f848e;"># prints Leandro</span>
+</div><div class="line" data-line="4"><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">leandroAccount_balance</span> <span style="color: #7f848e;"># prints 500</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">carlosAccount</span> <span style="color: #e06c75;">name=Carlitos</span> <span style="color: #e06c75;">balance=800</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">carlosAccount_name</span>    <span style="color: #7f848e;"># prints Carlitos</span>
+</div><div class="line" data-line="9"><span style="color: #e5c07b;">echo</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">carlosAccount_balance</span> <span style="color: #7f848e;"># prints 800</span>
+</div></code></pre>
+<p>Yay! We just proved that it’s possible to implement the first trait, <strong>holding an object’s state</strong>, in pure Bash script, <em>using global scope and object reference</em>.</p>
+<p>So far, so good, isn’t it?</p>
+<h2><a href="#second-trait-objects-must-support-dynamic-dispatch" aria-hidden="true" class="anchor" id="second-trait-objects-must-support-dynamic-dispatch"></a>Second trait: objects must support dynamic dispatch</h2>
+<p>Looking at the <a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">wikipedia</a>:</p>
+<blockquote>
+<p>Dynamic dispatch is the process of selecting which implementation of a polymorphic operation (method or function) to call at <strong>run time</strong>. It is commonly employed in, and considered a prime characteristic of, object-oriented programming (OOP) languages and systems.</p>
+</blockquote>
+<p>Can we implement this second trait, <strong>important for the object’s behaviour</strong>, in Bash? <em>Let’s try</em>.</p>
+<p>As one could guess, we can implement behaviour using functions. Suppose we want to call functions as follows:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">leandroAccount_fn_display</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">Leandro.</span> <span style="color: #e06c75;">Your</span> <span style="color: #e06c75;">balance</span> <span style="color: #e06c75;">is</span> <span style="color: #d19a66;">100</span>
+</div></code></pre>
+<p>In order to allow <em>saving the function name</em> into the object’s scope, we’d have to support <strong>lexical scope</strong>, which opens possibilities for computing techniques and structures such as late bindings and closures.</p>
+<p>Unfortunately, Bash has no support for lexical scope due to its simple grammar rules. Remember that it’s a <em>script language</em>, after all.</p>
+<p>But we can do another trick as well. How about passing the scope (object) <strong>as an argument</strong> to the function? Something like:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">leandroAccount</span>
+</div></code></pre>
+<p>Let’s try it.</p>
+<p>First, we have to define the <code>display</code> function:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">display</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">self</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_name</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">  <span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;Hello, <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #abb2bf;">!</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">&rbrace;</span>. Your balance is <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #abb2bf;">!</span><span style="color: #e06c75;">balance</span><span style="color: #abb2bf;">&rbrace;</span>&quot;</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Great. Now, time to create the object using the function as an argument:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;">## Note that we&#39;re using a different syntax for functions, by prepending a &quot;fn_&quot;, otherwise it would conflict with function attributes</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=500</span> <span style="color: #e06c75;">fn_display</span>
+</div></code></pre>
+<p>And, of course, we have to parse the fn argument in the <code>Object</code> function, by just adding the <code>elif</code> clause:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># ... code here</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">## Parse argument when matching functions</span>
+</div><div class="line" data-line="4"><span style="color: #7f848e;">## e.g fn_display -&gt; FUNC=display</span>
+</div><div class="line" data-line="5"><span style="color: #e5c07b;">read</span> <span style="color: #e06c75;">FUNC</span> <span style="color: #56b6c2;">&lt;&lt;&lt;</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">arg</span>&quot;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">sed</span> <span style="color: #e06c75;">-E</span> <span style="color: #98c379;">&quot;s/fn_(\w+)$/\1/&quot;</span><span style="color: #abb2bf;">)</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">...</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">elif</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">[</span> <span style="color: #e06c75;">!</span> <span style="color: #e06c75;">-z</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">FUNC</span>&quot;</span> <span style="color: #e06c75;">]</span><span style="color: #e06c75;">]</span> <span style="color: #56b6c2;">&amp;&amp;</span> <span style="color: #c678dd;">[[</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">FUNC</span>&quot;</span> <span style="color: #56b6c2;">!=</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #e06c75;">self</span>&quot;</span> <span style="color: #c678dd;">]]</span><span style="color: #abb2bf;">;</span> <span style="color: #61afef;">then</span>
+</div><div class="line" data-line="8">  <span style="color: #7f848e;">## Define the function in the global scope, prepending the object kind, e.g account_fn_display, user_fn_logout etc</span>
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">export</span> <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_fn_</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">FUNC</span><span style="color: #98c379;">=</span><span style="color: #abb2bf;">$</span><span style="color: #d19a66;">FUNC</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">fi</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #7f848e;"># ... code here</span>
+</div></code></pre>
+<p>At this time we are all set, as we can already call the function passing the object to it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=500</span> <span style="color: #e06c75;">fn_display</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">carlosAccount</span> <span style="color: #e06c75;">name=Carlitos</span> <span style="color: #e06c75;">balance=800</span> <span style="color: #e06c75;">fn_display</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">leandroAccount</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">carlosAccount</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">#### Result ####</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">Leandro.</span> <span style="color: #e06c75;">Your</span> <span style="color: #e06c75;">balance</span> <span style="color: #e06c75;">is</span> <span style="color: #d19a66;">100</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">Carlitos.</span> <span style="color: #e06c75;">Your</span> <span style="color: #e06c75;">balance</span> <span style="color: #e06c75;">is</span> <span style="color: #d19a66;">800</span>
+</div></code></pre>
+<p>Super Yay!</p>
+<p>We just proved that it’s perfectly possible to implement the second trait in Bash too, by using function local scope, object reference and argument passing.</p>
+<p>Thus, <strong>we can say we can implement OOP in Bash</strong>. Okay, very limited, but possible.</p>
+<h2><a href="#adding-more-functions" aria-hidden="true" class="anchor" id="adding-more-functions"></a>Adding more functions</h2>
+<p>Now, we can unlock the power of OOP in Bash by adding more behaviour as much as we want.</p>
+<p>Must implement a <code>deposit</code> function? No problem, that should be super easy at this moment:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">deposit</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">self</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">currentBalance</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">amount</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">2</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">export</span> <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance=</span><span style="color: #abb2bf;">$((</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">currentBalance</span> <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">amount</span><span style="color: #abb2bf;">))</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>And then:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=100</span> <span style="color: #e06c75;">fn_display</span> <span style="color: #e06c75;">fn_deposit</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_deposit</span> <span style="color: #e06c75;">leandroAccount</span> <span style="color: #d19a66;">50</span>
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">leandroAccount</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #7f848e;">## Result</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">Leandro.</span> <span style="color: #e06c75;">Your</span> <span style="color: #e06c75;">balance</span> <span style="color: #e06c75;">is</span> <span style="color: #d19a66;">150</span>
+</div></code></pre>
+<p>OMG, <em>what a wonderful day!</em></p>
+<h2><a href="#grouping-related-data-and-behaviour-together" aria-hidden="true" class="anchor" id="grouping-related-data-and-behaviour-together"></a>Grouping related data and behaviour together</h2>
+<p>At this moment, we have two functions at the script scope, <em>with no semantic meaning</em>.</p>
+<p>We can create another function that would wrap attributes and functions related to “accounts”. What about calling such a function, <code>Account</code>?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Account</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">display</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">self</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">name</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_name</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">    <span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&quot;Hello, <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #abb2bf;">!</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">&rbrace;</span>. Your balance is <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #abb2bf;">!</span><span style="color: #e06c75;">balance</span><span style="color: #abb2bf;">&rbrace;</span>&quot;</span>
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11">  <span style="color: #61afef;">deposit</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">self</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span>
+</div><div class="line" data-line="13">
+</div><div class="line" data-line="14">    <span style="color: #e06c75;">currentBalance</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">amount</span><span style="color: #56b6c2;">=</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">2</span>
+</div><div class="line" data-line="16">
+</div><div class="line" data-line="17">    <span style="color: #c678dd;">export</span> <span style="color: #abb2bf;">$&lbrace;</span><span style="color: #e06c75;">self</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">_balance=</span><span style="color: #abb2bf;">$((</span><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">currentBalance</span> <span style="color: #56b6c2;">+</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">amount</span><span style="color: #abb2bf;">))</span>
+</div><div class="line" data-line="18">  <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="19">
+</div><div class="line" data-line="20">  <span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #98c379;">&quot;<span style="color: #abb2bf;">$</span><span style="color: #d19a66;">@</span>&quot;</span>
+</div><div class="line" data-line="21">  <span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span> <span style="color: #e06c75;">fn_display</span>
+</div><div class="line" data-line="22">  <span style="color: #61afef;">Object</span> <span style="color: #e06c75;">account</span> <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">1</span> <span style="color: #e06c75;">fn_deposit</span>
+</div><div class="line" data-line="23"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>No way, <strong>it looks like a <code>Class</code></strong> we see in many Java/C++/Ruby tutorials!</p>
+<p>But it’s not a class in Bash. In the end, we’re just <em>simulating OOP</em>.</p>
+<p>However, since Bash relies in global scope because of its scripting language nature, we can organize our code using OOP, then allowing to interacting with objects like the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Account</span> <span style="color: #e06c75;">accountA</span> <span style="color: #e06c75;">name=Leandro</span> <span style="color: #e06c75;">balance=100</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Account</span> <span style="color: #e06c75;">accountB</span> <span style="color: #e06c75;">name=John</span> <span style="color: #e06c75;">balance=500</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_deposit</span> <span style="color: #e06c75;">accountA</span> <span style="color: #d19a66;">50</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">accountA</span>
+</div><div class="line" data-line="7"><span style="color: #abb2bf;">$</span><span style="color: #e06c75;">account_fn_display</span> <span style="color: #e06c75;">accountB</span>
+</div></code></pre>
+<p><strong>That’s amazing!</strong></p>
+<hr />
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>In this article I wanted to explain 2 important traits in OOP by using Bash script.</p>
+<p><a href="https://hipersayanx.blogspot.com/2012/12/object-oriented-programming-in-bash.html">This great blogpost</a> inspired me to explore implementing OOP in Bash. I’m not an expert in Bash, but it was very fun and pleasant to play at this matter.</p>
+<p>I hope you enjoyed the article, feel free to drop any comments. The code is shared <a href="https://gist.github.com/leandronsp/5e7c94ee5b4ea53ed28e9824ca8e243e">in this gist</a>.</p>
+<p>Not to mention, follow me in <a href="https://twitter.com/leandronsp">Twitter</a> and <a href="https://www.linkedin.com/in/leandronsp/">Linkedin</a>.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

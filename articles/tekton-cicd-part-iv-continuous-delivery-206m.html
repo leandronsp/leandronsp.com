@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tekton CI/CD, part IV, continuous delivery - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="The [previous post](https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a pipeli">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m.html">
+  <meta property="og:title" content="Tekton CI/CD, part IV, continuous delivery">
+  <meta property="og:description" content="The [previous post](https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a pipeli">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-02-21T22:13:39Z">
+  <meta property="article:tag" content="firstpost">
+      <meta property="article:tag" content="career">
+      <meta property="article:tag" content="discuss">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Tekton CI/CD, part IV, continuous delivery",
+    "datePublished": "2023-02-21T22:13:39Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "The [previous post](https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a pipeli",
+        "keywords": "firstpost, career, discuss"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Tekton CI/CD, part IV, continuous delivery</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 21 Feb 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">firstpost</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">career</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">discuss</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>The <a href="https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i">previous post</a> demonstrated how to <em>listen to Github events</em> and trigger a pipeline based on such event.</p>
+<p>So far, the pipeline consists in:</p>
+<ul>
+<li><strong>fetching</strong> the source code (from Github)</li>
+<li>building a Docker image (using dind) and <strong>running unit tests</strong></li>
+</ul>
+<p>We’re still missing the <strong>delivery</strong>, i.e <em>deploying our application to production</em>. That’s the subject of this article.</p>
+<hr />
+<h2><a href="#first-things-first" aria-hidden="true" class="anchor" id="first-things-first"></a>First things first</h2>
+<p>The process of <em>deploying</em> will be as follows:</p>
+<ul>
+<li><strong>build a Docker image</strong> of the application</li>
+<li><strong>push</strong> the image to the <strong>Docker registry</strong></li>
+<li>perform a <strong>rollout deployment</strong> in kubernetes, using <code>kubectl</code></li>
+</ul>
+<p>All of these steps will be made using Tekton tasks.</p>
+<p>We’ll keep using the application <a href="https://github.com/leandronsp/chespirito">chespirito</a>, but we are yet to deploy it to Kubernetes first, create a Docker registry to keep our images and lastly create a Task to perform the rollout with <code>kubectl</code>.</p>
+<h2><a href="#application-and-registry-setup" aria-hidden="true" class="anchor" id="application-and-registry-setup"></a>Application and registry setup</h2>
+<p>In order to setup the application in Kubernetes for the first time, we have to provide the Docker registry, which will be a Deployment Pod in the cluster.</p>
+<p>Both Chespirito Pod and Docker registry Pod are described <a href="https://gist.github.com/leandronsp/0dd7a3a3600fe23ecac1d41157373b4f">in this Gist</a>, so feel free to apply them in your cluster (don’t forget to change the <code>image</code> node because it may differ).</p>
+<p>After applying correctly, we may have the following output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                                         <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>             <span style="color: #e06c75;">RESTARTS</span>          <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">registry-pod-cdd5859d4-v6lrh</span>                 <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>            <span style="color: #d19a66;">15</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">152m</span> <span style="color: #e06c75;">ago</span><span style="color: #c678dd;">)</span>     <span style="color: #61afef;">40h</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">chespirito-pod-7d6679476f-7txjf</span>              <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>            <span style="color: #d19a66;">0</span>               <span style="color: #e06c75;">57m</span>
+</div></code></pre>
+<hr />
+<h2><a href="#to-the-pipeline" aria-hidden="true" class="anchor" id="to-the-pipeline"></a>To the Pipeline</h2>
+<p>Now, time to change our pipeline so it basically should cover:</p>
+<ul>
+<li>fetch source</li>
+<li>build (run tests + build an image for release)</li>
+<li>deploy</li>
+</ul>
+<h3><a href="#fetch-source-task" aria-hidden="true" class="anchor" id="fetch-source-task"></a>Fetch source Task</h3>
+<p>The <code>fetch-source</code> Task will keep intact, nothing to change here, just referencing to the task <code>git-clone</code> we imported from the Tekton Hub</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">fetch-source</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">git-clone</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">output</span>
+</div><div class="line" data-line="7">        <span style="color: #e06c75;">workspace</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">shared-data</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">url</span>
+</div><div class="line" data-line="10">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(params.repo-url)</span>
+</div><div class="line" data-line="11">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="12">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(params.revision)</span>
+</div></code></pre>
+<h3><a href="#build-task" aria-hidden="true" class="anchor" id="build-task"></a>Build task</h3>
+<p>The <code>build</code> Task should build an image, run tests at this image and then push such an image to the registry. Pipeline-wise, it should look in this way:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">build</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">runAfter</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;fetch-source&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">build</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">source</span>
+</div><div class="line" data-line="8">        <span style="color: #e06c75;">workspace</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">shared-data</span>
+</div></code></pre>
+<p>The Task itself consists of two steps:</p>
+<ul>
+<li>unit-tests</li>
+<li>release (push image to the registry)</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Task</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">build</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">source</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">stepTemplate</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">docker</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">workingDir</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(workspaces.source.path)</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">DOCKER_HOST</span>
+</div><div class="line" data-line="13">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tcp://localhost:2376</span>
+</div><div class="line" data-line="14">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">DOCKER_TLS_VERIFY</span>
+</div><div class="line" data-line="15">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;1&quot;</span>
+</div><div class="line" data-line="16">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">DOCKER_CERT_PATH</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;/certs/client&quot;</span>
+</div><div class="line" data-line="18">    <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/certs/client</span>
+</div><div class="line" data-line="20">        <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">dind-certs</span>
+</div><div class="line" data-line="21">  <span style="color: #e06c75;">steps</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="22">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">unit-tests</span>
+</div><div class="line" data-line="23">      <span style="color: #e06c75;">script</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="24"><span style="color: #98c379;">        <span style="color: #c678dd;">export</span> <span style="color: #d19a66;">CI_IMAGE</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">colima:31320/chespirito:ci</span></span>
+</div><div class="line" data-line="25"><span style="color: #98c379;"></span>
+</div><div class="line" data-line="26"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">pull</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span> <span style="color: #56b6c2;">||</span> <span style="color: #e5c07b;">true</span></span>
+</div><div class="line" data-line="27"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">build</span> <span style="color: #e06c75;">-t</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span> <span style="color: #e06c75;">.</span></span>
+</div><div class="line" data-line="28"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--rm</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span> <span style="color: #e06c75;">bash</span> <span style="color: #e06c75;">-c</span> <span style="color: #98c379;">&quot;ruby -Itest test/all.rb&quot;</span></span>
+</div><div class="line" data-line="29"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">push</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span></span>
+</div><div class="line" data-line="30">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">release</span>
+</div><div class="line" data-line="31">      <span style="color: #e06c75;">script</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="32"><span style="color: #98c379;">        <span style="color: #c678dd;">export</span> <span style="color: #d19a66;">CI_IMAGE</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">colima:31320/chespirito:ci</span></span>
+</div><div class="line" data-line="33"><span style="color: #98c379;">        <span style="color: #c678dd;">export</span> <span style="color: #d19a66;">RELEASE_IMAGE</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">colima:31320/chespirito</span></span>
+</div><div class="line" data-line="34"><span style="color: #98c379;"></span>
+</div><div class="line" data-line="35"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">pull</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span></span>
+</div><div class="line" data-line="36"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">image</span> <span style="color: #e06c75;">tag</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">CI_IMAGE</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RELEASE_IMAGE</span></span>
+</div><div class="line" data-line="37"><span style="color: #98c379;">        <span style="color: #61afef;">docker</span> <span style="color: #e06c75;">push</span> <span style="color: #abb2bf;">$</span><span style="color: #d19a66;">RELEASE_IMAGE</span></span>
+</div><div class="line" data-line="38"><span style="color: #98c379;"></span>
+</div></code></pre>
+<p>Note that:</p>
+<ul>
+<li>the <code>stepTemplate</code> block can be reused across different steps</li>
+<li>we’re using the <code>colima:31320</code> host because it’s the address of the <strong>private-insecure registry</strong> we installed previously <a href="https://gist.github.com/leandronsp/0dd7a3a3600fe23ecac1d41157373b4f">using this Gist</a></li>
+</ul>
+<p>And last but not least, the <code>sidecar</code> playing the role of <code>docker-in-docker</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">sidecars</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="3">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">dind</span>
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">docker:dind</span>
+</div><div class="line" data-line="5">      <span style="color: #e06c75;">securityContext</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">        <span style="color: #e06c75;">privileged</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">true</span>
+</div><div class="line" data-line="7">      <span style="color: #e06c75;">args</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">--storage-driver=vfs</span>
+</div><div class="line" data-line="9">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">--userland-proxy=false</span>
+</div><div class="line" data-line="10">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">--debug</span>
+</div><div class="line" data-line="11">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">--insecure-registry=colima:31320</span>
+</div><div class="line" data-line="12">      <span style="color: #e06c75;">env</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">DOCKER_TLS_CERTDIR</span>
+</div><div class="line" data-line="14">          <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/certs</span>
+</div><div class="line" data-line="15">      <span style="color: #e06c75;">volumeMounts</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/certs/client</span>
+</div><div class="line" data-line="17">          <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">dind-certs</span>
+</div><div class="line" data-line="18">        <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">mountPath</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(workspaces.source.path)</span>
+</div><div class="line" data-line="19">          <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">$(workspaces.source.volume)</span>
+</div><div class="line" data-line="20">      <span style="color: #e06c75;">readinessProbe</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="21">        <span style="color: #e06c75;">periodSeconds</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="22">        <span style="color: #e06c75;">exec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="23">          <span style="color: #e06c75;">command</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;ls&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;/certs/client/ca.pem&#39;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="24">  <span style="color: #e06c75;">volumes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="25">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">dind-certs</span>
+</div><div class="line" data-line="26">      <span style="color: #e06c75;">emptyDir</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>It’s quite similar to the sidecar we created in the last article, but this time we added the flag <code>--insecure-registry</code> to the command argument. Such flag is very important because <strong>the daemon running in dind is not aware</strong> of the Docker daemon that’s running in the cluster itself (after all, it’s <em>Docker in Docker</em>, remember?)</p>
+<p>Moreover, <code>colima</code> refers to my hostname in the <strong>colima VM</strong>, as the port <code>31320</code> is needed because the Kubernetes service that is exposing the Registry Pod is a <code>NodePort</code> service, which means it should be accessible anywhere in the cluster or VM. <em>Be aware that this hostname may change in your case, get to know your cluster IP first and use it</em>.</p>
+<h2><a href="#run-the-pipeline" aria-hidden="true" class="anchor" id="run-the-pipeline"></a>Run the Pipeline</h2>
+<p>Okay, time to run everything, but let’s create a <code>PipelineRun</code> to test it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PipelineRun</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">generateName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-pipeline-</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">pipelineRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-pipeline</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">https://github.com/leandronsp/chespirito.git</span>
+</div><div class="line" data-line="11">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">main</span>
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">workspaces</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">shared-data</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">volumeClaimTemplate</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="17">        <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="18">        <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteOnce</span>
+</div><div class="line" data-line="19">        <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="20">          <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="21">            <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/axbcqfouz666zhw4qouc.png" alt="dash2" /><br />
+:rocket: <strong>So far, so good.</strong></p>
+<p>But we’re still only pushing the image to the registry. Let’s go to the last task: <strong>deploy</strong>.</p>
+<h2><a href="#the-continuous-delivery-or-cd" aria-hidden="true" class="anchor" id="the-continuous-delivery-or-cd"></a>The continuous delivery, or CD</h2>
+<p>As far as we can tell, <strong>delivering applications</strong> mean applying patches, updates in a sustainable way, that does not harm the process and ensures the deployment is reliable and secure.</p>
+<p>At this moment, we’re doing a small part of “CD”, which is <em>pushing an image</em> ready for release to some registry. We are yet to use this image to update our production environment, i.e <strong>performing the rollout</strong>.</p>
+<h2><a href="#using-kubectl" aria-hidden="true" class="anchor" id="using-kubectl"></a>Using kubectl</h2>
+<p>Concerning the use of <code>kubectl</code>, we have to use some image from Docker Hub that already brings this tool, otherwise we would have to build an image on our own for that purpose.</p>
+<p>Luckily, the Tekton Hub provides a Task called <a href="https://hub.tekton.dev/tekton/task/kubernetes-actions">kubernetes-actions</a>, then all we have to do is install it and use it as we did in <code>git-clone</code>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">https://raw.githubusercontent.com/tektoncd/catalog/main/task/kubernetes-actions/0.2/kubernetes-actions.yaml</span>
+</div></code></pre>
+<p>It provides an image and the steps needed to perform any <strong>kubectl action</strong>.</p>
+<p>Going back to the pipeline, we have to add a Task to it, right after the <code>build</code> Task ref:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">deploy</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">runAfter</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;build&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">taskRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="5">      <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kubernetes-actions</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;script&quot;</span>
+</div><div class="line" data-line="8">        <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">          export RELEASE_IMAGE=colima:31320/chespirito</span>
+</div><div class="line" data-line="10"><span style="color: #98c379;"></span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">          kubectl set image deployment/chespirito-pod app=$RELEASE_IMAGE --record</span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">          kubectl rollout status deployment/chespirito-pod --timeout 5m</span>
+</div><div class="line" data-line="13"><span style="color: #98c379;"></span>
+</div></code></pre>
+<ul>
+<li>the <code>script</code> param is required by the Task in order to run an arbitrary script</li>
+<li><code>kubectl set image</code> allows to <strong>immediately</strong> change image in a deployment pod, which will trigger a <strong>rollout</strong></li>
+<li><code>kubectl rollout status</code> watches for the deployment to rollout completely</li>
+</ul>
+<h2><a href="#run-pipeline-run" aria-hidden="true" class="anchor" id="run-pipeline-run"></a>Run Pipeline, run!</h2>
+<p>We run the pipeline again, but it may fail because of permissions of the <code>default</code> ServiceAccount used by the <code>kubernetes-action</code> Task.</p>
+<p>That said, we can configure the RBAC for this Task:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ServiceAccount</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-service-account</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">---</span>
+</div><div class="line" data-line="6"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io/v1</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Role</span>
+</div><div class="line" data-line="8"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-role</span>
+</div><div class="line" data-line="10"><span style="color: #e06c75;">rules</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">apiGroups</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">&quot;*&quot;</span>
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">pods</span>
+</div><div class="line" data-line="15">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">deployments</span>
+</div><div class="line" data-line="16">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">deployments/scale</span>
+</div><div class="line" data-line="17">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">deployments/status</span>
+</div><div class="line" data-line="18">  <span style="color: #e06c75;">verbs</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">get</span>
+</div><div class="line" data-line="20">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">list</span>
+</div><div class="line" data-line="21">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">watch</span>
+</div><div class="line" data-line="22">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">create</span>
+</div><div class="line" data-line="23">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">delete</span>
+</div><div class="line" data-line="24">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">patch</span>
+</div><div class="line" data-line="25">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">update</span>
+</div><div class="line" data-line="26"><span style="color: #abb2bf;">---</span>
+</div><div class="line" data-line="27"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io/v1</span>
+</div><div class="line" data-line="28"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">RoleBinding</span>
+</div><div class="line" data-line="29"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="30">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-binding</span>
+</div><div class="line" data-line="31"><span style="color: #e06c75;">subjects</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="32"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ServiceAccount</span>
+</div><div class="line" data-line="33">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-service-account</span>
+</div><div class="line" data-line="34"><span style="color: #e06c75;">roleRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="35">  <span style="color: #e06c75;">apiGroup</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io</span>
+</div><div class="line" data-line="36">  <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Role</span>
+</div><div class="line" data-line="37">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-role</span>
+</div></code></pre>
+<p>The new ServiceAccount <code>tekton-kubectl-service-account</code> is allowed to only perform actions in pods and deployments.</p>
+<p>Now, we should place the <code>serviceAccountName</code> in the <code>PipelineRun</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PipelineRun</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">generateName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-pipeline-</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #7f848e;">#### Here! ####</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">serviceAccountName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-service-account</span>
+</div><div class="line" data-line="8"><span style="color: #abb2bf;">...</span>
+</div></code></pre>
+<p>Run that again and…<strong>everything worked as expected!</strong></p>
+<h2><a href="#last-things-last" aria-hidden="true" class="anchor" id="last-things-last"></a>Last things last</h2>
+<p>Of course, there’s no CI/CD if we have to perform manual actions. Let’s add the <code>serviceAccountName</code> to our current <strong>Trigger Template</strong> <code>github-pr-trigger-template</code> and open a PullRequest at the repository:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">triggers.tekton.dev/v1beta1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">TriggerTemplate</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">github-pr-trigger-template</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">params</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">revision</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">default</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">main</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">repo-url</span>
+</div><div class="line" data-line="10">  <span style="color: #e06c75;">resourcetemplates</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton.dev/v1beta1</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PipelineRun</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">generateName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">chespirito-pipeline-</span>
+</div><div class="line" data-line="15">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="16">      <span style="color: #7f848e;">#### Here! ####</span>
+</div><div class="line" data-line="17">      <span style="color: #e06c75;">serviceAccountName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">tekton-kubectl-service-account</span>
+</div><div class="line" data-line="18"><span style="color: #abb2bf;">...</span>
+</div></code></pre>
+<p>Open the PR and then… 💥</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/98wspclh0vhnonu2pxt3.png" alt="wonderful" /></p>
+<p>:rocket: <strong>How amazing is that?</strong> :beer:</p>
+<hr />
+<h2><a href="#the-final-architecture" aria-hidden="true" class="anchor" id="the-final-architecture"></a>The final architecture</h2>
+<p>The idea behind this series is a new way to think testing, building and delivering cloud-native application.</p>
+<p>Since we are in the “cloud-native” era, <strong>running isolated containers</strong> that do other jobs (i.e CI/CD) than the <em>business-only</em> may be cheaper and efficient.</p>
+<p>Take a look at how the architecture now looks way more simpler:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pxgtietff76dk3n2quc8.png" alt="architecture" /></p>
+<hr />
+<p>So far, we’ve seen the complete lifecycle of CI/CD, but we have more to come, for instance configuring a private Git repository (using SSH credentials as Kubernetes secrets) and using Tekton <strong>ClusterInterceptors</strong> to filter specific events and run different pipelines.</p>
+<p>Almost there, stay tuned! :rocket:</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

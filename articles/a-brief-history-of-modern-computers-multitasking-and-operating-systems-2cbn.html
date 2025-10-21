@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A brief history of modern computers, multitasking and operating systems - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In this article I'll try to write a brief history of modern computers, multitasking and how operating systems tackle concurrency. 
+
+## 40s
+The first *modern* com">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html">
+  <meta property="og:title" content="A brief history of modern computers, multitasking and operating systems">
+  <meta property="og:description" content="In this article I'll try to write a brief history of modern computers, multitasking and how operating systems tackle concurrency. 
+
+## 40s
+The first *modern* com">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-07-12T06:11:29Z">
+  <meta property="article:tag" content="unix">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="operatingsystems">
+      <meta property="article:tag" content="threads">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "A brief history of modern computers, multitasking and operating systems",
+    "datePublished": "2022-07-12T06:11:29Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In this article I'll try to write a brief history of modern computers, multitasking and how operating systems tackle concurrency. 
+
+## 40s
+The first *modern* com",
+        "keywords": "unix, linux, operatingsystems, threads"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">A brief history of modern computers, multitasking and operating systems</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 12 Jul 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">unix</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">operatingsystems</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">threads</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In this article I’ll try to write a brief history of modern computers, multitasking and how operating systems tackle concurrency.</p>
+<h2><a href="#40s" aria-hidden="true" class="anchor" id="40s"></a>40s</h2>
+<p>The first <em>modern</em> computers in the 40’s were capable of running programs built in <a href="https://en.wikipedia.org/wiki/Punched_card">punched cards</a>.</p>
+<p>At that moment, computers used to load <strong>one program at a time</strong>, and because of very modest speeds, programs would took <em>days</em> to finish, thus leading to long <em>waiting queues</em> for programmers.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mb794m14al7wbn4ns05j.jpeg" alt="computers in 40s" /></p>
+<h2><a href="#50s" aria-hidden="true" class="anchor" id="50s"></a>50s</h2>
+<p>A decade later, computers became a little faster and as such they could <strong>enqueue multiple programs at once</strong> using a FIFO system (first-in, first-out).</p>
+<p>Despite of the importance of enqueuing jobs and solving the <em>programmers waiting queues</em>, programs would still <strong>run one at a time</strong>, meaning that when a specific program gets blocked on <em>input or output</em> (<em>i.e</em> waiting the printer to finish printing the output), the <strong>CPU gets idle</strong>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pf7cr4inj8oisgvq6kba.jpeg" alt="computers 50s" /></p>
+<p>In other words, there’s no efficiency on the computer physical resources.</p>
+<h2><a href="#60s" aria-hidden="true" class="anchor" id="60s"></a>60s</h2>
+<p>Also called the “transistors era” or “third-generation computers”, in the 60’s we start seeing smaller yet even more faster computers.<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u767v3y9w88zi8neyt65.jpeg" alt="computers 60s" /><br />
+The main goal here is to keep up the CPU <strong>as busy as possible</strong>, denoting that while a specific program <em>waits</em> on I/O, another one can use a “slice” of the CPU.</p>
+<p>Two concurrent programs could use multiple computer resources <em>at the same time</em>.</p>
+<p>But how is this achieved?</p>
+<h3><a href="#monitors-the-former-operating-systems" aria-hidden="true" class="anchor" id="monitors-the-former-operating-systems"></a>Monitors, the former operating systems</h3>
+<p>Monitors were <em>primitive</em> systems that once installed in the computer, they could <strong>manage concurrent programs</strong> and give them a fair amount of the <em>CPU</em> while other programs are blocked on I/O.</p>
+<p>This “fairness” is based on an arbitrary time of the CPU, so as long as the Monitor thinks a program used its <em>fair time</em> of the CPU, it <strong>pauses</strong> this program and prevents it from using the CPU, giving priority to another program which was on the <strong>waiting queue</strong>.</p>
+<p>And this process repeats over and over again while programs finish their I/O operations.</p>
+<p>Such technique is called <a href="https://en.wikipedia.org/wiki/Time-sharing">time-sharing multitasking</a>.</p>
+<p>Make no mistake, <strong>concurrency</strong> is all about multiple concurrent programs getting a fair amount time of the CPU while they wait on I/O. It’s still <em>one</em> CPU for all of them, but the <em>Monitor</em> helps to <strong>keep the CPU busy as much as possible</strong>.</p>
+<p>By achieving multitasking and increasing the efficiency of resource utilization, we also increase the <em>volume of information being processed over time</em> (throughput).<br />
+<img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7xc368llk803usq1g9zu.jpeg" alt="tput" /></p>
+<h2><a href="#70s" aria-hidden="true" class="anchor" id="70s"></a>70s</h2>
+<p>This is the decade where more sophisticated “Monitor Systems” like <a href="https://en.wikipedia.org/wiki/Unix">Unix</a> were born. Those systems are called <a href="https://en.wikipedia.org/wiki/Operating_system">Operating Systems</a>, and this is the “cambrian explosion era” of computers.</p>
+<h2><a href="#operating-systems" aria-hidden="true" class="anchor" id="operating-systems"></a>Operating Systems</h2>
+<p>Like “Monitors”, Operating Systems were created to manage computer resources (CPU, memory, I/O) and guarantee a fair amount of computer resources (mainly CPU) to multiple concurrent programs running in the computer.</p>
+<p>Year after year, more operating systems are created. Let’s dig in the architecture of a modern operating system (OS):</p>
+<h3><a href="#programs-are-isolated" aria-hidden="true" class="anchor" id="programs-are-isolated"></a>Programs are isolated</h3>
+<p>Having <em>concurrency</em> in its realm, operating systems (OS from now on) need to guarantee that two different programs don’t use the same memory address. Otherwise, it would lead to a <a href="https://en.wikipedia.org/wiki/Race_condition">race condition</a>.</p>
+<p>For solving that problem and avoid race condition, a modern OS has to follow some rules:</p>
+<ul>
+<li>the program needs to be isolated, meaning it must have its own memory space</li>
+<li>programs can communicate to each other only via <strong>message passing</strong></li>
+<li>thus, programs need a unique identifier</li>
+</ul>
+<h3><a href="#os-processes" aria-hidden="true" class="anchor" id="os-processes"></a>OS Processes</h3>
+<p>These traits for a program to being isolated and having a unique identifier are what makes it a <strong>process</strong>.</p>
+<p>Then, basically, processes are <em>instances</em> of programs.</p>
+<p>Let’s check some processes on our OS:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ps</span> <span style="color: #e06c75;">ax</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">PID</span> <span style="color: #e06c75;">TTY</span>      <span style="color: #e06c75;">STAT</span>   <span style="color: #e06c75;">TIME</span> <span style="color: #e06c75;">COMMAND</span>
+</div><div class="line" data-line="4">  <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">pts/0</span>    <span style="color: #e06c75;">Ssl</span>    <span style="color: #e06c75;">0:00</span> <span style="color: #e06c75;">/usr/bin/qemu-x86_64</span> <span style="color: #e06c75;">/usr/bin/bash</span>
+</div><div class="line" data-line="5"> <span style="color: #d19a66;">53</span> <span style="color: #e06c75;">pts/0</span>    <span style="color: #e06c75;">Sl+</span>    <span style="color: #e06c75;">0:00</span> <span style="color: #e06c75;">/usr/bin/qemu-x86_64</span> <span style="color: #e06c75;">/usr/bin/sleep</span> <span style="color: #d19a66;">10</span>
+</div><div class="line" data-line="6"> <span style="color: #d19a66;">62</span> <span style="color: #e06c75;">?</span>        <span style="color: #e06c75;">Rl+</span>    <span style="color: #e06c75;">0:00</span> <span style="color: #e06c75;">/usr/bin/ps</span> <span style="color: #e06c75;">ax</span>
+</div></code></pre>
+<p>Note the process ID <code>53</code> which is running the command <code>sleep 10</code>. This process is <em>waiting</em> on the computer clock and is <strong>not using the CPU</strong>, and as soon as it finishes, the process is gone and completely removed from the OS.</p>
+<p>Now, let’s raise one more question: what if we write a program but within this program we want some specific <strong>blocks of code</strong> to being executed concurrently?</p>
+<p>Specifically saying, it’s a scenario where <em>a block of code is waiting on I/O, but another one in the same process is “free” to compete on CPU</em>.</p>
+<p>Enter <strong>threads</strong>.</p>
+<h3><a href="#os-threads" aria-hidden="true" class="anchor" id="os-threads"></a>OS Threads</h3>
+<p>Operating Systems also bring a concurrent primitive called <strong>Thread</strong>, which is <strong>bound to a process</strong> and can be treated as a concurrency unit like OS processes.</p>
+<p>Different threads <strong>running in the same process</strong> are not isolated, because they <em>share the same memory space</em>.</p>
+<p>Threads are created within programs developers use to write and do share the same process memory. Hence, Threads are bound to <strong>race conditions</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ps</span> <span style="color: #e06c75;">a</span> <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">pid,tid,command</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">PID</span>   <span style="color: #e06c75;">TID</span> <span style="color: #e06c75;">COMMAND</span>
+</div><div class="line" data-line="4">  <span style="color: #d19a66;">1</span>     <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">/usr/bin/qemu-x86_64</span> <span style="color: #e06c75;">/usr/bin/bash</span>
+</div><div class="line" data-line="5"><span style="color: #d19a66;">197</span>   <span style="color: #d19a66;">197</span> <span style="color: #e06c75;">/usr/bin/qemu-x86_64</span> <span style="color: #e06c75;">/usr/bin/sleep</span> <span style="color: #d19a66;">10</span>
+</div><div class="line" data-line="6"><span style="color: #d19a66;">200</span>   <span style="color: #d19a66;">200</span> <span style="color: #e06c75;">/usr/bin/ps</span> <span style="color: #e06c75;">ax</span> <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">pid,tid,command</span>
+</div></code></pre>
+<p>We can see the <code>TID</code> (thread ID) column, having the same identifier as the <code>PID</code> (process ID). Because every OS process by default, <em>has a main thread</em> running on it.</p>
+<p>Other threads might be created within the program by the application programmer.</p>
+<p>Okay, all of these stuff about <em>processes and threads</em> are cool and nice, but <strong>how do the OS manage those concurrency units</strong>?</p>
+<h3><a href="#os-scheduler" aria-hidden="true" class="anchor" id="os-scheduler"></a>OS Scheduler</h3>
+<p>The OS scheduler is a program which manages OS processes/ threads in the waiting queue and give them a fair amount of the CPU while others wait on I/O.</p>
+<p>Similar to the primitive “Monitor”, a scheduler uses <strong>time-sharing multitasking</strong> by pausing/resuming OS processes and threads through a <strong>context switch</strong>.</p>
+<p>OS Processes/Threads are preempted multiple times on CPU, and because of this nature of preempting concurrency units by <em>time</em>, most modern operating systems employ <strong>Preemptive Schedulers</strong>.</p>
+<h3><a href="#cooperative-scheduling" aria-hidden="true" class="anchor" id="cooperative-scheduling"></a>Cooperative scheduling</h3>
+<p>In the 70s/80s, a small amount of operating systems used to have a different scheduling strategy. Those schedulers <strong>do NOT preempt</strong> OS processes by time-sharing, but instead delegate to the OS process to make its own “context switch”, based on the process rules and requirements.</p>
+<p>Such scheduling is called “Cooperative Scheduling”, as the scheduler gives control to the process for making the context switch.</p>
+<p>However, most modern operating systems use preemptive multitasking, because they can have complete control over the concurrency units on the computer.</p>
+<h2><a href="#race-condition" aria-hidden="true" class="anchor" id="race-condition"></a>Race condition</h2>
+<p>As said earlier, OS processes are isolated <em>by design</em>, so they are not bound to race-conditions.</p>
+<p>However, threads do share the same memory space (the OS process memory), then programmers have to carefully design multi-threading systems.</p>
+<p>In the presence of a potential race condition, a single Thread can acquire a “lock”, which is an OS primitive that prevents other Threads in the same process from being preempted in the CPU.</p>
+<p>Still, locks can be cumbersome and lead to <strong>deadlocks</strong>, where two different Threads are <em>blocked forever</em> because they are waiting locks from each other.</p>
+<p>To avoid locking, other techniques which employ <strong>optmistic locking</strong> arise, where instead of acquiring OS locks, two different “versions” of data are generated then “compared” before updating.</p>
+<p>Yet another alternative to OS locks, is by making the Thread more “safe”, having its own isolated space, then communicating outside via <em>message passing</em>, similar to OS processes. Those threads follow the <a href="https://en.wikipedia.org/wiki/Actor_model">actor-model definition</a> and can be called “actors”.</p>
+<p>Both <strong>optmistic locking</strong> and <strong>actor-based threads</strong> rely on algorithms that can be implemented by runtimes and programming libraries.</p>
+<h2><a href="#multi-core-era" aria-hidden="true" class="anchor" id="multi-core-era"></a>Multi-core era</h2>
+<p>As the <a href="https://en.wikipedia.org/wiki/Moore%27s_law">Moore’s Law</a> comes to an end due to physical limitations of computer resources, CPU’s stopped increasing clock rates, which means they are <strong>not getting much faster</strong> since the mid 2000’s.</p>
+<p>CPU engineers then came to a great solution which is building multiple “CPU cores” into a single CPU-unit, where each CPU-core has the same clock speed. That’s why since the mid 2000’s we’ve seen the blast of multi-core processors as the number of cores are getting cheaper and increasing faster.</p>
+<p>Now that we understand concurrency and the importance to make the CPU busy, how can we <strong>increase the throughput of applications</strong> in such a scenario where CPU’s are not faster but do have multiple CPU-cores?</p>
+<p>Yes, using all the CPU-cores at the same time. It’s called <strong>parallelism</strong>.</p>
+<p>In a modern multiple-core CPU architecture, concurrent processes/threads that need CPU work can be executed <strong>in parallel</strong>.</p>
+<h2><a href="#non-blocking-era" aria-hidden="true" class="anchor" id="non-blocking-era"></a>Non-blocking era</h2>
+<p>On the other hand, in the lands of I/O, network bandwidth and SSD’s have gotten faster year after year.</p>
+<p>Then operating systems started to offer capabilities where process do not need to be “blocked” on I/O. These processes could be freed to do other work <strong>asynchronously</strong> and, as soon as the I/O operation is <em>completed</em>, the process is notified by the OS.</p>
+<p>Such technique is called “non-blocking I/O”, or “async I/O”.</p>
+<p>Runtime implementations such as NodeJS and other projects like Loom, PHP Swoole and Ruby3 employ concurrency primitives for taking advantage on async I/O, thus helping to increase the system overall throughput.</p>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>I hope this article helped you to understand a bit more about operating systems (OS) and how OS processes/threads are crucial units for tackling concurrency on computers.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

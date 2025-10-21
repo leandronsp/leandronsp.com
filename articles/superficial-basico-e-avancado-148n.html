@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superficial, básico e avançado - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Ufa, finalmente meu primeiro artigo de 2024. Criei ~~vergonha na cara~~ coragem e resolvi sentar e escrever um pouco.
+
+> Vou voltar a escrever coisas técnicas co">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/superficial-basico-e-avancado-148n.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/superficial-basico-e-avancado-148n.html">
+  <meta property="og:title" content="Superficial, básico e avançado">
+  <meta property="og:description" content="Ufa, finalmente meu primeiro artigo de 2024. Criei ~~vergonha na cara~~ coragem e resolvi sentar e escrever um pouco.
+
+> Vou voltar a escrever coisas técnicas co">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2024-03-09T17:34:25Z">
+  <meta property="article:tag" content="webdev">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Superficial, básico e avançado",
+    "datePublished": "2024-03-09T17:34:25Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Ufa, finalmente meu primeiro artigo de 2024. Criei ~~vergonha na cara~~ coragem e resolvi sentar e escrever um pouco.
+
+> Vou voltar a escrever coisas técnicas co",
+        "keywords": "webdev"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Superficial, básico e avançado</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 09 Mar 2024</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">webdev</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Ufa, finalmente meu primeiro artigo de 2024. Criei <del>vergonha na cara</del> coragem e resolvi sentar e escrever um pouco.</p>
+<blockquote>
+<p>Vou voltar a escrever coisas técnicas com frequência, prometo</p>
+</blockquote>
+<p>Mas antes de tudo, queria deixar claro que este <del>bait</del> post aqui é mais uma reflexão do que algo técnico. Não tem referências, não é uma verdade absoluta. Apenas uma reflexão.</p>
+<p>Afinal, como dividimos os níveis de conhecimento? Por exemplo, costumamos ver uma divisão entre básico, intermediário e avançado, certo?</p>
+<p>Aí é onde entra minha reflexão.</p>
+<h2><a href="#um-pouco-de-contexto" aria-hidden="true" class="anchor" id="um-pouco-de-contexto"></a>Um pouco de contexto</h2>
+<p>Esses dias estava conversando com uns colegas de trabalho e de repente chegamos nesse tema, sobre o que considerar básico ou avançado.</p>
+<p>Pra mim, um dos problemas é que esta divisão pode causar um pouco de ansiedade em algumas pessoas, pois elas se consideram no “básico” e se vêem muito longe do conhecimento que consideram “avançado”.</p>
+<p>O outro problema advém da régua que estamos nivelando. Ao determinar que tudo se começa pelo básico, e ao vermos que o distanciamento para o avançado é muito grande, isto pode nos deixar presos ao que consideramos básico, portanto, sempre nivelando o conhecimento médio para <em>baixo</em>.</p>
+<h2><a href="#o-básico-não-é-o-que-parece" aria-hidden="true" class="anchor" id="o-básico-não-é-o-que-parece"></a>O básico não é o que parece</h2>
+<p>Minha provocação é que o básico não deveria ser considerada a <em>porta de entrada</em> do conhecimento em algum tema.</p>
+<p>Ao entrarmos em alguma nova área de conhecimento, estamos de fato em uma <em>superfície</em>, portanto coloco este nível de conhecimento como <em>superficial</em>. Após termos um conhecimento superficial sobre algo, é o momento de entrarmos no básico, o que significa aprofundar um pouco mais neste conhecimento de tal modo que possamos estar <strong>dominando</strong> este conhecimento básico.</p>
+<p>Veja, não vamos considerar o <em>domínio em algo</em> como sendo expert ou avançado naquele conhecimento. Não. O domínio do básico deveria ser de tal forma que todos nós buscamos se tivermos algum interesse e, principalmente, se formos atuar com aquele tema no dia-dia.</p>
+<h2><a href="#deturparam-o-básico" aria-hidden="true" class="anchor" id="deturparam-o-básico"></a>Deturparam o básico</h2>
+<p>Muito se vê comentarem sobre o problema das pessoas saberem o básico ou então criticarem quando alguém compartilha algum tipo de conteúdo considerado “básico”.</p>
+<p>Algumas definições de <em>básico</em> no dicionário:</p>
+<blockquote>
+<p>Que serve como base; essencial, basilar.</p>
+</blockquote>
+<blockquote>
+<p>O mais relevante ou importante de; fundamental.</p>
+</blockquote>
+<p>Ou seja, o básico tem muito a ver com o <em>fundamental</em>, ou <em>essencial</em>. Ao meu ver, é <em>extremamente importante</em> dominarmos o básico se quisermos atuar com este conhecimento de forma frequente.</p>
+<h2><a href="#teu-conhecimento-é-superficial" aria-hidden="true" class="anchor" id="teu-conhecimento-é-superficial"></a>Teu conhecimento é superficial</h2>
+<p>Muitas vezes, o que pensamos ser o conhecimento básico em algo é, na verdade, um conhecimento superficial.</p>
+<p>Sabemos apenas a superfície. Temos uma noção de como aquilo funciona. Mas não conhecemos profundamente.</p>
+<p>Avançar para o básico consiste em aprofundar neste conhecimento. E o básico pode muitas vezes parecer <strong>complexo</strong>.</p>
+<p>Mas calma, já explico como dominar o conhecimento básico, e não precisa se desesperar, é necessário apenas um certo grau de dedicação que no fim vai fazer se sentir melhor e mais próximo do que consideramos <em>avançado</em>.</p>
+<h2><a href="#domínio-do-conhecimento-básico" aria-hidden="true" class="anchor" id="domínio-do-conhecimento-básico"></a>Domínio do conhecimento básico</h2>
+<p>Okay, mas como dominar o conhecimento básico? Aqui entra uma técnica muito sofisticada que consiste em:</p>
+<ul>
+<li>fazer tutoriais</li>
+<li>praticar</li>
+</ul>
+<blockquote>
+<p>Ah, Leandro. Você tá de BRINCADEIRA COM A MINHA CARA??</p>
+</blockquote>
+<p>Calma, xofem. Tutoriais são extremamente importantes. Faça tutoriais, um, dois, três, quantos puder. Tire conclusões. Descarte o que não vale a pena.</p>
+<p>E depois pratique com aquilo que já sabe. Por exemplo, ao aprender uma nova linguagem de programação, é muito útil escrever um projeto, trecho de código, algoritmo, estrutura de dado, whatever o que quiser que você já tenha feito em outras linguagens.</p>
+<p>Isto se chama <em>prática</em>. A prática vai fazer você sair do nível “tutorial” e aprofundar em conceitos básicos, o que naturalmente vai te fazer dominar este nível do conhecimento.</p>
+<p>Uma breve analogia (detesto analogias mas aqui vai) é quanto aos níveis de inglês, ou qualquer outro idioma. Muitos pensam que fluência em inglês está no último patamar <em>mas não</em>, a fluência está em todos os níveis: é possível saber apenas o básico do inglês mas buscar fluência dentro do básico.</p>
+<p>É sobre isto que estou falando.</p>
+<h2><a href="#saindo-do-superficial" aria-hidden="true" class="anchor" id="saindo-do-superficial"></a>Saindo do superficial</h2>
+<p>O lance é que podemos sair do superficial. Este conhecimento de superfície costumo dizer que é como “molhar o pé na piscina”. Molhou, a água tá boa? Dá um mergulho, sente a piscina (lá ele com analogia de novo, aff).</p>
+<p>O superficial nos dá uma noção, mas sentimos que não dominamos. Sentimos muita dificuldade. Pra mim, muitas dificuldades em algo denunciam um conhecimento superficial, e não o básico.</p>
+<p>Ao sair do superficial e buscarmos dominar o básico em algo, estamos subindo a régua, isto nos coloca mais próximos do que consideramos “avançado”, mas sem adicionar ansiedade.</p>
+<h2><a href="#tá-mas-o-quê-é-avançado" aria-hidden="true" class="anchor" id="tá-mas-o-quê-é-avançado"></a>Tá mas o quê é avançado?</h2>
+<p>Pra mim, o avançado é <em>basicamente</em> (trocadilho não intencional) se aprofundar ainda mais naquela área do conhecimento. É quando você, apesar de estar confortável com o conhecimento de base e não ficar bloqueado com frequência, quer entrar mais em detalhes e talvez buscar ser ainda mais proficiente naquela área.</p>
+<p>Não vou aprofundar em como entrar no avançado, talvez fique pra outro post. Mas aqui meu foco é saindo de superficial e entrando no básico.</p>
+<h2><a href="#vamos-a-exemplos-práticos" aria-hidden="true" class="anchor" id="vamos-a-exemplos-práticos"></a>Vamos a exemplos práticos</h2>
+<p>Por exemplo, em web, o conhecimento superficial seria saber que eu digito algo no navegador e alguma coisa acontece no servidor. Daí vou olhar o servidor pra ver o que aconteceu. Vejo logs, erros, etc e tento entender esses erros, perguntando, pesquisando e usando outros métodos.</p>
+<p>Já o conhecimento básico me coloca num ponto onde sei que por trás desse pedido do navegador, está acontecendo a resolução de nome, roteamento, conexão TCP através da internet, onde do outro lado há uma aplicação rodando em uma porta do sistema operacional atravé de TCP, etc e etc. Este conhecimento me ajuda a aumentar o vocabulário na área e a <em>extrapolar</em> para outros contextos que não web, facilitando na resolução de problemas (troubleshooting).</p>
+<p>Já o avançado é quando vou hackear roteadores, usar sysdig para fazer bait de hackers no meu servidor, entre outros aspectos (sigh).</p>
+<h2><a href="#outro-exemplo-prático" aria-hidden="true" class="anchor" id="outro-exemplo-prático"></a>Outro exemplo prático</h2>
+<p>Compiladores. Saber que nossa linguagem é “compilada” para código de máquina é um conhecimento superficial. Conseguimos seguir adiante com este conhecimento? Claro. No dia-dia muitos de nós fazemos CRUD, não é?</p>
+<p>Mas o conhecimento básico nos coloca em outro patamar, como entender que está acontecendo a etapa de análise léxica, parsing, otimizações, transformações etc antes de ser gerado de fato o código de máquina. Dominar o básico de compiladores pode ser essencial para identificar pontos de performance em alguma aplicação quando a “água bater no pescoço” em um problema bicudo.</p>
+<p>Se você estiver no superficial em compiladores, okay ninguém vai te cobrar nada. Mas imagina fazer parte do grupo que foi lá, arregaçou a manga e fez aquele tweak no interpretador adicionando uma mísera flag apenas porque você sabe <em>o básico de compiladores</em>? Então…</p>
+<p>Já o avançado de compiladores considero que seria entender a fundo as otimizações, criar o próprio JIT, fazer patch em runtime, escrever algoritmos de parsing e coisas do gênero.</p>
+<p>And so on…</p>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Veja, cara pessoa leitora, que não quero causar aqui algum tipo de entropia. Quero apenas que entenda que é possível dominar o básico sem ansiedade, sem toda a carga imposta para saber coisas avançadas em algo.</p>
+<p>Ao dominar o básico, um dia você pode encontrar inspiração e vontade para ir mais a fundo no avançado (mas isto não é de todo obrigatório), mas entenda que o conhecimento básico é que nos faz subir no conhecimento, nivelando a régua pra cima, e não pra baixo.</p>
+<blockquote>
+<p>Mas tudo o que você disse não é o mesmo que básico, intermediário e avançado?</p>
+</blockquote>
+<p>Interprete como quiser, mas a percepção de estarmos no básico nos afasta do intermediário. Bora sair do básico e ir pro intermediário então, se isto ajudar…rs</p>
+<blockquote>
+<p>Mas eu não quero saber o básico, quero ficar apenas no superficial</p>
+</blockquote>
+<p>Tá tudo bem também. É a sua escolha saber o superficial em algo. Se isto não causa nenhuma ansiedade ou te faz mal por não saber coisas mais “avançadas”, é perfeitamente aceitável continuar no superficial :)</p>
+<p>That’s all folks!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

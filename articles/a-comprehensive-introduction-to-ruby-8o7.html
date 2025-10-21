@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A comprehensive introduction to Ruby - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Another tutorial for learning Ruby? **Absolutely not**. This guide is different from the typical tutorials you'll find online.
+
+As someone new to Ruby, you've li">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/a-comprehensive-introduction-to-ruby-8o7.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/a-comprehensive-introduction-to-ruby-8o7.html">
+  <meta property="og:title" content="A comprehensive introduction to Ruby">
+  <meta property="og:description" content="Another tutorial for learning Ruby? **Absolutely not**. This guide is different from the typical tutorials you'll find online.
+
+As someone new to Ruby, you've li">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-04-28T03:40:38Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="rails">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "A comprehensive introduction to Ruby",
+    "datePublished": "2023-04-28T03:40:38Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Another tutorial for learning Ruby? **Absolutely not**. This guide is different from the typical tutorials you'll find online.
+
+As someone new to Ruby, you've li",
+        "keywords": "ruby, rails"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">A comprehensive introduction to Ruby</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 28 Apr 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">rails</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Another tutorial for learning Ruby? <strong>Absolutely not</strong>. This guide is different from the typical tutorials you’ll find online.</p>
+<p>As someone new to Ruby, you’ve likely already completed a few tutorials. Instead of providing yet another tutorial, this guide aims to offer unique insights and valuable resources to help you further your understanding of Ruby.</p>
+<blockquote>
+<p>🤔<br />
+But I’ve never completed any tutorial in Ruby</p>
+</blockquote>
+<p>Even if you haven’t completed any tutorials, this guide is designed to <strong>help you from the very beginning</strong>. By focusing on understanding the fundamentals, you’ll be able to practice with greater confidence and build a solid foundation in Ruby.</p>
+<hr />
+<h2><a href="#index" aria-hidden="true" class="anchor" id="index"></a>Index</h2>
+<p>In this article, we’ll cover the following topics:</p>
+<ul>
+<li>An overview of how Ruby is implemented</li>
+<li>A brief history of Ruby</li>
+<li>A short discussion of some of the key features of Ruby</li>
+<li>A simple “Hello, world” example in Ruby</li>
+<li>An introduction to IRB (Interactive Ruby)</li>
+<li>A short look at the data types in Ruby</li>
+<li>An exploration of why everything in Ruby is an object</li>
+</ul>
+<hr />
+<h2><a href="#-first-things-first" aria-hidden="true" class="anchor" id="-first-things-first"></a>🖖 First things first</h2>
+<p>Ruby is a versatile <strong>general-purpose</strong> language that can be used across various domains, from web development to IoT.</p>
+<p>However, it has gained significant adoption in the web development industry, particularly in the startup scene since the mid-2000s.</p>
+<p>It can be <a href="https://www.ruby-lang.org/en/downloads/">downloaded</a> in several ways, including using a Docker image for those who prefer using Docker.</p>
+<hr />
+<h2><a href="#-how-is-ruby-implemented" aria-hidden="true" class="anchor" id="-how-is-ruby-implemented"></a>💎 How is Ruby implemented</h2>
+<p>If you downloaded Ruby from the official website or used the default Docker image, you likely have the standard Ruby implementation: <strong>CRuby</strong>, which is primarily written in C.</p>
+<p>Although there are several implementations of Ruby, such as <em>JRuby and Rubinius</em>, <strong>CRuby</strong> is the most commonly used among major companies such as Shopify and Github.</p>
+<hr />
+<h2><a href="#-a-time-travel-to-the-rubys-history" aria-hidden="true" class="anchor" id="-a-time-travel-to-the-rubys-history"></a>⌛ A time travel to the Ruby’s history</h2>
+<p>Ruby was created in the early 1990s by Yukiriro Matsumoto, or “Matz”, a programmer and computer scientist in Japan.</p>
+<h3><a href="#-1993-where-it-all-started" aria-hidden="true" class="anchor" id="-1993-where-it-all-started"></a>🟢 1993, where it all started</h3>
+<p>Matz started the Ruby implementation in 1993, drawing inspiration from existing languages like Perl and Smalltalk. His implementation was called <strong>CRuby</strong>, or “MRI” (Matz Ruby Interpreter).</p>
+<p>👉 <strong>Ruby is interpreted</strong><br />
+CRuby is an <strong>interpreter</strong>, meaning that the source code is not compiled into optimized code; instead, it is interpreted line-by-line and translated to low-level instructions during execution.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ktz4dps84fxrw7ld6osx.png" alt="CRuby before YARV" /></p>
+<h3><a href="#-1995-2000-big-in-japan" aria-hidden="true" class="anchor" id="-1995-2000-big-in-japan"></a>🟢 1995-2000, big in Japan</h3>
+<p>Ruby was first released publicly in 1995, and until 1999, several features and improvements were added to the standard library. However, its adoption remained limited to Japan.</p>
+<p>In 2000, Dave Thomas and Andy Hunt published the first English-book on Ruby, “Programming Ruby” (a.k.a The <em>Pickaxe Book</em>), which played a crucial role in popularizing Ruby outside of Japan.</p>
+<h3><a href="#-2004-ruby-on-rails" aria-hidden="true" class="anchor" id="-2004-ruby-on-rails"></a>🟢 2004, Ruby on Rails</h3>
+<p><strong>Ruby on Rails</strong>, a web application framework built with Ruby, was released by David Heinemeier Hansson (a.k.a DHH). This framework played a significant role in Ruby’s widespread adoption in the web development community.</p>
+<h3><a href="#-2007-meet-yarv" aria-hidden="true" class="anchor" id="-2007-meet-yarv"></a>🟢 2007, meet YARV</h3>
+<p>CRuby was known to have various performance problems due to its interpretation process, lacking a compilation process such as <strong>JIT</strong> (Just-in-time compilation).</p>
+<p>During the development of version 1.9, the Ruby core team decided to refactor a significant portion of the CRuby source code. This resulted in the creation of the Ruby VM, which was integrated into the CRuby interpreter.</p>
+<p>The new VM, called <strong>YARV</strong> (Yet Another Ruby VM, duhh :P), takes the parsed tree (AST) and generates a bytecode instead of low-level instructions, enabling optimizations to be made. This bytecode is then translated into optimized low-level instructions, resulting in improved performance.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6qzkhbhh607fkrhruxks.png" alt="YARV" /></p>
+<p>Later, in the version 2.6, a new JIT was introduced, called <strong>MJIT</strong>. This uses a separate thread to perform optimizations on a portion of Ruby code, which are then joined during the execution process.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ro54m3maxvc5cjry8q7a.png" alt="YARV + MJIT" /></p>
+<h3><a href="#-2021-the-ruby-30" aria-hidden="true" class="anchor" id="-2021-the-ruby-30"></a>🟢 2021, the Ruby 3.0</h3>
+<p>After years of continuous improvement, <strong>Ruby 3.0</strong> was realeased in 2021, introducing new features to address the lack of <em>concurrency, parallelism, and async I/O</em>.</p>
+<p><strong>Ractors</strong> were introduced to enable parallelism on CPU, while <strong>Fibers</strong> brought a new scheduler interface that enables cooperative scheduling. When used with non-blocking I/O, this allows for faster Ruby applications that are heavily I/O bound.</p>
+<h3><a href="#-yjit-a-new-hope" aria-hidden="true" class="anchor" id="-yjit-a-new-hope"></a>🟢 YJIT, a new hope</h3>
+<p>The Ruby core team is currently developing a new version of Ruby that includes a faster JIT compiler called <strong>YJIT</strong>. This new JIT is expected to be faster than the current MJIT, providing significant performance improvements for Ruby applications.</p>
+<hr />
+<h2><a href="#-ruby-key-features" aria-hidden="true" class="anchor" id="-ruby-key-features"></a>💎 Ruby key features</h2>
+<p>Ruby is a high-level programming language that uses an interpreter to translate Ruby code into low-level code.</p>
+<p>Some of the key features of Ruby include:</p>
+<p>👉 <strong>Dynamic types</strong><br />
+Ruby is a dynamically typed language, which means that variable types are determined at runtime.</p>
+<p>👉 <strong>Object oriented</strong><br />
+Not only Ruby supports OOP, everything in Ruby is an object, including primitive data types like numbers and strings. By using dynamic dispatch, Ruby combines data and behaviour for almost everything in a Ruby program.</p>
+<p>👉 <strong>Mixins</strong><br />
+Ruby uses mixins instead of multiple inheritance, which allows for modular and reusable code. Mixins are achieved through the use of modules, which can be included in classes to provide additional functionality.</p>
+<p>👉 <strong>Garbage collected</strong><br />
+Ruby brings automatic memory management, taking care of allocating and freeing memory of objects as needed. This process is called Garbage Collection, or GC.</p>
+<p>👉 <strong>Metaprogramming</strong><br />
+Ruby allows for metaprogramming, which means that you can write code that generates or modifies other code at runtime. This feature enables expressive and flexible programming techniques like domain-specific languages (DSLs).</p>
+<p>👉 <strong>Functional programming</strong><br />
+Although Ruby is not a purely functional language, it supports functional programming concepts like high-order functions and immutable data structures. It also includes functional constructs like blocks, procs and lambdas, which enable the creation of expressive and concise code.</p>
+<hr />
+<h2><a href="#-hello-world" aria-hidden="true" class="anchor" id="-hello-world"></a>💎 Hello, world</h2>
+<p>Every programming language deserves a “Hello, world” example, and Ruby is no exception. Here’s the simplest “Hello, world” program you can write in Ruby:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ruby</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;print &quot;Hello, world\n&quot;&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">world</span>
+</div></code></pre>
+<ul>
+<li><code>ruby</code> is the CRuby interpreter that takes an input in the form of Ruby source code</li>
+<li>the <code>-e</code> option allows Ruby code to be passed directly to the command line instead of from a source file</li>
+<li><code>print</code> is a <em>method</em> in Ruby that outputs arbitrary text to STDOUT</li>
+<li>the message is finished with a <code>\n</code> character, which ensures the output is properly formatted and doesn’t overlap the next line in the shell</li>
+</ul>
+<p>Alternatively, Ruby provides a method called <code>puts</code> that automatically appends a <code>\n</code> character to the given text:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ruby</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;puts &quot;Hello, world&quot;&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">world</span>
+</div></code></pre>
+<hr />
+<h2><a href="#-irb" aria-hidden="true" class="anchor" id="-irb"></a>💎 IRB</h2>
+<p>Ruby’s interactive shell, known as IRB (Interactive Ruby), provides a convenient way to experiment with Ruby code and test small code snippets without needing to write and execute a full program.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">irb</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">irb</span><span style="color: #c678dd;">(</span><span style="color: #61afef;">main</span><span style="color: #c678dd;">)</span>:001:0<span style="color: #56b6c2;">&gt;</span>
+</div></code></pre>
+<p>Now, in IRB:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">1</span> <span style="color: #56b6c2;">+</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">2</span>
+</div></code></pre>
+<hr />
+<h2><a href="#-data-types" aria-hidden="true" class="anchor" id="-data-types"></a>💎 Data Types</h2>
+<p>Ruby includes data types commonly used in mainstream technologies:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Data</span> <span style="color: #e5c07b;">Type</span>  <span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Examples</span>                     <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Integer</span>    <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">42</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">10</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span>                   <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Float</span>      <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">3.14</span><span style="color: #abb2bf;">,</span> <span style="color: #56b6c2;">-</span><span style="color: #d19a66;">1.23e-4</span>               <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="6"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Boolean</span>    <span style="color: #56b6c2;">|</span> <span style="color: #d19a66;">true</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">false</span>                  <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">String</span>     <span style="color: #56b6c2;">|</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Hello, world!</span><span style="color: #98c379;">&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Ruby</span><span style="color: #98c379;">&#39;</span>      <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Array</span>      <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">]</span><span style="color: #abb2bf;">,</span>                   <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;">|</span>            <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;">apple</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">banana</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">cherry</span><span style="color: #98c379;">&#39;</span><span style="color: #c678dd;">]</span><span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="10"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Hash</span>       <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Alice</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">age</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">25</span><span style="color: #c678dd;">&rbrace;</span>     <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Symbol</span>     <span style="color: #56b6c2;">|</span> <span style="color: #e06c75;">:name</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">:age</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">:status</span>         <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="12"><span style="color: #56b6c2;">|</span> <span style="color: #e5c07b;">Nil</span>        <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">nil</span>                          <span style="color: #56b6c2;">|</span>
+</div><div class="line" data-line="13"><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">-</span><span style="color: #56b6c2;">+</span><span style="color: #e06c75;"></span>
+</div></code></pre>
+<p>👉 <strong>Ruby is dynamically typed</strong><br />
+As mentioned earlier, Ruby is a dynamically-typed language, meaning that variable types are determined at runtime.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">name</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Leandro</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">age</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">18</span>
+</div></code></pre>
+<p>It’s worth noting that Ruby doesn’t require variable type specifications.</p>
+<p>Instead, the interpreter dynamically infers the value’s data type at runtime, allowing programs to execute successfully without explicit type declarations.</p>
+<p>We can confirm this behavior by calling the <code>class</code> method on variables:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #e5c07b;">String</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #e06c75;">age</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #e5c07b;">Integer</span>
+</div></code></pre>
+<p>But how it’s possible to call methods from primitive data types in Ruby?</p>
+<hr />
+<h2><a href="#-everything-in-ruby-is-an-object" aria-hidden="true" class="anchor" id="-everything-in-ruby-is-an-object"></a>💎 Everything in Ruby is an object</h2>
+<p>Since <em>everything in Ruby is an object</em>, even primitive data types such as strings and integers can have instance methods called on them.</p>
+<p>This makes Ruby a highly object-oriented language, where every piece of data is represented as an object with its own state and behavior.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">name</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">object_id</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">80</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #e06c75;">age</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">object_id</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">37</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="8"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #e5c07b;">Integer</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">object_id</span>
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">3</span>
+</div></code></pre>
+<p>Before we dive deeper into object-oriented programming in Ruby, it’s important to understand <strong>what an object is</strong> and how it works in the context of the language.</p>
+<h3><a href="#-oop" aria-hidden="true" class="anchor" id="-oop"></a>🔵 OOP</h3>
+<p>Alan Kay, one of the pioneers of object-oriented programming (OOP), defined an object as a <strong>unit of software that encapsulates data and behavior</strong>.</p>
+<p>This definition means that an object combines data (state) and the code that manipulates that data (behavior), resulting in a more modular and organized approach to programming.</p>
+<h3><a href="#-oop-in-ruby" aria-hidden="true" class="anchor" id="-oop-in-ruby"></a>🔵 OOP in Ruby</h3>
+<p>To create objects in Ruby, we need to define a template that can generate multiple objects. In Ruby, this template is defined using the <code>class</code> keyword:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Objects in Ruby, also called instances, can be created by calling the method <code>new</code> in the class:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #7f848e;"># an instance of the Account class</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #7f848e;"># another instance</span>
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span> <span style="color: #7f848e;"># yet another instance</span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">...</span>
+</div></code></pre>
+<p>We can confirm that an instance object represents the <code>Account</code> class and holds an object ID by calling the instance methods <code>class</code> and <code>object_id</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">account</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">account</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #e06c75;">account</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">object_id</span>
+</div><div class="line" data-line="7"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">60</span>
+</div></code></pre>
+<p>👉 <strong>Classes are objects too</strong><br />
+Remember, everything in Ruby is an object. Classes are no different.</p>
+<p>Classes are just instances created from the class <code>Class</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">class</span><span style="color: #e06c75;"></span>
+</div><div class="line" data-line="2"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #e5c07b;">Class</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">object_id</span>
+</div><div class="line" data-line="5"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">80</span>
+</div></code></pre>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/73xehqnir7x719rex9fx.png" alt="classes are objects" /></p>
+<p>👉 <strong>Also, Integers are objects</strong><br />
+We can represent the integers as instances from the <code>Integer</code> class, since Integer is an instance of the <code>Class</code> class:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6y5lhspzf7bc7m27zdm4.png" alt="Integers are objects" /></p>
+<p>👉 <strong>Single inheritance</strong></p>
+<p>Ruby uses single inheritance, which means that every class inherits from a single superclass. It’s worth noting that every class in Ruby will inherit from the <a href="https://ruby-doc.org/core-3.0.0/BasicObject.html">BasicObject</a> parent class in some way.</p>
+<p>We can verify this behavior in Ruby by examining class hierarchies:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span>     <span style="color: #7f848e;"># Account</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">class</span>         <span style="color: #7f848e;"># Class</span>
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>    <span style="color: #7f848e;"># Object</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">class</span>               <span style="color: #7f848e;"># Integer</span>
+</div><div class="line" data-line="6"><span style="color: #e5c07b;">Integer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">class</span>         <span style="color: #7f848e;"># Class</span>
+</div><div class="line" data-line="7"><span style="color: #e5c07b;">Integer</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>    <span style="color: #7f848e;"># Numeric</span>
+</div><div class="line" data-line="8"><span style="color: #e5c07b;">Numeric</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>    <span style="color: #7f848e;"># Object</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #e5c07b;">Class</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>      <span style="color: #7f848e;"># Module</span>
+</div><div class="line" data-line="11"><span style="color: #e5c07b;">Module</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>     <span style="color: #7f848e;"># Object</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13"><span style="color: #e5c07b;">Object</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span>      <span style="color: #7f848e;"># BasicObject</span>
+</div><div class="line" data-line="14"><span style="color: #e5c07b;">BasicObject</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">superclass</span> <span style="color: #7f848e;"># nil</span>
+</div></code></pre>
+<p>Based on the example above, here’s a portion of the Ruby class hierarchy:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/lpid3tiwlidnyprpakd4.png" alt="class hierarchy" /></p>
+<h3><a href="#-modeling-oop-in-ruby" aria-hidden="true" class="anchor" id="-modeling-oop-in-ruby"></a>🔵 Modeling OOP in Ruby</h3>
+<p>In Ruby, everything is an object, which means that instances can hold state (attributes) and behavior (methods).</p>
+<p>In our current implementation, the <code>Account</code> class has no visible state or behavior, as it inherits all of its attributes and methods from the Object class. However, let’s say we want every <code>Account</code> instance to have a starting balance of zero.</p>
+<p>Let’s see the solution.</p>
+<p>👉 <strong>The initialize method</strong><br />
+Ruby provides a special method called <code>initialize</code>, which is automatically called every time a new instance is created (i.e., when <code>Account.new</code> is called).</p>
+<p>By default, <code>initialize</code> is empty, so there’s no need to define it. However, since we want to modify the initialization of the object, we should override the <code>initialize</code> method:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">@amount</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #e06c75;">leandro</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="8"><span style="color: #e06c75;">john</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div></code></pre>
+<p>You might be wondering about the <code>@</code> character that appears before the variable name in our example. In Ruby, variables inside methods are typically treated as local variables by default:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">some_method</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">name</span> <span style="color: #56b6c2;">=</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Leandro</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>It’s important to note that local variables within methods are discarded by the interpreter when the method is finished.</p>
+<p>To store variables that should persist during the lifetime of an object (i.e., its state), we should use <strong>instance variables</strong> instead. In Ruby, instance variables are denoted by the <code>@</code> symbol.</p>
+<p>Here’s a visual representation of instance variables:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7ifnjzf67otm30w60pla.png" alt="initialize with instance variable" /></p>
+<p>👉 <strong>Objects in Ruby are encapsulated</strong><br />
+In Ruby, an instance’s state is <strong>private by default</strong>, which means that we cannot directly access an object’s state from outside the object. Instead, we can use instance methods to retrieve or modify the object’s state.</p>
+<p>To demonstrate this, we can create an instance method called <code>balance</code>, which will return the current balance of the account object:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">@balance</span> 
+</div><div class="line" data-line="8">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>With the <code>balance</code> method defined, we can now retrieve the current balance of our account instance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">leandro</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span> 
+</div><div class="line" data-line="4"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">0</span>
+</div></code></pre>
+<p>It’s true that state without manipulation is often useless. To make our <code>Account</code> class more practical, we can define another <strong>instance method</strong> that will modify the balance:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">@balance</span>
+</div><div class="line" data-line="8">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">set_balance</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">balance</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="13"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #e06c75;">leandro</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="16"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">set_balance</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="17">
+</div><div class="line" data-line="18"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="19"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>In the <code>set_balance</code> method, it’s important to understand the difference between <code>balance</code> and <code>@balance</code>:</p>
+<ul>
+<li><code>balance</code> is a local variable that exists only during the lifetime of the method execution.</li>
+<li><code>@balance</code> is an instance variable that persists during the lifetime of the instance object.</li>
+</ul>
+<p>👉 <strong>Syntactic sugar all the way</strong><br />
+Now, suppose we want to modify the balance using a setter method. In Ruby, we can define setter methods by appending an <code>=</code> sign to the method name, like so: <code>balance=(balance)</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #56b6c2;">...</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">@balance</span> 
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">balance</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="9">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #e06c75;">leandro</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="13"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="16"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>Ruby is a language that values simplicity and readability, and it makes use of syntactic sugar to achieve this. One example of this is the ability to <strong>omit parentheses when calling methods</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">)</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># becomes</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>In fact, Ruby goes even further in its quest for readability and simplicity. When calling a method with a suffix of <code>=</code>, we can omit the parentheses and instead add a <strong>blank space before</strong> the <code>=</code> sign:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">10</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># becomes</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>Pretty cool, isn’t it? With this syntax, we can make method calls that look like variable assignments!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">@balance</span>
+</div><div class="line" data-line="8">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">balance</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="11">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">balance</span>
+</div><div class="line" data-line="12">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="13"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>👉 <strong>attr_reader/writer/accessor</strong><br />
+One of the great things about Ruby is that it provides built-in class methods like <code>attr_reader</code> that can help make our code more concise and readable.</p>
+<p>In particular, <code>attr_reader</code> works like a getter method for <strong>instance variables</strong>, allowing us to access their values from outside the class:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">@balance</span>  
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># becomes</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #e5c07b;">attr_reader</span> <span style="color: #e06c75;">:balance</span>
+</div></code></pre>
+<p>In addition to <code>attr_reader</code>, Ruby also provides <code>attr_writer</code>, which works like a setter method for instance variables:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">balance</span><span style="color: #56b6c2;">=</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">balance</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">@balance</span> 
+</div><div class="line" data-line="3"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;"># becomes</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #e5c07b;">attr_writer</span> <span style="color: #e06c75;">:balance</span>
+</div></code></pre>
+<p>Together, these two methods can help make our code more concise and easier to read, enabling us to quickly define and manipulate instance variables with ease:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #e5c07b;">attr_reader</span> <span style="color: #e06c75;">:balance</span>
+</div><div class="line" data-line="3">  <span style="color: #e5c07b;">attr_writer</span> <span style="color: #e06c75;">:balance</span>
+</div><div class="line" data-line="4">  
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>To further simplify the code, we can use <code>attr_accessor</code> when we have both a <code>attr_reader</code> and <code>attr_writer</code> method for the same instance variable:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">class</span> <span style="color: #e5c07b;">Account</span>
+</div><div class="line" data-line="2">  <span style="color: #e5c07b;">attr_accessor</span> <span style="color: #e06c75;">:balance</span>
+</div><div class="line" data-line="3">  
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">def</span> <span style="color: #61afef;">initialize</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">@balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9"><span style="color: #e06c75;">leandro</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Account</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">new</span>
+</div><div class="line" data-line="10"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">10</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #e06c75;">leandro</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">balance</span>
+</div><div class="line" data-line="13"><span style="color: #56b6c2;">=&gt;</span> <span style="color: #d19a66;">10</span>
+</div></code></pre>
+<p>Ruby truly does make programming a joy!</p>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this post, we provided a comprehensive introduction to the Ruby programming language.</p>
+<p>We covered a wide range of topics, from the implementation of Ruby and its history to its key features and data types.</p>
+<p>Finally, we explored the key concept that <strong>everything in Ruby is an object</strong>, giving you a solid foundation for understanding the <em>language’s core principles</em>.</p>
+<p>In future posts, we will continue to explore the key features of Ruby, including scopes, the self context, blocks, lambdas, and much more.</p>
+<p>By delving deeper into these topics, I hope to provide you with a comprehensive understanding of Ruby that will enable you to write powerful, effective code with ease.</p>
+<p>Stay tuned!</p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://www.ruby-lang.org/en/">Ruby official website</a><br />
+<a href="https://en.wikipedia.org/wiki/Ruby_(programming_language)">Wikipedia - Ruby programming language</a><br />
+<a href="https://en.wikipedia.org/wiki/Interpreter_(computing)">Wikipedia - Interpreter</a><br />
+<a href="https://blog.heroku.com/ruby-mjit">MJIT: a method based JIT compiler for Ruby</a><br />
+<a href="https://github.com/codicoscepticos/ruby-implementations/blob/master/README.md">Ruby implementations</a><br />
+<a href="https://shopify.engineering/yjit-just-in-time-compiler-cruby">YJIT - building a new JIT compiler for CRuby</a><br />
+<a href="https://dl.acm.org/doi/pdf/10.1145/3486606.3486781">YJIT - a basic block versioning JIT compiler for CRuby</a><br />
+<a href="https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/">Ruby 3.0 release notes</a></p>
+<hr />
+<p><em>This post was written with the assistance of <a href="https://openai.com/blog/chatgpt">ChatGPT</a>, which helped to compile information and identify grammar errors and inconsistencies</em>.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

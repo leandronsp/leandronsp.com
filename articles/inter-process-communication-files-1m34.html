@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inter-process communication: files - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="[In the previous post](https://dev.to/leandronsp/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers evolved t">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/inter-process-communication-files-1m34.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/inter-process-communication-files-1m34.html">
+  <meta property="og:title" content="Inter-process communication: files">
+  <meta property="og:description" content="[In the previous post](https://dev.to/leandronsp/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers evolved t">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-07-13T06:48:32Z">
+  <meta property="article:tag" content="unix">
+      <meta property="article:tag" content="linux">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Inter-process communication: files",
+    "datePublished": "2022-07-13T06:48:32Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "[In the previous post](https://dev.to/leandronsp/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers evolved t",
+        "keywords": "unix, linux"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Inter-process communication: files</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 13 Jul 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">unix</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p><a href="https://dev.to/leandronsp/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn">In the previous post</a> we learned that computers evolved to tackle <strong>concurrency</strong>, the reason why operating systems were created in order to share computer resources with running computer programs.</p>
+<p>The main concurrency unit primitive of an operating system is a <strong>process</strong>. Therefore, OS processes are isolated, which means they have their <em>own memory space</em>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/5dnz930twth07cbtch1z.jpeg" alt="process isolation" /></p>
+<p>However, eventually we <em>need</em> two different processes to communicate each other, either sending or consuming relevant data.</p>
+<p>Because of their nature of isolation, in order to communicate, OS processes need to share a common <strong>communication channel</strong>.</p>
+<p>That’s where we get introduced to a technique called <a href="https://en.wikipedia.org/wiki/Inter-process_communication">IPC</a>, or <strong>Inter-Process communication</strong>.</p>
+<p><strong><em>Disclaimer</em></strong>: in this article I’ll focus on explaining for UNIX-like operating systems. But all the theory and elementary aspects described here, can be used somehow in other operating systems too.</p>
+<hr />
+<h2><a href="#ipc-approaches" aria-hidden="true" class="anchor" id="ipc-approaches"></a>IPC approaches</h2>
+<p>Historically, as computers, operating systems and runtimes evolved, approaches for IPC have been developed, namely:</p>
+<ul>
+<li>Files</li>
+<li>Pipes</li>
+<li>Sockets</li>
+</ul>
+<p>…among others.</p>
+<p>Wait…what is a <strong>file</strong>? Or a <strong>socket</strong>? <em>Pipes</em>? <strong><em>No idea!</em></strong>. Trust me, it’s not that hard to understand.</p>
+<p>But in this very article, we’re going to focus in the <strong>files</strong> then <strong>file descriptors</strong>, leaving pipes and sockets for the next upcoming posts.</p>
+<h2><a href="#how-the-computer-data-is-stored" aria-hidden="true" class="anchor" id="how-the-computer-data-is-stored"></a>How the computer data is stored</h2>
+<p>The <em>computer storage</em> is the physical location in a computer where data is <em>stored</em>.</p>
+<p>Eventually, we need to access some specific data, right?</p>
+<p>How can we locate a <em>specific</em> data in the storage?</p>
+<p>It’s easy. We need to know the range where the data <strong>starts</strong> and where the data <strong>ends</strong>. Give to this <em>range</em> a name, then you have a <strong>file</strong>.</p>
+<p>Group all these files into a single system composed by <em>dictionaries</em>, and we have a <strong><em>filesystem</em></strong>.</p>
+<h2><a href="#filesystem" aria-hidden="true" class="anchor" id="filesystem"></a>Filesystem</h2>
+<p>Filesystem (or <strong>fs</strong>) is a place in the storage where <strong>all</strong> our data are stored in the computer.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jfcfq1m3xuie7jvkkisl.png" alt="filesystem" /></p>
+<p>Knowing that two different processes are isolated in their <em>own memory space</em> <strong>and</strong> they need to communicate to each other, we have no choices left for IPC but using the <strong>fs</strong>.</p>
+<h2><a href="#communication-channels" aria-hidden="true" class="anchor" id="communication-channels"></a>Communication channels</h2>
+<p>In order for processes to use the filesystem, they need to establish a <strong>communication channel</strong>. Such a channel uses a <em>special file</em> in the <strong>fs</strong>, called <strong>file descriptor</strong> (or <em>fd</em>).</p>
+<h3><a href="#file-descriptors" aria-hidden="true" class="anchor" id="file-descriptors"></a>File descriptors</h3>
+<p><em>File descriptor</em> is a <em>special</em> file, a unique identifier stored in a <em>file descriptor table</em> pointing to other files or <em>I/O resources</em>.</p>
+<h3><a href="#standard-streams" aria-hidden="true" class="anchor" id="standard-streams"></a>Standard streams</h3>
+<p>Every UNIX process comes by default with 3 <em>standard</em> communication channels, also known as <strong>standard streams</strong> represented by <em>file descriptors</em>:</p>
+<ul>
+<li><code>fd 0</code>: standard output (<strong>STDIN</strong>)</li>
+<li><code>fd 1</code>: standard input (<strong>STDOUT</strong>)</li>
+<li><code>fd 2</code>: standard error (<strong>STDERR</strong>)</li>
+</ul>
+<p>Let’s see them in action.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;Hello&#39;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Hello</span>
+</div></code></pre>
+<p>It seems pretty naive, right? But let’s understand what’s happening under the hood:</p>
+<ul>
+<li>the program <code>echo</code> sends a message to the <strong>STDOUT</strong> <code>0</code> and finishes</li>
+<li><strong>STDOUT</strong> is my computer monitor</li>
+</ul>
+<p>Easy as that. Next, we’ll see an example using the STDIN:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #7f848e;"># waits for data from STDIN</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">## Then I type &#39;leandro&#39;, followed by the ENTER key (CR), </span>
+</div><div class="line" data-line="4"><span style="color: #7f848e;">#### followed by `CTRL+D` to exit from the STDIN interface</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #e06c75;">bGVhbmRybwo</span><span style="color: #56b6c2;">=</span>
+</div></code></pre>
+<ul>
+<li>the program <code>base64</code> waits for data from the <strong>STDIN</strong> <code>0</code></li>
+<li><strong>STDIN</strong> is my keyboard</li>
+<li>I type my name, followed by <em>carriage return</em>*, followed by <code>CTRL+D</code></li>
+<li>the program sends the result to the <strong>STDOUT</strong> <code>1</code> and finishes</li>
+<li><strong>STDOUT</strong> is my computer monitor</li>
+</ul>
+<p>Look how some programs like <strong>base64</strong> can interact with both streams (STDIN and STDOUT).</p>
+<p>How about the <strong>STDERR</strong>?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #e06c75;">hahahaha</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">/usr/bin/base64:</span> <span style="color: #e06c75;">hahahaha:</span> <span style="color: #e06c75;">No</span> <span style="color: #e06c75;">such</span> <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">or</span> <span style="color: #e06c75;">directory</span>
+</div></code></pre>
+<p>As it waits for <em>STDIN</em>, the program itself raises an error to the <strong>STDERR</strong>, which by default in <em>most programs</em> is the <strong>STDOUT</strong>.</p>
+<p>That’s why we see the error in the screen monitor :)</p>
+<h3><a href="#stream-redirection" aria-hidden="true" class="anchor" id="stream-redirection"></a>Stream redirection</h3>
+<p>What if we wanted to redirect standard streams to another <strong>fd</strong>, or even <strong>to another file</strong>?</p>
+<p>Yes, it is possible. We can use the operator <code>&gt;</code> for <em>STDOUT/STDERR</em> and the operator <code>&lt;</code> for <em>STDIN</em>. Sounds familiar?</p>
+<p>Redirecting the <code>STDOUT 1</code> to another file:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;Hello&#39;</span> <span style="color: #56b6c2;">1</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">message.txt</span>
+</div></code></pre>
+<p>Then we can use the program <code>cat</code> to read the file:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">message.txt</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Hello</span>
+</div></code></pre>
+<p>Needless to say that the program <code>cat</code> sends the content to the <em>STDOUT</em>!</p>
+<p>Going back to the <code>base64</code> example, how could we redirect the STDERR to another file, instead of STDOUT? Yes, using <code>2&gt;</code>!</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #e06c75;">hahahaha</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">err.txt</span>
+</div></code></pre>
+<p>Great, now let’s “cat it”:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">cat</span> <span style="color: #e06c75;">err.txt</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">/usr/bin/base64:</span> <span style="color: #e06c75;">hahahaha:</span> <span style="color: #e06c75;">No</span> <span style="color: #e06c75;">such</span> <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">or</span> <span style="color: #e06c75;">directory</span>
+</div></code></pre>
+<p>Superb! We’re almost there!</p>
+<p>Oh, yes, I was almost forgetting. By default, the <code>fd</code> used when we redirect using only <code>&gt;</code> is the <code>fd 1</code>, or STDOUT.</p>
+<p>That’s why we see many examples like this one:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;leandro&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">message.txt</span> 
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;leandro&#39;</span> <span style="color: #56b6c2;">1</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">message.txt</span> <span style="color: #7f848e;"># it&#39;s the same!</span>
+</div></code></pre>
+<p>We can even use multiple redirections at the same command:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;leandro&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">message.txt</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">errors.txt</span>
+</div></code></pre>
+<p>Or, in case we want to <em>concentrate</em>* errors and messages in the same place <em>but</em> the STDOUT:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;some message&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">out.log</span> <span style="color: #56b6c2;">2</span><span style="color: #56b6c2;">&gt;&amp;</span><span style="color: #d19a66;">1</span>
+</div></code></pre>
+<p>The <code>&amp;1</code> means the current stream for the <code>fd 1</code>. In other words, we are redirecting STDERR to the same place where STDOUT <strong>was redirected</strong>.</p>
+<p>We can redirect STDIN too. First, we send some message to a file:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;some message&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">out.txt</span>
+</div></code></pre>
+<p>Then, in the <code>base64</code> program, we can redirect STDIN to reading directly from the file instead:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #d19a66;">0</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">out.txt</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">c29tZSBtZXNzYWdlCg</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">=</span>
+</div></code></pre>
+<p>UNIX allows us to remove the <code>0</code> because it’s redundant, since the operator <code>&lt;</code> is used only for <em>STDIN redirection</em>, right?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">out.txt</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">c29tZSBtZXNzYWdlCg</span><span style="color: #56b6c2;">=</span><span style="color: #98c379;">=</span>
+</div></code></pre>
+<p>Okay, but how two different processes can send messages to each other using the <em>standard streams</em>?</p>
+<h3><a href="#reading-files" aria-hidden="true" class="anchor" id="reading-files"></a>Reading files</h3>
+<p>This is a naive approach, where a process, using stream redirection, <em>writes</em> to a file. Then another different process <em>reads</em> from this very file.</p>
+<p><code>Process A</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">echo</span> <span style="color: #98c379;">&#39;hello from A!&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">process_a_messages.txt</span>
+</div></code></pre>
+<p>Then, from <code>Process B</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">cat</span> <span style="color: #e06c75;">process_a_messages.txt</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">hello</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">A!</span>
+</div></code></pre>
+<p>Very naive at first, but if we analyse carefully, we can note that:</p>
+<ul>
+<li>a process called “A” using the program <code>echo</code>, sends a message to the redirected STDOUT</li>
+<li>another process called “B” using the program <code>cat</code> reads a message from the redirected STDIN, which is the file written by the process A</li>
+</ul>
+<p>Making more sense? This conclusion is crucial:</p>
+<blockquote>
+<p>A process’s STDOUT is used to be the STDIN of another process</p>
+</blockquote>
+<p>Wow! That’s wonderful as it opens infinite possibilities to IPC, such as <strong>UNIX pipes</strong> which we’ll see in the next post.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;my precious&#39;</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">rawcontent.txt</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">rawcontent.txt</span>
+</div></code></pre>
+<h3><a href="#using-other-file-descriptors" aria-hidden="true" class="anchor" id="using-other-file-descriptors"></a>Using other file descriptors</h3>
+<p>Apart from the standard streams, can we create more file descriptors and use them for IPC?</p>
+<p>Yes. Let’s first create a directory where we’re gonna store our custom <strong>fd’s</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">mkdir</span> <span style="color: #e06c75;">/tmp/fd</span>
+</div></code></pre>
+<p>Then, we prepare a custom file descriptor <code>42</code> that will be our <em>single-communication channel</em> between two processes. First, we open the <code>fd</code> for <strong>writing</strong> (STDOUT):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">exec</span> <span style="color: #56b6c2;">42</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">/tmp/fd/42</span>
+</div></code></pre>
+<p>Now, from the process “A”, we send a message to the custom file descriptor using <em>stream redirection</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #98c379;">&#39;message from the process A&#39;</span> <span style="color: #56b6c2;">&gt;&amp;</span><span style="color: #d19a66;">42</span>
+</div></code></pre>
+<p>As for the process reader, we have to open the <code>fd</code> for <strong>reading</strong> (STDIN):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">exec</span> <span style="color: #56b6c2;">42</span><span style="color: #56b6c2;">&lt;</span> <span style="color: #61afef;">/tmp/fd/42</span>
+</div></code></pre>
+<p>And from the process “B”, we read the message from the <em>same</em> file descriptor using <em>stream redirection</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">base64</span> <span style="color: #56b6c2;">&lt;&amp;</span><span style="color: #d19a66;">42</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">bWVzc2FnZSBmcm9tIHRoZSBwcm9jZXNzIEEK</span>
+</div></code></pre>
+<p>We can’t forget to close the <code>fd</code> for both reading and writing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">exec</span> <span style="color: #56b6c2;">42</span><span style="color: #56b6c2;">&lt;&amp;-</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">exec</span> <span style="color: #56b6c2;">42</span><span style="color: #56b6c2;">&gt;&amp;-</span>
+</div></code></pre>
+<p>Yay! So much power using only <strong>file descriptors</strong> for IPC!</p>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>This article was a try to resume and explain the fundamentals behind using files as a primitive approach for inter-process communication.</p>
+<p>In the upcoming articles we will see other approaches such as <em>pipes, sockets and message queues</em>. Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voltando às raízes de blogueiro - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Já faz um tempo que não escrevo aqui no blog. 
+
+E também já faz bastante tempo que tenho o interesse em voltar a escrever mais como fazia antigamente, quando tud">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/voltando-as-raizes-de-blogueiro.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/voltando-as-raizes-de-blogueiro.html">
+  <meta property="og:title" content="Voltando às raízes de blogueiro">
+  <meta property="og:description" content="Já faz um tempo que não escrevo aqui no blog. 
+
+E também já faz bastante tempo que tenho o interesse em voltar a escrever mais como fazia antigamente, quando tud">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2025-10-18T20:05:19Z">
+  <meta property="article:tag" content="blog">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Voltando às raízes de blogueiro",
+    "datePublished": "2025-10-18T20:05:19Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Já faz um tempo que não escrevo aqui no blog. 
+
+E também já faz bastante tempo que tenho o interesse em voltar a escrever mais como fazia antigamente, quando tud",
+        "keywords": "blog"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Voltando às raízes de blogueiro</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 18 Oct 2025</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">blog</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Já faz um tempo que não escrevo aqui no blog.</p>
+<p>E também já faz bastante tempo que tenho o interesse em voltar a escrever mais como fazia antigamente, quando tudo o que tinha era algo na mente e simplesmente convertia em um punhado de texto solto no meu blog, como <a href="https://leandromaringolo.blogspot.com/">essa relíquia</a> aqui.</p>
+<p>Gosto de escrever artigos técnicos, mas por outro lado também gosto de simplesmente sentar e começar a escrever sem grandes pretensões. Só que me faltava algo. Eu só não sabia o que era.</p>
+<p>Para entender o que me faltava, vamos dar uns passos atrás e entender o contexto de como eu vinha utilizando plataformas de blogging e o cenário de blogging moderno.</p>
+<h2><a href="#blogpost" aria-hidden="true" class="anchor" id="blogpost"></a>Blogpost</h2>
+<p>A primeira plataforma que utilizei foi o <a href="https://www.blogger.com/">Blogger</a>, antigo <em>blogspot</em>, onde comecei a escrever meus primeiros artigos quando eu ainda “mexia com TI”. <strong>O ano era 2009</strong>.</p>
+<p>Eu compartilhava <a href="https://leandromaringolo.blogspot.com/">estudo de programação</a> quando tinha terminado a faculdade e também as gambiarras que eu fazia instalando e corrigindo problemas no Windows XP com Service Pack 3®.</p>
+<p>Atualmente o editor é assim, mas na época era bastante limitado:</p>
+<p><img src="/uploads/835.png" alt="image" /></p>
+<p>Não é ruim até, mas repara como que o <strong>espaço não é aproveitado</strong>. E uma coisa que eu sempre prezo ao escrever é, no caso, o <em>conforto em escrever</em>. Gosto de uma pegada fluída, com fonte agradável e que tenha um bom contraste. No caso desta plataforma em questão, eu tenho que clicar num botão de “Preview” e assim sou direcionado para outra página, saindo completamente do contexto.</p>
+<p>Isso me entristece, muito.</p>
+<p>Foram bons momentos como blogueirinho no Blogger, mas fiquei uns anos sem escrever por conta de vários motivos até que…</p>
+<h2><a href="#medium" aria-hidden="true" class="anchor" id="medium"></a>Medium</h2>
+<p>Circa 2014 <a href="https://medium.com/@leandronsp">decidi experimentar</a> voltar a escrever, mas desta vez no Medium. Fiz apenas um punhado de artigos sem grandes pretensões, mas eu tinha gostado da fluidez (na época) de escrever na plataforma deles.</p>
+<p>Entretanto a experiência de escrever ainda tava longe de ser a que eu queria. Mas eu nem sabia o que queria.</p>
+<p><img src="/uploads/899.png" alt="image" /></p>
+<blockquote>
+<p>Cadê o botão de preview? Oh, gosh…</p>
+</blockquote>
+<p>Fast-forward para 2021.</p>
+<h2><a href="#devto-e-hashnode" aria-hidden="true" class="anchor" id="devto-e-hashnode"></a>DEV.to e Hashnode</h2>
+<p>A plataforma dev.to me pareceu a princípio bastante intuitiva. Tem um lance de comunidade que é bacana, porque para além de ser uma plataforma de blogging é também uma comunidade em volta disso. Sem contar com o <strong>suporte a Markdown</strong> que nos dias de hoje é crucial para escrever artigos.</p>
+<p>Decidi <a href="https://dev.to/leandronsp">criar uma conta</a> lá e desde então tenho <strong>publicado quase 100 artigos</strong>:</p>
+<p><img src="/uploads/931.png" alt="image" /></p>
+<p>Ao mesmo tempo, a experiência de escrever era a melhor de todas que eu encontrei, mas ainda faltava uma coisa que eu já estava começando a perceber: <em>preview em tempo real</em>.</p>
+<p>É muito chato você escrever bastante coisa e ter que clicar num botão lá em cima pra abrir outra página que, não raramente, demora pra carregar. É uma experiência que não sou fã 100%.</p>
+<p><img src="/uploads/7650.png" alt="image" /></p>
+<p>Na mesma época eu queria algo parecido mas que pudesse ter uma “landing page” no estilo dos blogs antigos com um menu customizado com os links que eu quisesse colocar. Para além do suporte a Markdown e um editor fluído. Foi quando conheci o <a href="https://hashnode.com/@leandronsp">Hashnode</a>.</p>
+<p>Com Hashnode, eu pude criar uma página “customizada” com menu e assim organizar melhor meus artigos. Mas me faltava ainda algo mais configurável.</p>
+<p>Pra não mencionar que a experiência de escrita continuava a ser a mesma: <em>ter que clicar num botão de preview</em> que, com uma latência absurda, faz 412 coisas menos mostrar o preview que você verdadeiramente quer naquele momento.</p>
+<p><img src="/uploads/995.png" alt="image" /></p>
+<p>Acabou que deixei o Hashnode flopar, mas ficou com meu domínio <code>leandronsp.com</code> e passei a escrever mais pelo DEV.to mesmo.</p>
+<p><em>Era o que tinha pra janta</em>.</p>
+<blockquote>
+<p>Mas Leandro, existem ferramentas de visualização de Markdown, você consegue usar isso no Obsidian, na linha de comando, com plugin do Vim, com extensão do VSCode, etc etc</p>
+</blockquote>
+<p>Calma, calabreso. Eu quero apenas escrever, ver em tempo real o que estou escrevendo <em>sendo renderizado</em> e a seguir publicar. That’s it. Pra mim o web browser é ainda a ferramenta onde sinto mais conforto ao fazer esse tipo de tarefa.</p>
+<blockquote>
+<p>Desculpa galera do terminal, mas como um heavy-terminal user e Vimer raiz, eu ainda prefiro blogar no browser</p>
+</blockquote>
+<p>Foi assim até 2 dias atrás.</p>
+<h2><a href="#a-vontade-de-escrever-sobre-unix-signals" aria-hidden="true" class="anchor" id="a-vontade-de-escrever-sobre-unix-signals"></a>A vontade de escrever sobre UNIX signals</h2>
+<p>Como aqueles momentos em que do nada me vem a cabeça experimentar algo inútil que ninguém pediu e que provavelmente não vai pedir, decidi criar um broker de mensageria utilizando apenas sinais UNIX.</p>
+<blockquote>
+<p>Em breve publico isto, foi divertido</p>
+</blockquote>
+<p>Então, como de praxe, resolvi sentar pra escrever sobre. No DEV.to como habitual. Mas quer saber?</p>
+<p><em>Cansei</em>.</p>
+<p>Resolvi criar meu próprio motor de blog que iria me atender em todos os aspectos que sinto falta nos motores atuais: aproveitar espaço, trazer <em>preview em tempo real</em>, navegação fluída, simples e sem muito ruído, tudo com suporte a Markdown.</p>
+<p>Eu queria algo mais ou menos assim:</p>
+<p><img src="/uploads/7778.png" alt="image" /></p>
+<p>Com isto em mente, resolvi criar o <a href="https://github.com/leandronsp/curupira">curupira</a>.</p>
+<h2><a href="#curupira" aria-hidden="true" class="anchor" id="curupira"></a>Curupira</h2>
+<p>Pra quem já me conhece sabe que sou péssimo com nomes, mas resolvi dar esse nome em homenagem ao nosso folclore brasileiro e ao protetor das nossas matas. Só porque sim.</p>
+<p>No intuito de ter uma navegação fluída como a que eu sonhava, decidi utilizar <a href="https://hexdocs.pm/phoenix_live_view/welcome.html">Phoenix LiveView</a>. Em resumo, é uma tecnologia que escala absurdamente por conta da VM que roda por baixo, a <em>BEAM</em>. Meu objetivo de ter de um lado o editor para escrever e do outro um preview em tempo real poderia ser finalmente atingido de forma simples.</p>
+<p>É muito, mas muito simples criar apps real-time com Phoenix LiveView. A seguir uma demonstração de como pode ficar a página inicial do curupira:</p>
+<p><img src="/uploads/484.png" alt="image" /></p>
+<p>Basicamente você tem de um lado uma bio que resume teu blog, e do outro a lista de artigos. <em>É isto</em>. Não precisa ser complicado, temos que aproveitar o máximo de espaço possível na tela.</p>
+<p><img src="/uploads/516.png" alt="image" /></p>
+<p>Dá também pra alternar entre tema claro e escuro:</p>
+<p><img src="/uploads/4098.png" alt="image" /></p>
+<p>Além de tudo isso, é possível também gerar o site estático a partir de um comando <code>make</code>.</p>
+<blockquote>
+<p>Isto vai ser melhorado em breve, quero também deixar o processo de geração do site estático mais fluído e UX-friendly em um futuro próximo</p>
+</blockquote>
+<h2><a href="#leandronspcom" aria-hidden="true" class="anchor" id="leandronspcom"></a>leandronsp.com</h2>
+<p>Após gerar o site estático, mudei o apontamento do meu domínio principal para o Cloudflare Pages, mas poderia ser qualquer outro como Github Pages, Vercel, etc (esta parte ainda está manual no momento, vem mais coisa em breve).</p>
+<p>Meu novo site ficou então assim:</p>
+<p><img src="/uploads/4194.png" alt="image" /></p>
+<p><img src="/uploads/4258.png" alt="image" /></p>
+<p>Preferi fazer com que a página do artigo tivesse espaço suficiente para o conteúdo, e não para ruídos.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>É isto, pra quem tiver curiosidade em ver o repositório <a href="https://github.com/leandronsp/curupira">leandronsp/curupira</a>, publiquei hoje mas ainda está WIP.</p>
+<p>Este artigo já foi escrito com o curupira, e em breve será publicado neste blog.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

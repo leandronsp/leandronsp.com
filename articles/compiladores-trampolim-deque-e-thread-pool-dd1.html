@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compiladores, trampolim, deque e thread pool - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Faz alguns dias que não escrevo. Minha rotina mudou um pouco e também tenho focado em estudar algumas coisas que eu não tinha tanto domínio. Entretanto tenho alg">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html">
+  <meta property="og:title" content="Compiladores, trampolim, deque e thread pool">
+  <meta property="og:description" content="Faz alguns dias que não escrevo. Minha rotina mudou um pouco e também tenho focado em estudar algumas coisas que eu não tinha tanto domínio. Entretanto tenho alg">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-10-17T06:08:01Z">
+  <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="webdev">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Compiladores, trampolim, deque e thread pool",
+    "datePublished": "2023-10-17T06:08:01Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Faz alguns dias que não escrevo. Minha rotina mudou um pouco e também tenho focado em estudar algumas coisas que eu não tinha tanto domínio. Entretanto tenho alg",
+        "keywords": "ruby, webdev"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Compiladores, trampolim, deque e thread pool</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 17 Oct 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">webdev</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Faz alguns dias que não escrevo. Minha rotina mudou um pouco e também tenho focado em estudar algumas coisas que eu não tinha tanto domínio. Entretanto tenho algumas coisas pra compartilhar.</p>
+<p>Vamos a isso.</p>
+<hr />
+<h2><a href="#rinha-de-compiladores" aria-hidden="true" class="anchor" id="rinha-de-compiladores"></a>Rinha de compiladores</h2>
+<p>Em Setembro de 2023 aconteceu na tal #bolhaDev uma <a href="https://github.com/aripiprazole/rinha-de-compiler">outra competição</a> em formato de rinha, mas desta vez o desafio era a <strong>construção de um compilador/interpretador</strong> que fosse capaz de rodar um programa escrito em uma linguagem especificada para a rinha, chamada - guess what -, <em>rinha</em>.</p>
+<p>A competição foi criada por duas meninas fantásticas e que entendem muito desse mundo de compiladores: a <a href="https://twitter.com/algebraic_sofia">Sofia</a> e a <a href="https://twitter.com/algebraic_gabi">Gabi</a>. Ambas tinham o intuito de despertar mais o interesse das pessoas nesse tema de compiladores, o que foi atingido com sucesso: <em>190 projetos</em> foram submetidos em diversas linguagens de programação. Teve até projetos <a href="https://github.com/jeffque/rinha-compiler">submetidos</a> em <a href="https://github.com/tiagosh/garbash">Bash</a> (desta vez não fui eu, risos).</p>
+<p>Inicialmente eu só tinha interesse em acompanhar esta rinha de perto sem submeter, apenas pra aprender mais com essa galera que manja bastante. Eu já tinha feito algumas coisas bastante básicas sobre compiladores na faculdade há muito tempo atrás.</p>
+<p>Mas após ver a live do brabo <a href="https://www.youtube.com/watch?v=FbCdhicY3sk">Navarro</a>, que trouxe uma didática excelente com sua versão em Rust, decidi entrar também com o intuito de aprender mais e praticar algumas técnicas.</p>
+<p>Escolhi Ruby porque eu queria testar um negócio. E disto saiu o <a href="https://github.com/leandronsp/patropi">patropi</a>.</p>
+<p>Okay, mas o que era pra ser feito de fato? Vamos voltar duas casas e entender primeiro <strong>o que raios é um compilador ou interpretador</strong>.</p>
+<h3><a href="#-arquitetura-de-cpu-e-código-de-máquina" aria-hidden="true" class="anchor" id="-arquitetura-de-cpu-e-código-de-máquina"></a>👉🏽 Arquitetura de CPU e código de máquina</h3>
+<p>Para que uma CPU possa processar informações, é necessário organizá-la em um conjunto coeso de instruções. A este conjunto organizado de instruções para uma determinada CPU chamamos de <strong>arquitetura da CPU</strong>.</p>
+<p>Existem diversos tipos de arquiteturas de CPU disponíveis, e cada CPU traz um conjunto específico de instruções. Exemplos de arquiteturas: x86, x86-64 (64-bits), ARM (baseada em RISC), MIPS, SPARC, PowerPC dentre outros.</p>
+<p>As instruções da CPU são mapeadas para componentes da arquitetura chamados <em>registradores</em>. Para manipularmos esses registradores, precisamos utilizar um conjunto de “códigos” que são pré-definidos pelo fabricante da arquitetura da CPU. Estes códigos são chamados de <strong>opcodes</strong>, ou código de máquina, ou instruções de máquina.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0000000000401000 
+</div><div class="line" data-line="2">  401000:       48 c7 c0 01 00 00 00    
+</div><div class="line" data-line="3">  401007:       48 c7 c7 01 00 00 00    
+</div><div class="line" data-line="4">  40100e:       48 c7 c6 00 20 40 00    
+</div><div class="line" data-line="5">  401015:       48 c7 c2 0e 00 00 00    
+</div><div class="line" data-line="6">  40101c:       0f 05                   
+</div><div class="line" data-line="7">  40101e:       48 c7 c0 3c 00 00 00    
+</div><div class="line" data-line="8">  401025:       48 31 ff                
+</div><div class="line" data-line="9">  401028:       0f 05                   
+</div></code></pre>
+<p>Escrever programas em código de máquina pode ser bastante desafiador, por isso alguns sistemas operacionais e bibliotecas trazem consigo um programa que auxilia na “montagem” desse código de máquina, possibilitando assim escrever programas em uma linguagem mnemônica com base em letras, números e símbolos, sendo mais fácil de memorizar do que os opcodes.</p>
+<p>A estes montadores chamamos de <strong>assemblers</strong>.</p>
+<h3><a href="#-assemblers" aria-hidden="true" class="anchor" id="-assemblers"></a>👉🏽 Assemblers</h3>
+<p>Com um assembler, podemos escrever código de montagem (assembly), que é convertido para código de máquina.</p>
+<p>Exemplo de um simples programa escrito em assembly x86_64 que imprime <code>Hello, World!</code> no standard output:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">.section .data
+</div><div class="line" data-line="2">hello:
+</div><div class="line" data-line="3">    .ascii &quot;Hello, World!\n&quot;
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">.section .text
+</div><div class="line" data-line="6">.global _start
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">_start:
+</div><div class="line" data-line="9">    # write our string to stdout
+</div><div class="line" data-line="10">    movq $1, %rax         # syscall number for sys_write
+</div><div class="line" data-line="11">    movq $1, %rdi         # file descriptor 1 is stdout
+</div><div class="line" data-line="12">    movq $hello, %rsi     # pointer to the hello string
+</div><div class="line" data-line="13">    movq $14, %rdx        # length of the hello string plus newline character
+</div><div class="line" data-line="14">    syscall               # invoke the kernel
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16">    # exit
+</div><div class="line" data-line="17">    movq $60, %rax        # syscall number for sys_exit
+</div><div class="line" data-line="18">    xorq %rdi, %rdi       # exit code 0
+</div><div class="line" data-line="19">    syscall               # invoke the kernel
+</div></code></pre>
+<p>Após executar o programa com o assembler <code>as</code> que vem acompanhado no GNU/Linux seguido do linker <code>ld</code>, temos o binário com o código de máquina.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">as</span> <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">hello.o</span> <span style="color: #e06c75;">hello.s</span> 
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">ld</span> <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">hello</span> <span style="color: #e06c75;">hello.o</span>
+</div><div class="line" data-line="3">$ <span style="color: #61afef;">./hello</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">World!</span>
+</div></code></pre>
+<p>Uma forma de fazer o “disassembly” do binário e ver o assembly equivalente, é com o utilitário <code>objdump</code>, onde podemos ver as instruções de máquina (opcodes) mapeadas para cada instrução assembly contida no nosso código fonte:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">objdump</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">hello</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">hello:</span>     <span style="color: #e06c75;">file</span> <span style="color: #e06c75;">format</span> <span style="color: #e06c75;">elf64-x86-64</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #61afef;">Disassembly</span> <span style="color: #e06c75;">of</span> <span style="color: #e06c75;">section</span> <span style="color: #e06c75;">.text:</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #d19a66;">0000000000401000</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">_start</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">:</span>
+</div><div class="line" data-line="9">  <span style="color: #61afef;">401000:</span>       <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">c7</span> <span style="color: #e06c75;">c0</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>    <span style="color: #e06c75;">mov</span>    <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">0x1</span><span style="color: #e06c75;">,%rax</span>
+</div><div class="line" data-line="10">  <span style="color: #61afef;">401007:</span>       <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">c7</span> <span style="color: #e06c75;">c7</span> <span style="color: #d19a66;">01</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>    <span style="color: #e06c75;">mov</span>    <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">0x1</span><span style="color: #e06c75;">,%rdi</span>
+</div><div class="line" data-line="11">  <span style="color: #61afef;">40100e:</span>       <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">c7</span> <span style="color: #e06c75;">c6</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">20</span> <span style="color: #d19a66;">40</span> <span style="color: #d19a66;">00</span>    <span style="color: #e06c75;">mov</span>    <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">0x402000</span><span style="color: #e06c75;">,%rsi</span>
+</div><div class="line" data-line="12">  <span style="color: #61afef;">401015:</span>       <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">c7</span> <span style="color: #e06c75;">c2</span> <span style="color: #e06c75;">0e</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>    <span style="color: #e06c75;">mov</span>    <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">0xe</span><span style="color: #e06c75;">,%rdx</span>
+</div><div class="line" data-line="13">  <span style="color: #61afef;">40101c:</span>       <span style="color: #e06c75;">0f</span> <span style="color: #d19a66;">05</span>                   <span style="color: #e06c75;">syscall</span>
+</div><div class="line" data-line="14">  <span style="color: #61afef;">40101e:</span>       <span style="color: #d19a66;">48</span> <span style="color: #e06c75;">c7</span> <span style="color: #e06c75;">c0</span> <span style="color: #e06c75;">3c</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span> <span style="color: #d19a66;">00</span>    <span style="color: #e06c75;">mov</span>    <span style="color: #abb2bf;">$</span><span style="color: #e06c75;">0x3c</span><span style="color: #e06c75;">,%rax</span>
+</div><div class="line" data-line="15">  <span style="color: #61afef;">401025:</span>       <span style="color: #d19a66;">48</span> <span style="color: #d19a66;">31</span> <span style="color: #e06c75;">ff</span>                <span style="color: #e06c75;">xor</span>    <span style="color: #e06c75;">%rdi,%rdi</span>
+</div><div class="line" data-line="16">  <span style="color: #61afef;">401028:</span>       <span style="color: #e06c75;">0f</span> <span style="color: #d19a66;">05</span>                   <span style="color: #e06c75;">syscall</span>
+</div></code></pre>
+<p><em>Espetacular, não?</em></p>
+<h3><a href="#-tá-mas-e-os-compiladores" aria-hidden="true" class="anchor" id="-tá-mas-e-os-compiladores"></a>👉🏽 Tá, mas e os compiladores?</h3>
+<p>Os compiladores entram justamente na categoria de programas de mais alto nível que convertem para o assembly da arquitetura em questão ou diretamente para código de máquina.</p>
+<p>Por exemplo, este simples programa escrito em C:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-c" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">#include</span> <span style="color: #98c379;">&lt;stdio.h&gt;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">int</span> <span style="color: #61afef;">main</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="4">    <span style="color: #61afef;">printf</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Hello, World!<span style="color: #56b6c2;">\n</span>&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">return</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Pode ser compilado para código de máquina utilizando o compilador <code>gcc</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">gcc</span> <span style="color: #e06c75;">-o</span> <span style="color: #e06c75;">hello</span> <span style="color: #e06c75;">hello.c</span> 
+</div><div class="line" data-line="2">$ <span style="color: #61afef;">./hello</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">World!</span>
+</div></code></pre>
+<blockquote>
+<p>É muito comum também compiladores converterem para uma representação intermediária (IR) antes de gerar o código de máquina, como é o caso do próprio gcc, LLVM, dentre outros.</p>
+</blockquote>
+<h3><a href="#-e-os-interpretadores" aria-hidden="true" class="anchor" id="-e-os-interpretadores"></a>👉🏽 E os interpretadores?</h3>
+<p>A distinção e similaridade entre compiladores e interpretadores não é um senso bastante comum, embora algumas pessoas entendam que interpretador é um tipo de compilador.</p>
+<p>Indo pelo sentido prático, podemos dizer que o compilador <em>compila</em> para instrução de máquina. Enquanto que o interpretador vai lendo linha por linha do código fonte e executando.</p>
+<p>Interpretadores modernos possuem um processo interno de compilação em tempo real, chamado <strong>just-in-time</strong>, ou <em>JIT</em>, o que pode inclusive caracterizar interpretadores também no rol de compiladores.</p>
+<p>Independente da definição correta ou não de compiladores/interpretadores, uma coisa que devemos ter em mente é que estão acontecendo diversas transformações em camadas até chegar ao código de máquina.</p>
+<p>Nesse processo de transformação, acontecem análises e otimizações que vão afetar drasticamente a performance do programa.</p>
+<h3><a href="#-frontend-vs-backend" aria-hidden="true" class="anchor" id="-frontend-vs-backend"></a>👉🏽 Frontend vs Backend</h3>
+<p>Você pensava que a briga front vs back existia apenas na web, pois não? No mundo dos compiladores também!</p>
+<blockquote>
+<p>To brincando, gente. Não tem briga nenhuma não</p>
+</blockquote>
+<p><strong>Frontend</strong> é a etapa que faz a leitura do código fonte e gera uma árvore sintática. Esta árvore, como o próprio nome diz, segue uma estrutura de dados muito comum na computação, o que permite a análise de programas seguindo o conjunto de regras definido na gramática.</p>
+<p>Basicamente, o frontend faz a análise léxica (gerando tokens válidos da especificação), e em seguida a análise sintática (parsing dos tokens), gerando a árvore sintática abstrata, ou <strong>AST</strong>.</p>
+<p>Com a AST, o frontend pode ainda realizar análise semântica e até mesmo gerar um código intermediário (IR), se for o caso.</p>
+<p>Já no <strong>Backend</strong> consiste na etapa de, a partir de uma AST ou IR, aplicar otimizações, análise estática (também chamada de <em>ahead-of-time compilation</em>, ou <strong>AOT</strong>), compilação em tempo de execução (JIT) e por fim a geração de assembly ou código de máquina.</p>
+<p>Resumindo, então, alguns tipos de assemblers e compiladores:</p>
+<ol>
+<li>Assemblers</li>
+</ol>
+<ul>
+<li>NASM</li>
+<li>GNU as</li>
+</ul>
+<ol start="2">
+<li>Frontend</li>
+</ol>
+<ul>
+<li>Clang (para LLVM)</li>
+<li>GCC</li>
+<li>javac</li>
+</ul>
+<ol start="3">
+<li>Backend</li>
+</ol>
+<ul>
+<li>LLC/LLI (para LLVM)</li>
+<li>GCC</li>
+<li>JVM</li>
+</ul>
+<h3><a href="#-okay-mas-e-a-rinha" aria-hidden="true" class="anchor" id="-okay-mas-e-a-rinha"></a>👉🏽 Okay mas e a rinha</h3>
+<p>Na rinha, foi disponibilizado um frontend para a especificação da linguagem, em formato de <a href="https://crates.io/crates/rinha">Rust crate</a>.</p>
+<p>Bastando ter o Rust instalado, adicionamos a crate e, através do comando <code>rinha</code>, temos uma representação JSON da AST:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># examples/hello.rinha</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">print</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Hello, world&quot;</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># run frontend</span>
+</div><div class="line" data-line="5"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">rinha</span> <span style="color: #e06c75;">-p</span> <span style="color: #e06c75;">examples/hello.rinha</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="8">  <span style="color: #98c379;">&quot;name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;examples/hello.rinha&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">  <span style="color: #98c379;">&quot;expression&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="10">    <span style="color: #98c379;">&quot;kind&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;Print&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="11">    <span style="color: #98c379;">&quot;value&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="12">      <span style="color: #98c379;">&quot;kind&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;Str&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="13">      <span style="color: #98c379;">&quot;value&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;Hello, world&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="14">      <span style="color: #98c379;">&quot;location&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span>
+</div><div class="line" data-line="15">        <span style="color: #98c379;">&quot;start&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">6,</span>
+</div><div class="line" data-line="16">        <span style="color: #98c379;">&quot;end&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">20,</span>
+</div><div class="line" data-line="17">        <span style="color: #98c379;">&quot;filename&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;examples/hello.rinha&quot;</span>
+</div><div class="line" data-line="18">      <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="19"><span style="color: #61afef;">...........</span>
+</div></code></pre>
+<p>O desafio? Escrever um compilador/interpretador para este AST. <em>Simples assim.</em></p>
+<hr />
+<h2><a href="#patropi-e-o-trampolim" aria-hidden="true" class="anchor" id="patropi-e-o-trampolim"></a>Patropi e o trampolim</h2>
+<p>Minha submissão escrita em Ruby foi batizada de <strong>Patropi</strong> (<em>idk either</em>). Optei por fazer um interpretador no formato <em>tree-walking interpreter</em>, que basicamente vai caminhando por cada nó da AST e executando.</p>
+<p>Como não sou especialista em compiladores e otimizações, pra mim foi o caminho mais sensato naquele momento.</p>
+<p>Um exemplo de código muito simples em Ruby, para interpretar o simples <code>print(&quot;Hello world&quot;)</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">evaluate</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">term</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">case</span> <span style="color: #e06c75;">term</span>
+</div><div class="line" data-line="3">  <span style="color: #c678dd;">in</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">kind</span><span style="color: #56b6c2;">:</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Str</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">value</span><span style="color: #56b6c2;">:</span> <span style="color: #e06c75;">value</span> <span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">;</span> <span style="color: #e06c75;">value</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">to_s</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">in</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">kind</span><span style="color: #56b6c2;">:</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Print</span><span style="color: #98c379;">&#39;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">value</span><span style="color: #56b6c2;">:</span> <span style="color: #e06c75;">next_term</span> <span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">;</span> <span style="color: #61afef;">puts</span> <span style="color: #61afef;">evaluate</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">next_term</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">else</span> <span style="color: #c678dd;">raise</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">Unknown term: </span><span style="color: #abb2bf;">#&lbrace;</span><span style="color: #e06c75;">term</span><span style="color: #abb2bf;">&rbrace;</span><span style="color: #98c379;">&quot;</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Note que o método <code>evaluate</code> é nosso ponto focal. Ele recebe um termo (nó da AST) e tenta buscar por um match específico. Caso dê match com uma <code>String</code> literal, retorna o valor. Mas se der match com um nó <code>Print</code>, chama o <code>evaluate</code> recursivamente.</p>
+<h3><a href="#-recursão" aria-hidden="true" class="anchor" id="-recursão"></a>👉🏽 Recursão</h3>
+<p><strong>Recursão</strong> é o caminho mais intuitivo para manipular uma árvore na computação. Quase todo compilador é feito inicialmente de forma recursiva na manipulação da árvore justamente porque é intuitivo.</p>
+<blockquote>
+<p>Enquanto há nó para percorrer, vou chamar minha função novamente, até chegar no fim do galho</p>
+</blockquote>
+<p>Não vou entrar muito nos detalhes dos trade-offs da recursão, mas se quiser se aprofundar nisto, sugiro a leitura do artigo que escrevi sobre <a href="https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4">fundamentos de recursão</a>.</p>
+<p>Com isto em mente, e sabendo que o pessoal na rinha iria executar alguns programas que exigem muito da memória stack, decidi experimentar uma estratégia não muito ortodoxa e que funciona como alternativa à recursão quando otimizações de recursão de cauda não são possíveis ou são muito limitadas.</p>
+<p>A esta estratégia (que também explico com detalhes no artigo apontado), chamamos de <strong>Trampoline</strong>, ou <em>trampolim</em>.</p>
+<h3><a href="#-trampolim-para-o-resgate" aria-hidden="true" class="anchor" id="-trampolim-para-o-resgate"></a>👉🏽 Trampolim para o resgate</h3>
+<p>Basicamente, ao invés de chamar a função recursivamente, eu devolvo uma estrutura chamada “continuation”, passando o controle para um loop fora da função.</p>
+<p>Este loop imperativo toma a decisão de executar uma closure com o valor passado na continuation ou se vai para o próximo nó da árvore. A cada iteração do loop, por não haver chamada recursiva, não há acúmulo na stack frame, portanto diminui drasticamente a chance de acontecer <strong>stack buffer overflow</strong>, ou seja, praticamente não há chance de estouro de pilha.</p>
+<p>Aqui segue uma imagem com a arquitetura do <a href="https://github.com/leandronsp/patropi">Patropi</a>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jsbup3brs6qdax53p4sy.png" alt="arquitetura do patropi" /></p>
+<blockquote>
+<p>Para mais detalhes de código, basta seguir o link do <a href="https://github.com/leandronsp/patropi">repositório no Github</a></p>
+</blockquote>
+<h3><a href="#-and-the-oscar-goes-to" aria-hidden="true" class="anchor" id="-and-the-oscar-goes-to"></a>👉🏽 And the Oscar goes to…</h3>
+<p>O <a href="https://github.com/aripiprazole/rinha-de-compiler/blob/main/TESTS.md">ranking oficial</a> está divulgado no repositório da rinha, e em primeiro lugar ficou uma solução escrita em Golang de tree-walking interpreter. Achei incrível, here we “Go” again :P</p>
+<p>Minha solução em Ruby, o Patropi, das 190 submissões, ficou entre as 68 que rodaram, amargando a 65ª posição.</p>
+<p>Apesar de ter sido divertido implementar o trampolim, Patropi não soube lidar muito bem com Tuplas e falhou em diversos testes…</p>
+<hr />
+<h2><a href="#fila-duplamente-terminada-em-go" aria-hidden="true" class="anchor" id="fila-duplamente-terminada-em-go"></a>Fila duplamente terminada em Go</h2>
+<p>Neste intervalo de estudos, aproveitei também para contribuir para um projeto de <a href="https://github.com/kelvins/algorithms-and-data-structures">algoritmos e estruturas de dados</a> no Github. A ideia do repositório é muito boa, basicamente ali tem dezenas de algoritmos que podem ser implementados por qualquer pessoa em diversas linguagens. Basta contribuir :)</p>
+<p>Aproveitei a deixa para submeter <a href="https://github.com/kelvins/algorithms-and-data-structures/pulls?q=is%3Apr+author%3Aleandronsp+is%3Aclosed">alguns algoritmos e estruturas de dados</a> em Rust, Go e Ruby. Mas queria destacar uma fila duplamente terminada (double-ended queue, ou <strong>deque</strong>) que <a href="https://github.com/kelvins/algorithms-and-data-structures/pull/211">fiz em Go</a>.</p>
+<p><strong>Deque</strong> é uma estrutura de dados de fila que permite adicionar ou remover elementos em qualquer um dos lados.</p>
+<p>Por exemplo, uma pilha permite adicionar e remover em apenas um lado (LIFO). Em uma fila, adicionamos a um lado e removemos do outro (FIFO).</p>
+<p>A versatilidade da deque permite na média um acesso em tempo constante em ambos os lados (início da fila ou fim), tanto para adição (push) ou remoção (pop).</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/cutdsqnv54nvvvehskxo.png" alt="deque" /></p>
+<p>Um caso prático de deque seria no histórico de um navegador web, por exemplo. Como o armazenamento no navegador é limitado, o histórico precisa ter um limite de tamanho. Portanto adicionar e remover em ambas extremidades com o mesmo custo passa a ser uma vantagem neste cenário.</p>
+<p>Em Go, poderíamos implementar em baby-steps da seguinte forma. Primeiro, definimos a type struct que terá um slice de inteiros:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-go" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">package</span> <span style="color: #e5c07b;">main</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">import</span> <span style="color: #98c379;">&quot;fmt&quot;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #c678dd;">type</span> <span style="color: #e5c07b;">Deque</span> <span style="color: #c678dd;">struct</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="6">	<span style="color: #e06c75;">Store</span> <span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #e5c07b;">int</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Agora, temos que implementar as operações do lado direito, <code>Rpush</code> e <code>RPop</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-go" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">func</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">Deque</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">RPush</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">element</span> <span style="color: #e5c07b;">int</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">	<span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">append</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">element</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #c678dd;">func</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">Deque</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">RPop</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">int</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="6">	<span style="color: #c678dd;">if</span> <span style="color: #e5c07b;">len</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="7">		<span style="color: #c678dd;">return</span> <span style="color: #c678dd;">nil</span>
+</div><div class="line" data-line="8">	<span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">	<span style="color: #e06c75;">element</span> <span style="color: #56b6c2;">:=</span> <span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">[</span><span style="color: #e5c07b;">len</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">)</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="11">	<span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">[</span><span style="color: #abb2bf;">:</span><span style="color: #e5c07b;">len</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">)</span><span style="color: #56b6c2;">-</span><span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	<span style="color: #c678dd;">return</span> <span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">element</span>
+</div><div class="line" data-line="14"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<ul>
+<li>RPush: utiliza o built-in <code>append</code> no lado direito, que é uma operação constante</li>
+<li>RPop: manipula o slice, trabalhando apenas com os índices</li>
+</ul>
+<p>Para terminar, fazer o mesmo do lado esquerdo:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-go" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">func</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">Deque</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">LPush</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">element</span> <span style="color: #e5c07b;">int</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">	<span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">append</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">[</span><span style="color: #c678dd;">]</span><span style="color: #e5c07b;">int</span><span style="color: #c678dd;">&lbrace;</span><span style="color: #e06c75;">element</span><span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #56b6c2;">...</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #c678dd;">func</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">Deque</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">LPop</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">*</span><span style="color: #e5c07b;">int</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="6">	<span style="color: #c678dd;">if</span> <span style="color: #e5c07b;">len</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">==</span> <span style="color: #d19a66;">0</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="7">		<span style="color: #c678dd;">return</span> <span style="color: #c678dd;">nil</span>
+</div><div class="line" data-line="8">	<span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">	<span style="color: #e06c75;">element</span> <span style="color: #56b6c2;">:=</span> <span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">0</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="11">	<span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">deque</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">Store</span><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">:</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="12">
+</div><div class="line" data-line="13">	<span style="color: #c678dd;">return</span> <span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">element</span>
+</div><div class="line" data-line="14"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>No lado esquerdo, as operações passam a ter um custo linear, mas na média, por ser uma fila duplamente terminada, esse custo é amortizado caindo pra constante.</p>
+<hr />
+<h2><a href="#thread-pool-no-adelnor" aria-hidden="true" class="anchor" id="thread-pool-no-adelnor"></a>Thread pool no Adelnor</h2>
+<p>Pra finalizar, meu projetinho xodó do momento, o <a href="https://github.com/leandronsp/adelnor">leandronsp/adelnor</a>, precisava de uns ajustes importantes. Cada request HTTP era servido dentro da thread principal, não havia qualquer tipo de concorrência, e portanto o server não conseguia entregar muitos requests.</p>
+<p>Resolvi implementar uma thread pool modesta <a href="https://github.com/leandronsp/adelnor/pull/1">submetendo este PR</a>, em live na Twitch e também no <a href="https://www.youtube.com/watch?v=a8Ccxt0UGqA">Youtube</a>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">gem</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">adelnor</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">require</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">adelnor</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">app</span> <span style="color: #56b6c2;">=</span> <span style="color: #56b6c2;">-&gt;</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">env</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="4">  <span style="color: #c678dd;">[</span><span style="color: #d19a66;">200</span><span style="color: #abb2bf;">,</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Content-Type</span><span style="color: #98c379;">&#39;</span> <span style="color: #56b6c2;">=&gt;</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">text/html</span><span style="color: #98c379;">&#39;</span> <span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&#39;</span><span style="color: #98c379;">Hello world!</span><span style="color: #98c379;">&#39;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #e5c07b;">Adelnor</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">Server</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">run</span> <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3000</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">thread_pool</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">5</span>
+</div></code></pre>
+<p>Foi um processo interessante. Após subir o server com uma pool de 5 threads, a app conseguiu entregar 4x mais requests do que na versão single-threaded.</p>
+<p>E caso queira aprender mais sobre threads em Ruby, recomendo muito <a href="https://workingwithruby.com/wwrt/intro">este guia</a>.</p>
+<hr />
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>É isto que tive experimentando ultimamente. No momento, estou fazendo algumas melhorias no Adelnor, nomeadamente implementar modelo de atores com Ractors, mas vou entrar em detalhes disto num blogpost à parte.</p>
+<hr />
+<h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
+<p><a href="https://computersciencewiki.org/index.php/Architecture_of_the_central_processing_unit_(CPU)">CPU architecture</a><br />
+<a href="http://sparksandflames.com/files/x86InstructionChart.html">x86 instructions chart</a><br />
+<a href="https://craftinginterpreters.com/">Crafting Interpreters</a><br />
+<a href="https://github.com/aripiprazole/rinha-de-compiler">Rinha de compiladores</a><br />
+<a href="https://github.com/reu/rinha-compiladores">reu/rinha-compiladores</a><br />
+<a href="https://github.com/leandronsp/patropi">leandronsp/patropi</a><br />
+<a href="https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4">Fundamentos de Recursão</a><br />
+<a href="https://en.wikipedia.org/wiki/Double-ended_queue">Double-ended queue</a><br />
+<a href="https://workingwithruby.com/">workingwithruby.com</a><br />
+<a href="https://github.com/leandronsp/adelnor">leandronsp/adelnor</a></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

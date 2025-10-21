@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thinking like containers - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="We can't deny how popular [Docker containers](https://www.docker.com/resources/what-container) became on the daily basis of many software developers around the w">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/thinking-like-containers-3k24.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/thinking-like-containers-3k24.html">
+  <meta property="og:title" content="Thinking like containers">
+  <meta property="og:description" content="We can't deny how popular [Docker containers](https://www.docker.com/resources/what-container) became on the daily basis of many software developers around the w">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-08-09T14:06:00Z">
+  <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="linux">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Thinking like containers",
+    "datePublished": "2022-08-09T14:06:00Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "We can't deny how popular [Docker containers](https://www.docker.com/resources/what-container) became on the daily basis of many software developers around the w",
+        "keywords": "docker, linux"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Thinking like containers</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 09 Aug 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>We can’t deny how popular <a href="https://www.docker.com/resources/what-container">Docker containers</a> became on the daily basis of many software developers around the world. Moreover, it is a mainstream technology behind <a href="https://en.wikipedia.org/wiki/Cloud_native_computing">cloud-native</a> applications such as <a href="https://en.wikipedia.org/wiki/Kubernetes">Kubernetes</a> and it’s used as  the deployment engine at various production systems.</p>
+<p>However, its learning curve is not so friendly for many, considering that the fundamentals of Linux containers is not widely taught. On this post I will try to briefly explain the building block for containers and how to use the Docker container runtime to boost productivity.</p>
+<h2><a href="#virtualization" aria-hidden="true" class="anchor" id="virtualization"></a>Virtualization</h2>
+<p>To understand a container, we should understand what is virtualization at first.</p>
+<p>Virtualization is a solution to the problem of isolating and having a completely different environment sharing the same “machine”. Each virtualized environment would have its own memory, disk and CPU quotas. For instance:</p>
+<ul>
+<li>Machine RAM: 16GB</li>
+<li>Windows 10 quota: 4GB</li>
+<li>Ubuntu 18.04 quota: 4GB</li>
+</ul>
+<p>However, virtualization has a cost: it does not share the same <a href="https://en.wikipedia.org/wiki/Kernel_(operating_system)">OS kernel</a>. In case we want to have a small virtualized web-application in our machine, such app will bootstrap a different kernel and load a lot of runtime libraries.</p>
+<p>It’s useful for those who want a fully virtualized operating system but not ideal for general-purpose applications. That’s where <em>containers</em> come in.</p>
+<h2><a href="#containers" aria-hidden="true" class="anchor" id="containers"></a>Containers</h2>
+<p>Containers are the solution of sharing the same physical resources, the same kernel space, but still isolated.</p>
+<p>In short: <strong>a container is an isolated space in our computer where we can run a different OS, and from that OS we are able to install whatever we want and run any command without affecting our local machine, the host</strong>.</p>
+<p>For me, that’s exactly the <em>fascinating part</em> of using containers. Following are some benefits I can highlight.</p>
+<h3><a href="#experimentation" aria-hidden="true" class="anchor" id="experimentation"></a>Experimentation</h3>
+<p>Since all the needed dependencies belong to the containers, we will no longer face installation problems in our computer, library conflicts, version upgrades and so on.</p>
+<p>All the messy stuff that sometimes, <em>prevent us from doing more experimentation</em>. Gone.</p>
+<h3><a href="#context-switch" aria-hidden="true" class="anchor" id="context-switch"></a>Context switch</h3>
+<p>Sometimes, many of us work on a variety of projects. Switching contexts may be cumbersome. One project uses the PostgreSQL 9.5 while other uses PostgreSQL 11. Managing two Postgres instances in your local environment? Good luck with that.</p>
+<p>By using containers, context switch is easily as doing:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">rm</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">postgres_9</span>
+</div><div class="line" data-line="2"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">postgres_11</span> <span style="color: #e06c75;">postgres:11</span> 
+</div></code></pre>
+<h3><a href="#uniformization" aria-hidden="true" class="anchor" id="uniformization"></a>Uniformization</h3>
+<p>Containers allow to run a different operating system. What about if we choose to run the same production environment in our computer?</p>
+<p>It takes us to a different position where we have <em>full control</em> on the application. That’s WAY easier to debug and replicate bugs since we are using the same OS and libraries.</p>
+<p>No more “it works on my machine” or “it DOES NOT work on my machine”.</p>
+<h3><a href="#deploy-agnostic" aria-hidden="true" class="anchor" id="deploy-agnostic"></a>Deploy agnostic</h3>
+<p>The steps to deploy are exactly the same be it on our computer or in the production environment.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">--name</span> <span style="color: #e06c75;">my_application</span> <span style="color: #e06c75;">my_application</span>
+</div></code></pre>
+<p>Furthermore, the container <strong>does not care</strong> about the environment it’s running in. We can EASILY push our container to another server and run it from there. Almost <em>zero</em> configuration needed.</p>
+<p>Want to try a cheaper cloud-provider? Cool. Your container WILL run there effortlessly.</p>
+<h2><a href="#container-runtimes" aria-hidden="true" class="anchor" id="container-runtimes"></a>Container Runtimes</h2>
+<p>In order to run containers, we need to install and configure a <a href="https://en.wikipedia.org/wiki/Open_Container_Initiative">container runtime</a>. For the purpose of this article, and due to its popularity, we will use <strong>Docker</strong>.</p>
+<h3><a href="#first-container" aria-hidden="true" class="anchor" id="first-container"></a>First container</h3>
+<p>So let’s suppose we have a new computer with just the Operating System installed. And a browser, of course :)</p>
+<p>Assuming that <a href="https://docs.docker.com/get-docker/">you have Docker properly configured</a>, we want to run <code>bundle install</code> in some application we have but remember, <em>we don’t have Ruby installed in our computer</em>.</p>
+<ul>
+<li>we don’t want to install Ruby neither its dependencies</li>
+<li>we just wanna run <code>bundle install</code> inside the container and that’s all</li>
+</ul>
+<p>First things first:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">ruby:2.7</span>
+</div></code></pre>
+<p>The <code>run</code> command takes a pre-defined container <em>image</em> somewhere and starts a container following the <strong>rules</strong> described from that very <em>image</em>. Where did the <code>ruby:2.7</code> image come from? <a href="https://hub.docker.com">Docker Hub</a>. Think of it like a <code>Github</code> for Docker images.</p>
+<p>There are more Container <em>registries</em> but Docker Hub, such as <a href="https://github.com/features/packages">Github Registry</a>, <a href="https://aws.amazon.com/ecr/">Amazon ECR</a>, to name a few. We can change the registry anytime by using the command <a href="https://docs.docker.com/engine/reference/commandline/login/">docker login</a>.</p>
+<p>The above command did nothing but showing a message <code>Switch to inspect mode.</code>. That’s because the default command pre-defined in the image <code>ruby:2.7</code> is the <code>irb</code>, which means the container will try to allocate a <a href="https://stackoverflow.com/questions/30137135/confused-about-docker-t-option-to-allocate-a-pseudo-tty">pseudo-TTY</a> so we can interact on that <a href="https://en.wikipedia.org/wiki/Tty_(unix)">tty</a>, or “terminal”.</p>
+<p>For doing so, we should use a flag option in the <code>run</code> command:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">ruby:2.7</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;">### Options</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">-t</span> <span style="color: #e06c75;">Allocate</span> <span style="color: #e06c75;">a</span> <span style="color: #e06c75;">pseudo-TTY</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">-i</span> <span style="color: #e06c75;">Keep</span> <span style="color: #e06c75;">STDIN</span> <span style="color: #e06c75;">open</span> <span style="color: #e06c75;">even</span> <span style="color: #e06c75;">if</span> <span style="color: #e06c75;">not</span> <span style="color: #e06c75;">attached</span>
+</div></code></pre>
+<p>Now, we have a full Ruby 2.7 installation ready to receive instructions, right on our computer with no host installation required!</p>
+<p>That’s a big YAY, in my point of view :D</p>
+<h3><a href="#entering-a-container" aria-hidden="true" class="anchor" id="entering-a-container"></a>Entering a container</h3>
+<p>We can run arbitrary commands other than the default:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">ruby:2.7</span> <span style="color: #e06c75;">ls</span>
+</div></code></pre>
+<p>It:</p>
+<ul>
+<li>creates the container using the image</li>
+<li>runs the <code>ls</code> command inside the container</li>
+<li>exits the container</li>
+</ul>
+<p>Knowing that we can run any command, we can run the <code>bash</code> command, which will take us right into the container:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">-it</span> <span style="color: #e06c75;">ruby:2.7</span> <span style="color: #e06c75;">bash</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># Remember that the bash, as the same as irb, will </span>
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># allocate a pseudo-TTY</span>
+</div></code></pre>
+<p>What if we try to run <code>bundle</code> inside the container?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">Could</span> <span style="color: #e06c75;">not</span> <span style="color: #e06c75;">locale</span> <span style="color: #e06c75;">Gemfile</span>
+</div></code></pre>
+<p>Here’s why: containers are <em>isolated</em>. Think of separate “computers” (containers) inside our computer (host).</p>
+<p>How about “copying” our files <strong>from host to container</strong>? We can use <a href="https://docs.docker.com/storage/volumes/">Volumes</a>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">-it</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">ruby:2.7</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">bash</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #7f848e;">## Options</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">-v</span> <span style="color: #e06c75;">source:target,</span> <span style="color: #e06c75;">where</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">source</span> <span style="color: #e06c75;">is</span> <span style="color: #e06c75;">our</span> <span style="color: #e06c75;">current</span> <span style="color: #e06c75;">dir</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">host</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #e5c07b;">pwd</span><span style="color: #c678dd;">)</span>, <span style="color: #61afef;">and</span> <span style="color: #e06c75;">target</span> <span style="color: #e06c75;">a</span> <span style="color: #e06c75;">folder</span> <span style="color: #e06c75;">we</span> <span style="color: #e06c75;">will</span> <span style="color: #e06c75;">cal</span> <span style="color: #98c379;">&quot;app&quot;</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">container</span>
+</div></code></pre>
+<p>Now, inside the container, we can run <code>bundle install</code>. If you are using a common Ruby application with Gemfile, it will start installing the gems using bundler!</p>
+<p>The bundler config and installed gems are located in the standard directory, <code>/usr/local/bundler</code>.</p>
+<h3><a href="#containers-are-ephemeral" aria-hidden="true" class="anchor" id="containers-are-ephemeral"></a>Containers are ephemeral</h3>
+<p>Try to exit the container and entering it again. Run <code>bundle install</code>. What will happen?</p>
+<p><em>It will install the gems all over again</em>. Boring. That’s because containers are ephemeral and do not persist state. If we want to <em>keep</em> the state of the container, we should <em>send back anything we want to the host</em>.  Using what?</p>
+<p>Yes, volumes.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">docker</span> <span style="color: #e06c75;">run</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">-it</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">-v</span> <span style="color: #e06c75;">bundler_gems:/usr/local/bundler</span> \
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">ruby:2.7</span> \
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">bash</span>
+</div></code></pre>
+<p>This time, the volume is a bit different, because it’s not using the <code>relative path</code>, but using a <code>named volume</code> instead. Docker has this feature where we can create <em>named</em> volumes <strong>in the host</strong>, as we don’t care where this volume is persisted. Somewhere in our computer, for sure. But we don’t care.</p>
+<p>We are just saying:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">I</span> <span style="color: #e06c75;">want</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">associate</span> <span style="color: #e06c75;">anything</span> <span style="color: #98c379;">&quot;inside /usr/local/bundler&quot;</span> 
+</div><div class="line" data-line="2"><span style="color: #61afef;">FROM</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">container</span> 
+</div><div class="line" data-line="3"><span style="color: #61afef;">TO</span> <span style="color: #e06c75;">a</span> <span style="color: #e06c75;">volume</span> <span style="color: #e06c75;">named</span> <span style="color: #98c379;">&quot;bundler_gems&quot;</span> 
+</div><div class="line" data-line="4"><span style="color: #61afef;">ON</span> <span style="color: #e06c75;">the</span> <span style="color: #e06c75;">host</span>
+</div></code></pre>
+<p>The first <code>bundle install</code> will take time, because the volume is still empty. But from the second time and on, everytime we run a <em>new container</em>, Docker will associate the named volume to the <code>/usr/loca/bundler</code> inside the container and <strong>vice-versa</strong>.</p>
+<p>That’s the nature of volumes: two-way binding. You change from host, it will affect the container. If you change from the container, it will affect the host.</p>
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>This article was an introduction on containers and, being more strict, on how to <em>think</em> like a container.</p>
+<p>I think the ride to containers is worth. A bit “fuzzy” at start but it will pay back as soon as we feel we can experiment more on computers.</p>
+<p>And in case you want to keep learning it, check out my <a href="https://dev.to/leandronsp/series/19249">series of posts</a> about containers and Docker.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

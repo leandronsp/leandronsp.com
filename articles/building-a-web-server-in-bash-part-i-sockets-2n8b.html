@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building a Web server in Bash, part I - sockets - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Have you ever wondered _how a Web server works under the hood_? Moreover, would you be willing to sharpen your Shell scripting skills?
+
+Maybe this guide is for y">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html">
+  <meta property="og:title" content="Building a Web server in Bash, part I - sockets">
+  <meta property="og:description" content="Have you ever wondered _how a Web server works under the hood_? Moreover, would you be willing to sharpen your Shell scripting skills?
+
+Maybe this guide is for y">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-08-01T03:32:44Z">
+  <meta property="article:tag" content="webdev">
+      <meta property="article:tag" content="http">
+      <meta property="article:tag" content="linux">
+      <meta property="article:tag" content="shellscript">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Building a Web server in Bash, part I - sockets",
+    "datePublished": "2022-08-01T03:32:44Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Have you ever wondered _how a Web server works under the hood_? Moreover, would you be willing to sharpen your Shell scripting skills?
+
+Maybe this guide is for y",
+        "keywords": "webdev, http, linux, shellscript"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Building a Web server in Bash, part I - sockets</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 01 Aug 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">webdev</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">http</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">shellscript</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Have you ever wondered <em>how a Web server works under the hood</em>? Moreover, would you be willing to sharpen your Shell scripting skills?</p>
+<p>Maybe this guide is for you.</p>
+<p>Throughout the guide we are going to build, step-by-step, a simple Web server only using <strong>bash</strong>, as we go further across fundamental terms such as sockets, TCP, HTTP and the triad of web: HTML, CSS and Javascript.</p>
+<p>This guide may be a little too long, but it will be divided in smaller parts for a better comprehension.</p>
+<p>Make sure you pick up your UNIX-like terminal, prepare your favourite shell (I’m using bash), grab a cup of coffee and let’s go in this journey.</p>
+<hr />
+<h2><a href="#first-things-first" aria-hidden="true" class="anchor" id="first-things-first"></a>First things first</h2>
+<p>It’s very important that you understand some fundamentals like UNIX standard streams and pipes. Unless you are already comfortable with such terms, <a href="https://dev.to/leandronsp/series/18859">please refer to my series of posts about UNIX</a>.</p>
+<h1><a href="#meet-netcat" aria-hidden="true" class="anchor" id="meet-netcat"></a>Meet netcat</h1>
+<p><a href="https://linux.die.net/man/1/nc">netcat</a> is a computer networking utility for manipulating network sockets such as UNIX, TCP or UDP.</p>
+<p>Make sure you have it in your operating system and install it accordingly.</p>
+<h2><a href="#a-recap-about-sockets" aria-hidden="true" class="anchor" id="a-recap-about-sockets"></a>A recap about Sockets</h2>
+<p>In regarding sockets, we may explore first the creation of a UNIX socket, then make two different processes communicate to each other through the socket.</p>
+<p>There are two types of UNIX sockets: <strong>stream and datagram</strong>.</p>
+<p><em>Stream sockets</em> establish a <strong>connection</strong> between the server and the client, as the data is sent in a <strong>reliable way</strong>.</p>
+<p><em>Datagram sockets</em> do not create establish a connection, as the data is <strong>NOT sent in a reliable way</strong>.</p>
+<p>In this very guide we’ll focus only on <strong>Stream sockets</strong>.</p>
+<h3><a href="#unix-sockets" aria-hidden="true" class="anchor" id="unix-sockets"></a>UNIX sockets</h3>
+<p>Let’s open a terminal and create a socket called <code>server.sock</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">nc</span> <span style="color: #e06c75;">-Uvl</span> <span style="color: #e06c75;">server.sock</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Bound</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">server.sock</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">server.sock</span>
+</div></code></pre>
+<p>Understanding the command options:</p>
+<ul>
+<li>-U: specifies that it’s a UNIX socket</li>
+<li>-v: verbose mode</li>
+<li>-l: ready to listen to connections into the socket</li>
+</ul>
+<p>Now, in another terminal, let’s create the client that connects to the existing <code>server.sock</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">nc</span> <span style="color: #e06c75;">-Uv</span> <span style="color: #e06c75;">server.sock</span>
+</div></code></pre>
+<p>At this moment, note that in the server’s STDOUT, a message <code>Connection received on server.sock</code> just appeared. It means that a client has connected, thus both client and server are ready to exchange messages through this connection.</p>
+<p>Try typing <code>PING</code> from the client side, afterwards go to the server side and type <code>PONG</code>. <em>This is how a client-server architecture works!</em></p>
+<h3><a href="#standard-streams-redirection-and-pipes-all-the-way" aria-hidden="true" class="anchor" id="standard-streams-redirection-and-pipes-all-the-way"></a>Standard streams, redirection and pipes all the way</h3>
+<p>Think for a moment what happened to the <code>nc</code> (netcat) process:</p>
+<ul>
+<li>the STDIN was kept open until you typed a message</li>
+<li>the STDIN of the <code>nc</code> process was sent to the socket</li>
+<li>when any other message arrived in the socket, it was sent to the STDOUT of the <code>nc</code> process</li>
+</ul>
+<p>Let’s assume this pseudo-abstraction based on UNIX pipes:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Server</span>
+</div><div class="line" data-line="2">$ <span style="color: #c678dd;">&lbrace;</span><span style="color: #98c379;">input</span><span style="color: #98c379;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-Ul</span> <span style="color: #e06c75;">server.sock</span> <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #98c379;">output</span><span style="color: #98c379;">&rbrace;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># Client</span>
+</div><div class="line" data-line="5">$ <span style="color: #c678dd;">&lbrace;</span><span style="color: #98c379;">input</span><span style="color: #98c379;">&rbrace;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-U</span> <span style="color: #e06c75;">server.sock</span> <span style="color: #56b6c2;">|</span> <span style="color: #c678dd;">&lbrace;</span><span style="color: #98c379;">output</span><span style="color: #98c379;">&rbrace;</span>
+</div></code></pre>
+<p>What we can learn about this? <em>We are able to pipe a message to the <code>nc</code> command</em>, then afterwards this message can be sent to the socket.</p>
+<p>It applies for both client and server. Let’s see it in action in the server side:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">PONG</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-Uvl</span> <span style="color: #e06c75;">server.sock</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Bound</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">server.sock</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">server.sock</span>
+</div></code></pre>
+<p><code>nc</code> receives the data from the pipe normally like any other UNIX command. It takes the data from the STDIN and stores it to be sent to the socket.</p>
+<p>However, because of the <code>-l</code> option, the server is listening to messages in the socket first. Anytime a request message arrives, the response message <code>PONG</code> is sent back.</p>
+<p>Let’s see the client side:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">PING</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-Uv</span> <span style="color: #e06c75;">server.sock</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">PONG</span>
+</div></code></pre>
+<p><code>nc</code> receives the data from the pipe normally like any other UNIX command. It takes the data from the STDIN and sends it to the socket, because it’s not listening like a server.</p>
+<p>It’s just a client: <strong>clients connect to sockets, send messages and then finish their work</strong>.</p>
+<p>That’s why we see the response message <code>PONG</code> arriving as soon as the client connected.</p>
+<h3><a href="#closing-the-socket" aria-hidden="true" class="anchor" id="closing-the-socket"></a>Closing the socket</h3>
+<p>What if we wanted the server socket to be closed right after a client finishes sending the request message?</p>
+<p>The option <code>-N</code> does the job. Try using the following in the server side:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">PONG</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-UvlN</span> <span style="color: #e06c75;">server.sock</span>
+</div></code></pre>
+<h3><a href="#going-to-the-internet" aria-hidden="true" class="anchor" id="going-to-the-internet"></a>Going to the Internet</h3>
+<p>Okay, but when we talk about a Web server, we mean that server and client live in separate machines. Such machines must then be connected to the <strong>Internet</strong>, which is the most standard, public and decentralised global computer network.</p>
+<p>Because of processes living in different computers, using a UNIX socket is not possible. But the <a href="https://en.wikipedia.org/wiki/Berkeley_sockets">Berkeley Sockets API</a> was created to solve that problem, as it employs more high-level network protocols that implement the same API as of UNIX sockets.</p>
+<p>Such protocols are called TCP or UDP. We’re going to use TCP in this post.</p>
+<h3><a href="#tcp-sockets" aria-hidden="true" class="anchor" id="tcp-sockets"></a>TCP sockets</h3>
+<p><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">TCP</a> stands for <strong>Transmission Control Protocol</strong>, and lives in the 4th layer of the Networking <a href="https://en.wikipedia.org/wiki/OSI_model">OSI model</a>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/voznsfcoaloyw9s192z9.png" alt="OSI model" /></p>
+<p><strong>Disclaimer</strong>: <em>just for testing purposes, we’ll keep using client-server in the same machine, but it’s completely possible to use TCP locally.</em></p>
+<p>Creating a TCP server:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">PONG</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-lvN</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">0.0.0.0</span> <span style="color: #d19a66;">3000</span>
+</div></code></pre>
+<ul>
+<li>-l: listens for TCP connections</li>
+<li>-v: verbose mode</li>
+<li>-N: force a client connection to be closed when data transfer is done</li>
+</ul>
+<p>And the TCP client:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">PING</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-v</span> <span style="color: #e06c75;">localhost</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Connection</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">localhost</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">127.0.0.1</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #d19a66;">3000</span> <span style="color: #e06c75;">port</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">tcp/*</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">succeeded!</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">PONG</span>
+</div></code></pre>
+<p>Note that the connection was established right after the client connected to the socket. The server then immediately sent back the response <code>PONG</code> to the client.</p>
+<p>But we want to exchange a more sophisticated message through the Internet, right? A kind of message that provides flexibility and security.</p>
+<p><strong>Hello, HTTP!</strong></p>
+<h2><a href="#http" aria-hidden="true" class="anchor" id="http"></a>HTTP</h2>
+<p><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a> is a protocol used for transferring multimedia and hypertext over TCP. It’s the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview">fundamental base</a> of the Web.</p>
+<p>Before exploring a more sophisticated Web server in bash, let’s see how to create a <em>single-line</em> HTTP server using <code>netcat</code>, directly on the bash session.</p>
+<p>Instead of responding a simple <code>PONG</code> text like we’ve seen over TCP, we can send a more structured message using the HTTP protocol convention:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;HTTP/1.1 200\r\nContent-Type: application/text\r\n\r\nPONG&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-lvN</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">0.0.0.0</span> <span style="color: #d19a66;">3000</span>
+</div></code></pre>
+<p>Understanding the HTTP response message:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">HTTP/1.1 200       
+</div><div class="line" data-line="2">Content-Type: application/text 
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">PONG 
+</div></code></pre>
+<ul>
+<li><code>HTTP/1.1 200</code>: HTTP response status code, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">in this case 200 means success</a></li>
+<li><code>Content-Type: application/text</code>: HTTP response headers. It could be sent multiple headers in the same HTTP message, as well as NO headers <strong>at all</strong> are also allowed</li>
+<li><em>empty line</em>: this is mandatory, in order to differentiate headers and the remaining response body</li>
+<li><code>PONG</code>: content of the remaining response body</li>
+</ul>
+<p>Pretty <em>straightforward and human-readable</em>, uh?</p>
+<p>Now, let’s perform the HTTP client:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;GET / HTTP/1.1\r\n\r\n\r\nPING&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-vN</span> <span style="color: #e06c75;">localhost</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Connection</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">localhost</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">127.0.0.1</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span> <span style="color: #d19a66;">3000</span> <span style="color: #e06c75;">port</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">tcp/*</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">succeeded!</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">HTTP/1.1</span> <span style="color: #d19a66;">200</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">Content-Type:</span> <span style="color: #e06c75;">application/text</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #61afef;">PONG</span>
+</div></code></pre>
+<p>The HTTP message, despite of human-readable, it’s not readable easily by computers. Hence, different HTTP clients must know the protocol in order to “parse” and display the body message.</p>
+<p>Let’s take an example of HTTP client, the <code>curl</code> program:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://localhost:3000/</span> <span style="color: #e06c75;">-d</span> <span style="color: #e06c75;">PING</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">PONG</span>
+</div></code></pre>
+<p>Yay!</p>
+<h3><a href="#adding-some-html-sprinkle" aria-hidden="true" class="anchor" id="adding-some-html-sprinkle"></a>Adding some HTML sprinkle</h3>
+<p><a href="https://en.wikipedia.org/wiki/HTML">HTML</a> is a markup language used for multimedia, structured content and dynamic web pages when used along with CSS and JS.</p>
+<p>For now, let’s change the <code>Content-Type</code> HTTP header to allow <code>text/html</code> and then add a simple HTML tag to the message:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">echo</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;HTTP/1.1 200\r\nContent-Type: text/html\r\n\r\n&lt;h1&gt;PONG&lt;/h1&gt;&#39;</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">nc</span> <span style="color: #e06c75;">-lvkN</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Listening</span> <span style="color: #e06c75;">on</span> <span style="color: #e06c75;">0.0.0.0</span> <span style="color: #d19a66;">3000</span>
+</div></code></pre>
+<p>As for the client:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">http://localhost:3000/</span> 
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">h1</span><span style="color: #56b6c2;">&gt;</span><span style="color: #61afef;">PONG</span><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">/h1</span><span style="color: #56b6c2;">&gt;</span>
+</div></code></pre>
+<p>Nice! But, despite of being able to parse an HTTP message, aren’t <code>curl</code> able to render the HTML sent in the response body?</p>
+<p>Nope. <code>curl</code> can’t do that.</p>
+<p>Then let’s try to use another HTTP client. It’s well-known for rendering HTML content, and I’m pretty sure you already used it before: <strong>yes, I’m talking about the Web browser</strong>.</p>
+<p>Open <code>localhost:3000</code> in your favourite web browser and…<em>YAY</em>!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/m31y11q5ek7luvl884ff.png" alt="PONG HTML" /></p>
+<p>That’s WHY it’s called a <strong>Web browser</strong>, got the point?</p>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>This is the first part of the guide, where we learned how to manipulate the <code>netcat</code> tool, going through some concepts like TCP, HTTP and a very bit of HTML in a one-liner server.</p>
+<p>In the next upcoming parts, we’ll keep exploring the fundamentals in order to build a complete Web server written in ShellScript.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

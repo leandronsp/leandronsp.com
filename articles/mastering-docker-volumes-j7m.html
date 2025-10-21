@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastering Docker Volumes - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="For those just starting with Docker, I've written some posts on [how to think like containers](https://dev.to/leandronsp/thinking-like-containers-3k24), which I">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/mastering-docker-volumes-j7m.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/mastering-docker-volumes-j7m.html">
+  <meta property="og:title" content="Mastering Docker Volumes">
+  <meta property="og:description" content="For those just starting with Docker, I've written some posts on [how to think like containers](https://dev.to/leandronsp/thinking-like-containers-3k24), which I">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-02-05T01:06:00Z">
+  <meta property="article:tag" content="docker">
+      <meta property="article:tag" content="containers">
+      <meta property="article:tag" content="linux">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Mastering Docker Volumes",
+    "datePublished": "2022-02-05T01:06:00Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "For those just starting with Docker, I've written some posts on [how to think like containers](https://dev.to/leandronsp/thinking-like-containers-3k24), which I",
+        "keywords": "docker, containers, linux"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Mastering Docker Volumes</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 05 Feb 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">containers</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">linux</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>For those just starting with Docker, I’ve written some posts on <a href="https://dev.to/leandronsp/thinking-like-containers-3k24">how to think like containers</a>, which I believe to be an <em>important</em> mindset to using Docker, as well as <a href="https://dev.to/leandronsp/using-docker-in-development-the-right-way-15j3">using Docker in development, the right way</a>.</p>
+<p>However, if you want to move one step further on mastering Docker, it’s important to understand how <a href="https://docs.docker.com/storage/volumes/">volumes</a> and <a href="https://docs.docker.com/network/">networking</a> work in Docker.</p>
+<p>In this post, I’ll guide you through the Volume basics, <a href="https://dev.to/leandronsp/mastering-the-docker-networking-2h57">leaving Networking for another post</a>.</p>
+<h2><a href="#containers-are-ephemeral" aria-hidden="true" class="anchor" id="containers-are-ephemeral"></a>Containers are ephemeral</h2>
+<p>It’s important to keep in mind that containers are ephemeral. Whenever the container finishes executing the <em>command</em>, it’s completely “shut down”.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">docker</span> <span style="color: #61afef;">run</span> <span style="color: #61afef;">node</span> <span style="color: #61afef;">ls</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">bin</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">boot</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">dev</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">etc</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">home</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">lib</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">media</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">mnt</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">opt</span>
+</div><div class="line" data-line="12"><span style="color: #61afef;">proc</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">root</span>
+</div><div class="line" data-line="14"><span style="color: #61afef;">run</span>
+</div><div class="line" data-line="15"><span style="color: #61afef;">sbin</span>
+</div><div class="line" data-line="16"><span style="color: #61afef;">srv</span>
+</div><div class="line" data-line="17"><span style="color: #61afef;">sys</span>
+</div><div class="line" data-line="18"><span style="color: #61afef;">tmp</span>
+</div><div class="line" data-line="19"><span style="color: #61afef;">usr</span>
+</div><div class="line" data-line="20"><span style="color: #61afef;">var</span>
+</div></code></pre>
+<p>It starts a <em>new</em> container using the image node <strong>and</strong> executes the command <code>ls</code> (list files and directories) inside the container.</p>
+<p>The command gives an output and is <em>finished</em>. Once the command is finished, the container is shut down and all <strong>its data is lost</strong>.</p>
+<h2><a href="#executing-a-javascript-program" aria-hidden="true" class="anchor" id="executing-a-javascript-program"></a>Executing a Javascript program</h2>
+<p>Let’s suppose we have a file containing a very basic Javascript program:</p>
+<p><code>helloWorld.js</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-javascript" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">greeting</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">message</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #e5c07b;">console</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">log</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">message</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #61afef;">greeting</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Hello, world&quot;</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>How can we run this program using containers? One could try to  do something like:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">node</span> <span style="color: #e06c75;">node</span> <span style="color: #e06c75;">helloWorld.js</span>
+</div></code></pre>
+<p>…which raises the error:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Error:</span> <span style="color: #e06c75;">Cannot</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">module</span> <span style="color: #98c379;">&#39;/app/helloWorld.js&#39;</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">...</span>
+</div></code></pre>
+<p>That’s because containers are <strong>isolated</strong> and do not share the same Host filesystem.</p>
+<h2><a href="#sync-data-between-host-and-container" aria-hidden="true" class="anchor" id="sync-data-between-host-and-container"></a>Sync data between Host and Container</h2>
+<p>We have to sync the file <code>helloWorld.js</code> with the containers. Docker provides a way to <strong>mount volumes</strong>, which means:</p>
+<blockquote>
+<p>I want to mount a directory or file <em>from</em> the Host to the Container, so every change made in the Host will be mirrored to the Container, and <strong>vice-versa</strong>.</p>
+</blockquote>
+<p>You change the file/directory in the Host, the container will see the changes. You change the file/directory in the container, the Host will see the changes.</p>
+<p>Let’s sync the <code>helloWorld.js</code> with the container:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">/docker-101/helloWorld.js:/app/helloWorld.js</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">node</span> 
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span> <span style="color: #e06c75;">/app/helloWorld.js</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Hello,</span> <span style="color: #e06c75;">world</span>
+</div></code></pre>
+<p>…where:</p>
+<ul>
+<li><strong>pwd</strong> refers to the full pathname of the <a href="https://en.wikipedia.org/wiki/Pwd"><em>current directory</em></a></li>
+<li><strong>-v {hostPath}:{containerPath}</strong> mounts the file/directory to the container</li>
+<li><strong>node</strong> is the image</li>
+<li><strong>node /app/helloWorld.js</strong> executes the command using the path defined inside the container, <code>/app/helloWorld.js</code></li>
+</ul>
+<h2><a href="#a-real-project" aria-hidden="true" class="anchor" id="a-real-project"></a>A real project</h2>
+<p>Suppose we have a project tree like this:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">/docker-101</span>
+</div><div class="line" data-line="2">  <span style="color: #61afef;">/src</span>
+</div><div class="line" data-line="3">    <span style="color: #61afef;">/components</span>
+</div><div class="line" data-line="4">    <span style="color: #61afef;">components.js</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">index.js</span>
+</div></code></pre>
+<p>From inside the <code>docker-101</code> directory, we want to run a container using the <code>index.js</code> file, but all the files in the <code>src</code> folder <em>must</em> be in the container app as well.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span>
+</div><div class="line" data-line="3">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span> <span style="color: #e06c75;">/app/index.js</span>
+</div></code></pre>
+<p>All the files within the <code>pwd</code>, current directory, will be mounted to the <code>/app</code> within the container.</p>
+<p>What if we want to <em>enter</em> the container and manipulate the files from there?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-it</span>
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">bash</span>
+</div></code></pre>
+<p>…where:</p>
+<ul>
+<li><strong>-it</strong> instructs Docker to keep the container terminal (bash/shell) open</li>
+<li><strong>bash</strong> opens a new bash/shell inside the container</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">root</span><span style="color: #61afef;">@8dcbfa6d777c:/#</span> <span style="color: #e06c75;">cd</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e06c75;">root</span><span style="color: #61afef;">@8dcbfa6d777c:/app#</span> <span style="color: #e06c75;">ls</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">index.js</span>  <span style="color: #e06c75;">src</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #e06c75;">root</span><span style="color: #61afef;">@8dcbfa6d777c:/app#</span> <span style="color: #e06c75;">touch</span> <span style="color: #e06c75;">new-file.js</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8"><span style="color: #e06c75;">root</span><span style="color: #61afef;">@8dcbfa6d777c:/app#</span> <span style="color: #e06c75;">ls</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">index.js</span>  <span style="color: #e06c75;">new-file.js</span> <span style="color: #e06c75;">src</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #e06c75;">root</span><span style="color: #61afef;">@8dcbfa6d777c:/app#</span> <span style="color: #e06c75;">exit</span>
+</div><div class="line" data-line="12"><span style="color: #e5c07b;">exit</span>
+</div></code></pre>
+<p>Now, after exiting the container, if we perform <code>ls</code> <em>from the host</em>, we get:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">index.js</span>    <span style="color: #e06c75;">new-file.js</span> <span style="color: #e06c75;">src</span>
+</div></code></pre>
+<p>This type of volume is called <strong>Path Volume</strong>.</p>
+<h2><a href="#using-mount-option" aria-hidden="true" class="anchor" id="using-mount-option"></a>Using <em>mount</em> option</h2>
+<p>Another way to mount volumes is by using the <code>--mount</code> option, which specifies the type of the mount, a <em>source</em> and a <em>target</em>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">--mount</span> <span style="color: #e06c75;">type=bind,source=</span><span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">,target=/app</span>
+</div><div class="line" data-line="3">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span> <span style="color: #e06c75;">/app/helloWorld.js</span>
+</div></code></pre>
+<p>The <code>mount</code> is more explicit, but in most cases using <code>-v</code> should be good enough.</p>
+<h2><a href="#another-real-example" aria-hidden="true" class="anchor" id="another-real-example"></a>Another real example</h2>
+<p>Imagine we want to print the timestamp for current time. We can do this in a lot of ways, but as for now we’re going to use the <a href="http://underscorejs.org">underscore</a> library.</p>
+<p><code>index.js</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-javascript" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">var</span> <span style="color: #e06c75;">_</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">require</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&#39;underscore&#39;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">console</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">log</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">_</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">now</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>We execute <code>docker run -it -v $(pwd):/app node node /app/index.js</code> and we get the following error:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Error:</span> <span style="color: #e06c75;">Cannot</span> <span style="color: #e06c75;">find</span> <span style="color: #e06c75;">module</span> <span style="color: #98c379;">&#39;underscore&#39;</span>
+</div></code></pre>
+<p>Obviously, we have to add the <code>underscore</code> dependency to our project. Let’s do it using <code>npm</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-w</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">npm</span> <span style="color: #e06c75;">add</span> <span style="color: #e06c75;">underscore</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">added</span> <span style="color: #d19a66;">1</span> <span style="color: #e06c75;">package,</span> <span style="color: #e06c75;">and</span> <span style="color: #e06c75;">audited</span> <span style="color: #d19a66;">2</span> <span style="color: #e06c75;">packages</span> <span style="color: #e06c75;">in</span> <span style="color: #e06c75;">2s</span>
+</div></code></pre>
+<p>Note the <code>-w /app</code>, which means <strong>working directory</strong>, where we are telling Docker to execute the command from within that directory. In our case, the command <code>npm add underscore</code> will be executed inside the <code>/app</code> directory in the container.</p>
+<p>Now, we can run our <code>index.js</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-w</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">node</span> <span style="color: #e06c75;">index.js</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">1644018496251</span>
+</div></code></pre>
+<h2><a href="#want-some-npm-cache" aria-hidden="true" class="anchor" id="want-some-npm-cache"></a>Want some NPM cache?</h2>
+<p>Sometimes we need to speedup the npm process using cache. Inside the container, by default, the <code>npm</code> stores  cache at <code>/root/.npm</code>. You can check that by running:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">npm</span> <span style="color: #e06c75;">config</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">cache</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">=</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">/root/.npm</span>
+</div></code></pre>
+<p>At this moment, we are only syncing the <code>-v $(pwd):/app</code> volume. When the container writes the npm cache to <code>/root/.npm</code>, we are not syncing back to the Host.</p>
+<p>We learned that we can mount multiple volumes to the container, so let’s do that:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">/npm_cache:/root/.npm</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">----</span> <span style="color: #61afef;">sync</span> <span style="color: #61afef;">the</span> <span style="color: #61afef;">NPM</span> <span style="color: #61afef;">cache</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">-w</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="6">  <span style="color: #61afef;">npm</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">underscore</span>
+</div></code></pre>
+<p>When we perform <code>ls</code> from the Host, we get the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">index.js</span>          <span style="color: #e06c75;">node_modules</span>      <span style="color: #e06c75;">npm_cache</span>         <span style="color: #e06c75;">package-lock.json</span> <span style="color: #e06c75;">package.json</span>      <span style="color: #e06c75;">src</span>
+</div></code></pre>
+<p>However, we <em>do not want</em> to keep track of “npm_cache” folder in our project. It’s not our business.</p>
+<p>What if we wanted to store such cache in another path in the Host, therefore we <strong>do not care where it’s stored</strong>?</p>
+<p>Docker provides a special type of Volume, where the <em>path in the Host</em> is chosen by Docker, hence the only thing we need to know is <strong>its name</strong>. Docker knows where it is located, but we do not care.</p>
+<p>Yes, they are called <strong>Named Volumes</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">volume</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">my-volume</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">volume</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">my-volume</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="2">    <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">        <span style="color: #98c379;">&quot;CreatedAt&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;2022-02-05T00:47:59Z&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="4">        <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="5">        <span style="color: #98c379;">&quot;Labels&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">&quot;Mountpoint&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;/var/lib/docker/volumes/my-volume/_data&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">        <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;my-volume&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">        <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">&rbrace;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="9">        <span style="color: #98c379;">&quot;Scope&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">&rbrace;</span><span style="color: #56b6c2;"></span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>The <code>Mountpoint</code> is the exact path in the Host. So, every container using this volume will sync their data directly to this mountpoint, leaving us to manage and know the volume by using its name elsewhere, “my-volume”.</p>
+<p>In our example of underscore, we can start the container using named volumes too:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-v</span> <span style="color: #e06c75;">npm_cache:/root/.npm</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">----</span> <span style="color: #61afef;">named</span> <span style="color: #61afef;">volume</span> <span style="color: #61afef;">in</span> <span style="color: #61afef;">the</span> <span style="color: #61afef;">Host</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">-w</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="6">  <span style="color: #61afef;">npm</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">underscore</span>
+</div></code></pre>
+<p>This way, Docker will <strong>create</strong> a volume called <code>npm_cache</code> and mount it to the container at <code>/root/.npm</code>.</p>
+<p>Don’t believe me? Go check yourself:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">volume</span> <span style="color: #e06c75;">inspect</span> <span style="color: #e06c75;">npm_cache</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">[</span>
+</div><div class="line" data-line="2">    <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">        <span style="color: #98c379;">&quot;CreatedAt&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;2022-02-05T00:51:24Z&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="4">        <span style="color: #98c379;">&quot;Driver&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="5">        <span style="color: #98c379;">&quot;Labels&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">null,</span>
+</div><div class="line" data-line="6">        <span style="color: #98c379;">&quot;Mountpoint&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;/var/lib/docker/volumes/npm_cache/_data&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="7">        <span style="color: #98c379;">&quot;Name&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;npm_cache&quot;</span><span style="color: #e06c75;">,</span>
+</div><div class="line" data-line="8">        <span style="color: #98c379;">&quot;Options&quot;</span><span style="color: #98c379;">:</span> <span style="color: #e06c75;">null,</span>
+</div><div class="line" data-line="9">        <span style="color: #98c379;">&quot;Scope&quot;</span><span style="color: #98c379;">:</span> <span style="color: #98c379;">&quot;local&quot;</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">&rbrace;</span><span style="color: #56b6c2;"></span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>Yay! Much clearer, as we keep the speedup of our npm process.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">docker</span> <span style="color: #e06c75;">run</span> 
+</div><div class="line" data-line="2">  <span style="color: #61afef;">-v</span> <span style="color: #abb2bf;">$(</span><span style="color: #e5c07b;">pwd</span><span style="color: #abb2bf;">)</span><span style="color: #e06c75;">:/app</span> 
+</div><div class="line" data-line="3">  <span style="color: #61afef;">-v</span> <span style="color: #e06c75;">npm_cache:/root/.npm</span>
+</div><div class="line" data-line="4">  <span style="color: #61afef;">-w</span> <span style="color: #e06c75;">/app</span>
+</div><div class="line" data-line="5">  <span style="color: #61afef;">node</span>
+</div><div class="line" data-line="6">  <span style="color: #61afef;">node</span> <span style="color: #e06c75;">index.js</span>
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">1644022388847</span>
+</div></code></pre>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping up</h2>
+<p>In this post we learned how to use <strong>Path Volumes</strong> and <strong>Named Volumes</strong> in Docker.</p>
+<p>Path volumes are very helpful when we want to keep track the path in the host, i.e mounting the entire project we are working on.</p>
+<p>Named volumes are handy when we <strong>do not want</strong> to keep track the path in the host, but instead leveraging Docker to choose the <code>mountpoint</code> for us, i.e using cache for NPM, Yarn, Ruby bundler, Python packages and so on.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

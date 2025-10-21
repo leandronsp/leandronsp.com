@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A CRUD journey in Haskell, part I, introduction - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In the past few days, [I've been learning some Haskell](https://twitter.com/leandronsp/status/1421991890346463233?s=20) after years of seeing people praising thi">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html">
+  <meta property="og:title" content="A CRUD journey in Haskell, part I, introduction">
+  <meta property="og:description" content="In the past few days, [I've been learning some Haskell](https://twitter.com/leandronsp/status/1421991890346463233?s=20) after years of seeing people praising thi">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2021-08-03T21:05:28Z">
+  <meta property="article:tag" content="haskell">
+      <meta property="article:tag" content="programming">
+      <meta property="article:tag" content="functional">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "A CRUD journey in Haskell, part I, introduction",
+    "datePublished": "2021-08-03T21:05:28Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In the past few days, [I've been learning some Haskell](https://twitter.com/leandronsp/status/1421991890346463233?s=20) after years of seeing people praising thi",
+        "keywords": "haskell, programming, functional"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">A CRUD journey in Haskell, part I, introduction</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 03 Aug 2021</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">haskell</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">programming</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">functional</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In the past few days, <a href="https://twitter.com/leandronsp/status/1421991890346463233?s=20">I’ve been learning some Haskell</a> after years of seeing people praising this programming language, be it about its expressiveness on writing programs or its pureness of being a “pure” functional programming language free of side-effects.</p>
+<h2><a href="#expressiveness" aria-hidden="true" class="anchor" id="expressiveness"></a>Expressiveness</h2>
+<p><a href="https://github.com/leandronsp/fun/tree/master/haskell">After playing</a> a bit with Haskell, I could realize how much I like such expressiveness in a programming language.</p>
+<p>Additionally, I have backgound programming in Ruby since 2010 and Elixir since 2016. I always loved the way I can write declarative and readable code in those languages, which makes them my 2 preferred languages by far.</p>
+<p>Then I met Haskell.</p>
+<h2><a href="#types" aria-hidden="true" class="anchor" id="types"></a>Types</h2>
+<p>In the late 2000’s, I started my career programming in Java. Hence, I have some familiarity working with type declarations and how to use types to ensure some level of correctness.</p>
+<p>However, when learning Haskell, I could realize there’s much more I could learn on types. After more than a decade doing mainly <a href="https://en.wikipedia.org/wiki/Duck_typing">duck type programming</a>, I feel I have to do a “mental shift” in order to master types.</p>
+<p>Thankfully, [Haskell does a great job on type inference](<a href="https://en.wikipedia.org/wiki/Haskell_(programming_language)">https://en.wikipedia.org/wiki/Haskell_(programming_language)</a>, which will ease my process on using types.</p>
+<h2><a href="#hello-world" aria-hidden="true" class="anchor" id="hello-world"></a>Hello World</h2>
+<p>In this blogpost series I’ll assume you already have <a href="https://www.haskell.org">the Haskell environment installed</a>. In case you want to save your time and your host storage utilization, you can use <a href="https://hub.docker.com/_/haskell">Docker</a>.</p>
+<p>A simple hello world using the <a href="https://en.wikipedia.org/wiki/Glasgow_Haskell_Compiler">ghc</a>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;putStrLn &quot;Hello World in Haskell!&quot;&#39;</span>
+</div></code></pre>
+<p>This is the most possible simple Hello World in Haskell.</p>
+<p><code>ghc</code> <strong>on the <code>-e</code> mode</strong> will interpret the expression <code>putStrLn &quot;Hello World in Haskell&quot;</code>, compile it to native code and execute it, all in a single command.</p>
+<h3><a href="#whats-ghc" aria-hidden="true" class="anchor" id="whats-ghc"></a>What’s ghc?</h3>
+<p>It stands for “Glasgow Haskell Compiler”. It’s the <a href="https://en.wikipedia.org/wiki/Glasgow_Haskell_Compiler">most used Haskell compiler implementation</a>, having its initial release in the early 90’s.</p>
+<p>When we write a Haskell program in a <code>.hs</code> source file, we use the <code>ghc</code> to compile our program into native code. For instance, let’s make another “Hello World” but using the compilation process manually:</p>
+<p><code>Hello.hs</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-haskell" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">main</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">putStrLn</span> <span style="color: #98c379;">&quot;Hello World in Haskell!&quot;</span>
+</div></code></pre>
+<p>Then, compile the program using <code>ghc</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">Hello.hs</span>
+</div></code></pre>
+<p>It will compile and generate the binary code in the output file <code>./Hello</code>, which can be executed successfully:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">./Hello</span>
+</div></code></pre>
+<p>“Hello World in Haskell!”. YAY! 🎉</p>
+<h3><a href="#skipping-the-manual-compilation-process" aria-hidden="true" class="anchor" id="skipping-the-manual-compilation-process"></a>Skipping the manual compilation process</h3>
+<p>Remember our first <code>Hello World</code> example, skipping the manual compilation process? The <code>-e</code> option can be <em>a valid Haskell expression, hence function calls are eligible for that</em>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">app/Hello.hs</span> <span style="color: #e06c75;">-e</span> <span style="color: #e06c75;">main</span>
+</div></code></pre>
+<p>The same as calling:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&#39;putStrLn &quot;Hello World in Haskell!&quot;&#39;</span>
+</div></code></pre>
+<h2><a href="#a-quicksort-example" aria-hidden="true" class="anchor" id="a-quicksort-example"></a>A Quicksort example</h2>
+<p>Let’s write a simple, not-optimized Quicksort algorithm:</p>
+<p><code>Quicksort.hs</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">quicksort</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">]</span>                                     
+</div><div class="line" data-line="2"><span style="color: #61afef;">quicksort</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">pivot</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">pivot</span><span style="color: #e06c75;">]</span>                                
+</div><div class="line" data-line="3">                                                           
+</div><div class="line" data-line="4"><span style="color: #61afef;">quicksort</span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">pivot:tail</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span>                                   
+</div><div class="line" data-line="5">  <span style="color: #c678dd;">(</span><span style="color: #61afef;">quicksort</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">smaller</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">smaller</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">-</span> <span style="color: #61afef;">tail,</span> <span style="color: #61afef;">smaller</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">=</span> <span style="color: #98c379;">pivot</span><span style="color: #98c379;">]</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">  <span style="color: #61afef;">++</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">pivot</span><span style="color: #e06c75;">]</span> <span style="color: #e06c75;">++</span>                                            
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">(</span><span style="color: #61afef;">quicksort</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">larger</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">larger</span> <span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">-</span> <span style="color: #61afef;">tail,</span> <span style="color: #61afef;">larger</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #98c379;">pivot</span><span style="color: #98c379;">]</span><span style="color: #c678dd;">)</span>    
+</div></code></pre>
+<p>Now, in order to run the algorithm, it’s only a matter of:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghc</span> <span style="color: #e06c75;">Quicksort.hs</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;quicksort [5, 13, 8, 1, 2, 1, 3]&quot;</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #7f848e;"># [1, 1, 2, 3, 5, 8, 13]</span>
+</div></code></pre>
+<p>I’ll skip explaining the Quicksort solution, but in Haskell we basically used the following features:</p>
+<ul>
+<li><a href="http://learnyouahaskell.com/syntax-in-functions">Pattern Matching</a></li>
+<li><a href="http://learnyouahaskell.com/recursion">Recursion</a></li>
+<li><a href="https://wiki.haskell.org/List_comprehension">List comprehensions</a></li>
+</ul>
+<h2><a href="#using-the-repl" aria-hidden="true" class="anchor" id="using-the-repl"></a>Using the REPL</h2>
+<p>Haskell comes with a great <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> called <a href="https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/ghci.html">GHCi</a>. From the GHCi interpreter, we can load modules and execute their functions right from there:</p>
+<p>Enter the REPL:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghci</span>
+</div></code></pre>
+<p>Then, inside the REPL, do some math:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">1</span> <span style="color: #61afef;">+</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="2"><span style="color: #d19a66;">2</span>
+</div></code></pre>
+<p>Load the Quicksort module:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">:load</span> <span style="color: #61afef;">Quicksort.hs</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">[</span><span style="color: #d19a66;">1</span> of <span style="color: #d19a66;">1</span><span style="color: #98c379;">]</span> Compiling Main       <span style="color: #c678dd;">(</span> <span style="color: #61afef;">Quicksort.hs,</span> <span style="color: #e06c75;">interpreted</span> <span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3">Ok, <span style="color: #61afef;">one</span> <span style="color: #e06c75;">module</span> <span style="color: #e06c75;">loaded.</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #e06c75;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">quicksort</span> <span style="color: #98c379;">[</span><span style="color: #98c379;">2,</span> <span style="color: #61afef;">3,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">[</span><span style="color: #61afef;">1,</span> <span style="color: #e06c75;">2,</span> <span style="color: #d19a66;">3</span><span style="color: #e06c75;">]</span>
+</div></code></pre>
+<p>And quit the REPL:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">:quit</span>
+</div></code></pre>
+<h3><a href="#prelude" aria-hidden="true" class="anchor" id="prelude"></a>Prelude</h3>
+<p>Inside the REPL, Haskell loads automatically the basic <a href="https://hackage.haskell.org/package/base-4.15.0.0/docs/Prelude.html">Prelude module</a> and some standard libraries, such as <a href="https://hackage.haskell.org/package/base-4.15.0.0/docs/System-IO.html">IO</a> and Complex. Because of that, any function belonging to the Prelude module will be acessible via REPL.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># implicit</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">putStrLn</span> <span style="color: #98c379;">&quot;hello from GHCi&quot;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># explicit</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">ghci</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">Prelude.putStrLn</span>  <span style="color: #98c379;">&quot;hello from GHCi&quot;</span>
+</div></code></pre>
+<h2><a href="#writing-unit-tests" aria-hidden="true" class="anchor" id="writing-unit-tests"></a>Writing Unit tests</h2>
+<p>Testing is a good engineering practice agnostic to technology or tooling. Haskell is no different and the community created a great tool for Unit testing called <a href="https://hackage.haskell.org/package/HUnit">HUnit</a>, inspired by the Java JUnit.</p>
+<p>Since it’s an external package, we must download it and <strong>import the module</strong> <code>Test.HUnit</code> in order to run our first unit test in Haskell.</p>
+<p>We will use <a href="https://docs.haskellstack.org/en/stable/README/">Stack</a> which comes with a good tooling for creating and managing complex projects in Haskell.</p>
+<p>First of all, let’s setup Stack so it will install a <code>ghc</code> in an isolated place and give us a buch of useful commands for using packages:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">stack</span> <span style="color: #e06c75;">setup</span>
+</div></code></pre>
+<p>Now we are able to install the <code>HUnit</code> package:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">stack</span> <span style="color: #e06c75;">install</span> <span style="color: #e06c75;">HUnit</span>
+</div></code></pre>
+<p>Following, the unit test:</p>
+<p><code>Tests.hs</code></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">import</span> <span style="color: #e06c75;">Test.HUnit</span>                                 
+</div><div class="line" data-line="2">                                                  
+</div><div class="line" data-line="3"><span style="color: #61afef;">simpleTest</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">TestCase</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">assertEqual</span> <span style="color: #98c379;">&quot;1 equals 1&quot;</span> <span style="color: #d19a66;">1</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>And then, we can run our test:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">stack</span> <span style="color: #e06c75;">ghc</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">Tests.hs</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;runTestTT simpleTest&quot;</span>
+</div></code></pre>
+<p>Which results in:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">Cases:</span> <span style="color: #d19a66;">1</span>  <span style="color: #e06c75;">Tried:</span> <span style="color: #d19a66;">1</span>  <span style="color: #e06c75;">Errors:</span> <span style="color: #d19a66;">0</span>  <span style="color: #e06c75;">Failures:</span> <span style="color: #d19a66;">0</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">Counts</span> <span style="color: #e06c75;">&lbrace;</span><span style="color: #e06c75;">cases</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">1,</span> <span style="color: #e06c75;">tried</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">1,</span> <span style="color: #e06c75;">errors</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">0,</span> <span style="color: #e06c75;">failures</span> <span style="color: #e06c75;">=</span> <span style="color: #d19a66;">0</span><span style="color: #e06c75;">&rbrace;</span>
+</div></code></pre>
+<p>Notes:</p>
+<ul>
+<li>calling <code>stack</code> is needed so Stack will load the <code>HUnit</code> module into the <code>ghc</code></li>
+<li>the <code>Test.HUnit</code> module defines a function called <code>runTestTT</code> which we use to run our test</li>
+</ul>
+<p>We can even define multiple TestCases at once:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">import</span> <span style="color: #e06c75;">Test.HUnit</span>                                              
+</div><div class="line" data-line="2">                                                               
+</div><div class="line" data-line="3"><span style="color: #61afef;">simpleTest</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">TestCase</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #61afef;">assertEqual</span> <span style="color: #98c379;">&quot;1 == 1&quot;</span> <span style="color: #d19a66;">1</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>                
+</div><div class="line" data-line="4"><span style="color: #61afef;">mathTest</span>  <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">TestCase</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">assertEqual</span> <span style="color: #98c379;">&quot;10 / 5 equals 2&quot;</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span> <span style="color: #e06c75;">/</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5">                                                               
+</div><div class="line" data-line="6"><span style="color: #61afef;">tests</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">TestList</span> <span style="color: #e06c75;">[</span>
+</div><div class="line" data-line="7">    <span style="color: #61afef;">TestLabel</span> <span style="color: #98c379;">&quot;simple&quot;</span> <span style="color: #e06c75;">simpleTest,</span> 
+</div><div class="line" data-line="8">    <span style="color: #61afef;">TestLabel</span> <span style="color: #98c379;">&quot;math&quot;</span> <span style="color: #e06c75;">mathTest</span><span style="color: #e06c75;">]</span>                                   
+</div></code></pre>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">stack</span> <span style="color: #e06c75;">ghc</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">Tests.hs</span> <span style="color: #e06c75;">-e</span> <span style="color: #98c379;">&quot;runTestTT tests&quot;</span>
+</div></code></pre>
+<p>Or, if preferred, multiple assertions per TestCase:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">import</span> <span style="color: #e06c75;">Test.HUnit</span>                         
+</div><div class="line" data-line="2">                                          
+</div><div class="line" data-line="3"><span style="color: #61afef;">tests</span> <span style="color: #e06c75;">=</span> <span style="color: #e06c75;">TestCase</span> <span style="color: #98c379;">$</span> <span style="color: #e06c75;">do</span>                     
+</div><div class="line" data-line="4">  <span style="color: #61afef;">assertEqual</span> <span style="color: #98c379;">&quot;1 == 1&quot;</span> <span style="color: #d19a66;">1</span> <span style="color: #d19a66;">1</span>                
+</div><div class="line" data-line="5">  <span style="color: #61afef;">assertEqual</span> <span style="color: #98c379;">&quot;10 / 5 equals 2&quot;</span><span style="color: #abb2bf;"></span> <span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span> <span style="color: #e06c75;">/</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #d19a66;">2</span>
+</div></code></pre>
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>In this post we’ve seen a gentle introduction to the Haskell programming language, writing simple programs using GHC, GHCi and Stack. We also covered how to setup and write unit tests, which are very important to every real-world project.</p>
+<p>I didn’t cover <strong>type declarations</strong>, but it will be covered in future posts.</p>
+<p>Moreover, in the upcoming posts, we’ll do some Socket programming and create a simple TCP server in Haskell, being the base ground of our simple CRUD application.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

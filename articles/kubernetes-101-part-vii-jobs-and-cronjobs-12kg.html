@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part VII, jobs and cronjobs - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Our previous article, we learned how DaemonSets can effectively [collect data](https://dev.to/leandronsp/kubernetes-101-part-vi-daemonsets-1ph0) from Kubernetes">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html">
+  <meta property="og:title" content="Kubernetes 101, part VII, jobs and cronjobs">
+  <meta property="og:description" content="Our previous article, we learned how DaemonSets can effectively [collect data](https://dev.to/leandronsp/kubernetes-101-part-vi-daemonsets-1ph0) from Kubernetes">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-04-29T23:45:28Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="docker">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part VII, jobs and cronjobs",
+    "datePublished": "2023-04-29T23:45:28Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Our previous article, we learned how DaemonSets can effectively [collect data](https://dev.to/leandronsp/kubernetes-101-part-vi-daemonsets-1ph0) from Kubernetes",
+        "keywords": "kubernetes, docker"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part VII, jobs and cronjobs</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 29 Apr 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">docker</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Our previous article, we learned how DaemonSets can effectively <a href="https://dev.to/leandronsp/kubernetes-101-part-vi-daemonsets-1ph0">collect data</a> from Kubernetes nodes, allowing data to be structured and sent to appropriate tooling.</p>
+<p>In this post, we’ll delve into the topic of running a single job in Kubernetes through the use of Kubernetes <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>.</p>
+<p>Furthermore, we’ll learn how Kubernetes enables the scheduling of jobs to be executed regularly, through the use of <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">Cronjobs</a>.</p>
+<hr />
+<h2><a href="#job" aria-hidden="true" class="anchor" id="job"></a>Job</h2>
+<p>Kubernetes Job objects incorporate a <strong>Job controller</strong> that <em>creates a Pod</em> from the spec provided, enabling it to execute an arbitrary command.</p>
+<p>That said, the YAML file looks like the following:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Job</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">batch/v1</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">sleeper</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">      <span style="color: #e06c75;">restartPolicy</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Never</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">sleeper</span>
+</div><div class="line" data-line="11">        <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">debian</span>
+</div><div class="line" data-line="12">        <span style="color: #e06c75;">command</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;sleep&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;15&quot;</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>We can check that the job <code>sleeper</code> was created:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">jobs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>      <span style="color: #e06c75;">COMPLETIONS</span>   <span style="color: #e06c75;">DURATION</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper</span>   <span style="color: #e06c75;">0/1</span>           <span style="color: #e06c75;">5s</span>        <span style="color: #e06c75;">5s</span>
+</div></code></pre>
+<p>And a Pod was started from the job created above:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                    <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-8mmtg</span>           <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">8s</span>
+</div></code></pre>
+<p>After the Pod is finished successfully, it goes to the <code>Completed</code> status:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                    <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>    <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-8mmtg</span>           <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">35s</span>
+</div></code></pre>
+<p>And the Job completions is updated to <code>1/1</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">jobs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>      <span style="color: #e06c75;">COMPLETIONS</span>   <span style="color: #e06c75;">DURATION</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper</span>   <span style="color: #e06c75;">1/1</span>           <span style="color: #e06c75;">35s</span>        <span style="color: #e06c75;">35s</span>
+</div></code></pre>
+<p>Below is a visual representation of how Kubernetes handles Jobs, supported by a Pod that executes the command provided:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/eb6p326ph0ghpltw36mq.png" alt="k8s jobs" /></p>
+<p>However, not rare we have to run a job regularly.</p>
+<p>In UNIX-like systems, a program called <a href="https://en.wikipedia.org/wiki/Cron">crontab</a> enables to run regularly, given a syntax for scheduling, an arbitrary command. Kubernetes allows Jobs to be scheduled in the same manner, using the the <strong>crontab syntax</strong>.</p>
+<p><em>Meet Kubernetes CronJobs</em>.</p>
+<hr />
+<h2><a href="#cronjob" aria-hidden="true" class="anchor" id="cronjob"></a>CronJob</h2>
+<p>In short, a Cronjob will <strong>regularly start a new Job</strong>, from which a new Pod will be started.</p>
+<p>Here’s an illustration of how CronJobs work in Kubernetes:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/o8tvnd5xpq2ups68oqtl.png" alt="k8s cronjobs" /></p>
+<p>Below is the YAML representation of it:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">CronJob</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">batch/v1</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">sleeper</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">schedule</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">&quot;*/1 * * * *&quot;</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">jobTemplate</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="9">      <span style="color: #e06c75;">template</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">        <span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">          <span style="color: #e06c75;">restartPolicy</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Never</span>
+</div><div class="line" data-line="12">          <span style="color: #e06c75;">containers</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="13">          <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">sleeper</span>
+</div><div class="line" data-line="14">            <span style="color: #e06c75;">image</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">debian</span>
+</div><div class="line" data-line="15">            <span style="color: #e06c75;">command</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;sleep&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;15&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="16">
+</div></code></pre>
+<ul>
+<li>in the <code>schedule</code> key we provide the crontab syntax</li>
+<li>the <code>jobTemplate</code> is exactly the <em>Job specification</em> that will run a Pod</li>
+</ul>
+<p>Let’s confirm that Kubernetes created a Cronjob object:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">cronjobs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>      <span style="color: #e06c75;">SCHEDULE</span>      <span style="color: #e06c75;">SUSPEND</span>   <span style="color: #e06c75;">ACTIVE</span>   <span style="color: #e06c75;">LAST</span> <span style="color: #e06c75;">SCHEDULE</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper</span>   <span style="color: #e06c75;">*/1</span> <span style="color: #e06c75;">*</span> <span style="color: #e06c75;">*</span> <span style="color: #e06c75;">*</span> <span style="color: #e06c75;">*</span>   <span style="color: #e06c75;">False</span>     <span style="color: #d19a66;">0</span>        <span style="color: #e06c75;">52s</span>             <span style="color: #e06c75;">9m29s</span>
+</div></code></pre>
+<p>From the CronJob, a Job was created:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">jobs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>               <span style="color: #e06c75;">COMPLETIONS</span>   <span style="color: #e06c75;">DURATION</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-28046804</span>   <span style="color: #e06c75;">0/1</span>           <span style="color: #e06c75;">22s</span>        <span style="color: #e06c75;">35s</span>
+</div></code></pre>
+<p>And a Pod was started:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                     <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>      <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-28046805-hqkwb</span>   <span style="color: #e06c75;">1/1</span>     <span style="color: #e06c75;">Running</span>     <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">40s</span>
+</div></code></pre>
+<p>After a couple of minutes, we see that the CronJob created 3 Jobs which, by the way, is the default number of Jobs that Kubernetes will keep in the cluster (we can change that number at our need <code>successfulJobsHistoryLimit</code>):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">jobs</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>               <span style="color: #e06c75;">COMPLETIONS</span>   <span style="color: #e06c75;">DURATION</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-28046806</span>   <span style="color: #e06c75;">1/1</span>           <span style="color: #e06c75;">21s</span>        <span style="color: #e06c75;">3m10s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">sleeper-28046807</span>   <span style="color: #e06c75;">1/1</span>           <span style="color: #e06c75;">21s</span>        <span style="color: #e06c75;">2m10s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">sleeper-28046808</span>   <span style="color: #e06c75;">1/1</span>           <span style="color: #e06c75;">21s</span>        <span style="color: #e06c75;">70s</span>
+</div></code></pre>
+<p>Therefore, each Job will start a new Pod:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">get</span> <span style="color: #e06c75;">pods</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">NAME</span>                     <span style="color: #e06c75;">READY</span>   <span style="color: #e06c75;">STATUS</span>      <span style="color: #e06c75;">RESTARTS</span>   <span style="color: #e06c75;">AGE</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">sleeper-28046808-szdw7</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">2m26s</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">sleeper-28046809-fhxk8</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">86s</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">sleeper-28046810-2gvds</span>   <span style="color: #e06c75;">0/1</span>     <span style="color: #e06c75;">Completed</span>   <span style="color: #d19a66;">0</span>          <span style="color: #e06c75;">26s</span>
+</div></code></pre>
+<hr />
+<h2><a href="#wrapping-up" aria-hidden="true" class="anchor" id="wrapping-up"></a>Wrapping Up</h2>
+<p>This post demonstrated how to run arbitrary commands using the Kubernetes Job object.</p>
+<p>Furthermore, we have learned that Kubernetes CronJob objects allow for the scheduling of Jobs to be executed regularly.</p>
+<p>So far, we have covered the <strong>primary Kubernetes workload objects</strong>, namely ReplicaSet, Deployment, StatefulSet, DaemonSet, Job and CronJob.</p>
+<p>In the following posts, we’ll explore how these objects connect with each other within the cluster while also gaining an understanding of Kubernetes networking.</p>
+<hr />
+<p><em>This post was written with the assistance of ChatGPT, which helped with some “eye candy” on grammar.</em></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

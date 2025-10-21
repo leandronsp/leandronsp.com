@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes 101, part I, the fundamentals - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="It's been a while I wanted to take a time to sit down and write about _Kubernetes_. **The time has come.**
+
+In short, [Kubernetes](https://kubernetes.io/) is an">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html">
+  <meta property="og:title" content="Kubernetes 101, part I, the fundamentals">
+  <meta property="og:description" content="It's been a while I wanted to take a time to sit down and write about _Kubernetes_. **The time has come.**
+
+In short, [Kubernetes](https://kubernetes.io/) is an">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-02-23T02:25:00Z">
+  
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Kubernetes 101, part I, the fundamentals",
+    "datePublished": "2023-02-23T02:25:00Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "It's been a while I wanted to take a time to sit down and write about _Kubernetes_. **The time has come.**
+
+In short, [Kubernetes](https://kubernetes.io/) is an"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Kubernetes 101, part I, the fundamentals</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 23 Feb 2023</span>
+        </div>
+
+        
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>It’s been a while I wanted to take a time to sit down and write about <em>Kubernetes</em>. <strong>The time has come.</strong></p>
+<p>In short, <a href="https://kubernetes.io/">Kubernetes</a> is an open-source system for <strong>automating and managing containerized applications</strong>. <em>Kubernetes is all about containers.</em></p>
+<hr />
+<p>:exclamation: <em>If you don’t have much idea of what <strong>a container is</strong>, please refer to my <a href="https://dev.to/leandronsp/series/19249">Docker 101 series</a> first and then come back to this one. Thereby you’ll be more prepared to understand Kubernetes.</em></p>
+<p>Disclaimer said, let’s see the problem all this “K8s thing” tries to solve.</p>
+<hr />
+<h2><a href="#package-containers-management" aria-hidden="true" class="anchor" id="package-containers-management"></a>:package: Containers management</h2>
+<p>Suppose we have a complex system that is composed by:</p>
+<ul>
+<li>A Backoffice written in Ruby</li>
+<li>Various databases running PostgreSQL</li>
+<li>A report system written in Java</li>
+<li>A Chat app written in Erlang</li>
+<li>A Frontoffice written in NodeJS</li>
+</ul>
+<p>Okay, this architecture is quite heterogeneous, but it serves the purpose of this article. In addition, we <strong>run everything in containers</strong>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2fqe02nlekeupwbkr4o4.png" alt="a1" /></p>
+<p>Assume we have to ensure maximum availability and scalability of the “Frontoffice” application, because eventually it is the application that final users consume. Here, the system <strong>requires at least</strong> 2 Frontoffice containers running:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dltlhau8is0u26vbtxkh.png" alt="a2" /></p>
+<p>Moreover, there’s another functional requirement that the Chat app cannot be down for much time, and in case it goes down, we should <strong>make sure it is started again</strong>, having the capability of <strong>self-healing</strong>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4efwffltg9vouvxle8ec.png" alt="a3" /></p>
+<p>Now think of an architecture where we have <em>dozens if not hundreds</em> of containers:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/iu8njsodwahkfbsshbau.png" alt="a4" /></p>
+<p><strong>Container management is not easy</strong>, that’s where Kubernetes comes in.</p>
+<hr />
+<h2><a href="#scroll-a-bit-of-history" aria-hidden="true" class="anchor" id="scroll-a-bit-of-history"></a>:scroll: A bit of history</h2>
+<p>After 15 years of running complex workloads internally, <strong>Google</strong> decided to make public their former container management tool called “Borg”.</p>
+<p>In 2014, the launch was made and they named it “Kubernetes”. The tool went <strong>open-source</strong> and the community soon embraced it.</p>
+<p>Kubernetes is written in <strong>Golang</strong>, initially it used to support only Docker containers but later support to other container runtimes have come too, such as <em>containerd and CRI-O</em>.</p>
+<h3><a href="#cloud-cloud-native-computing-foundation" aria-hidden="true" class="anchor" id="cloud-cloud-native-computing-foundation"></a>:cloud: Cloud Native Computing Foundation</h3>
+<p>In 2015 the <a href="https://www.linuxfoundation.org/">Linux Foundation</a> created a foundation branch that aims for supporting open-source projects that <em>run and manage containers</em> in the cloud computing.</p>
+<p>Then, the <strong>Cloud Native Computing Foundation</strong>, or <a href="https://www.cncf.io/">CNCF</a>, was created.</p>
+<p>Less than a year later, <strong>Kubernetes was introduced</strong> as the <em>first CNCF graduated project ever</em>.</p>
+<p>Currently as of 2023, a <strong>lot of companies and big players run Kubernetes</strong> on their infrastructure, Amazon, Google, Microsoft, RedHat, VMWare to name a few.</p>
+<hr />
+<h2><a href="#kubernetes-architecture" aria-hidden="true" class="anchor" id="kubernetes-architecture"></a>Kubernetes Architecture</h2>
+<p>Here’s a brief picture of how a Kubernetes architecture looks like:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ktn922ak6lykt2jp85qd.png" alt="architecture" /></p>
+<p>In the above scenario, we have a k8s cluster that consists of “4 machines” (or <strong>virtual machines</strong> that’s more common nowadays), being:</p>
+<ul>
+<li>1 machine called <strong>Control Plane</strong>, in which the cluster is created and is <em>responsible to accept new machines</em> (or nodes) on the cluster</li>
+<li>3 other machines called <strong>Nodes</strong>, which will contain <em>all the managed containers</em> by the cluster.</li>
+</ul>
+<h3><a href="#thumbsup-a-rule-of-thumb" aria-hidden="true" class="anchor" id="thumbsup-a-rule-of-thumb"></a>:thumbsup: A rule of thumb</h3>
+<p><em>All the running containers</em> establish what we call the <strong>cluster state</strong>.</p>
+<p>In Kubernetes, <strong>we declare the desired state</strong> of the cluster by making HTTP requests to the Kubernetes API, and Kubernetes will “work hard” to achieve the desired state.</p>
+<p><em>However, making plain HTTP requests in order to declare the state can be somewhat cumbersome, error prone and a tedious job.</em> How about having some <strong>CLI in the command-line</strong> which would do the hard work of authenticating and making HTTP requests?</p>
+<p>Meet <a href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a>.</p>
+<h3><a href="#bust_in_silhouette-creating-objects-in-the-cluster" aria-hidden="true" class="anchor" id="bust_in_silhouette-creating-objects-in-the-cluster"></a>:bust_in_silhouette: Creating objects in the cluster</h3>
+<p>Kubernetes treats <strong>everything in the cluster as objects</strong>, where objects can have <strong>different types</strong> (kind).</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">nginx</span> <span style="color: #e06c75;">--image=nginx</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">pod/nginx</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<p>The following picture describes such interaction where we use the <code>kubectl</code> CLI which will perform a request to the control plane API:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/cvip2022mznsnof13dt2.png" alt="b1" /></p>
+<p>But <strong>what’s a Pod?</strong>, you may be wondering. <strong>Pod is the smallest object unit</strong> we can interact with.</p>
+<p>Pods could be like containers, however <strong>Pods can contain multiple containers.</strong></p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s2si31ffi0mhp19nymxo.png" alt="b2" /></p>
+<hr />
+<h2><a href="#mag_right-architecture-flow" aria-hidden="true" class="anchor" id="mag_right-architecture-flow"></a>:mag_right: Architecture Flow</h2>
+<p>Now let’s dig into the <em>flow of creating objects</em>, on how the cluster performs the <strong>pod scheduling and state updates</strong>.</p>
+<p>That’s supposed to be a brief architecture flow, so we can understand better the k8s architecture.</p>
+<h3><a href="#point_right-control-plane-scheduler" aria-hidden="true" class="anchor" id="point_right-control-plane-scheduler"></a>:point_right: Control Plane Scheduler</h3>
+<p>The <strong>Control Plane Scheduler</strong> looks out for the next available node and schedules the object/pod to it.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4i63xb3oyig5vivmisf6.png" alt="c1" /></p>
+<h3><a href="#point_right-node-kubelet" aria-hidden="true" class="anchor" id="point_right-node-kubelet"></a>:point_right: Node Kubelet</h3>
+<p>Each node contains a component called <strong>Kubelet</strong>, which <strong>admits objects coming from the Scheduler</strong> and, using the <em>container runtime</em> installed in the node (could be Docker, containerd, etc), creates the object in the node.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1799rgdv7aszhol0rjbj.png" alt="c2" /></p>
+<h3><a href="#point_right-etcd" aria-hidden="true" class="anchor" id="point_right-etcd"></a>:point_right: etcd</h3>
+<p>In the Control Plane there’s a component called <a href="https://etcd.io/">etcd</a> which is a <strong>distributed key-value store</strong> that works well in distributed systems and cluster of machines. <em>It’s a good fit for Kubernetes.</em></p>
+<p>K8s uses etcd to persist and keep the current state.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/lmq9zb8xhvmt4m5s9vyl.png" alt="c3" /></p>
+<h3><a href="#hand-a-bit-of-networking-in-kubernetes" aria-hidden="true" class="anchor" id="hand-a-bit-of-networking-in-kubernetes"></a>:hand: A bit of networking in Kubernetes</h3>
+<p>Suppose we have two NGINX pods in the cluster, a <strong>server</strong> and a <strong>client</strong>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">server</span> <span style="color: #e06c75;">--image=nginx</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">pod/server</span> <span style="color: #e06c75;">created</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">run</span> <span style="color: #e06c75;">client</span> <span style="color: #e06c75;">--image=nginx</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">pod/client</span> <span style="color: #e06c75;">created</span>
+</div></code></pre>
+<p>Assume we want to reach the <code>server</code>, how do we reach such pod in the port 80?</p>
+<p>In containerized applications, by default, <strong>containers are isolated</strong> and do not share the host network. <em>Neither do Pods</em>.</p>
+<p>We can only request the <code>localhost:80</code> within the <code>server</code> Pod. How do we <strong>execute commands in a running pod</strong>?</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">server</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">localhost</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">html</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">...</span>
+</div></code></pre>
+<p>It works, but <strong>only requesting within the pod</strong>.</p>
+<p>How about requesting the <em>server</em> <strong>from the client</strong>, is it possible? Yes, because <em>each Pod receives an internal IP</em> in the cluster.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">describe</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">server</span> <span style="color: #56b6c2;">|</span> <span style="color: #61afef;">grep</span> <span style="color: #e06c75;">IP</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">IP:</span> <span style="color: #e06c75;">172.17.0.6</span>
+</div></code></pre>
+<p>Now, we can perform the request to the server from the <code>client</code> using the server internal IP:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">client</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">172.17.0.6</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">html</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">...</span>
+</div></code></pre>
+<p>However, in case we perform a deploy, i.e change the old <code>server</code> Pod to a <em>newer Pod</em>, <strong>there’s no guarantee that the new Pod will get the same previous IP</strong>.</p>
+<p>We need some mechanism of <strong>pod discovery</strong>, where we can declare a <em>special object</em> in Kubernetes that <strong>will give a name</strong> to a given pod. Therefore, within the cluster, we could <strong>reach Pods by their names</strong> instead of internal IP’s.</p>
+<p>Such special object is called <strong>Service</strong>.</p>
+<h3><a href="#point_right-controller-manager" aria-hidden="true" class="anchor" id="point_right-controller-manager"></a>:point_right: Controller Manager</h3>
+<p>The <em>Control Plane</em> also employs a component called <strong>Controller Manager</strong>. It’s responsible to receive a request for special objects like <strong>Services</strong> and expose them via service discovery.</p>
+<p>All we have to do is issuing <code>kubectl expose</code> and the control plane will do the job.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">expose</span> <span style="color: #e06c75;">pod</span> <span style="color: #e06c75;">server</span> <span style="color: #e06c75;">--port=80</span> <span style="color: #e06c75;">--target-port=80</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">service/server</span> <span style="color: #e06c75;">exposed</span>
+</div></code></pre>
+<p>Then we are able to <strong>reach the <code>server</code> pod by its name</strong>, instead of its internal IP:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">exec</span> <span style="color: #e06c75;">client</span> <span style="color: #e06c75;">--</span> <span style="color: #e06c75;">curl</span> <span style="color: #e06c75;">server</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #56b6c2;">&lt;</span><span style="color: #61afef;">html</span><span style="color: #56b6c2;">&gt;</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">...</span>
+</div></code></pre>
+<p>Let’s look at what happened in the architecture flow. First, the <code>kubectl expose</code> command issued the creation of the <strong>Service object</strong>:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jo5p6f909ob6uhhb02oi.png" alt="c4" /></p>
+<p>Then, the <strong>Controller Manager</strong> exposes the Pod via service discovery:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/kerdb0cb04bk0z1pojob.png" alt="c5" /></p>
+<p>Afterwards, the controller manager <em>routes</em> to the <code>kube-proxy</code> component that is running in the node, which will <strong>create the Service object</strong> for the respective Pod. At the end of the process, the state is persisted in <code>etcd</code>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zmipyze46b6s6grlcz94.png" alt="c6" /></p>
+<h3><a href="#point_right-cloud-controller" aria-hidden="true" class="anchor" id="point_right-cloud-controller"></a>:point_right: Cloud Controller</h3>
+<p>Another controller that exists in the control plane is the <strong>Cloud Controller</strong>, responsible for receiving requests to create objects and <strong>interacting with the underlying cloud provider</strong> if needed.</p>
+<p>For example, when we create a Service object of type <code>LoadBalancer</code>, the <strong>Cloud Controller</strong> <em>will create a LB</em> in the underlying provider, be it AWS, GCP, Azure etc</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b1pgcu7djxq5sk3lbtvr.png" alt="c7" /></p>
+<hr />
+<h2><a href="#100-the-final-overview" aria-hidden="true" class="anchor" id="100-the-final-overview"></a>:100: The final overview</h2>
+<p>After learning about the kubernetes architecture, let’s summarize the <strong>main architecture flow</strong> in one picture:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/coflj69ddtv7wj2lwpcy.png" alt="overview" /></p>
+<hr />
+<p>This post was an <em>introduction to Kubernetes</em> along with an overview to its <strong>main architecture</strong>.</p>
+<p>We also learned about some building block objects like <strong>Pods and Services</strong>.</p>
+<p>In the upcoming posts, we’ll see a more detailed view about Kubernetes <em>workloads, configuration and networking</em>.</p>
+<p>Stay tuned!</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

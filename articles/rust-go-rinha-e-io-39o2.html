@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rust, Go, Rinha e I/O - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Este artigo é o início de um formato diferente de conteúdo que quero experimentar, um apanhado (ou resumão, ou dump, como queiram chamar) de coisas que tenho vis">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html">
+  <meta property="og:title" content="Rust, Go, Rinha e I/O">
+  <meta property="og:description" content="Este artigo é o início de um formato diferente de conteúdo que quero experimentar, um apanhado (ou resumão, ou dump, como queiram chamar) de coisas que tenho vis">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-09-08T03:25:48Z">
+  <meta property="article:tag" content="braziliandevs">
+      <meta property="article:tag" content="rust">
+      <meta property="article:tag" content="ruby">
+      <meta property="article:tag" content="go">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Rust, Go, Rinha e I/O",
+    "datePublished": "2023-09-08T03:25:48Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "Este artigo é o início de um formato diferente de conteúdo que quero experimentar, um apanhado (ou resumão, ou dump, como queiram chamar) de coisas que tenho vis",
+        "keywords": "braziliandevs, rust, ruby, go"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Rust, Go, Rinha e I/O</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 08 Sep 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">braziliandevs</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">rust</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">go</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>Este artigo é o início de um formato diferente de conteúdo que quero experimentar, um apanhado (ou resumão, ou dump, como queiram chamar) de coisas que tenho visto nos últimos dias, com uma pegada informal e um leve toque de didática como de costume.</p>
+<hr />
+<h2><a href="#rust-go-e-background-jobs" aria-hidden="true" class="anchor" id="rust-go-e-background-jobs"></a>Rust, Go e background jobs</h2>
+<p>Em 2022 eu estava aprendendo Rust.</p>
+<p>Numa bela 4a feira de chuva, fiz um tweet dizendo que iria tentar implementar uma lista duplamente ligada em Rust. Minutos depois, fiz <a href="https://twitter.com/leandronsp/status/1578154810612027392?s=20">outro tweet</a> dizendo que iria desistir e ver Netflix.</p>
+<p>Então desisti do Rust.</p>
+<p>Recentemente em 2023 comecei uma saga para aprender Golang. Como a sintaxe me incomodou um pouco, talvez pela verbosidade dos <code>if err != nil</code> a dar com telha, decidi continuar kkk</p>
+<p>Mas adicionando uma complexidade nisto tudo: voltar a aprender Rust junto com Go.</p>
+<blockquote>
+<p>As vezes eu meto dessas, em 2015/16 decidi aprender Elixir e redes neurais artificiais tudo junto, e saiu o <a href="https://github.com/leandronsp/morphine">morphine</a></p>
+</blockquote>
+<p>Nesta segunda tentativa com Rust, bateu um sentimento, confesso. <em>Sentimento bom</em>, no caso.</p>
+<p>Com isto, passei a praticar em Rust e Go (e porque não Ruby) estruturas de dados simples que já estou habituado a implementar (pq pratico muito): filas, pilhas, listas ligadas, mutexes etc etc. E claro, programação em sockets como de praxe.</p>
+<p>Desta massarocada toda saiu <a href="https://gist.github.com/leandronsp/31ad977cf1a68f5d7b3d13d46ab34a8c">um UNIX server</a> em Go, <a href="https://gist.github.com/leandronsp/b72b2b21d2ef8f8f3ccb2ab8af422c2b">outro</a> em Rust, pelo que indo de milho em milho, saiu um background job em <a href="https://gist.github.com/leandronsp/c0a7daaa27f75dd65d9fa803db8489ad">ambas</a> distintas <a href="https://gist.github.com/leandronsp/90f0e97ef28586c5c996835b311f9ac5">linguagens</a>.</p>
+<p>Cheguei a um <a href="https://gist.github.com/leandronsp/90f0e97ef28586c5c996835b311f9ac5">background job em Rust</a> muito overkill, vale a pena dar uma olhada, lá abordo lista duplamente ligada, fila duplamente terminada, rpoplpush, blocking queue, DLQ, retries, threads etc.</p>
+<p>Tudo isso implementado com os smart pointers em Rust, para resolver problemas inerentes (ok, não são bem problemas) a ownership e borrow checker.</p>
+<blockquote>
+<p>Em breve vou escrever sobre meu aprendizado em Rust com artigos mais detalhados, preciso arrumar um tempo na minha vida, salvar pinguins na Antártida é mais urgente que isso</p>
+</blockquote>
+<p>Mas se você acha que é  ̶m̶u̶i̶t̶o̶ ̶m̶a̶i̶s̶ ̶e̶l̶e̶g̶a̶n̶t̶e̶ mais fácil ver um código Ruby, <a href="https://github.com/leandronsp/fun/blob/master/dsa/queues/ruby/background_job.rb">aqui neste arquivo</a> no meu projeto <a href="https://github.com/leandronsp/fun">leandronsp/fun</a> também abordo um background job em Ruby com os mesmos conceitos aplicados ali em Rust e Go.</p>
+<hr />
+<h2><a href="#rinha-de-backend" aria-hidden="true" class="anchor" id="rinha-de-backend"></a>Rinha de backend</h2>
+<p>Entre Julho e Agosto aconteceu na famosa #bolhaDev no Twitter uma competição chamada <a href="https://github.com/zanfranceschi/rinha-de-backend-2023-q3">rinha de backend</a>, criada pelo <a href="https://twitter.com/zanfranceschi">Zan do Twitter</a> e nosso arauto do sarcasmo <a href="https://twitter.com/wilcorrea">Will Correa</a>.</p>
+<p>A ideia era que as pessoas participantes trouxessem a implementação de uma API definida nas regras da competição.</p>
+<p>O desafio tinha como requisito uma arquitetura composta por basicamente <strong>um NGINX</strong> fazendo load balancing para <strong>2 API’s</strong> mandando dados para <strong>um banco de dados</strong>, tudo rodando em containers.</p>
+<blockquote>
+<p>Se você quer saber mais sobre containers e Docker, dê uma olhadinha <a href="https://dev.to/leandronsp/series/19249">nesta série de artigos</a> que escrevi centuries ago</p>
+</blockquote>
+<p>Pra deixar mais desafiador ainda, havia uma restrição obrigatória de recursos onde o total de containers não podia exceder o limite de 1.5 CPU’s e 3GB de memória.</p>
+<p>Em uma data previamente estipulada, todas as submissões seriam submetidas a test de stress (violento, diga-se de passagem) através de uma ferramenta chamada <a href="https://gatling.io/docs/gatling/tutorials/installation/">Gatling</a>.</p>
+<p>Foi uma iniciativa muito bacana pois trouxe à luz pessoas que pouco interagiam por ali e que eram muito talentosas. Deu pra aprender e trocar muita figurinha durante os dias pré-submissão.</p>
+<p>Outra coisa boa foi que o <a href="https://twitter.com/coproduto">polvo lá do Twitter</a> organizou um <a href="https://www.meetup.com/import-beer/events/295288014/">encontro presencial</a> que iria transmitir a live da rinha, onde deu pra conhecer mais pessoas interessadas no tema.</p>
+<h3><a href="#plain-ruby-chespirito-e-roda" aria-hidden="true" class="anchor" id="plain-ruby-chespirito-e-roda"></a>Plain Ruby, Chespirito e Roda</h3>
+<p>Decidi participar submetendo uma versão em Ruby (sem Rails) tentando colocar em prova um web framework muito simples que criei chamado <a href="https://github.com/leandronsp/chespirito">Chespirito</a>.</p>
+<p>Infelizmente, durante os testes no meu ambiente local não consegui grandes números com o Chespirito e acabei indo de <a href="https://github.com/jeremyevans/roda">Roda</a>, que por acaso é o pior framework que já vi, pois sou muito hater de DSL’s em situações onde não precisamos delas.</p>
+<p>Um exemplo da tamanha verbosidade que atingimos com este framework:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">get</span> <span style="color: #c678dd;">do</span>              <span style="color: #7f848e;"># GET</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">on</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">a</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span>         <span style="color: #7f848e;"># GET /a branch</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">on</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">b</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span>       <span style="color: #7f848e;"># GET /a/b branch</span>
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">c</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">end</span> <span style="color: #7f848e;"># GET /a/b/c request</span>
+</div><div class="line" data-line="5">      <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">d</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">end</span> <span style="color: #7f848e;"># GET /a/b/d request</span>
+</div><div class="line" data-line="6">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">post</span> <span style="color: #c678dd;">do</span>             <span style="color: #7f848e;"># POST</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">on</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">a</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span>         <span style="color: #7f848e;"># POST /a branch</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">on</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">b</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span>       <span style="color: #7f848e;"># POST /a/b branch</span>
+</div><div class="line" data-line="13">      <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">c</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">end</span> <span style="color: #7f848e;"># POST /a/b/c request</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">r</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is</span> <span style="color: #98c379;">&quot;</span><span style="color: #98c379;">e</span><span style="color: #98c379;">&quot;</span> <span style="color: #c678dd;">do</span> <span style="color: #c678dd;">end</span> <span style="color: #7f848e;"># POST /a/b/e request</span>
+</div><div class="line" data-line="15">    <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="16">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="17"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<blockquote>
+<p>Escolhi Roda pq me disseram que era rápido. Não comparei com Sinatra, apenas confiei</p>
+</blockquote>
+<p>Submeti então minha versão naquela terça-feira sombria às 22h42 com Roda e <a href="https://github.com/puma/puma">Puma</a>, pois meu ambiente não me ajudou a tirar bons números com I/O assíncrono no <a href="https://github.com/socketry/falcon">Falcon</a>.</p>
+<blockquote>
+<p>Logo mais chegamos no ponto do meu ambiente</p>
+</blockquote>
+<p>Portanto, minha submissão ficou assim:</p>
+<ul>
+<li>Multi-threading com Puma, com uma modesta pool de threads 0:5, que é o default no Puma, e sem CPU workers</li>
+<li><a href="https://github.com/mperham/connection_pool">Pool</a> de 5 conexões com o PostgreSQL</li>
+<li>PostgreSQL nos defaults (100 max_connections)</li>
+<li>NGINX nos defaults com um ligeiro aumento para 1024 worker_connections</li>
+</ul>
+<p>No docker-compose submetido, dividi os recursos da seguinte forma:</p>
+<ul>
+<li>0.4 CPU | 1GB mem para as API’s (x2)</li>
+<li>0.6 CPU | 0.8GB mem para o PostgreSQL</li>
+<li>0.1 CPU | 0.2GB mem para o NGINX</li>
+</ul>
+<p>Depois vou explicar como que distribuindo melhor os recursos e <a href="https://twitter.com/leandronsp/status/1699568664859603184">diminuindo os números do NGINX e PostgreSQL</a> fez meu troughput melhorar, mas só consegui fazer isto dias depois da rinha ter terminado.</p>
+<h3><a href="#o-grande-momento-the-big-moment" aria-hidden="true" class="anchor" id="o-grande-momento-the-big-moment"></a>O grande momento, the big moment</h3>
+<p>Minha submissão Ruby ficou em 20º lugar num ranking de 51 submissões funcionais (quase 100 foram submetidas mas muitas não rodaram lá na máquina dos caras), com um total de 24k inserts no banco de dados após o teste de stress com carga dobrada.</p>
+<p>Não achei um número ruim mas eu tinha uma noção de que o desafio era muito I/O-bound, coisa que expliquei <a href="https://twitter.com/leandronsp/status/1695470712738210189">nesta thread</a> do Twitter e também <a href="https://twitter.com/leandronsp/status/1699568664859603184">nesta outra thread</a> dias depois.</p>
+<blockquote>
+<p>Se I/O-bound ou CPU-bound são termos esquisitos pra você, sugiro dar um passo atrás e aprender os fundamentos de concorrência em sistemas operacionais, <a href="https://web101.leandronsp.com/">neste super guia</a> que escrevi anos atrás sobre o funcionamento da Web</p>
+</blockquote>
+<h3><a href="#resumo-da-ópera" aria-hidden="true" class="anchor" id="resumo-da-ópera"></a>Resumo da ópera</h3>
+<p>O resumo disto é que depois com mais calma, consegui ajustar melhor meu ambiente de desenvolvimento. Abandonei o <a href="https://github.com/abiosoft/colima">colima</a> que tava com performance horrível no meu macOS e abracei o <a href="https://orbstack.dev/">orbstack</a>. So far, so good.</p>
+<p>Com isto, pude rodar de forma mais assertiva com restrição de recursos os testes de stress no meu ambiente. Tem a ver com a virtualização do orbstack ser mais performática etc e tal.</p>
+<h3><a href="#a-new-hope-for-plain-ruby" aria-hidden="true" class="anchor" id="a-new-hope-for-plain-ruby"></a>A new hope for plain Ruby</h3>
+<p>Isto abriu portas para que eu voltasse a experimentar Falcon e meu filho Chespirito. Guess what, os números começaram a bater a famigerada dupla Roda/Puma.</p>
+<p>Aproveitei também para utilizar o <a href="https://www.portainer.io/">Portainer</a> para visualizar métricas de CPU e memória dos containers no Docker.</p>
+<p>Não apenas isto, também mexi nos meus limites no docker-compose, ficando assim, delegando mais recursos para o PostgreSQL que, tadinho, era o que mais apanhava (parabéns guerreiro, tmj):</p>
+<ul>
+<li>0.2 CPU | 0.3GB para API’s (x2)</li>
+<li>1 CPU | 1.7GB para PostgreSQL (sim, nessa arquitetura, db sempre gasta mais CPU e memória)</li>
+<li>0.1 CPU | 0.1GB para o NGINX</li>
+</ul>
+<p>Diferente de muitas submissões na rinha, fiquei entre poucos que optaram por não utilizar qualquer estratégia de cache ou batch insert de forma assíncrona.</p>
+<p>Meu intuito sempre foi experimentar algo que acredito muito e que trago nos projetos em que trabalho: não abusar de cache ou estratégia assíncrona onde não precisa. Cache ajuda mas pode trazer muitos desafios e encarecer custos no fim das contas.</p>
+<blockquote>
+<p>Claro que, para a rinha, tudo era válido. Foi um amontoado positivo de diferentes soluções e troca de conhecimento</p>
+</blockquote>
+<p>Mas como sou chato com custos, eu sempre vou pra solução mais simples possível e que causa menos entropia possível, <em>até que se prove o contrário</em>.</p>
+<p>Cenário então fica assim:</p>
+<ul>
+<li>I/O não-bloqueante com Falcon, atendendo requests com multitasking cooperativo (Fibers)</li>
+<li>Chespirito, que não faz grande coisa a não ser rotear mensagens do Rack para a lógica devida, mas com código muito mais explícito e sem aquela DSL  ̶h̶o̶r̶r̶o̶r̶o̶s̶a̶ estranha do Roda</li>
+</ul>
+<p>Os números melhoraram, indo pra 35k. Not bad. Mas eu tinha uma leve suspeita de que algo errado ainda estava com minha solução. Por ser um desafio muito I/O-heavy, os requests ficavam pouco no Ruby, então eu tinha que melhorar a latência do PostgreSQL.</p>
+<p>Foi aí que inverti a lógica.</p>
+<h3><a href="#fechando-a-torneira" aria-hidden="true" class="anchor" id="fechando-a-torneira"></a>Fechando a torneira</h3>
+<p><a href="https://twitter.com/leandronsp/status/1699568664859603184">Nesta thread</a> compartilhei recentemente como consegui atingir 46k inserts, mas em suma eu basicamente percebi que muitos requests à espera (Gatling judia) fazem aumentar a latência e consequentemente ciclo de CPU para fazer gestão das filas nos sockets.</p>
+<p>Minha ideia então foi não deixar muito requests à espera, mesmo porque as queries no db são muito rápidas (remember kids, índices corretos salvam vidas).</p>
+<p>Para atingir isto, resolvi diminuir o PostgreSQL para 30 max_connections e NGINX para 256 worker_connections (podia até ser 128 ou 64 tbh). Na API, como são duas, deixei uma pool de 15 conexões, pois o PostgreSQL neste caso iria até 30.</p>
+<p>O resultado trouxe um troughput melhor e garantiu 46k inserts.</p>
+<blockquote>
+<p>Em breve vou escrever um artigo mais detalhado sobre esta saga do Ruby na rinha</p>
+</blockquote>
+<h3><a href="#e-o-bash" aria-hidden="true" class="anchor" id="e-o-bash"></a>E o Bash?</h3>
+<p>It turns out que também fiz <a href="https://github.com/leandronsp/rinha-backend-bash">outra versão</a> e submeti, escrita em Bash script, apenas for fun mesmo. Foi produto de um tweet inocente que fiz, o pessoal não perdoou e fez o tweet viralizar, pelo que me senti obrigado e implementar a API em Bash.</p>
+<p>Na verdade, como eu já venho de uma saga ensinando fundamentos de computação <a href="https://dev.to/leandronsp/series/18859">nos meus artigos</a> usando Bash, foi tranquilo fazer uma versão minimamente aceitável com mkfifo e netcat.</p>
+<p>Submeti sem grandes pretensões, rodei o teste local apenas uma vez e deu um monte de erro, pensei “freak it vou mandar mesmo assim” e foi.</p>
+<p>Para meu deleite, a solução em Bash ficou dentre as 51 funcionais da rinha, conquistando a tão sonhada 51ª posição, com um total de 17 inserts.</p>
+<blockquote>
+<p>Isso mesmo, 17 inserts</p>
+</blockquote>
+<p>Twitter não perdoa e então começaram a me chamar de “carinha do Bash”, “ministro dos scripts Bash” e etc, mas gente <strong>EU NAO PROGRAMO EM BASH</strong>. Sou apenas um dev scriptzero que usa Bash as vezes pra facilitar minha vida e automatizar o que não preciso, mas longe de “manjar” de Bash kkkkk</p>
+<hr />
+<h2><a href="#io-assíncrono-e-live-coding-do-leandro" aria-hidden="true" class="anchor" id="io-assíncrono-e-live-coding-do-leandro"></a>I/O assíncrono e live coding do Leandro</h2>
+<p>Com o término da rinha, foi gerado um buzz muito alto em torno de I/O, principalmente o famoso <strong>I/O assíncrono</strong>, ou então como alguns costumam referenciar por <strong>I/O não-bloqueante</strong>.</p>
+<p>Em breve escrevo artigos mais formais e detalhados sobre I/O não-bloqueante, mas recentemente fui de <a href="https://www.youtube.com/watch?v=w1ejKYlxhaA">live mesmo</a>, com um formato mais de “explicação”, indo lá atrás de forma resumida nos aspectos de concorrência em sistemas operacionais até chegar em I/O não-bloqueante.</p>
+<p>Na <a href="https://www.youtube.com/watch?v=w1ejKYlxhaA">live</a> eu trouxe exemplos em Ruby, Bash e C. Se você quer dar uma espreitada no que aconteceu por lá, <a href="https://www.youtube.com/watch?v=w1ejKYlxhaA">CLIQUE AQUI</a>.</p>
+<hr />
+<h2><a href="#thats-all-folks" aria-hidden="true" class="anchor" id="thats-all-folks"></a>That’s all folks</h2>
+<p>É isto, o intuito deste breve artigo foi fazer um apanhado das coisas que tenho olhado recentemente, em um formato mais informal como costumo usar no Twitter.</p>
+<p>Espero que o formato possa ser útil, caso contrário irei apenas continuar com aquele formato  ̶c̶h̶a̶t̶o̶ denso e didático.</p>
+<p>Claro que não deixarei de escrever os artigos técnicos de costume. E pode ser que eu misture inglês com português e a massarocada toda.</p>
+<p>Fiquem ligades.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

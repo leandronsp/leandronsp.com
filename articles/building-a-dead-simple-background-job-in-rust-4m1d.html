@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building a dead simple background job in Rust - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="In today's post we'll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue.
+
+---
+
+## First things first
+Gener">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/building-a-dead-simple-background-job-in-rust-4m1d.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/building-a-dead-simple-background-job-in-rust-4m1d.html">
+  <meta property="og:title" content="Building a dead simple background job in Rust">
+  <meta property="og:description" content="In today's post we'll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue.
+
+---
+
+## First things first
+Gener">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2023-11-12T14:43:13Z">
+  <meta property="article:tag" content="rust">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Building a dead simple background job in Rust",
+    "datePublished": "2023-11-12T14:43:13Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "In today's post we'll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue.
+
+---
+
+## First things first
+Gener",
+        "keywords": "rust"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Building a dead simple background job in Rust</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 12 Nov 2023</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">rust</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>In today’s post we’ll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue.</p>
+<hr />
+<h2><a href="#first-things-first" aria-hidden="true" class="anchor" id="first-things-first"></a>First things first</h2>
+<p>Generally, a background job operates on one or more threads that continuously consume messages from a queue.</p>
+<p>In this post, we’ll use a Vector to represent our queue.</p>
+<p>This Vector is an instance of the standard Rust library implementation known as <strong>VecDeque</strong>. <a href="https://doc.rust-lang.org/std/collections/struct.VecDeque.html">VecDeque</a> is a double-ended queue that acts as a growing ring buffer.</p>
+<h2><a href="#data-model" aria-hidden="true" class="anchor" id="data-model"></a>Data model</h2>
+<p>To make our solution more organized, we can define 3 structs:</p>
+<h3><a href="#transmitter" aria-hidden="true" class="anchor" id="transmitter"></a>Transmitter</h3>
+<p>The transmitter (tx) holds an <strong>store</strong>, which is the queue (Vector) encapsulated by a Arc/Mutex; and an <strong>emitter</strong>, which is a Condvar, used for synchronization based on a condition.</p>
+<h3><a href="#receiver" aria-hidden="true" class="anchor" id="receiver"></a>Receiver</h3>
+<p>The receiver (rx), pretty much like the transmitter, also holds a store and an emitter.</p>
+<h3><a href="#channel" aria-hidden="true" class="anchor" id="channel"></a>Channel</h3>
+<p>Channel holds a transmitter and a receiver.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">struct</span> <span style="color: #e5c07b;">Transmitter</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">Mutex</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">VecDeque</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span><span style="color: #c678dd;">&gt;</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">Condvar</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">struct</span> <span style="color: #e5c07b;">Receiver</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">Mutex</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">VecDeque</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span><span style="color: #c678dd;">&gt;</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">Condvar</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="9"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #c678dd;">struct</span> <span style="color: #e5c07b;">Channel</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="12">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Transmitter</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="13">    <span style="color: #e06c75;">rx</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Receiver</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="14"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<h2><a href="#what-is-an-arc-in-rust" aria-hidden="true" class="anchor" id="what-is-an-arc-in-rust"></a>What is an Arc in Rust?</h2>
+<p>The queue (VecDeque) is going to be shared across the channel for one or more threads.</p>
+<p>In Rust, such problem requires shared ownership addressed by a <strong>reference counter</strong> (Rc), but since we are in a multi-thread scenario, Rc is not thread-safe, that’s why we need an <em>atomic reference counter</em>, or simply <strong>Arc</strong>, which is indeed thread-safe.</p>
+<blockquote>
+<p>You can learn more details about smart pointers by reading my post on <a href="https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff">Understanding the basics of smart pointers in Rust</a></p>
+</blockquote>
+<h2><a href="#how-about-mutex" aria-hidden="true" class="anchor" id="how-about-mutex"></a>How about Mutex?</h2>
+<p>Since Arc is a reference counter, its references are immutable. For mutability in the underlying data, we need <em>interior mutability</em> using RefCell.</p>
+<blockquote>
+<p>My mentioned post about smart pointers also covers interior mutability, check it out for further details</p>
+</blockquote>
+<p>In the same as Rc, <em>RefCell is not thread-safe</em>. For a thread-safe scenario, we need to synchronize access to data using <em>locks</em>. That’s where <strong>mutual exclusion</strong> (Mutex) comes in.</p>
+<h2><a href="#okay-and-condvar-what-the-heck-is-that" aria-hidden="true" class="anchor" id="okay-and-condvar-what-the-heck-is-that"></a>Okay, and Condvar? What the heck is that?</h2>
+<p><strong>Condvar</strong> is a primitive for synchronization in concurrent systems where we can put a thread to “wait” (suspended) until a given condition is met.</p>
+<p>For blocking queues, we basically want the following condition (pseudo-code):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">queue</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">some_array</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">mutex</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">os_lock</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">emitter</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">os_condvar</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5"><span style="color: #7f848e;">// Thread is suspened until the array gets some data</span>
+</div><div class="line" data-line="6"><span style="color: #7f848e;">// There&#39;s no CPU consume</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">while</span> <span style="color: #e06c75;">queue</span> <span style="color: #e06c75;">is</span> <span style="color: #e06c75;">empty</span>
+</div><div class="line" data-line="8">   <span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">wait</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">mutex</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9"><span style="color: #e06c75;">end</span>
+</div><div class="line" data-line="10">
+</div><div class="line" data-line="11"><span style="color: #7f848e;">// Someone emitted a signal</span>
+</div><div class="line" data-line="12"><span style="color: #e06c75;">data</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">queue</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">pop</span>
+</div></code></pre>
+<p>In other process:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">queue</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">push</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">data</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">signal</span><span style="color: #abb2bf;"></span>
+</div></code></pre>
+<h2><a href="#data-modeling-implementation" aria-hidden="true" class="anchor" id="data-modeling-implementation"></a>Data modeling implementation</h2>
+<p>Now, let’s implement the methods <code>send</code> and <code>recv</code> (receive) in our simulated channel.</p>
+<h3><a href="#transmitter-1" aria-hidden="true" class="anchor" id="transmitter-1"></a>Transmitter</h3>
+<p>The transmitter (tx) will have a method called <strong>send</strong>, which basically:</p>
+<ul>
+<li>locks the shared queue (<code>store.lock().unwrap()</code>)</li>
+<li>pushes data to the queue (<code>push_back(data)</code>)</li>
+<li>emits a signal (<code>emitter.notify_one</code>) to notify some suspended thread that is waiting for data in the queue</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">impl</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #e5c07b;">Transmitter</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #c678dd;">fn</span> <span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">data</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">T</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">        <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">store</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">lock</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">push_back</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">data</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="4">        <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">notify_one</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">    <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="6"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<h3><a href="#receiver-1" aria-hidden="true" class="anchor" id="receiver-1"></a>Receiver</h3>
+<p>The receiver (rx) has a method called <strong>recv</strong> (short for <em>receive</em>) which:</p>
+<ul>
+<li>creates a lock in the shared queue (<code>store.lock().unwrap()</code>)</li>
+<li>suspends the current thread until the condition is met, in other words, <strong>while the queue is empty</strong>, the thread is suspended in the operating system, thus not consuming CPU (<code>emitter.wait</code>)</li>
+<li>once the thread is awaken, it can pops the data from the queue (<code>store.pop_front()</code>)</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">impl</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #e5c07b;">Receiver</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #c678dd;">fn</span> <span style="color: #61afef;">recv</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e5c07b;">self</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">-&gt;</span> <span style="color: #e5c07b;">Option</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">        <span style="color: #c678dd;">let</span> <span style="color: #c678dd;">mut</span> <span style="color: #e06c75;">store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">store</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">lock</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="4">
+</div><div class="line" data-line="5">        <span style="color: #c678dd;">while</span> <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is_empty</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="6">            <span style="color: #e06c75;">store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">wait</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">store</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="7">        <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">        <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">pop_front</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Moreover, the Receiver struct can have an extra method called <strong>try_recv</strong> which does not block the thread, not using the Condvar condition:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">fn</span> <span style="color: #61afef;">try_recv</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e5c07b;">self</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">-&gt;</span> <span style="color: #e5c07b;">Option</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #e5c07b;">self</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">store</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">lock</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">pop_front</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<h3><a href="#channel-1" aria-hidden="true" class="anchor" id="channel-1"></a>Channel</h3>
+<p>Once the Transmitter and Receiver are already implemented, the implementation of Channel is a piece of cake:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">impl</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #e5c07b;">Channel</span><span style="color: #c678dd;">&lt;</span><span style="color: #e5c07b;">T</span><span style="color: #c678dd;">&gt;</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #c678dd;">fn</span> <span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">-&gt;</span> <span style="color: #e5c07b;">Self</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="3">        <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">store</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">Mutex</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">VecDeque</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="4">        <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">emitter</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">Condvar</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">        <span style="color: #e5c07b;">Channel</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="7">            <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Transmitter</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">clone</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">store</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">clone</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">emitter</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="8">            <span style="color: #e06c75;">rx</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Receiver</span> <span style="color: #c678dd;">&lbrace;</span> <span style="color: #e06c75;">store</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">clone</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">store</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">emitter</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Arc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">clone</span><span style="color: #c678dd;">(</span><span style="color: #56b6c2;">&amp;</span><span style="color: #e06c75;">emitter</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&rbrace;</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="9">        <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="10">    <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="11"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>Note that both Mutex and Condvar are encapsulated in an Arc (atomic reference counter), because we have to share them across tx and rx at the same time.</p>
+<h3><a href="#main" aria-hidden="true" class="anchor" id="main"></a>Main</h3>
+<p>The <strong>main</strong> function can me implemented as follows:</p>
+<ul>
+<li>create a channel and binds the <strong>tx</strong> and <strong>rx</strong> respectively</li>
+<li>the channel holds a shared Mutex/VecDeque and a Condvar</li>
+<li>tx is used to send data to the channel</li>
+<li>rx is used from the inner thread to receive data from the channel</li>
+</ul>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">fn</span> <span style="color: #61afef;">main</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">    <span style="color: #7f848e;">// Initialize channel</span>
+</div><div class="line" data-line="3">    <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">channel</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">Channel</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">new</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="4">    <span style="color: #c678dd;">let</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rx</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">channel</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">channel</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rx</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6">    <span style="color: #7f848e;">// Push data to the channel</span>
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Some job to do: 1&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Another job: 2&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10">    <span style="color: #7f848e;">// Process the channel</span>
+</div><div class="line" data-line="11">    <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">worker</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">thread</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">spawn</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">move</span> <span style="color: #c678dd;">|</span><span style="color: #c678dd;">|</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="12">        <span style="color: #c678dd;">loop</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="13">            <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">job</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">rx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">recv</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span> <span style="color: #7f848e;">// we could use try_recv too</span>
+</div><div class="line" data-line="14">
+</div><div class="line" data-line="15">            <span style="color: #c678dd;">match</span> <span style="color: #e06c75;">job</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="16">                <span style="color: #c678dd;">Some</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">job</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">=&gt;</span> <span style="color: #c678dd;">println</span><span style="color: #61afef;">!</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Job: &lbrace;&rbrace;&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">job</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="17">                <span style="color: #c678dd;">None</span> <span style="color: #abb2bf;">=&gt;</span> <span style="color: #c678dd;">break</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="18">            <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="19">        <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="20">    <span style="color: #c678dd;">&rbrace;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="21">    
+</div><div class="line" data-line="22">    <span style="color: #7f848e;">// Push more data to the channel</span>
+</div><div class="line" data-line="23">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Yet another job&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="24">
+</div><div class="line" data-line="25">    <span style="color: #e06c75;">worker</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">join</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="26"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<p>We run the code and, <strong>Yay</strong>, everything is working as expected:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Job</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">Some</span> <span style="color: #e06c75;">job</span> <span style="color: #e06c75;">to</span> <span style="color: #e06c75;">do</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="2"><span style="color: #e5c07b;">Job</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Another</span> <span style="color: #e06c75;">job</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="3"><span style="color: #e5c07b;">Job</span><span style="color: #abb2bf;">:</span> <span style="color: #e5c07b;">Yet</span> <span style="color: #e06c75;">another</span> <span style="color: #e06c75;">job</span>
+</div></code></pre>
+<hr />
+<h2><a href="#rust-channels-for-the-rescue" aria-hidden="true" class="anchor" id="rust-channels-for-the-rescue"></a>Rust channels for the rescue</h2>
+<p>You may be wondering:</p>
+<blockquote>
+<p>Hey Leandro, why doesn’t Rust bring all this stuff already built-in? Do we really need to implement a raw queue and use synchronization primitives on our own every time we want to create a channel for threads?</p>
+</blockquote>
+<p><em>Today is your lucky day</em>. Indeed Rust brings <strong>Channels</strong>, which employ the same techniques described in this very post, but more robust, of course:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-rust" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">use</span> <span style="color: #e5c07b;">std</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">sync</span><span style="color: #abb2bf;">::</span><span style="color: #e06c75;">mpsc</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="2"><span style="color: #c678dd;">use</span> <span style="color: #e5c07b;">std</span><span style="color: #abb2bf;">::</span><span style="color: #e06c75;">thread</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #c678dd;">fn</span> <span style="color: #61afef;">main</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="5">    <span style="color: #7f848e;">// Initialize channel</span>
+</div><div class="line" data-line="6">    <span style="color: #c678dd;">let</span> <span style="color: #c678dd;">(</span><span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">rx</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">mpsc</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">channel</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="7">
+</div><div class="line" data-line="8">    <span style="color: #7f848e;">// Push data to the channel</span>
+</div><div class="line" data-line="9">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Some job to do: 1&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Another job: 2&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12">    <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">worker</span> <span style="color: #56b6c2;">=</span> <span style="color: #e5c07b;">thread</span><span style="color: #abb2bf;">::</span><span style="color: #61afef;">spawn</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">move</span> <span style="color: #c678dd;">|</span><span style="color: #c678dd;">|</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="13">        <span style="color: #c678dd;">loop</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="14">            <span style="color: #c678dd;">let</span> <span style="color: #e06c75;">job</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">rx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">recv</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="15">
+</div><div class="line" data-line="16">            <span style="color: #c678dd;">match</span> <span style="color: #e06c75;">job</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="17">                <span style="color: #c678dd;">Ok</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">job</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">=&gt;</span> <span style="color: #c678dd;">println</span><span style="color: #61afef;">!</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Job: &lbrace;&rbrace;&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">job</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;"></span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="18">                <span style="color: #c678dd;">Err</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">_</span><span style="color: #c678dd;">)</span> <span style="color: #abb2bf;">=&gt;</span> <span style="color: #c678dd;">break</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="19">            <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="20">        <span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="21">    <span style="color: #c678dd;">&rbrace;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="22">
+</div><div class="line" data-line="23">    <span style="color: #7f848e;">// Push more data to the channel</span>
+</div><div class="line" data-line="24">    <span style="color: #e06c75;">tx</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">send</span><span style="color: #c678dd;">(</span><span style="color: #98c379;">&quot;Yet another job&quot;</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="25">
+</div><div class="line" data-line="26">    <span style="color: #e06c75;">worker</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">join</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">unwrap</span><span style="color: #c678dd;">(</span><span style="color: #c678dd;">)</span><span style="color: #abb2bf;">;</span>
+</div><div class="line" data-line="27"><span style="color: #c678dd;">&rbrace;</span>
+</div></code></pre>
+<ul>
+<li><code>mpsc</code> stands for <strong>multiple producers, single consumer</strong></li>
+<li><code>mpsc::channel</code> creates a channel with a internal shared queue and returns a transmitter (tx) and a receiver (rx)</li>
+<li>pretty much like our custom implementation, <code>tx.send</code> sends data to the channel, whereas <code>tx.recv</code> reads/pops data from the channel</li>
+</ul>
+<p><em>How cool is that</em>?</p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">https://doc.rust-lang.org/book/ch16-00-concurrency.html</a></p>
+<p><a href="https://doc.rust-lang.org/std/vec/struct.Vec.html">https://doc.rust-lang.org/std/vec/struct.Vec.html</a></p>
+<p><a href="https://doc.rust-lang.org/std/collections/struct.VecDeque.html">https://doc.rust-lang.org/std/collections/struct.VecDeque.html</a></p>
+<p><a href="https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff">https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff</a></p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Métricas cAdvisor no Kubernetes com Prometheus e Grafana - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="No [último artigo](https://dev.to/leandronsp/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor Promethe">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html">
+  <meta property="og:title" content="Métricas cAdvisor no Kubernetes com Prometheus e Grafana">
+  <meta property="og:description" content="No [último artigo](https://dev.to/leandronsp/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor Promethe">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2022-07-06T23:09:14Z">
+  <meta property="article:tag" content="kubernetes">
+      <meta property="article:tag" content="prometheus">
+      <meta property="article:tag" content="grafana">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Métricas cAdvisor no Kubernetes com Prometheus e Grafana",
+    "datePublished": "2022-07-06T23:09:14Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "No [último artigo](https://dev.to/leandronsp/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor Promethe",
+        "keywords": "kubernetes, prometheus, grafana"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <style>
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: #2f3542;
+      border-color: #3d4454;
+    }
+    [data-theme="dark"] .article-card:hover {
+      border-color: #4a5568;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article container has its own background */
+    .article-container {
+      background-color: oklch(98% 0.005 80); /* base-100 light */
+      border-radius: 0.5rem;
+    }
+    [data-theme="dark"] .article-container {
+      background-color: oklch(30% 0.015 252); /* base-100 dark */
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200">
+  <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+      <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to articles
+      </a>
+
+      <button
+        type="button"
+        id="theme-toggle"
+        class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
+        title="Toggle theme"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="article-container py-8">
+    <article class="container mx-auto px-4 max-w-8xl">
+      <h1 class="text-5xl font-bold mb-6">Métricas cAdvisor no Kubernetes com Prometheus e Grafana</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 06 Jul 2022</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">kubernetes</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">prometheus</span><span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">grafana</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>No <a href="https://dev.to/leandronsp/prometheus-on-kubernetes-101-296j">último artigo</a> vimos o funcionamento básico do Prometheus e como configurar um servidor Prometheus em um cluster <strong>Kubernetes</strong>.</p>
+<p><em>(lembrando que estou utilizando um cluster local com Docker Desktop for Mac</em>)</p>
+<p>Neste artigo, vamos explorar mais métricas para monitoramento:</p>
+<ul>
+<li>porcentagem de uso da CPU no cluster</li>
+<li>porcentagem de uso da memória no cluster</li>
+</ul>
+<h2><a href="#prometheus-sources" aria-hidden="true" class="anchor" id="prometheus-sources"></a>Prometheus Sources</h2>
+<p>Existem diversas fontes (sources) de dados para o Prometheus, mas vamos resumir aqui as principais para um cluster Kubernetes, nomeadamente:</p>
+<ul>
+<li>cAdvisor</li>
+<li>node-exporter</li>
+<li>kube-state-metrics</li>
+</ul>
+<h3><a href="#cadvisor" aria-hidden="true" class="anchor" id="cadvisor"></a>cAdvisor</h3>
+<p><a href="https://github.com/google/cadvisor">cAdvisor</a> é um agente de monitoramento para <em>containers</em> e tem suporte nativo ao Docker.</p>
+<p>Em um cluster Kubernetes, temos a opção de instalar o cAdvisor como uma <em>pod</em> que coleta métricas dos containers.</p>
+<p>Entretanto não precisamos disto, uma vez que o componente <strong>kubelet</strong> do Kubernetes já utiliza e exporta métricas do cAdvisor em um endpoint do cluster.</p>
+<h3><a href="#node-exporter" aria-hidden="true" class="anchor" id="node-exporter"></a>node-exporter</h3>
+<p>O <a href="https://github.com/prometheus/node_exporter">node-exporter</a> é um agente para monitoramento dos recursos do nó (máquina), tais como CPU, memória e armazenamento persistente.</p>
+<p>Pode ser instalado em um cluster Kubernetes como uma <em>pod</em> que coleta métricas dos nodes do cluster.</p>
+<h3><a href="#kube-state-metrics" aria-hidden="true" class="anchor" id="kube-state-metrics"></a>kube-state-metrics</h3>
+<p>Este agente é um <a href="https://github.com/kubernetes/kube-state-metrics">add-on</a> que fica à escuta de todos os eventos do Kubernetes API Server, ou seja, qualquer coisa que acontece no cluster é coletada e exportada como métrica.</p>
+<p>Tal como os outros agentes, <strong>kube-state-metrics</strong> pode ser instalado no cluster através de uma <em>pod</em> que fica coletando métricas do API Server.</p>
+<h2><a href="#qual-deles-utilizar" aria-hidden="true" class="anchor" id="qual-deles-utilizar"></a>Qual deles utilizar?</h2>
+<p>Após o resumo dos diferentes tipos de <em>sources</em>, vamos neste artigo focar no <code>cAdvisor</code>, deixando os outros para futuros artigos.</p>
+<p>É extremamente importante <strong>conhecer os tipos de métricas</strong> que cada um oferece e <em>fazer o balanço</em> correto de quais sources o Prometheus deve fazer o scraping.</p>
+<h2><a href="#coletando-métricas-com-cadvisor" aria-hidden="true" class="anchor" id="coletando-métricas-com-cadvisor"></a>Coletando métricas com cAdvisor</h2>
+<p>Recapitulando a configuração “estática” que vem por padrão no Prometheus:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">job_name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus</span>
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">static_configs</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="3">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">targets</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&#39;localhost:9090&#39;</span><span style="color: #c678dd;">]</span>
+</div></code></pre>
+<p>No caso do cAdvisor, que já é utilizando pelo <code>kubelet</code>, vamos criar outro <code>job</code> e utilizar uma configuração dinâmica que muda as labels em tempo de scraping, de forma a deixar mais simples nossas queries.</p>
+<p>Como o <code>kubelet</code> exporta as métricas via <code>https</code>, precisamos definir o schema de acesso bem como configuração de <code>tls_config</code> e <code>token</code> de acesso:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">  <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">job_name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kubernetes-nodes-cadvisor</span>
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">scheme</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">https</span>
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">tls_config</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">      <span style="color: #e06c75;">ca_file</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/run/secrets/kubernetes.io/serviceaccount/ca.crt</span>
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">bearer_token_file</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/var/run/secrets/kubernetes.io/serviceaccount/token</span>
+</div></code></pre>
+<p><em>Nota: <code>/var/run/secrets/kubernetes.io/serviceaccount/</code> é o caminho padrão de secrets e certificados de acesso para componentes internos do Kubernetes</em>.</p>
+<p>Próximo passo é escolher o <strong>role</strong>, que é basicamente o tipo de “discover” que o Prometheus deve fazer nas métricas. O Kubernetes oferece vários tipos de roles:</p>
+<ul>
+<li>node: informações de containers agrupados por nós (máquinas)</li>
+<li>service: containers agrupados por service, bem como informações extras dos services</li>
+<li>pod: informações dos containers das pods em si</li>
+<li>endpoint: agrupamento por endpoint</li>
+<li>ingress: e por fim, agrupamento por ingress, muito útil para monitoramento blackbox</li>
+</ul>
+<p>Nosso exemplo passa por criar apenas uma role <code>node</code>, pois queremos informações baseadas no node (% de CPU, % de memória):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">    <span style="color: #e06c75;">kubernetes_sd_configs</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="2">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">role</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">node</span>
+</div></code></pre>
+<p>Isto ainda não basta, pois precisamos das configurações de <code>relabel</code>, que é uma feature do Prometheus que faz labeling de métricas <em>em tempo de scraping</em>. Com relabel, somos permitidos a escolher labels específicas e trocá-las por variáveis que o Prometheus usa durante o scraping.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1">    <span style="color: #e06c75;">relabel_configs</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="2">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">action</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">labelmap</span>
+</div><div class="line" data-line="3">        <span style="color: #e06c75;">regex</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">__meta_kubernetes_node_label_(.+)</span>
+</div><div class="line" data-line="4">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">target_label</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">__address__</span>
+</div><div class="line" data-line="5">        <span style="color: #e06c75;">replacement</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">kubernetes.default.svc:443</span>
+</div><div class="line" data-line="6">      <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">source_labels</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">__meta_kubernetes_node_name</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="7">        <span style="color: #e06c75;">regex</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">(.+)</span>
+</div><div class="line" data-line="8">        <span style="color: #e06c75;">target_label</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">__metrics_path__</span>
+</div><div class="line" data-line="9">        <span style="color: #e06c75;">replacement</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">/api/v1/nodes/$&lbrace;1&rbrace;/proxy/metrics/cadvisor</span>
+</div></code></pre>
+<p><strong>Importante</strong>: temos que colocar este yaml num <code>configmap</code> e montar no <code>volume</code> da Pod, mas este passo vou deixar como exercício para que o artigo não fique enorme.</p>
+<p><em>Não há motivo para pânico</em> entretanto, tudo o que faço aqui é compartilhado no <a href="https://github.com/leandronsp/monitoring-101">Github</a>_</p>
+<h2><a href="#visualizando" aria-hidden="true" class="anchor" id="visualizando"></a>Visualizando</h2>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">monitoring</span> <span style="color: #e06c75;">port-forward</span> <span style="color: #e06c75;">deploy/prometheus-pod</span> <span style="color: #e06c75;">9090:9090</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">open</span> <span style="color: #e06c75;">localhost:9090</span>
+</div></code></pre>
+<p>Uh oh :(</p>
+<p>A página não abre. Mas vamos olhar os logs da pod:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">Failed to watch *v1.Node: failed to list *v1.Node: nodes is forbidden: User \&quot;system:serviceaccount:monitoring:default\&quot; cannot list resource \&quot;nodes\&quot; in API group \ │
+</div><div class="line" data-line="2">│ &quot;\&quot; at the cluster scope&quot;
+</div></code></pre>
+<p>Esta pod não tem permissão de acesso às métricas de “nodes” no cluster. Vamos então criar uma <code>ClusterRole</code> que permita acesso às métricas dos recursos do cluster e associá-la a qualquer recurso do namespace <code>monitoring</code> através de <code>ServiceAccount</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ClusterRole</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">rules</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">apiGroups</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">nodes</span>
+</div><div class="line" data-line="9">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">nodes/proxy</span>
+</div><div class="line" data-line="10">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">services</span>
+</div><div class="line" data-line="11">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">endpoints</span>
+</div><div class="line" data-line="12">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">pods</span>
+</div><div class="line" data-line="13">  <span style="color: #e06c75;">verbs</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;get&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;list&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;watch&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="14"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">apiGroups</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="15">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">extensions</span>
+</div><div class="line" data-line="16">  <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="17">  <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ingresses</span>
+</div><div class="line" data-line="18">  <span style="color: #e06c75;">verbs</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;get&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;list&quot;</span><span style="color: #abb2bf;">,</span> <span style="color: #98c379;">&quot;watch&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="19"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">nonResourceURLs</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;/metrics&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="20">  <span style="color: #e06c75;">verbs</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">[</span><span style="color: #98c379;">&quot;get&quot;</span><span style="color: #c678dd;">]</span>
+</div><div class="line" data-line="21"><span style="color: #abb2bf;">---</span>
+</div><div class="line" data-line="22"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io/v1</span>
+</div><div class="line" data-line="23"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ClusterRoleBinding</span>
+</div><div class="line" data-line="24"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="25">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus</span>
+</div><div class="line" data-line="26"><span style="color: #e06c75;">roleRef</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="27">  <span style="color: #e06c75;">apiGroup</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">rbac.authorization.k8s.io</span>
+</div><div class="line" data-line="28">  <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ClusterRole</span>
+</div><div class="line" data-line="29">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus</span>
+</div><div class="line" data-line="30"><span style="color: #e06c75;">subjects</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="31"><span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ServiceAccount</span>
+</div><div class="line" data-line="32">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">default</span>
+</div><div class="line" data-line="33">  <span style="color: #e06c75;">namespace</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">monitoring</span> <span style="color: #7f848e;"># &lt;---- importante</span>
+</div></code></pre>
+<p>And now:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">cluster-role.yml</span>
+</div></code></pre>
+<p>Iniciar <code>port-forward</code> novamente e abrir a interface web buscando pela métrica <code>machine_cpu_cores</code>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hjvwrpbcss3i2kdh5jp4.png" alt="prom screenshot" /><br />
+Que dia maravilhoso!</p>
+<h2><a href="#mais-métricas-no-cadvisor" aria-hidden="true" class="anchor" id="mais-métricas-no-cadvisor"></a>Mais métricas no cAdvisor</h2>
+<p>Poderíamos ficar o dia todo experimentando métricas, dentre elas:</p>
+<h3><a href="#container_cpu_usage_seconds_total" aria-hidden="true" class="anchor" id="container_cpu_usage_seconds_total"></a>container_cpu_usage_seconds_total</h3>
+<p>Traz de forma <em>multi-dimensional</em> os segundos de utilização da CPU. Isto dá um poder enorme para agruparmos por soma:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">sum(container_cpu_usage_seconds_total&lbrace;namespace=&quot;monitoring&quot;&rbrace;)
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">5.702207
+</div></code></pre>
+<h3><a href="#container_memory_working_set_bytes" aria-hidden="true" class="anchor" id="container_memory_working_set_bytes"></a>container_memory_working_set_bytes</h3>
+<p>Quantidade de bytes reservados para determinado recurso no namespace <code>monitoring</code>:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">sum(container_memory_working_set_bytes&lbrace;namespace=&quot;monitoring&quot;&rbrace;)
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3">89485312 (valor em bytes)
+</div></code></pre>
+<p>E a lista não pára…</p>
+<p>Mas como podemos mostrar estas métricas em dashboards mais bonitas com gráficos e <strong>persistidas</strong>, podendo assim sempre consultá-las?</p>
+<h2><a href="#prazer-grafana" aria-hidden="true" class="anchor" id="prazer-grafana"></a>Prazer, Grafana</h2>
+<p><a href="https://en.wikipedia.org/wiki/Grafana">Grafana</a> é uma ferramenta de analytics desenvolvida pela Grafana Labs, que permite a criação de widgets em dashboards a partir de “conectores” que trazem métricas.</p>
+<p>Atualmente esta ferramenta suporta diversos conectores, dentre eles nosso amigo Prometheus, portanto esta combinação é poderosa para criarmos dashboards avançadas de monitoramento.</p>
+<h3><a href="#configurando-o-grafana" aria-hidden="true" class="anchor" id="configurando-o-grafana"></a>Configurando o Grafana</h3>
+<p>Vamos também rodar o Grafana dentro do cluster, portanto:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">create</span> <span style="color: #e06c75;">deployment</span> \
+</div><div class="line" data-line="2">    <span style="color: #e06c75;">grafana-pod</span> \
+</div><div class="line" data-line="3">    <span style="color: #e06c75;">--namespace=monitoring</span> \
+</div><div class="line" data-line="4">    <span style="color: #e06c75;">--image=grafana/grafana</span>\
+</div><div class="line" data-line="5">    <span style="color: #e06c75;">--replicas=1</span> \
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">--port=3000</span> \
+</div><div class="line" data-line="7">    <span style="color: #e06c75;">--dry-run=client</span> \
+</div><div class="line" data-line="8">    <span style="color: #e06c75;">--output=yaml</span> <span style="color: #56b6c2;">&gt;</span> <span style="color: #61afef;">./grafana-pod.yml</span>
+</div><div class="line" data-line="9">
+</div><div class="line" data-line="10"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">apply</span> <span style="color: #e06c75;">-f</span> <span style="color: #e06c75;">./grafana-pod.yml</span>
+</div></code></pre>
+<p>Precisamos também de um <code>configmap</code> que será colocando dentro da pod, que representa nosso “conector” do Prometheus:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">data</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">grafana.json</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;"><span style="color: #abb2bf;">|</span></span>
+</div><div class="line" data-line="4"><span style="color: #98c379;">    &lbrace;</span>
+</div><div class="line" data-line="5"><span style="color: #98c379;">        &quot;apiVersion&quot;: 1,</span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">        &quot;datasources&quot;: [</span>
+</div><div class="line" data-line="7"><span style="color: #98c379;">            &lbrace;</span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">              &quot;name&quot;: &quot;Prometheus&quot;,</span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">              &quot;type&quot;: &quot;prometheus&quot;,</span>
+</div><div class="line" data-line="10"><span style="color: #98c379;">              &quot;access&quot;:&quot;server&quot;,</span>
+</div><div class="line" data-line="11"><span style="color: #98c379;">              &quot;editable&quot;: true,</span>
+</div><div class="line" data-line="12"><span style="color: #98c379;">              &quot;url&quot;: &quot;http://prometheus-svc.monitoring.svc.cluster.local&quot;,</span>
+</div><div class="line" data-line="13"><span style="color: #98c379;">              &quot;version&quot;: 1</span>
+</div><div class="line" data-line="14"><span style="color: #98c379;">            &rbrace;</span>
+</div><div class="line" data-line="15"><span style="color: #98c379;">        ]</span>
+</div><div class="line" data-line="16"><span style="color: #98c379;">    &rbrace;</span>
+</div><div class="line" data-line="17"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">ConfigMap</span>
+</div><div class="line" data-line="18"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="19">  <span style="color: #e06c75;">creationTimestamp</span><span style="color: #abb2bf;">:</span> <span style="color: #c678dd;">null</span>
+</div><div class="line" data-line="20">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">grafana-config</span>
+</div><div class="line" data-line="21">  <span style="color: #e06c75;">namespace</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">monitoring</span>
+</div></code></pre>
+<p>E claro, não podemos esquecer de criar um <code>Service</code> para o Prometheus, pois assim a pod do Grafana consegue “conversar” com a pod do Prometheus.</p>
+<p><em>Nota: lembrando que Services no Kubernetes resolvem problema de discovery de Pods, ok?</em></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">Service</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus-svc</span>
+</div><div class="line" data-line="5">  <span style="color: #e06c75;">labels</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">    <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus-svc</span>
+</div><div class="line" data-line="7"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">  <span style="color: #e06c75;">type</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">NodePort</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">selector</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">app</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">prometheus-pod</span>
+</div><div class="line" data-line="11">  <span style="color: #e06c75;">ports</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="12">    <span style="color: #abb2bf;">-</span> <span style="color: #e06c75;">protocol</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">TCP</span>
+</div><div class="line" data-line="13">      <span style="color: #e06c75;">port</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">80</span>
+</div><div class="line" data-line="14">      <span style="color: #e06c75;">targetPort</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">9090</span>
+</div></code></pre>
+<p>Após o devido <code>apply</code>, vamos subir o Grafana:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">$</span> <span style="color: #e06c75;">kubectl</span> <span style="color: #e06c75;">-n</span> <span style="color: #e06c75;">monitoring</span> <span style="color: #e06c75;">port-forward</span> <span style="color: #e06c75;">deploy/grafana-pod</span> <span style="color: #e06c75;">3000:3000</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #61afef;">Forwarding</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">127.0.0.1:3000</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">3000</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">Forwarding</span> <span style="color: #e06c75;">from</span> <span style="color: #e06c75;">[</span><span style="color: #e06c75;">::1</span><span style="color: #e06c75;">]</span><span style="color: #e06c75;">:3000</span> <span style="color: #e06c75;">-</span><span style="color: #56b6c2;">&gt;</span> <span style="color: #d19a66;">3000</span>
+</div></code></pre>
+<p>Abra <code>localhost:3000</code>, coloque as credenciais (inicialmente são <code>admin | admin</code>), mas no passo seguinte o app irá pedir para mudar de password.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/btmpo4rid232arvzwev1.png" alt="grafana login" /></p>
+<h3><a href="#criando-dashboards-no-grafana" aria-hidden="true" class="anchor" id="criando-dashboards-no-grafana"></a>Criando Dashboards no Grafana</h3>
+<p>Adicionar panels, widgets e dashboards é uma tarefa que requer bastante paciência e atenção ao detalhe, uma vez que os dados serão a “fonte da verdade”.</p>
+<p>Entretanto a comunidade do Grafana vem fazendo um <a href="https://grafana.com/grafana/dashboards/">ótimo trabalho desenvolvendo dashboards</a> com várias visualizações e tipos de widgets diferentes, facilitando a importação de dashboards apenas utilizando ID.</p>
+<p>Para poupar tempo neste artigo, eu criei uma dashboard do zero com alguns widgets que mostram utilização de CPU e memória, e felizmente é possível exportar uma versão <code>json</code> completa do dashboard, que <a href="https://gist.github.com/leandronsp/92a8d132b29a50ce1fe7cd163bf5ab70">deixei neste Gist</a>.</p>
+<h3><a href="#importando-uma-dashboard" aria-hidden="true" class="anchor" id="importando-uma-dashboard"></a>Importando uma Dashboard</h3>
+<p>Precisamos então, na área de criação de dashboards, importar bastando copiar e colar o json que está no gist, conforme imagem abaixo:</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ttd9ucnencpw2yivcqye.png" alt="grafana screen2" /></p>
+<p>E <em>voilà</em>! Temos uma dashboard prontinha com métricas de CPU e memória do nosso cluster!</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/69n8axrn14jfwp4197oz.png" alt="grafana screen 3" /></p>
+<h2><a href="#passo-extra-persistência" aria-hidden="true" class="anchor" id="passo-extra-persistência"></a>Passo extra: persistência</h2>
+<p>Lembra que falei sobre ter uma dashboard <em>persistida</em>? Pois é, por padrão, containers não compartilham storage com o host, mas Kubernetes permite resolver isto com <code>PersistentVolumes</code>, para então atribuir estes <code>PVs</code> a containers.</p>
+<p>Parece complicado, mas não é. Vamos primeiro criar um <code>StorageClass</code> que representa o tipo de armazenamento.</p>
+<p>Cada ambiente tem um tipo de <strong>storage provisioner</strong>, e no meu caso estou utilizando o Docker for Mac, que tem um <strong>provisioner</strong> chamado <code>docker.io/hostpath</code>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">storage.k8s.io/v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">StorageClass</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">standard</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">provisioner</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">docker.io/hostpath</span>
+</div></code></pre>
+<p>E vamos supor que queremos atribuir <code>1GB</code> de storage para que o Grafana guarde os dados persistidos.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">apiVersion</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">v1</span>
+</div><div class="line" data-line="2"><span style="color: #e06c75;">kind</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">PersistentVolumeClaim</span>
+</div><div class="line" data-line="3"><span style="color: #e06c75;">metadata</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">name</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">grafana-pvc</span>
+</div><div class="line" data-line="5"><span style="color: #e06c75;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="6">  <span style="color: #e06c75;">storageClassName</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">standard</span>
+</div><div class="line" data-line="7">  <span style="color: #e06c75;">accessModes</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="8">    <span style="color: #abb2bf;">-</span> <span style="color: #98c379;">ReadWriteMany</span>
+</div><div class="line" data-line="9">  <span style="color: #e06c75;">resources</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="10">    <span style="color: #e06c75;">requests</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="11">      <span style="color: #e06c75;">storage</span><span style="color: #abb2bf;">:</span> <span style="color: #98c379;">1Gi</span>
+</div></code></pre>
+<p>Um <code>PersistentVolumeClaim</code> serve para, a partir de um <strong>Storage Class</strong>, “declarar” o modo de acesso, capacidade, etc.</p>
+<p>And nowww (<em>com sotaque do Supla</em>), “montar” o PVC como <em>volume</em> na Pod:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-yaml" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #abb2bf;">...</span>
+</div><div class="line" data-line="2">    <span style="color: #98c379;">spec</span><span style="color: #abb2bf;">:</span>
+</div><div class="line" data-line="3">      <span style="color: #e06c75;">volumes</span><span style="color: #abb2bf;">:</span>            <span style="color: #98c379;">&lt;------ declaração dos volumes</span>
+</div><div class="line" data-line="4"><span style="color: #98c379;">        - name</span>: grafana-persistent-volume
+</div><div class="line" data-line="5">          persistentVolumeClaim:
+</div><div class="line" data-line="6">            claimName: grafana-pvc &lt;---- PVC
+</div><div class="line" data-line="7">      containers:
+</div><div class="line" data-line="8">        - image: ...
+</div><div class="line" data-line="9">          name: grafana
+</div><div class="line" data-line="10">          ports:
+</div><div class="line" data-line="11">            - ...
+</div><div class="line" data-line="12">          volumeMounts:  &lt;--- montar volumes declarados na Pod
+</div><div class="line" data-line="13">            - name: grafana-persistent-volume
+</div><div class="line" data-line="14">              mountPath: /var/lib/grafana
+</div></code></pre>
+<p>Apply na coisa toda e…tudo funciona lindamente, né?</p>
+<h2><a href="#conclusão" aria-hidden="true" class="anchor" id="conclusão"></a>Conclusão</h2>
+<p>Este artigo foi um overview básico nas métricas do cAdvisor. Podemos fazer muito mais coisas, que serão adicionadas ao longo dos próximos artigos.</p>
+      </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/60">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-primary hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/50">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static-theme.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 2 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 2000 });
+      } else {
+        setTimeout(loadGTM, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>
