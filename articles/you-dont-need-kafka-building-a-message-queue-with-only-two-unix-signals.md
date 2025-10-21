@@ -25,7 +25,7 @@ aGVsbG8K
 Here's what's happening:
 * The process `echo` is started with the content "hello"
 * `echo` is a program that prints the message to _STDOUT_
-* Through the pipe, the content in _STDOUT_ is **sent** directly to the _STDINT_ of the `base64` process
+* Through the pipe, the content in _STDOUT_ is **sent** directly to the _STDIN_ of the `base64` process
 * The `base64` process encodes its input to Base64 and then puts the result in _STDOUT_
 
 Note the word "send". Yes, anonymous pipes are a form of **IPC (Inter-process communication).** Other forms of IPC in UNIX include:

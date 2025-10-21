@@ -1,4 +1,4 @@
-.PHONY: help up down logs restart
+.PHONY: help up down logs restart deploy
 
 help:
 	@echo "leandronsp.com - Static Site Server"
@@ -9,6 +9,7 @@ help:
 	@echo "  make down     - Stop nginx server"
 	@echo "  make logs     - View nginx logs"
 	@echo "  make restart  - Restart nginx server"
+	@echo "  make deploy   - Commit and push changes (use MESSAGE='...' for custom commit)"
 	@echo ""
 
 up:
@@ -26,3 +27,10 @@ logs:
 restart:
 	@docker-compose restart nginx
 	@echo "✓ Server restarted"
+
+deploy:
+	@echo "Deploying to Cloudflare Pages..."
+	@git add .
+	@git commit -m "$(if $(MESSAGE),$(MESSAGE),update site content)"
+	@git push
+	@echo "✓ Changes pushed to main - deployment triggered"
