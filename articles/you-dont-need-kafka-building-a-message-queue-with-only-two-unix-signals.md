@@ -4,7 +4,7 @@ slug: "you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals"
 published_at: "2025-10-21 00:06:14Z"
 language: "en"
 status: "published"
-tags: []
+tags: ["kafka", "unix"]
 ---
 
 Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you didn't. But I did. And I want to share my journey of how I achieved it.
