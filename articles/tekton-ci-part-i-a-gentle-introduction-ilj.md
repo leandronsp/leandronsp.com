@@ -8,7 +8,7 @@ tags: ["discuss", "softwaredevelopment", "agile"]
 ---
 
 
-In [another post](https://dev.to/leandronsp/cicd-in-a-nutshell-3k6a) I talked about **CI/CD in a nutshell** and its fundamentals, before going further on **Tekton**. _In case you need, I suggest you reading that post before_.
+In [another post](https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a) I talked about **CI/CD in a nutshell** and its fundamentals, before going further on **Tekton**. _In case you need, I suggest you reading that post before_.
 
 Now that we understand CI/CD practices, the importance of _Cloud Delivery Foundation_ (CDF) as community and that Tekton is a graduated CDF project, we can deep dive into Tekton.
 

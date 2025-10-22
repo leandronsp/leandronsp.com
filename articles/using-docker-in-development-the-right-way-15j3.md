@@ -9,7 +9,7 @@ tags: ["docker", "containers"]
 
 _If you are not proficient in Docker, or that topics like containers and virtual machines are still a bit "fuzzy", have problems working with Docker in development but want to learn and work using containers, this article is for you._
 
-Few weeks ago I wrote an article on [Thinking like containers](https://dev.to/leandronsp/thinking-like-containers-3k24), where I did an introduction on containers and explained the problem that containers solve.
+Few weeks ago I wrote an article on [Thinking like containers](https://leandronsp.com/articles/thinking-like-containers-3k24), where I did an introduction on containers and explained the problem that containers solve.
 
 ## Production usage
 The most popular usage of containers is at _production environments_, because the team can pack up the application into an image containing the runtime and all the needed dependencies. 
@@ -60,7 +60,7 @@ I'll focus on another aspect.
 ### Forget how those real projects are using Docker
 It sounds counterintuitive at first but my argument is that, if you start using Docker today, and thinking that _containers work exactly like you see in the company's projects_, you are doomed. 
 
-Containers go **beyond** that way. I suggest first learning [how containers work](https://dev.to/leandronsp/thinking-like-containers-3k24 ). Experiment on them. Try out different things and technologies using them.
+Containers go **beyond** that way. I suggest first learning [how containers work](https://leandronsp.com/articles/thinking-like-containers-3k24 ). Experiment on them. Try out different things and technologies using them.
 
 Then, only then, you can use containers on real projects the right way. 
 

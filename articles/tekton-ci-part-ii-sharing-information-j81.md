@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "ci", "linux", "docker"]
 ---
 
-[In the previous post](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview through its main components: _Steps, Tasks and Pipelines_.
+[In the previous post](https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview through its main components: _Steps, Tasks and Pipelines_.
 
 Now, let's keep exploring the **Tekton building blocks** as we see a complete journey from _development to production_.
 

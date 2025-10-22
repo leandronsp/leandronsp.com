@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="In the [first part](https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc` comma">
+  <meta name="description" content="In the [first part](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc`">
   <meta name="author" content="Leandro Proença">
   <link rel="canonical" href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html">
 
@@ -15,7 +15,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html">
   <meta property="og:title" content="Building a Web server in Bash, part II - parsing HTTP">
-  <meta property="og:description" content="In the [first part](https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc` comma">
+  <meta property="og:description" content="In the [first part](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc`">
   <meta property="og:site_name" content="Leandro Proença">
   <meta property="article:published_time" content="2022-08-01T03:33:37Z">
   <meta property="article:tag" content="webdev">
@@ -34,7 +34,7 @@
       "@type": "Person",
       "name": "Leandro Proença"
     },
-    "description": "In the [first part](https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc` comma",
+    "description": "In the [first part](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc`",
         "keywords": "webdev, http, linux, shellscript"
   }
   </script>
@@ -147,7 +147,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Building a Web server in Bash, part II - parsing HTTP</h1>
 
@@ -172,7 +172,7 @@
       </div>
 
       <div class="prose prose-lg max-w-none">
-        <p>In the <a href="https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b">first part</a> of this guide, we walked through the basics of netcat <code>nc</code> command, from basic UNIX sockets to TCP sockets, all the way writing an <em>HTML content inside the HTTP response body</em>.</p>
+        <p>In the <a href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b">first part</a> of this guide, we walked through the basics of netcat <code>nc</code> command, from basic UNIX sockets to TCP sockets, all the way writing an <em>HTML content inside the HTTP response body</em>.</p>
 <p>Now, let’s go further on writing some ShellScript, towards a more sophisticated Web server that delivers features like <em>login, homepage and logout</em>.</p>
 <hr />
 <h2><a href="#just-a-static-response" aria-hidden="true" class="anchor" id="just-a-static-response"></a>Just a static response</h2>
@@ -201,7 +201,7 @@
 <li>the request message is processed then a response is sent to the STDIN. In this case, to the <code>FIFO</code> structure</li>
 <li>as the FIFO structure contains the STDIN of the netcat process, it can be then sent to the socket</li>
 </ul>
-<p>What’s this “FIFO” structure we have learned in the <a href="https://dev.to/leandronsp/inter-process-communication-pipes-52nj">previous posts</a>? <strong>Yes, named pipes!</strong></p>
+<p>What’s this “FIFO” structure we have learned in the <a href="https://leandronsp.com/articles/inter-process-communication-pipes-52nj">previous posts</a>? <strong>Yes, named pipes!</strong></p>
 <p>That’s a great solution, <em>isn’t it</em>?</p>
 <h2><a href="#using-fifo-as-the-response" aria-hidden="true" class="anchor" id="using-fifo-as-the-response"></a>Using FIFO as the response</h2>
 <p>Okay, time to write the very first version of our web server.</p>
@@ -367,33 +367,33 @@
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker", "k8s", "containers"]
 ---
 
-In the [previous post](https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an introduction to its **main architecture**.
+In the [previous post](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an introduction to its **main architecture**.
 
 Once we got introduced, it's time to explore how we can run an application in Kubernetes.
 

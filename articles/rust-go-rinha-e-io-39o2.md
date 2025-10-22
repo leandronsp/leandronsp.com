@@ -47,7 +47,7 @@ A ideia era que as pessoas participantes trouxessem a implementação de uma API
 
 O desafio tinha como requisito uma arquitetura composta por basicamente **um NGINX** fazendo load balancing para **2 API's** mandando dados para **um banco de dados**, tudo rodando em containers.
 
-> Se você quer saber mais sobre containers e Docker, dê uma olhadinha [nesta série de artigos](https://dev.to/leandronsp/series/19249) que escrevi centuries ago
+> Se você quer saber mais sobre containers e Docker, dê uma olhadinha [nesta série de artigos](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1) que escrevi centuries ago
 
 Pra deixar mais desafiador ainda, havia uma restrição obrigatória de recursos onde o total de containers não podia exceder o limite de 1.5 CPU's e 3GB de memória. 
 
@@ -158,7 +158,7 @@ O resultado trouxe um troughput melhor e garantiu 46k inserts.
 ### E o Bash?
 It turns out que também fiz [outra versão](https://github.com/leandronsp/rinha-backend-bash) e submeti, escrita em Bash script, apenas for fun mesmo. Foi produto de um tweet inocente que fiz, o pessoal não perdoou e fez o tweet viralizar, pelo que me senti obrigado e implementar a API em Bash.
 
-Na verdade, como eu já venho de uma saga ensinando fundamentos de computação [nos meus artigos](https://dev.to/leandronsp/series/18859) usando Bash, foi tranquilo fazer uma versão minimamente aceitável com mkfifo e netcat.
+Na verdade, como eu já venho de uma saga ensinando fundamentos de computação [nos meus artigos](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) usando Bash, foi tranquilo fazer uma versão minimamente aceitável com mkfifo e netcat.
 
 Submeti sem grandes pretensões, rodei o teste local apenas uma vez e deu um monte de erro, pensei "freak it vou mandar mesmo assim" e foi.
 

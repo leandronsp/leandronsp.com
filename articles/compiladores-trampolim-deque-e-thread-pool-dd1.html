@@ -145,7 +145,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Compiladores, trampolim, deque e thread pool</h1>
 
@@ -346,7 +346,7 @@
 <blockquote>
 <p>Enquanto há nó para percorrer, vou chamar minha função novamente, até chegar no fim do galho</p>
 </blockquote>
-<p>Não vou entrar muito nos detalhes dos trade-offs da recursão, mas se quiser se aprofundar nisto, sugiro a leitura do artigo que escrevi sobre <a href="https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4">fundamentos de recursão</a>.</p>
+<p>Não vou entrar muito nos detalhes dos trade-offs da recursão, mas se quiser se aprofundar nisto, sugiro a leitura do artigo que escrevi sobre <a href="https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4">fundamentos de recursão</a>.</p>
 <p>Com isto em mente, e sabendo que o pessoal na rinha iria executar alguns programas que exigem muito da memória stack, decidi experimentar uma estratégia não muito ortodoxa e que funciona como alternativa à recursão quando otimizações de recursão de cauda não são possíveis ou são muito limitadas.</p>
 <p>A esta estratégia (que também explico com detalhes no artigo apontado), chamamos de <strong>Trampoline</strong>, ou <em>trampolim</em>.</p>
 <h3><a href="#-trampolim-para-o-resgate" aria-hidden="true" class="anchor" id="-trampolim-para-o-resgate"></a>👉🏽 Trampolim para o resgate</h3>
@@ -443,7 +443,7 @@
 <a href="https://github.com/aripiprazole/rinha-de-compiler">Rinha de compiladores</a><br />
 <a href="https://github.com/reu/rinha-compiladores">reu/rinha-compiladores</a><br />
 <a href="https://github.com/leandronsp/patropi">leandronsp/patropi</a><br />
-<a href="https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4">Fundamentos de Recursão</a><br />
+<a href="https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4">Fundamentos de Recursão</a><br />
 <a href="https://en.wikipedia.org/wiki/Double-ended_queue">Double-ended queue</a><br />
 <a href="https://workingwithruby.com/">workingwithruby.com</a><br />
 <a href="https://github.com/leandronsp/adelnor">leandronsp/adelnor</a></p>
@@ -474,33 +474,33 @@
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

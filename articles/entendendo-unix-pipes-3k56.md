@@ -111,7 +111,7 @@ Neste artigo, tentei demonstrar o funcionamento básico de UNIX pipelines, que u
 
 [Este artigo do Marcell Cruz](https://dev.to/____marcell/bidirectional-piping-how-to-make-two-programs-communicate-with-each-other-2ke9) é bastante elucidativo e me ajudou a despertar interesse em dissecar o tema para produzir mais conteúdo de UNIX em pt-BR.
 
-No [artigo a seguir](https://dev.to/leandronsp/implementando-um-simples-background-job-com-unix-named-pipes-3eja) mostro como funcionam **UNIX named pipes** e como isto abre portas para a implementação de um simples background job em Shell script. 
+No [artigo a seguir](https://leandronsp.com/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja) mostro como funcionam **UNIX named pipes** e como isto abre portas para a implementação de um simples background job em Shell script. 
 
 Stay tuned!
 

@@ -182,7 +182,7 @@ Em seguida, acesse o terminal `psql` com o seguinte comando:
 $ docker exec -it postgres psql -U postgres
 ```
 
-> O quê você está esperando para ir logo aprender sobre [containers](https://dev.to/leandronsp/thinking-like-containers-3k24)?
+> O quê você está esperando para ir logo aprender sobre [containers](https://leandronsp.com/articles/thinking-like-containers-3k24)?
 
 No PostgreSQL, o tipo de dado que representa um inteiro de dois bytes é chamado **int2** ou **smallint**:
 

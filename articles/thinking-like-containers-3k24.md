@@ -164,4 +164,4 @@ This article was an introduction on containers and, being more strict, on how to
 
 I think the ride to containers is worth. A bit "fuzzy" at start but it will pay back as soon as we feel we can experiment more on computers.
 
-And in case you want to keep learning it, check out my [series of posts](https://dev.to/leandronsp/series/19249) about containers and Docker. 
+And in case you want to keep learning it, check out my [series of posts](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1) about containers and Docker. 

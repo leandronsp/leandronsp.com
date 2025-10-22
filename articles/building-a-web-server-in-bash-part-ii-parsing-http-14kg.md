@@ -7,7 +7,7 @@ status: "published"
 tags: ["webdev", "http", "linux", "shellscript"]
 ---
 
-In the [first part](https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc` command, from basic UNIX sockets to TCP sockets, all the way writing an _HTML content inside the HTTP response body_. 
+In the [first part](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc` command, from basic UNIX sockets to TCP sockets, all the way writing an _HTML content inside the HTTP response body_. 
 
 Now, let's go further on writing some ShellScript, towards a more sophisticated Web server that delivers features like _login, homepage and logout_.
 
@@ -43,7 +43,7 @@ Let's think for a bit about a potential solution.
 * the request message is processed then a response is sent to the STDIN. In this case, to the `FIFO` structure
 * as the FIFO structure contains the STDIN of the netcat process, it can be then sent to the socket
 
-What's this "FIFO" structure we have learned in the [previous posts](https://dev.to/leandronsp/inter-process-communication-pipes-52nj)? **Yes, named pipes!**
+What's this "FIFO" structure we have learned in the [previous posts](https://leandronsp.com/articles/inter-process-communication-pipes-52nj)? **Yes, named pipes!**
 
 That's a great solution, _isn't it_?
 

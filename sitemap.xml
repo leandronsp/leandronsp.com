@@ -8,31 +8,10 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-10-17</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2024-05-25</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/superficial-basico-e-avancado-148n.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2024-03-09</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-09-08</lastmod>
 </url>
 
   <url>
@@ -57,13 +36,6 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-05-24</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
@@ -75,13 +47,6 @@
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2022-09-17</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2022-08-01</lastmod>
 </url>
 
   <url>
@@ -99,10 +64,59 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html</loc>
+  <loc>https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2023-03-12</lastmod>
+  <lastmod>2022-08-01</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-10-17</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-05-24</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/arrays-in-x86-assembly.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2025-10-22</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-12-04</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-09-16</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-04-28</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-08-10</lastmod>
 </url>
 
   <url>
@@ -127,13 +141,6 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-12-04</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
@@ -148,13 +155,6 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-09-16</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/using-docker-in-development-the-right-way-15j3.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
@@ -162,52 +162,10 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-04-28</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-08-10</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/quicksort-a-ruby-implementation-using-test-driven-development-10ma.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2021-04-16</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-04-10</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2024-05-13</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2024-04-23</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2024-04-11</lastmod>
 </url>
 
   <url>
@@ -225,17 +183,31 @@
 </url>
 
   <url>
+  <loc>https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-05-19</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2024-05-13</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-04-10</lastmod>
+</url>
+
+  <url>
   <loc>https://leandronsp.com/articles/building-a-dead-simple-background-job-in-rust-4m1d.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2023-11-12</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2024-08-17</lastmod>
 </url>
 
   <url>
@@ -246,24 +218,10 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html</loc>
+  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2023-05-19</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-04-29</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-04-05</lastmod>
+  <lastmod>2024-04-23</lastmod>
 </url>
 
   <url>
@@ -281,24 +239,10 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/um-resumo-do-meu-2024-1lf4.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2025-10-18</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2022-07-12</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-04-01</lastmod>
 </url>
 
   <url>
@@ -309,17 +253,45 @@
 </url>
 
   <url>
+  <loc>https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2025-10-21</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-04-29</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-04-05</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/um-resumo-do-meu-2024-1lf4.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2025-10-18</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-04-01</lastmod>
+</url>
+
+  <url>
   <loc>https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2023-03-12</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-02-23</lastmod>
 </url>
 
   <url>
@@ -330,24 +302,31 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html</loc>
+  <loc>https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2022-08-06</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2023-02-19</lastmod>
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/thinking-like-containers-3k24.html</loc>
+  <loc>https://leandronsp.com/articles/seu-dinheiro-nao-e-infinito-2l2k.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2022-08-09</lastmod>
+  <lastmod>2022-10-21</lastmod>
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html</loc>
+  <loc>https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2022-08-06</lastmod>
+  <lastmod>2023-02-19</lastmod>
 </url>
 
   <url>
@@ -362,13 +341,6 @@
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2022-07-14</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2023-02-19</lastmod>
 </url>
 
   <url>
@@ -393,13 +365,6 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/seu-dinheiro-nao-e-infinito-2l2k.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2022-10-21</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/building-a-web-server-in-bash-the-grand-finale-n14.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
@@ -407,10 +372,24 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html</loc>
+  <loc>https://leandronsp.com/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2022-07-06</lastmod>
+  <lastmod>2022-03-03</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-04-30</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification-11je.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-04-14</lastmod>
 </url>
 
   <url>
@@ -442,38 +421,10 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2022-03-03</lastmod>
-</url>
-
-  <url>
   <loc>https://leandronsp.com/articles/mastering-docker-volumes-j7m.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
   <lastmod>2022-02-05</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-05-09</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-04-30</lastmod>
-</url>
-
-  <url>
-  <loc>https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification-11je.html</loc>
-  <priority>0.8</priority>
-  <changefreq>monthly</changefreq>
-  <lastmod>2021-04-14</lastmod>
 </url>
 
   <url>
@@ -484,6 +435,55 @@
 </url>
 
   <url>
+  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2024-04-11</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-09-08</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-02-23</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/thinking-like-containers-3k24.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2022-08-09</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2023-03-12</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2022-07-06</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2021-05-09</lastmod>
+</url>
+
+  <url>
   <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
@@ -491,10 +491,17 @@
 </url>
 
   <url>
-  <loc>https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html</loc>
+  <loc>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html</loc>
   <priority>0.8</priority>
   <changefreq>monthly</changefreq>
-  <lastmod>2025-10-21</lastmod>
+  <lastmod>2024-05-25</lastmod>
+</url>
+
+  <url>
+  <loc>https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
+  <lastmod>2024-08-17</lastmod>
 </url>
 
 </urlset>

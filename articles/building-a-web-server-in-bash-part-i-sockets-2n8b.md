@@ -20,7 +20,7 @@ Make sure you pick up your UNIX-like terminal, prepare your favourite shell (I'm
 ---
 
 ## First things first
-It's very important that you understand some fundamentals like UNIX standard streams and pipes. Unless you are already comfortable with such terms, [please refer to my series of posts about UNIX](https://dev.to/leandronsp/series/18859).
+It's very important that you understand some fundamentals like UNIX standard streams and pipes. Unless you are already comfortable with such terms, [please refer to my series of posts about UNIX](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b).
 
 # Meet netcat
 [netcat](https://linux.die.net/man/1/nc) is a computer networking utility for manipulating network sockets such as UNIX, TCP or UDP. 

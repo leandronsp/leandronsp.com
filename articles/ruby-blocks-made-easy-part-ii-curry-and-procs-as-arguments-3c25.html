@@ -158,7 +158,7 @@ tags: ruby, pr",
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Ruby blocks made easy, part II, curry and procs as arguments</h1>
 
@@ -189,7 +189,7 @@ published: true<br />
 description: Understanding the fundamentals of Ruby blocks<br />
 tags: ruby, programming, softwaredevelopment<br />
 cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/imojdiw5a8hijxe7l633.png">https://dev-to-uploads.s3.amazonaws.com/uploads/articles/imojdiw5a8hijxe7l633.png</a></h2>
-<p><a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-i-methods-and-procs-ji2">In the previous post</a>, we learned that methods can be transformed into procs to be evaluated <em>later</em>.</p>
+<p><a href="https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2">In the previous post</a>, we learned that methods can be transformed into procs to be evaluated <em>later</em>.</p>
 <p>One thing worth to mention is that, the method itself can be used like a proc: every <code>Method</code> structure has a method called <code>call</code>:</p>
 <pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">Time</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">now</span> <span style="color: #7f848e;"># =&gt; 2021-04-10 17:22:05</span>
 </div><div class="line" data-line="2">
@@ -270,7 +270,7 @@ cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/i
 </div></code></pre>
 <h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
 <p>We learned that procs can be passed as arguments to another methods and, optionally, can use curried arguments, making our code appear more <em>declarative</em>.</p>
-<p><a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48">In the next and last post of this series</a>, we will unblock more fundamentals and introduce <em>blocks</em>.</p>
+<p><a href="https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48">In the next and last post of this series</a>, we will unblock more fundamentals and introduce <em>blocks</em>.</p>
       </div>
     </article>
 
@@ -298,33 +298,33 @@ cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/i
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

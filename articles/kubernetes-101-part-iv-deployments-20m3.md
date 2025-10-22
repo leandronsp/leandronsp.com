@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker"]
 ---
 
-In the [third part](https://dev.to/leandronsp/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes employs **self-healing capabilities** by using the _controller pattern_ through the utilisation of _workload resources_ such as **ReplicaSets**.
+In the [third part](https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes employs **self-healing capabilities** by using the _controller pattern_ through the utilisation of _workload resources_ such as **ReplicaSets**.
 
 However, it's well-known that most applications require to be _updated frequently_. 
 

@@ -7,7 +7,7 @@ status: "published"
 tags: ["ruby", "tdd", "http"]
 ---
 
-[In the previous article](https://dev.to/leandronsp/web-basics-a-tcp-server-in-ruby-947), we learned the very basics of networking and how to write a simple TCP server in Ruby.
+[In the previous article](https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947), we learned the very basics of networking and how to write a simple TCP server in Ruby.
 
 Here, we'll see a simple implementation of an HTTP server in Ruby.
 

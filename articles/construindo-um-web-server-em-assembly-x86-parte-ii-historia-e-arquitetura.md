@@ -1,6 +1,6 @@
 ---
 title: "Construindo um web server em Assembly x86, parte II, história e arquitetura"
-slug: "construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9"
+slug: "construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura"
 published_at: "2024-04-11 23:26:28Z"
 language: "pt-BR"
 status: "published"

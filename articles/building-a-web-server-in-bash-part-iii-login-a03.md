@@ -7,7 +7,7 @@ status: "published"
 tags: ["webdev", "linux", "html", "shellscript"]
 ---
 
-In the [previous posts](https://dev.to/leandronsp/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *netcat*. Moreover, we learned how to start reading and parsing an HTTP message using ShellScript. 
+In the [previous posts](https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *netcat*. Moreover, we learned how to start reading and parsing an HTTP message using ShellScript. 
 
 _Time to definitely improve our app_.
 

@@ -52,7 +52,7 @@ The queue (VecDeque) is going to be shared across the channel for one or more th
 
 In Rust, such problem requires shared ownership addressed by a **reference counter** (Rc), but since we are in a multi-thread scenario, Rc is not thread-safe, that's why we need an _atomic reference counter_, or simply **Arc**, which is indeed thread-safe.
 
-> You can learn more details about smart pointers by reading my post on [Understanding the basics of smart pointers in Rust](https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff)
+> You can learn more details about smart pointers by reading my post on [Understanding the basics of smart pointers in Rust](https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff)
 
 ## How about Mutex?
 Since Arc is a reference counter, its references are immutable. For mutability in the underlying data, we need _interior mutability_ using RefCell.
@@ -251,4 +251,4 @@ https://doc.rust-lang.org/std/vec/struct.Vec.html
 
 https://doc.rust-lang.org/std/collections/struct.VecDeque.html
 
-https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff
+https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff

@@ -7,7 +7,7 @@ status: "published"
 tags: ["unix", "linux"]
 ---
 
-[In the previous post](https://dev.to/leandronsp/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers evolved to tackle **concurrency**, the reason why operating systems were created in order to share computer resources with running computer programs. 
+[In the previous post](https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers evolved to tackle **concurrency**, the reason why operating systems were created in order to share computer resources with running computer programs. 
 
 The main concurrency unit primitive of an operating system is a **process**. Therefore, OS processes are isolated, which means they have their *own memory space*. 
 

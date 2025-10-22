@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker"]
 ---
 
-Our previous article, we learned how DaemonSets can effectively [collect data](https://dev.to/leandronsp/kubernetes-101-part-vi-daemonsets-1ph0) from Kubernetes nodes, allowing data to be structured and sent to appropriate tooling.
+Our previous article, we learned how DaemonSets can effectively [collect data](https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0) from Kubernetes nodes, allowing data to be structured and sent to appropriate tooling.
 
 In this post, we'll delve into the topic of running a single job in Kubernetes through the use of Kubernetes [Jobs](https://kubernetes.io/docs/concepts/workloads/controllers/job/). 
 

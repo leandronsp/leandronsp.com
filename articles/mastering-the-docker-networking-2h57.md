@@ -7,7 +7,7 @@ status: "published"
 tags: ["docker", "linux", "nginx"]
 ---
 
-Few months ago I demonstrated [through a practical example](https://dev.to/leandronsp/mastering-docker-volumes-j7m) the reasons to understand and take advantage of Docker volumes. 
+Few months ago I demonstrated [through a practical example](https://leandronsp.com/articles/mastering-docker-volumes-j7m) the reasons to understand and take advantage of Docker volumes. 
 
 In this one, I'll try to do the same in regarding the Docker networking. 
 

@@ -1,6 +1,6 @@
 ---
 title: "Construindo um web server em Assembly x86, the grand finale, multi-threading"
-slug: "construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp"
+slug: "construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading"
 published_at: "2024-07-14 02:37:25Z"
 language: "pt-BR"
 status: "published"

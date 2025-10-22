@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker", "k8s", "containers"]
 ---
 
-The [second part](https://dev.to/leandronsp/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two containers communicating to each other using FIFO and a shared volume.
+The [second part](https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two containers communicating to each other using FIFO and a shared volume.
 
 In this post we'll learn about **self-healing systems** and what we can achieve by leveraging Pod management to **Kubernetes workload resources** so they can manage Pods on our behalf.
 

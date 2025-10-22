@@ -13,7 +13,7 @@ In short, [Kubernetes](https://kubernetes.io/) is an open-source system for **au
 
 ---
 
-:exclamation: _If you don't have much idea of what **a container is**, please refer to my [Docker 101 series](https://dev.to/leandronsp/series/19249) first and then come back to this one. Thereby you'll be more prepared to understand Kubernetes._ 
+:exclamation: _If you don't have much idea of what **a container is**, please refer to my [Docker 101 series](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1) first and then come back to this one. Thereby you'll be more prepared to understand Kubernetes._ 
 
 Disclaimer said, let's see the problem all this "K8s thing" tries to solve.
 

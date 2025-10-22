@@ -7,7 +7,7 @@ status: "published"
 tags: ["unix", "linux"]
 ---
 
-After learning how [OS processes can use file descriptors](https://dev.to/leandronsp/inter-process-communication-files-1m34) for IPC, it's time to analyse another IPC approach: pipes.
+After learning how [OS processes can use file descriptors](https://leandronsp.com/articles/inter-process-communication-files-1m34) for IPC, it's time to analyse another IPC approach: pipes.
 
 ---
 Let's recap the following example:

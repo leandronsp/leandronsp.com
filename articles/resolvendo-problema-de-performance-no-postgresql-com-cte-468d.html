@@ -152,7 +152,7 @@ Um dos [cenários mais comuns](https://",
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Resolvendo problema de performance no PostgreSQL com CTE</h1>
 
@@ -178,7 +178,7 @@ Um dos [cenários mais comuns](https://",
 
       <div class="prose prose-lg max-w-none">
         <p><strong>Spoiler</strong>: <em>a query ficou 23x mais rápida com CTE’s apenas transformando o problema quadrático em linear. Sem índices</em>.</p>
-<p>Um dos <a href="https://dev.to/leandronsp/how-to-reduce-the-time-complexity-of-nested-loops-1lkd">cenários mais comuns</a> de problemas de performance em software é o famoso <strong>nested loop</strong>.</p>
+<p>Um dos <a href="https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd">cenários mais comuns</a> de problemas de performance em software é o famoso <strong>nested loop</strong>.</p>
 <p>Com o banco de dados não é diferente. Por vezes podemos acabar por escrever queries que apresentam complexidade quadrática, onde nossa primeira solução óbvia para melhorar a performance seria através da criação de <strong>índices</strong>.</p>
 <p>Neste artigo vou mostrar uma alternativa para este problema de nested loops em queries sem criar índices, apenas utilizando <a href="https://www.postgresql.org/docs/current/queries-with.html">CTE’s</a>, ou <em>Common Table Expressions</em>.</p>
 <h2><a href="#setup" aria-hidden="true" class="anchor" id="setup"></a>Setup</h2>
@@ -322,33 +322,33 @@ Podemos reparar que já não há mais o node de <em>Nested Loop</em>, pelo que �
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

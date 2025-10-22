@@ -7,7 +7,7 @@ status: "published"
 tags: ["firstpost", "career", "discuss"]
 ---
 
-The [previous post](https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a pipeline based on such event.
+The [previous post](https://leandronsp.com/articles/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a pipeline based on such event.
 
 So far, the pipeline consists in:
 

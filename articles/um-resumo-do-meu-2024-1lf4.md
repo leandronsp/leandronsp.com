@@ -22,14 +22,14 @@ Teve também transmissão ao vivo criando uma [Rede Neural Artificial em Ruby](h
 
 Na parte de artigos, [escrevi muita coisa](https://dev.to/leandronsp) em 2023:
 
-* Introdução ao [Tekton CI/CD](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj)
-* [Kubernetes 101](https://dev.to/leandronsp/kubernetes-101-part-i-the-fundamentals-23a1)
-* Um guia completo cobrindo [os fundamentos de Git](https://dev.to/leandronsp/git-fundamentals-a-complete-guide-do7)
-* Criando [redes neurais em Ruby](https://dev.to/leandronsp/ai-ruby-an-introduction-to-neural-networks-23f3)
-* Teve até artigo sobre [ponto flutuante](https://dev.to/leandronsp/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n)
-* [Fundamentos de recursão](https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4)
-* [Resumo da rinha de compiladores](https://dev.to/leandronsp/compiladores-trampolim-deque-e-thread-pool-dd1) e trampolim
-* [Mais Rust](https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff)
+* Introdução ao [Tekton CI/CD](https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj)
+* [Kubernetes 101](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1)
+* Um guia completo cobrindo [os fundamentos de Git](https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7)
+* Criando [redes neurais em Ruby](https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3)
+* Teve até artigo sobre [ponto flutuante](https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n)
+* [Fundamentos de recursão](https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4)
+* [Resumo da rinha de compiladores](https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1) e trampolim
+* [Mais Rust](https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff)
 
 E o famoso [Guia Web 101](https://web101.leandronsp.com/) também.
 
@@ -91,9 +91,9 @@ Não obstante, resolvi também [escrever artigos em live](https://www.youtube.co
 
 Brincadeiras a parte, e ideia é mesmo compartilhar o processo. É sobre o _modus operandi_, a forma como eu quebro o raciocínio em partes na hora de escrever. E também o que me inspira.
 
-No mundo dos artigos, eu [comecei em Abril](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) a saga "Escrevendo um Web server em Assembly x86". Foram um total de 6 artigos, onde no final conseguimos implementar um web server simples, porém multi-threaded em Assembly. Foram 3 meses escrevendo, fazendo lives e [muitos conceitos abordados](https://github.com/leandronsp/monica), muita coisa mesmo.
+No mundo dos artigos, eu [comecei em Abril](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) a saga "Escrevendo um Web server em Assembly x86". Foram um total de 6 artigos, onde no final conseguimos implementar um web server simples, porém multi-threaded em Assembly. Foram 3 meses escrevendo, fazendo lives e [muitos conceitos abordados](https://github.com/leandronsp/monica), muita coisa mesmo.
 
-Aproveitei também para escrever sobre [Arrays em Assembly x86](https://dev.to/leandronsp/arrays-em-assembly-x86-55hb).
+Aproveitei também para escrever sobre [Arrays em Assembly x86](https://leandronsp.com/articles/arrays-em-assembly-x86-55hb).
 
 Esta saga foi muito enriquecedora pra mim. Pude aprender e firmar muitos conceitos. Vale muito a pena aprender Assembly e coisas de baixo nível.
 

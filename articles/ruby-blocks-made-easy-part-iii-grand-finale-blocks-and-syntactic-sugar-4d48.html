@@ -155,7 +155,7 @@ description: Understanding the fundamentals of Ruby blocks",
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar</h1>
 
@@ -186,7 +186,7 @@ published: true<br />
 description: Understanding the fundamentals of Ruby blocks<br />
 tags: ruby, programming, softwaredevelopment<br />
 cover_image: <a href="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9ob6kb11iq2ugylftpln.png">https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9ob6kb11iq2ugylftpln.png</a></h2>
-<p>In this series of posts, we already covered that <a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-i-methods-and-procs-ji2"><em>methods can be transformed into procs</em></a> and as such, can be evaluated <strong>later</strong>. Furthermore, we’ve seen that <a href="https://dev.to/leandronsp/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25">procs can be used as arguments to another methods</a> and that such procs can optionally use curried arguments.</p>
+<p>In this series of posts, we already covered that <a href="https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2"><em>methods can be transformed into procs</em></a> and as such, can be evaluated <strong>later</strong>. Furthermore, we’ve seen that <a href="https://leandronsp.com/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25">procs can be used as arguments to another methods</a> and that such procs can optionally use curried arguments.</p>
 <p>Until now, we have been using methods as a way to represent “blocks” of code:</p>
 <pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">multiply</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">a</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">b</span><span style="color: #c678dd;">)</span>
 </div><div class="line" data-line="2">  <span style="color: #e06c75;">a</span> <span style="color: #56b6c2;">*</span> <span style="color: #e06c75;">b</span>
@@ -372,33 +372,33 @@ Take a look at the <a href="https://ruby-doc.org/core-2.4.0/Proc.html">Proc</a> 
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

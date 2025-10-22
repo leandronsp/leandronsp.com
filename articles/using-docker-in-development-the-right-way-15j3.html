@@ -145,7 +145,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Using Docker in development the right way</h1>
 
@@ -171,7 +171,7 @@
 
       <div class="prose prose-lg max-w-none">
         <p><em>If you are not proficient in Docker, or that topics like containers and virtual machines are still a bit “fuzzy”, have problems working with Docker in development but want to learn and work using containers, this article is for you.</em></p>
-<p>Few weeks ago I wrote an article on <a href="https://dev.to/leandronsp/thinking-like-containers-3k24">Thinking like containers</a>, where I did an introduction on containers and explained the problem that containers solve.</p>
+<p>Few weeks ago I wrote an article on <a href="https://leandronsp.com/articles/thinking-like-containers-3k24">Thinking like containers</a>, where I did an introduction on containers and explained the problem that containers solve.</p>
 <h2><a href="#production-usage" aria-hidden="true" class="anchor" id="production-usage"></a>Production usage</h2>
 <p>The most popular usage of containers is at <em>production environments</em>, because the team can pack up the application into an image containing the runtime and all the needed dependencies.</p>
 <p>Such a process helps to deploy the application in isolation and makes it <em>server-agnostic</em>, meaning that it can technically be easily deployed at any cloud provider in the world.</p>
@@ -204,7 +204,7 @@ Pretty cool, because it helps to replicate bugs with ease, since the container d
 <p>I’ll focus on another aspect.</p>
 <h3><a href="#forget-how-those-real-projects-are-using-docker" aria-hidden="true" class="anchor" id="forget-how-those-real-projects-are-using-docker"></a>Forget how those real projects are using Docker</h3>
 <p>It sounds counterintuitive at first but my argument is that, if you start using Docker today, and thinking that <em>containers work exactly like you see in the company’s projects</em>, you are doomed.</p>
-<p>Containers go <strong>beyond</strong> that way. I suggest first learning <a href="https://dev.to/leandronsp/thinking-like-containers-3k24">how containers work</a>. Experiment on them. Try out different things and technologies using them.</p>
+<p>Containers go <strong>beyond</strong> that way. I suggest first learning <a href="https://leandronsp.com/articles/thinking-like-containers-3k24">how containers work</a>. Experiment on them. Try out different things and technologies using them.</p>
 <p>Then, only then, you can use containers on real projects the right way.</p>
 <h3><a href="#whats-the-right-way-then" aria-hidden="true" class="anchor" id="whats-the-right-way-then"></a>What’s the right way then?</h3>
 <p>Let’s supposed you don’t have NodeJS installed in your host. People would first install NodeJS, depending on your operating system, configure it and do a couple of things before being able to run:</p>
@@ -270,33 +270,33 @@ Pretty cool, because it helps to replicate bugs with ease, since the container d
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

@@ -1,6 +1,6 @@
 ---
 title: "Construindo um web server em Assembly x86, parte IV, um assembly modesto"
-slug: "construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif"
+slug: "construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto"
 published_at: "2024-05-13 11:33:03Z"
 language: "pt-BR"
 status: "published"

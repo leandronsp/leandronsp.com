@@ -1,6 +1,6 @@
 ---
 title: "Construindo um web server em Assembly x86, parte V, finalmente o server"
-slug: "construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5"
+slug: "construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server"
 published_at: "2024-05-25 00:14:20Z"
 language: "pt-BR"
 status: "published"

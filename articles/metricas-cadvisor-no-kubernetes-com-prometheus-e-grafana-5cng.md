@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "prometheus", "grafana"]
 ---
 
-No [último artigo](https://dev.to/leandronsp/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor Prometheus em um cluster **Kubernetes**. 
+No [último artigo](https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor Prometheus em um cluster **Kubernetes**. 
 
 _(lembrando que estou utilizando um cluster local com Docker Desktop for Mac_)
 

@@ -7,7 +7,7 @@ status: "published"
 tags: ["unix", "linux", "pipes"]
 ---
 
-No [último artigo](https://dev.to/leandronsp/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pipes**. E que estes canais são uma das bases de comunicação entre diferentes processos. 
+No [último artigo](https://leandronsp.com/articles/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pipes**. E que estes canais são uma das bases de comunicação entre diferentes processos. 
 
 Neste artigo vamos explorar "pipes nomeados", ou [named pipes](https://en.wikipedia.org/wiki/Named_pipe), e como este modelo de dados pode ajudar a entender o funcionamento de um background job. 
 

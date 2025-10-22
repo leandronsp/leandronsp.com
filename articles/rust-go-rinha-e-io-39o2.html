@@ -147,7 +147,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Rust, Go, Rinha e I/O</h1>
 
@@ -198,7 +198,7 @@
 <p>A ideia era que as pessoas participantes trouxessem a implementação de uma API definida nas regras da competição.</p>
 <p>O desafio tinha como requisito uma arquitetura composta por basicamente <strong>um NGINX</strong> fazendo load balancing para <strong>2 API’s</strong> mandando dados para <strong>um banco de dados</strong>, tudo rodando em containers.</p>
 <blockquote>
-<p>Se você quer saber mais sobre containers e Docker, dê uma olhadinha <a href="https://dev.to/leandronsp/series/19249">nesta série de artigos</a> que escrevi centuries ago</p>
+<p>Se você quer saber mais sobre containers e Docker, dê uma olhadinha <a href="https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1">nesta série de artigos</a> que escrevi centuries ago</p>
 </blockquote>
 <p>Pra deixar mais desafiador ainda, havia uma restrição obrigatória de recursos onde o total de containers não podia exceder o limite de 1.5 CPU’s e 3GB de memória.</p>
 <p>Em uma data previamente estipulada, todas as submissões seriam submetidas a test de stress (violento, diga-se de passagem) através de uma ferramenta chamada <a href="https://gatling.io/docs/gatling/tutorials/installation/">Gatling</a>.</p>
@@ -288,7 +288,7 @@
 </blockquote>
 <h3><a href="#e-o-bash" aria-hidden="true" class="anchor" id="e-o-bash"></a>E o Bash?</h3>
 <p>It turns out que também fiz <a href="https://github.com/leandronsp/rinha-backend-bash">outra versão</a> e submeti, escrita em Bash script, apenas for fun mesmo. Foi produto de um tweet inocente que fiz, o pessoal não perdoou e fez o tweet viralizar, pelo que me senti obrigado e implementar a API em Bash.</p>
-<p>Na verdade, como eu já venho de uma saga ensinando fundamentos de computação <a href="https://dev.to/leandronsp/series/18859">nos meus artigos</a> usando Bash, foi tranquilo fazer uma versão minimamente aceitável com mkfifo e netcat.</p>
+<p>Na verdade, como eu já venho de uma saga ensinando fundamentos de computação <a href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b">nos meus artigos</a> usando Bash, foi tranquilo fazer uma versão minimamente aceitável com mkfifo e netcat.</p>
 <p>Submeti sem grandes pretensões, rodei o teste local apenas uma vez e deu um monte de erro, pensei “freak it vou mandar mesmo assim” e foi.</p>
 <p>Para meu deleite, a solução em Bash ficou dentre as 51 funcionais da rinha, conquistando a tão sonhada 51ª posição, com um total de 17 inserts.</p>
 <blockquote>
@@ -333,33 +333,33 @@
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

@@ -9,7 +9,7 @@ tags: ["tutorial"]
 
 _For this guide I'm assuming you are running a local Kubernetes cluster._
 
-[In the previous article](https://dev.to/leandronsp/tekton-ci-part-ii-sharing-information-j81) we've seen how to share information across a Pipeline using **Workspaces**, leading to a task for cloning a Github repository then ending with anoter task for listing the source files in the cloned repository.
+[In the previous article](https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81) we've seen how to share information across a Pipeline using **Workspaces**, leading to a task for cloning a Github repository then ending with anoter task for listing the source files in the cloned repository.
 
 Now, let's understand how to **listen to Github events** and _trigger the Pipeline_ using event bindings.
 

@@ -1,6 +1,6 @@
 ---
 title: "Construindo um web server em Assembly x86, parte III, código de máquina"
-slug: "construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk"
+slug: "construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina"
 published_at: "2024-04-23 23:18:02Z"
 language: "pt-BR"
 status: "published"

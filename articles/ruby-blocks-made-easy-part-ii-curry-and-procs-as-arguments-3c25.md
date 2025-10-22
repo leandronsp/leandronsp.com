@@ -14,7 +14,7 @@ description: Understanding the fundamentals of Ruby blocks
 tags: ruby, programming, softwaredevelopment
 cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/imojdiw5a8hijxe7l633.png
 ---
-[In the previous post](https://dev.to/leandronsp/ruby-blocks-made-easy-part-i-methods-and-procs-ji2), we learned that methods can be transformed into procs to be evaluated _later_.
+[In the previous post](https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2), we learned that methods can be transformed into procs to be evaluated _later_.
 
 One thing worth to mention is that, the method itself can be used like a proc: every `Method` structure has a method called `call`:
 ```ruby
@@ -107,7 +107,7 @@ map_numbers([2, 4, 9], method(:square_of).curry[3])
 ## Conclusion
 We learned that procs can be passed as arguments to another methods and, optionally, can use curried arguments, making our code appear more _declarative_.
 
-[In the next and last post of this series](https://dev.to/leandronsp/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48), we will unblock more fundamentals and introduce _blocks_.
+[In the next and last post of this series](https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48), we will unblock more fundamentals and introduce _blocks_.
  
 
 

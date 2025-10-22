@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie">
+  <meta name="description" content="Agora que já temos uma [base de entendimento](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sob">
   <meta name="author" content="Leandro Proença">
   <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html">
 
@@ -15,7 +15,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html">
   <meta property="og:title" content="Construindo um web server em Assembly x86, parte III, código de máquina">
-  <meta property="og:description" content="Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie">
+  <meta property="og:description" content="Agora que já temos uma [base de entendimento](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sob">
   <meta property="og:site_name" content="Leandro Proença">
   <meta property="article:published_time" content="2024-04-23T23:18:02Z">
   <meta property="article:tag" content="assembly">
@@ -32,7 +32,7 @@
       "@type": "Person",
       "name": "Leandro Proença"
     },
-    "description": "Agora que já temos uma [base de entendimento](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sobre hie",
+    "description": "Agora que já temos uma [base de entendimento](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) sob",
         "keywords": "assembly, braziliandevs"
   }
   </script>
@@ -145,7 +145,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, parte III, código de máquina</h1>
 
@@ -170,7 +170,7 @@
       </div>
 
       <div class="prose prose-lg max-w-none">
-        <p>Agora que já temos uma <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9">base de entendimento</a> sobre hierarquia de memória, arquitetura de CPU e registradores, vamos aplicar estes conceitos em exemplos práticos: construindo programas de computador.</p>
+        <p>Agora que já temos uma <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9">base de entendimento</a> sobre hierarquia de memória, arquitetura de CPU e registradores, vamos aplicar estes conceitos em exemplos práticos: construindo programas de computador.</p>
 <p><em>Mas o que é um programa de computador?</em></p>
 <p>Teremos a resposta para esta pergunta ao longo deste artigo. Vamos abordar muitos conceitos, desde código de máquina (o mais importante na minha opinião), a sistemas de numeração binário, decimal e hexadecimal.</p>
 <p>Iremos também compreender opcodes, chamadas de sistema, modo kernel, libc, ASCII, standard streams; e alterar arquivos binários em hexadecimal.</p>
@@ -500,7 +500,7 @@
 <li>escrever a string na saída STDOUT, que é a saída padrão do programa (em outras palavras, a “tela”)</li>
 </ul>
 <blockquote>
-<p>Se quiser mais detalhes do que é STDOUT, standard streams e redirecionamento de streams, sugiro ler <a href="https://dev.to/leandronsp/entendendo-unix-pipes-3k56">outros artigos</a> que escrevi sobre UNIX pipes</p>
+<p>Se quiser mais detalhes do que é STDOUT, standard streams e redirecionamento de streams, sugiro ler <a href="https://leandronsp.com/articles/entendendo-unix-pipes-3k56">outros artigos</a> que escrevi sobre UNIX pipes</p>
 </blockquote>
 <ul>
 <li>terminar o programa</li>
@@ -736,33 +736,33 @@ https://en.wikipedia.org/wiki/X86_calling_conventions
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

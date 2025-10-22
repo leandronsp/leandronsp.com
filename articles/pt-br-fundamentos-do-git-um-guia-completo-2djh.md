@@ -1022,4 +1022,4 @@ Até mais!
 
 ---
 
-_Este artigo é uma tradução **by ChatGPT** do meu artigo original [Git fundamentals, a complete guide](https://dev.to/leandronsp/git-fundamentals-a-complete-guide-do7)._
+_Este artigo é uma tradução **by ChatGPT** do meu artigo original [Git fundamentals, a complete guide](https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7)._

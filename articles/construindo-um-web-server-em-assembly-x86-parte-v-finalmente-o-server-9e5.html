@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de Assembl">
+  <meta name="description" content="No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de A">
   <meta name="author" content="Leandro Proença">
   <link rel="canonical" href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html">
 
@@ -15,7 +15,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html">
   <meta property="og:title" content="Construindo um web server em Assembly x86, parte V, finalmente o server">
-  <meta property="og:description" content="No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de Assembl">
+  <meta property="og:description" content="No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de A">
   <meta property="og:site_name" content="Leandro Proença">
   <meta property="article:published_time" content="2024-05-25T00:14:20Z">
   <meta property="article:tag" content="braziliandevs">
@@ -33,7 +33,7 @@
       "@type": "Person",
       "name": "Leandro Proença"
     },
-    "description": "No [artigo anterior](https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de Assembl",
+    "description": "No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de A",
         "keywords": "braziliandevs, assembly, computerscience"
   }
   </script>
@@ -146,7 +146,7 @@
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Construindo um web server em Assembly x86, parte V, finalmente o server</h1>
 
@@ -171,7 +171,7 @@
       </div>
 
       <div class="prose prose-lg max-w-none">
-        <p>No <a href="https://dev.to/leandronsp/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">artigo anterior</a>, passamos pelos fundamentos de Assembly, onde foi possível entender alguns conceitos básicos tais como tipos de registradores, <strong>stack</strong>, loops, FLAGS etc, tudo sendo feito com debugging via <em>GDB</em>.</p>
+        <p>No <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">artigo anterior</a>, passamos pelos fundamentos de Assembly, onde foi possível entender alguns conceitos básicos tais como tipos de registradores, <strong>stack</strong>, loops, FLAGS etc, tudo sendo feito com debugging via <em>GDB</em>.</p>
 <p>Agora, vamos de fato construir um web server muito simples que devolve um HTML com a frase “Hello, World”. A meta é chegarmos nisto:</p>
 <p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/6745f6h98cph2u50aa8x.png" alt="hello world" /></p>
 <p>O processo para chegarmos a este objetivo consiste em cobrir fundamentos de Web, passando por sockets, TCP e HTTP, enquanto vamos explorando conceitos práticos em Assembly x86.</p>
@@ -342,7 +342,7 @@ A syscall <em>accept</em> admite uma conexão de um cliente no socket e cria um 
 <li><strong>protocol</strong>: esta opção é usada no caso da utilização de um protocolo em específico. Neste caso, vamos deixar o valor como 0 que é o default para AF_INET e SOCK_STREAM, <em>indicando que se trata de um socket TCP</em></li>
 </ul>
 <blockquote>
-<p>Lembrando que existem sockets da família UNIX que não funcionam na camada de rede IP. É possível combinar socket UNIX com SOCK_STREAM, mas neste caso estamos combinando a família AF_INET (IPv4) com o tipo SOCK_STREAM (segmento de bytes, duplex), e esta combinação faz este socket ser TCP. Para mais detalhes sobre sockets, sugiro a leitura de um artigo que escrevi sobre <a href="https://dev.to/leandronsp/building-a-web-server-in-bash-part-i-sockets-2n8b">UNIX Sockets</a></p>
+<p>Lembrando que existem sockets da família UNIX que não funcionam na camada de rede IP. É possível combinar socket UNIX com SOCK_STREAM, mas neste caso estamos combinando a família AF_INET (IPv4) com o tipo SOCK_STREAM (segmento de bytes, duplex), e esta combinação faz este socket ser TCP. Para mais detalhes sobre sockets, sugiro a leitura de um artigo que escrevi sobre <a href="https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b">UNIX Sockets</a></p>
 </blockquote>
 <p>Vamos confirmar com GDB?</p>
 <pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-bash" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Breakpoint na linha &lt;syscall&gt;</span>
@@ -802,7 +802,7 @@ Representa o ponteiro para o endereço de memória que contém uma estrutura de 
 <h2><a href="#referências" aria-hidden="true" class="anchor" id="referências"></a>Referências</h2>
 <sub>
 Building a web server in Bash
-https://dev.to/leandronsp/series/19120
+https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj
 OSI Model
 https://en.wikipedia.org/wiki/OSI_model
 TCP
@@ -841,33 +841,33 @@ https://www.gta.ufrj.br/ensino/eel878/sockets/sockaddr_inman.html
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

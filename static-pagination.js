@@ -1,7 +1,7 @@
-(function(){let t=1,i=1,a=[];function g(){a=Array.from(document.querySelectorAll(".article-card")),u(),c(1)}function u(){const e=a.filter(n=>n.style.display!=="none");i=Math.max(1,Math.ceil(e.length/10)),t>i&&(t=i)}function f(){t=1,u(),c(1)}function c(e){t=e;const n=a.filter(o=>o.style.display!=="none"),s=(e-1)*10,l=s+10;a.forEach(o=>{o.classList.add("hidden")}),n.forEach((o,d)=>{d>=s&&d<l&&o.classList.remove("hidden")}),m();const r=document.getElementById("articles-container");r&&(r.scrollTop=0)}function m(){const e=document.getElementById("pagination-container");if(!e)return;const n=document.getElementById("current-page"),s=document.getElementById("total-pages");n&&(n.textContent=t),s&&(s.textContent=i);const l=a.filter(d=>d.style.display!=="none");if(i<=1){e.innerHTML="";return}const r=Math.min((t-1)*10+1,l.length),o=Math.min(t*10,l.length);e.innerHTML=`
+(function(){let e=1,i=1,l=[];function g(){l=Array.from(document.querySelectorAll(".article-card")),u();const t=sessionStorage.getItem("homepage-state");if(t)try{const n=JSON.parse(t);if(o(n.page||1),n.search){const a=document.getElementById("search-input");a&&(a.value=n.search,a.dispatchEvent(new Event("input",{bubbles:!0})))}}catch{o(1)}else o(1)}function u(){const t=l.filter(n=>n.style.display!=="none");i=Math.max(1,Math.ceil(t.length/10)),e>i&&(e=i)}function f(){e=1,u(),o(1)}function o(t){e=t;const n=l.filter(s=>s.style.display!=="none"),a=(t-1)*10,c=a+10;l.forEach(s=>{s.classList.add("hidden")}),n.forEach((s,d)=>{d>=a&&d<c&&s.classList.remove("hidden")}),p(),m();const r=document.getElementById("articles-container");r&&(r.scrollTop=0)}function m(){const t=document.getElementById("search-input"),n={page:e,search:t?t.value:""};sessionStorage.setItem("homepage-state",JSON.stringify(n))}function p(){const t=document.getElementById("pagination-container");if(!t)return;const n=document.getElementById("current-page"),a=document.getElementById("total-pages");n&&(n.textContent=e),a&&(a.textContent=i);const c=l.filter(d=>d.style.display!=="none");if(i<=1){t.innerHTML="";return}const r=Math.min((e-1)*10+1,c.length),s=Math.min(e*10,c.length);t.innerHTML=`
       <div class="flex flex-col items-center gap-4">
         <div class="text-sm text-base-content/70">
-          Showing ${r}-${o} of ${l.length} articles
+          Showing ${r}-${s} of ${c.length} articles
         </div>
 
         <div class="join">
@@ -11,8 +11,8 @@
             </svg>
           </button>
 
-          <button class="join-item btn btn-sm no-animation" aria-label="Page ${t} of ${i}">
-            Page ${t} of ${i}
+          <button class="join-item btn btn-sm no-animation" aria-label="Page ${e} of ${i}">
+            Page ${e} of ${i}
           </button>
 
           <button class="join-item btn btn-sm" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
@@ -22,4 +22,4 @@
           </button>
         </div>
       </div>
-    `,b()}function b(){const e=document.getElementById("prev-page"),n=document.getElementById("next-page");e&&(e.disabled=t===1,t===1?e.classList.add("btn-disabled"):e.classList.remove("btn-disabled")),n&&(n.disabled=t===i,t===i?n.classList.add("btn-disabled"):n.classList.remove("btn-disabled"))}function E(){t<i&&c(t+1)}function p(){t>1&&c(t-1)}window.pagination={nextPage:E,prevPage:p,handleSearch:f},document.readyState==="loading"?document.addEventListener("DOMContentLoaded",g):g()})();
+    `,h()}function h(){const t=document.getElementById("prev-page"),n=document.getElementById("next-page");t&&(t.disabled=e===1,e===1?t.classList.add("btn-disabled"):t.classList.remove("btn-disabled")),n&&(n.disabled=e===i,e===i?n.classList.add("btn-disabled"):n.classList.remove("btn-disabled"))}function v(){e<i&&o(e+1)}function E(){e>1&&o(e-1)}window.pagination={nextPage:v,prevPage:E,handleSearch:f},document.readyState==="loading"?document.addEventListener("DOMContentLoaded",g):g()})();

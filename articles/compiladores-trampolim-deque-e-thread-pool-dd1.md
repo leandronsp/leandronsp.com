@@ -227,7 +227,7 @@ Note que o método `evaluate` é nosso ponto focal. Ele recebe um termo (nó da 
 
 > Enquanto há nó para percorrer, vou chamar minha função novamente, até chegar no fim do galho
 
-Não vou entrar muito nos detalhes dos trade-offs da recursão, mas se quiser se aprofundar nisto, sugiro a leitura do artigo que escrevi sobre [fundamentos de recursão](https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4).
+Não vou entrar muito nos detalhes dos trade-offs da recursão, mas se quiser se aprofundar nisto, sugiro a leitura do artigo que escrevi sobre [fundamentos de recursão](https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4).
 
 Com isto em mente, e sabendo que o pessoal na rinha iria executar alguns programas que exigem muito da memória stack, decidi experimentar uma estratégia não muito ortodoxa e que funciona como alternativa à recursão quando otimizações de recursão de cauda não são possíveis ou são muito limitadas. 
 
@@ -366,7 +366,7 @@ E caso queira aprender mais sobre threads em Ruby, recomendo muito [este guia](h
 [Rinha de compiladores](https://github.com/aripiprazole/rinha-de-compiler)
 [reu/rinha-compiladores](https://github.com/reu/rinha-compiladores)
 [leandronsp/patropi](https://github.com/leandronsp/patropi)
-[Fundamentos de Recursão](https://dev.to/leandronsp/entendendo-fundamentos-de-recursao-2ap4)
+[Fundamentos de Recursão](https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4)
 [Double-ended queue](https://en.wikipedia.org/wiki/Double-ended_queue)
 [workingwithruby.com](https://workingwithruby.com/)
 [leandronsp/adelnor](https://github.com/leandronsp/adelnor)

@@ -7,7 +7,7 @@ status: "published"
 tags: ["webdev", "html", "css", "javasccript"]
 ---
 
-What a journey. In the [previous post](https://dev.to/leandronsp/building-a-web-server-in-bash-part-iii-login-a03) we experienced a refactoring in our ShellScrpit web server, _adding a complete login/logout system to it._
+What a journey. In the [previous post](https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03) we experienced a refactoring in our ShellScrpit web server, _adding a complete login/logout system to it._
 
 Now, let's finish this guide and enhance our web server with more HTML, styling CSS and dynamic behaviour with _modern Javascript_. 
 

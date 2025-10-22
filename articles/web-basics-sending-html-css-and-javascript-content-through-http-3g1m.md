@@ -7,7 +7,7 @@ status: "published"
 tags: ["ruby", "html", "css", "javascript"]
 ---
 
-Now that we have [an HTTP server](https://dev.to/leandronsp/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance the server so it can respond in a more appropriate content type for Web browsers.
+Now that we have [an HTTP server](https://leandronsp.com/articles/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance the server so it can respond in a more appropriate content type for Web browsers.
 
 ## Web standards
 In the very beginning of Web, websites did not follow a standard, besides such constraints could take users to a bad navigation experience. 

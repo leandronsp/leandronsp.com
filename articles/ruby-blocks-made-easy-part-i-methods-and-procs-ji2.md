@@ -149,7 +149,7 @@ current_time.call # produces 2021-04-10 17:42:02
 ## Conclusion
 In this post we learned that Ruby methods can be transformed into Procs to be evaluated later. 
 
-In the upcoming series, we will keep learning the fundamentals of _Ruby blocks_ and see [how to use procs as arguments to methods](https://dev.to/leandronsp/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25).
+In the upcoming series, we will keep learning the fundamentals of _Ruby blocks_ and see [how to use procs as arguments to methods](https://leandronsp.com/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25).
 
 
 

@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker"]
 ---
 
-[In the previous article](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **availability**, using _Deployments_.
+[In the previous article](https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **availability**, using _Deployments_.
 
 This article will cover stateful applications in Kubernetes and how **StatefulSets** fit in such scenario. Moreover, you'll have the chance to understand _how volumes work in Kubernetes_ and how they relate to Pods hence Deployments and StatefulSets.
 
@@ -252,7 +252,7 @@ Yay! We just created a _stateful application_ using Deployment and Persistent Vo
 ## 🔵 Scaling up stateful applications
 At this moment, our Deployment has 1 replica only, but if we want to achieve _high availability_, we have to configure our deployment to support more replicas. 
 
-Let's scale up to 3 replicas as we learned [in the previous article](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3). It's easy as doing:
+Let's scale up to 3 replicas as we learned [in the previous article](https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3). It's easy as doing:
 
 ```bash
 $ kubectl scale deploy/pg --replicas=3

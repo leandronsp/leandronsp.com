@@ -7,11 +7,11 @@ status: "published"
 tags: ["docker", "containers", "linux"]
 ---
 
-For those just starting with Docker, I've written some posts on [how to think like containers](https://dev.to/leandronsp/thinking-like-containers-3k24), which I believe to be an *important* mindset to using Docker, as well as [using Docker in development, the right way](https://dev.to/leandronsp/using-docker-in-development-the-right-way-15j3). 
+For those just starting with Docker, I've written some posts on [how to think like containers](https://leandronsp.com/articles/thinking-like-containers-3k24), which I believe to be an *important* mindset to using Docker, as well as [using Docker in development, the right way](https://leandronsp.com/articles/using-docker-in-development-the-right-way-15j3). 
 
 However, if you want to move one step further on mastering Docker, it's important to understand how [volumes](https://docs.docker.com/storage/volumes/) and [networking](https://docs.docker.com/network/) work in Docker. 
 
-In this post, I'll guide you through the Volume basics, [leaving Networking for another post](https://dev.to/leandronsp/mastering-the-docker-networking-2h57). 
+In this post, I'll guide you through the Volume basics, [leaving Networking for another post](https://leandronsp.com/articles/mastering-the-docker-networking-2h57). 
 
 ## Containers are ephemeral
 It's important to keep in mind that containers are ephemeral. Whenever the container finishes executing the _command_, it's completely "shut down". 

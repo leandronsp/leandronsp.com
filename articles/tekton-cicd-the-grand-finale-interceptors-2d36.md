@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker", "agile"]
 ---
 
-We learned in [the previous article](https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and the `kubernetes-action` Task being part of our Pipeline.
+We learned in [the previous article](https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and the `kubernetes-action` Task being part of our Pipeline.
 
 But let's think about our process a little bit:
 
@@ -286,11 +286,11 @@ I'm using `ed25519` but it can be `rsa` or other cryptographic algorithms too. _
 
 That's it. It's been a journey, so let's recap:
 
-* We started talking about [CI/CD fundamentals](https://dev.to/leandronsp/cicd-in-a-nutshell-3k6a) and "why we are here"
-* Then, we covered [an introduction to Tekton](https://dev.to/leandronsp/tekton-ci-part-i-a-gentle-introduction-ilj), learning its main building block components
-* The second part was about [sharing information with Workspaces](https://dev.to/leandronsp/tekton-ci-part-ii-sharing-information-j81) which are very important to master if we want to explore the best on CI/CD pipelines
-* Afterwards, we've seen how to [listen to Github events](https://dev.to/leandronsp/tekton-ci-part-iii-listen-to-github-events-1h3i), making automation the first-class citizen
-* The part IV talks about the [continuous delivery](https://dev.to/leandronsp/tekton-cicd-part-iv-continuous-delivery-206m), where we created a pipeline that did a complete job testing, building and deploying an application in production
+* We started talking about [CI/CD fundamentals](https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a) and "why we are here"
+* Then, we covered [an introduction to Tekton](https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj), learning its main building block components
+* The second part was about [sharing information with Workspaces](https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81) which are very important to master if we want to explore the best on CI/CD pipelines
+* Afterwards, we've seen how to [listen to Github events](https://leandronsp.com/articles/tekton-ci-part-iii-listen-to-github-events-1h3i), making automation the first-class citizen
+* The part IV talks about the [continuous delivery](https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m), where we created a pipeline that did a complete job testing, building and deploying an application in production
 
 And this post, the last one, was a demonstration of **improving our pipeline**, making it more reliable with _different environments_, where we could learn about **Interceptors**, which helped to achive our goal :rocket:
 

@@ -1,6 +1,6 @@
 ---
 title: "Arrays em Assembly x86"
-slug: "arrays-em-assembly-x86-55hb"
+slug: "arrays-em-assembly-x86"
 published_at: "2024-08-17 21:49:05Z"
 language: "pt-BR"
 status: "published"

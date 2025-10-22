@@ -9,7 +9,7 @@ tags: ["sql", "postgres", "cte"]
 
 **Spoiler**: *a query ficou 23x mais rápida com CTE's apenas transformando o problema quadrático em linear. Sem índices*.
 
-Um dos [cenários mais comuns](https://dev.to/leandronsp/how-to-reduce-the-time-complexity-of-nested-loops-1lkd) de problemas de performance em software é o famoso **nested loop**.
+Um dos [cenários mais comuns](https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd) de problemas de performance em software é o famoso **nested loop**.
 
 Com o banco de dados não é diferente. Por vezes podemos acabar por escrever queries que apresentam complexidade quadrática, onde nossa primeira solução óbvia para melhorar a performance seria através da criação de **índices**. 
 

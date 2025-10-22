@@ -159,7 +159,7 @@ Gener",
     </div>
   </div>
 
-  <div class="article-container py-8">
+  <main class="article-container py-8">
     <article class="container mx-auto px-4 max-w-8xl">
       <h1 class="text-5xl font-bold mb-6">Building a dead simple background job in Rust</h1>
 
@@ -217,7 +217,7 @@ Gener",
 <p>The queue (VecDeque) is going to be shared across the channel for one or more threads.</p>
 <p>In Rust, such problem requires shared ownership addressed by a <strong>reference counter</strong> (Rc), but since we are in a multi-thread scenario, Rc is not thread-safe, that’s why we need an <em>atomic reference counter</em>, or simply <strong>Arc</strong>, which is indeed thread-safe.</p>
 <blockquote>
-<p>You can learn more details about smart pointers by reading my post on <a href="https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff">Understanding the basics of smart pointers in Rust</a></p>
+<p>You can learn more details about smart pointers by reading my post on <a href="https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff">Understanding the basics of smart pointers in Rust</a></p>
 </blockquote>
 <h2><a href="#how-about-mutex" aria-hidden="true" class="anchor" id="how-about-mutex"></a>How about Mutex?</h2>
 <p>Since Arc is a reference counter, its references are immutable. For mutability in the underlying data, we need <em>interior mutability</em> using RefCell.</p>
@@ -386,7 +386,7 @@ Gener",
 <p><a href="https://doc.rust-lang.org/book/ch16-00-concurrency.html">https://doc.rust-lang.org/book/ch16-00-concurrency.html</a></p>
 <p><a href="https://doc.rust-lang.org/std/vec/struct.Vec.html">https://doc.rust-lang.org/std/vec/struct.Vec.html</a></p>
 <p><a href="https://doc.rust-lang.org/std/collections/struct.VecDeque.html">https://doc.rust-lang.org/std/collections/struct.VecDeque.html</a></p>
-<p><a href="https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff">https://dev.to/leandronsp/understanding-the-basics-of-smart-pointers-in-rust-3dff</a></p>
+<p><a href="https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff">https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff</a></p>
       </div>
     </article>
 
@@ -414,33 +414,33 @@ Gener",
 
     <!-- Footer -->
     <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-      <div class="text-center text-sm text-base-content/60">
+      <div class="text-center text-sm text-base-content/80">
         <p>
           Powered by
           <a
             href="https://github.com/leandronsp/curupira"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-semibold text-primary hover:underline"
+            class="font-semibold text-blue-600 hover:underline"
           >
             Curupira
           </a>
           | Open source blog platform built with Phoenix LiveView
         </p>
-        <p class="mt-2 text-xs text-base-content/50">
+        <p class="mt-2 text-xs text-base-content/70">
           Licensed under
           <a
             href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline"
+            class="text-blue-600 hover:underline"
           >
             AGPL-3.0
           </a>
         </p>
       </div>
     </footer>
-  </div>
+  </main>
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-giscus.js" defer></script>

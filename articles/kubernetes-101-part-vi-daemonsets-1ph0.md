@@ -7,7 +7,7 @@ status: "published"
 tags: ["kubernetes", "docker"]
 ---
 
-For most use cases, deploying **core business apps** in Kubernetes using [Deployments](https://dev.to/leandronsp/kubernetes-101-part-iv-deployments-20m3) for stateless applications and [StatefulSets](https://dev.to/leandronsp/kubernetes-101-part-v-statefulsets-5dob) for stateful applications is good enough. 
+For most use cases, deploying **core business apps** in Kubernetes using [Deployments](https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3) for stateless applications and [StatefulSets](https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob) for stateful applications is good enough. 
 
 Not rare, we need to deploy components that will not perform the core business work but **will support the core business** instead. 
 
