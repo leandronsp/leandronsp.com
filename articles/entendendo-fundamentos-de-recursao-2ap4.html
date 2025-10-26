@@ -9,7 +9,9 @@
   <!-- Google Fonts - Nunito for name, Caveat for bio -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet"></noscript>
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="Se pra você:
@@ -95,6 +97,10 @@
     }
     [data-theme="dark"] .prose a {
       color: #8fb4ff;
+      text-decoration: underline;
+    }
+    .prose a {
+      text-decoration: underline;
     }
     [data-theme="dark"] .prose code {
       background-color: #3d4454;
@@ -131,6 +137,18 @@
     }
     [data-theme="dark"] .intro-text {
       color: #d4d4d8; /* Lighter pastel gray for dark theme */
+    }
+    /* Dark theme button contrast */
+    [data-theme="dark"] .lang-filter-btn:not(.bg-primary) {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .tag-pill:not(.bg-primary) {
+      background-color: #3d4454;
+      color: #e8eaed;
+    }
+    /* Dark theme date text */
+    [data-theme="dark"] time {
+      color: #d1d5db;
     }
     /* Article card styling */
     article {
