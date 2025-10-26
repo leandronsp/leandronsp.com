@@ -79,10 +79,6 @@ Posts written occasionally in Brazilian Portuguese or English.",
     }
     [data-theme="dark"] .article-card {
       background-color: transparent;
-      border-color: #3d4454;
-    }
-    [data-theme="dark"] .article-card:hover {
-      border-color: #4a5568;
     }
     /* Keep pinned article with background for prominence in dark theme - lighter pastel */
     [data-theme="dark"] .pinned-article {
@@ -147,7 +143,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
       <div class="flex flex-col gap-2 mb-4">
         <!-- Name + Social Icons + Guide Links (all screens) -->
         <div class="flex items-center gap-3">
-          <h1 class="blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0">Leandro Proença</h1>
+          <a href="/" class="blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0 no-underline cursor-pointer hover:opacity-80 transition-opacity">Leandro Proença</a>
           <div class="flex items-center gap-2">
             <a href="https://linkedin.com/in/leandronsp" target="_blank" rel="noopener noreferrer" class="text-base-content/60 hover:text-primary transition-colors" title="LinkedIn">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
@@ -316,14 +312,14 @@ Posts written occasionally in Brazilian Portuguese or English.",
     </div>
 
     <!-- Pinned Article (Full Width) -->
-    <article
-  class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border-4 border-orange-500 dark:border-blue-400 shadow-md shadow-orange-200/50 dark:shadow-blue-900/30 rounded-xl hover:border-orange-600 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative"
+    <a
+  href="/articles/git-fundamentals-a-complete-guide.html"
+  class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border border-amber-200/40 dark:border-blue-400/20 shadow-md shadow-orange-100/30 dark:shadow-blue-900/30 rounded-xl hover:border-amber-400/70 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative no-underline"
   data-slug="git-fundamentals-a-complete-guide"
   data-title="git fundamentals, a complete guide"
   data-tags="git linux"
   data-language="en"
   data-pinned="true"
-  onclick="window.location.href='/articles/git-fundamentals-a-complete-guide.html'"
 >
   <!-- Pinned Badge -->
   <div class="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-semibold">
@@ -356,19 +352,19 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-xl">🇺🇸</span>
   </div>
-</article>
+</a>
 
 
     <!-- Articles Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="articles-container">
-      <article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+      <a
+  href="/articles/arrays-in-x86-assembly.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="arrays-in-x86-assembly"
   data-title="arrays in x86 assembly"
   data-tags="assembly"
   data-language="en"
   
-  onclick="window.location.href='/articles/arrays-in-x86-assembly.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -393,16 +389,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals"
   data-title="you don't need kafka: building a message queue with only two unix signals"
   data-tags="kafka unix"
   data-language="en"
   
-  onclick="window.location.href='/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -427,16 +423,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/voltando-as-raizes-de-blogueiro.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="voltando-as-raizes-de-blogueiro"
   data-title="voltando às raízes de blogueiro"
   data-tags="blog"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/voltando-as-raizes-de-blogueiro.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -461,16 +457,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/um-resumo-do-meu-2024.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="um-resumo-do-meu-2024"
   data-title="um resumo do meu 2024"
   data-tags="braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/um-resumo-do-meu-2024.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -495,16 +491,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/arrays-em-assembly-x86-55hb.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="arrays-em-assembly-x86-55hb"
   data-title="arrays em assembly x86"
   data-tags="assembly"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/arrays-em-assembly-x86-55hb.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -529,16 +525,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading"
   data-title="construindo um web server em assembly x86, the grand finale, multi-threading"
   data-tags="braziliandevs assembly"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -563,16 +559,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server"
   data-title="construindo um web server em assembly x86, parte v, finalmente o server"
   data-tags="braziliandevs assembly computerscience"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -597,16 +593,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif"
   data-title="construindo um web server em assembly x86, parte iv, um assembly modesto"
   data-tags="computerscience braziliandevs assembly"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -631,16 +627,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk"
   data-title="construindo um web server em assembly x86, parte iii, código de máquina"
   data-tags="assembly braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -665,16 +661,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9"
   data-title="construindo um web server em assembly x86, parte ii, história e arquitetura"
   data-tags="assembly braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -699,16 +695,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5"
   data-title="construindo um web server em assembly x86, parte i, introdução"
   data-tags="assembly braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -733,16 +729,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/superficial-basico-e-avancado-148n.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="superficial-basico-e-avancado-148n"
   data-title="superficial, básico e avançado"
   data-tags="webdev"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/superficial-basico-e-avancado-148n.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -767,16 +763,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/building-a-dead-simple-background-job-in-rust-4m1d.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="building-a-dead-simple-background-job-in-rust-4m1d"
   data-title="building a dead simple background job in rust"
   data-tags="rust"
   data-language="en"
   
-  onclick="window.location.href='/articles/building-a-dead-simple-background-job-in-rust-4m1d.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -801,16 +797,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="understanding-the-basics-of-smart-pointers-in-rust-3dff"
   data-title="understanding the basics of smart pointers in rust"
   data-tags="rust datastructures"
   data-language="en"
   
-  onclick="window.location.href='/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -835,16 +831,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="compiladores-trampolim-deque-e-thread-pool-dd1"
   data-title="compiladores, trampolim, deque e thread pool"
   data-tags="ruby webdev"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -869,16 +865,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/rust-go-rinha-e-io-39o2.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="rust-go-rinha-e-io-39o2"
   data-title="rust, go, rinha e i/o"
   data-tags="braziliandevs rust ruby go"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/rust-go-rinha-e-io-39o2.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -903,16 +899,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/entendendo-fundamentos-de-recursao-2ap4.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="entendendo-fundamentos-de-recursao-2ap4"
   data-title="entendendo fundamentos de recursão"
   data-tags="programming ruby braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/entendendo-fundamentos-de-recursao-2ap4.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -937,16 +933,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n"
   data-title="vencendo os números de ponto flutuante: um guia de sobrevivência"
   data-tags="computerscience braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -971,16 +967,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="winning-at-floating-point-issues-a-survival-guide-4g1g"
   data-title="winning at floating-point issues: a survival guide"
   data-tags="computerscience programming"
   data-language="en"
   
-  onclick="window.location.href='/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1005,16 +1001,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="pt-br-fundamentos-do-git-um-guia-completo-2djh"
   data-title="[pt-br] fundamentos do git, um guia completo"
   data-tags="git linux braziliandevs"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1039,16 +1035,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="ai-ruby-an-introduction-to-neural-networks-23f3"
   data-title="ai & ruby: an introduction to neural networks"
   data-tags="ruby machinelearning ai neuralnetworks"
   data-language="en"
   
-  onclick="window.location.href='/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1073,16 +1069,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-viii-networking-fundamentals-mo7"
   data-title="kubernetes 101, part viii, networking fundamentals"
   data-tags="kubernetes docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1107,16 +1103,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-vii-jobs-and-cronjobs-12kg"
   data-title="kubernetes 101, part vii, jobs and cronjobs"
   data-tags="kubernetes docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1141,16 +1137,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-comprehensive-introduction-to-ruby-8o7.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-comprehensive-introduction-to-ruby-8o7"
   data-title="a comprehensive introduction to ruby"
   data-tags="ruby rails"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-comprehensive-introduction-to-ruby-8o7.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1175,16 +1171,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-vi-daemonsets-1ph0.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-vi-daemonsets-1ph0"
   data-title="kubernetes 101, part vi, daemonsets"
   data-tags="kubernetes docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-vi-daemonsets-1ph0.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1209,16 +1205,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-v-statefulsets-5dob.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-v-statefulsets-5dob"
   data-title="kubernetes 101, part v, statefulsets"
   data-tags="kubernetes docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-v-statefulsets-5dob.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1243,16 +1239,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/sql-join-explained-53lc.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="sql-join-explained-53lc"
   data-title="sql join explained"
   data-tags="sql database postgres"
   data-language="en"
   
-  onclick="window.location.href='/articles/sql-join-explained-53lc.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1277,16 +1273,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/git-fundamentals-a-complete-guide.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="git-fundamentals-a-complete-guide"
   data-title="git fundamentals, a complete guide"
   data-tags="git linux"
   data-language="en"
   data-pinned="true"
-  onclick="window.location.href='/articles/git-fundamentals-a-complete-guide.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1311,16 +1307,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-iv-deployments-20m3.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-iv-deployments-20m3"
   data-title="kubernetes 101, part iv, deployments"
   data-tags="kubernetes docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-iv-deployments-20m3.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1345,16 +1341,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-iii-controllers-and-self-healing-4ki5"
   data-title="kubernetes 101, part iii, controllers and self-healing"
   data-tags="kubernetes docker k8s containers"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1379,16 +1375,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-ii-pods-19pb.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-ii-pods-19pb"
   data-title="kubernetes 101, part ii, pods"
   data-tags="kubernetes docker k8s containers"
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-ii-pods-19pb.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1413,16 +1409,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/kubernetes-101-part-i-the-fundamentals-23a1.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="kubernetes-101-part-i-the-fundamentals-23a1"
   data-title="kubernetes 101, part i, the fundamentals"
   data-tags=""
   data-language="en"
   
-  onclick="window.location.href='/articles/kubernetes-101-part-i-the-fundamentals-23a1.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1447,16 +1443,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="tekton-cicd-the-grand-finale-interceptors-2d36"
   data-title="tekton ci/cd, the grand finale, interceptors"
   data-tags="kubernetes docker agile"
   data-language="en"
   
-  onclick="window.location.href='/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1481,16 +1477,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/tekton-cicd-part-iv-continuous-delivery-206m.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="tekton-cicd-part-iv-continuous-delivery-206m"
   data-title="tekton ci/cd, part iv, continuous delivery"
   data-tags="firstpost career discuss"
   data-language="en"
   
-  onclick="window.location.href='/articles/tekton-cicd-part-iv-continuous-delivery-206m.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1515,16 +1511,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/tekton-ci-part-iii-listen-to-github-events-1h3i.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="tekton-ci-part-iii-listen-to-github-events-1h3i"
   data-title="tekton ci, part iii, listen to github events"
   data-tags="tutorial"
   data-language="en"
   
-  onclick="window.location.href='/articles/tekton-ci-part-iii-listen-to-github-events-1h3i.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1549,16 +1545,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/tekton-ci-part-ii-sharing-information-j81.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="tekton-ci-part-ii-sharing-information-j81"
   data-title="tekton ci, part ii, sharing information"
   data-tags="kubernetes ci linux docker"
   data-language="en"
   
-  onclick="window.location.href='/articles/tekton-ci-part-ii-sharing-information-j81.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1583,16 +1579,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="tekton-ci-part-i-a-gentle-introduction-ilj"
   data-title="tekton ci, part i, a gentle introduction"
   data-tags="discuss softwaredevelopment agile"
   data-language="en"
   
-  onclick="window.location.href='/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1617,16 +1613,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/cicd-in-a-nutshell-3k6a.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="cicd-in-a-nutshell-3k6a"
   data-title="ci/cd in a nutshell"
   data-tags="ci cd software engineering"
   data-language="en"
   
-  onclick="window.location.href='/articles/cicd-in-a-nutshell-3k6a.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1651,16 +1647,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/seu-dinheiro-nao-e-infinito-2l2k.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="seu-dinheiro-nao-e-infinito-2l2k"
   data-title="seu dinheiro não é infinito"
   data-tags="leadership management technology"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/seu-dinheiro-nao-e-infinito-2l2k.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1685,16 +1681,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/lideranca-comeca-com-confianca-minha-trajetoria-4i68.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="lideranca-comeca-com-confianca-minha-trajetoria-4i68"
   data-title="liderança começa com confiança: minha trajetória"
   data-tags=""
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/lideranca-comeca-com-confianca-minha-trajetoria-4i68.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1719,16 +1715,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/thinking-like-containers-3k24.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="thinking-like-containers-3k24"
   data-title="thinking like containers"
   data-tags="docker linux"
   data-language="en"
   
-  onclick="window.location.href='/articles/thinking-like-containers-3k24.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1753,16 +1749,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/simulating-oop-in-bash-3mop.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="simulating-oop-in-bash-3mop"
   data-title="simulating oop in bash"
   data-tags="oop bash linux"
   data-language="en"
   
-  onclick="window.location.href='/articles/simulating-oop-in-bash-3mop.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1787,16 +1783,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/building-a-web-server-in-bash-the-grand-finale-n14.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="building-a-web-server-in-bash-the-grand-finale-n14"
   data-title="building a web server in bash, the grand finale"
   data-tags="webdev html css javasccript"
   data-language="en"
   
-  onclick="window.location.href='/articles/building-a-web-server-in-bash-the-grand-finale-n14.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1821,16 +1817,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/building-a-web-server-in-bash-part-iii-login-a03.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="building-a-web-server-in-bash-part-iii-login-a03"
   data-title="building a web server in bash, part iii - login"
   data-tags="webdev linux html shellscript"
   data-language="en"
   
-  onclick="window.location.href='/articles/building-a-web-server-in-bash-part-iii-login-a03.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1855,16 +1851,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="building-a-web-server-in-bash-part-ii-parsing-http-14kg"
   data-title="building a web server in bash, part ii - parsing http"
   data-tags="webdev http linux shellscript"
   data-language="en"
   
-  onclick="window.location.href='/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1889,16 +1885,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="building-a-web-server-in-bash-part-i-sockets-2n8b"
   data-title="building a web server in bash, part i - sockets"
   data-tags="webdev http linux shellscript"
   data-language="en"
   
-  onclick="window.location.href='/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1923,16 +1919,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/inter-process-communication-pipes-52nj.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="inter-process-communication-pipes-52nj"
   data-title="inter-process communication: pipes"
   data-tags="unix linux"
   data-language="en"
   
-  onclick="window.location.href='/articles/inter-process-communication-pipes-52nj.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1957,16 +1953,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/inter-process-communication-files-1m34.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="inter-process-communication-files-1m34"
   data-title="inter-process communication: files"
   data-tags="unix linux"
   data-language="en"
   
-  onclick="window.location.href='/articles/inter-process-communication-files-1m34.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -1991,16 +1987,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn"
   data-title="a brief history of modern computers, multitasking and operating systems"
   data-tags="unix linux operatingsystems threads"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2025,16 +2021,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng"
   data-title="métricas cadvisor no kubernetes com prometheus e grafana"
   data-tags="kubernetes prometheus grafana"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2059,16 +2055,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/prometheus-on-kubernetes-101-296j.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="prometheus-on-kubernetes-101-296j"
   data-title="prometheus on kubernetes 101"
   data-tags="prometheus kubernetes docker"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/prometheus-on-kubernetes-101-296j.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2093,16 +2089,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/mastering-the-docker-networking-2h57.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="mastering-the-docker-networking-2h57"
   data-title="mastering the docker networking"
   data-tags="docker linux nginx"
   data-language="en"
   
-  onclick="window.location.href='/articles/mastering-the-docker-networking-2h57.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2127,16 +2123,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="implementando-um-simples-background-job-com-unix-named-pipes-3eja"
   data-title="implementando um simples background job com unix named pipes"
   data-tags="unix linux pipes"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2161,16 +2157,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/entendendo-unix-pipes-3k56.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="entendendo-unix-pipes-3k56"
   data-title="entendendo unix pipes"
   data-tags="unix linux pipe"
   data-language="en"
   
-  onclick="window.location.href='/articles/entendendo-unix-pipes-3k56.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2195,16 +2191,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="resolvendo-problema-de-performance-no-postgresql-com-cte-468d"
   data-title="resolvendo problema de performance no postgresql com cte"
   data-tags="sql postgres cte"
   data-language="pt-BR"
   
-  onclick="window.location.href='/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2229,16 +2225,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇧🇷</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-very-simple-graphql-tutorial-in-ruby-54ck"
   data-title="a very simple graphql tutorial in ruby"
   data-tags="ruby graphql"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2263,16 +2259,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/mastering-docker-volumes-j7m.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="mastering-docker-volumes-j7m"
   data-title="mastering docker volumes"
   data-tags="docker containers linux"
   data-language="en"
   
-  onclick="window.location.href='/articles/mastering-docker-volumes-j7m.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2297,16 +2293,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="how-to-reduce-the-time-complexity-of-nested-loops-1lkd"
   data-title="how to reduce the time complexity of nested loops"
   data-tags="programming ruby algorithms"
   data-language="en"
   
-  onclick="window.location.href='/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2331,16 +2327,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d"
   data-title="a powerful full-text search in postgresql in less than 20 lines"
   data-tags="postgres"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2365,16 +2361,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-crud-journey-in-haskell-part-ii-socket-programming-2po1"
   data-title="a crud journey in haskell, part ii, socket programming"
   data-tags="haskell networking tcp ruby"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2399,16 +2395,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="a-crud-journey-in-haskell-part-i-introduction-2c3j"
   data-title="a crud journey in haskell, part i, introduction"
   data-tags="haskell programming functional"
   data-language="en"
   
-  onclick="window.location.href='/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2433,16 +2429,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/using-docker-in-development-the-right-way-15j3.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="using-docker-in-development-the-right-way-15j3"
   data-title="using docker in development the right way"
   data-tags="docker containers"
   data-language="en"
   
-  onclick="window.location.href='/articles/using-docker-in-development-the-right-way-15j3.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2467,16 +2463,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="web-basics-sending-html-css-and-javascript-content-through-http-3g1m"
   data-title="web basics: sending html, css and javascript content through http"
   data-tags="ruby html css javascript"
   data-language="en"
   
-  onclick="window.location.href='/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2501,16 +2497,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="web-basics-a-simple-http-server-in-ruby-2jj4"
   data-title="web basics: a simple http server in ruby"
   data-tags="ruby tdd http"
   data-language="en"
   
-  onclick="window.location.href='/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2535,16 +2531,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/web-basics-a-tcp-server-in-ruby-947.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="web-basics-a-tcp-server-in-ruby-947"
   data-title="web basics: a tcp server in ruby"
   data-tags="ruby tcp http programming"
   data-language="en"
   
-  onclick="window.location.href='/articles/web-basics-a-tcp-server-in-ruby-947.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2569,16 +2565,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="boilerplate-for-a-containerized-plain-ruby-application-3094"
   data-title="boilerplate for a containerized plain ruby application"
   data-tags="ruby tdd docker makefile"
   data-language="en"
   
-  onclick="window.location.href='/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2603,16 +2599,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/quicksort-a-ruby-implementation-using-test-driven-development.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="quicksort-a-ruby-implementation-using-test-driven-development"
   data-title="quicksort, a ruby implementation using test-driven development"
   data-tags="ruby quicksort algorithms tdd"
   data-language="en"
   
-  onclick="window.location.href='/articles/quicksort-a-ruby-implementation-using-test-driven-development.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2637,16 +2633,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="deploy-to-kubernetes-using-github-actions-including-slack-notification"
   data-title="deploy to kubernetes using github actions (including slack notification)"
   data-tags="github aws eks kubernetes"
   data-language="en"
   
-  onclick="window.location.href='/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2671,16 +2667,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar"
   data-title="ruby blocks made easy, part iii ~grand finale~, blocks and syntactic sugar"
   data-tags="ruby programming softwaredevelopment"
   data-language="en"
   
-  onclick="window.location.href='/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2705,16 +2701,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments"
   data-title="ruby blocks made easy, part ii, curry and procs as arguments"
   data-tags="ruby programming softwaredevelopment"
   data-language="en"
   
-  onclick="window.location.href='/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2739,16 +2735,16 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
-<article
-  class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+<a
+  href="/articles/ruby-blocks-made-easy-part-i-methods-and-procs.html"
+  class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
   data-slug="ruby-blocks-made-easy-part-i-methods-and-procs"
   data-title="ruby blocks made easy, part i, methods and procs"
   data-tags="ruby programming softwaredevelopment"
   data-language="en"
   
-  onclick="window.location.href='/articles/ruby-blocks-made-easy-part-i-methods-and-procs.html'"
 >
   <!-- Tags First -->
   <div class="flex gap-2 flex-wrap mb-3">
@@ -2773,7 +2769,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
     <span>•</span>
     <span class="text-lg">🇺🇸</span>
   </div>
-</article>
+</a>
 
     </div>
 
