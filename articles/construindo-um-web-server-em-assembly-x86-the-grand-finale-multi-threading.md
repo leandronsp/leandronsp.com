@@ -7,7 +7,7 @@ status: "published"
 tags: ["braziliandevs", "assembly"]
 ---
 
-Uma vez que temos um [web server funcional](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5), podemos dar o próximo (e último) passo, que é deixar o servidor **minimamente escalável** fazendo uso de uma pool de threads. 
+Uma vez que temos um [web server funcional](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server), podemos dar o próximo (e último) passo, que é deixar o servidor **minimamente escalável** fazendo uso de uma pool de threads. 
 
 Neste artigo, vamos mergulhar nas entranhas da implementação de uma pool de threads com sincronização através de locks, e para atingir tal feito em assembly abordaremos filas, alocação dinâmica de memória e controle de locks com futex.
 
