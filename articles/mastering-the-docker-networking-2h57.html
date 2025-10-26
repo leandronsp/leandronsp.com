@@ -181,7 +181,7 @@
       <!-- Search Bar + Language Switcher -->
       <div class="flex gap-4 items-center">
         <!-- Search -->
-        <div class="relative flex-1 max-w-2xl">
+        <div class="hidden md:block relative flex-1 max-w-2xl">
           <input
             type="text"
             id="search-input"
@@ -230,9 +230,9 @@
     <!-- Tags Navigation -->
     <div class="border-t border-base-300 bg-base-200/50">
       <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
-        <div class="overflow-x-auto py-3">
-          <div class="flex gap-2 items-center min-w-max">
-            <div id="tags-pills" class="flex gap-2 items-center">
+        <div class="py-3">
+          <div class="flex flex-wrap gap-2 items-center">
+            <div id="tags-pills" class="flex flex-wrap gap-2 items-center">
               <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
               <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
               <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
@@ -650,6 +650,7 @@
 
   <script src="/static-theme.js" defer></script>
   <script src="/static-filters.js" defer></script>
+  <script src="/static-search.js" defer></script>
   <script src="/static-giscus.js" defer></script>
 
   <!-- Lazy load Google Analytics after page is interactive -->
