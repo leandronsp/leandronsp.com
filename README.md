@@ -2,6 +2,9 @@
 
 Static blog site exported from [Curupira](https://github.com/leandronsp/curupira) and deployed to Cloudflare Pages.
 
+<img width="1155" height="854" alt="Screenshot 2025-10-26 at 12 53 18" src="https://github.com/user-attachments/assets/2f38d3df-1c14-41e0-8280-a3e1d8c97279" />
+
+
 ## Overview
 
 This repository contains:
@@ -118,6 +121,11 @@ The `nginx.conf` file includes:
 - ✅ Responsive design
 - ✅ Optimized CSS (purged + minified)
 - ✅ Sitemap.xml + robots.txt
+
+## PageSpeed
+
+<img width="998" height="908" alt="Screenshot 2025-10-26 at 12 52 56" src="https://github.com/user-attachments/assets/ab92f1b9-0967-40fc-b65b-b8b6e298a327" />
+
 
 ## Source
 
