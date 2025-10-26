@@ -9,9 +9,7 @@
   <!-- Google Fonts - Nunito for name, Caveat for bio -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="In today's post we'll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue.
@@ -98,10 +96,6 @@ Gener",
     }
     [data-theme="dark"] .prose a {
       color: #8fb4ff;
-      text-decoration: underline;
-    }
-    .prose a {
-      text-decoration: underline;
     }
     [data-theme="dark"] .prose code {
       background-color: #3d4454;
@@ -138,18 +132,6 @@ Gener",
     }
     [data-theme="dark"] .intro-text {
       color: #d4d4d8; /* Lighter pastel gray for dark theme */
-    }
-    /* Dark theme button contrast */
-    [data-theme="dark"] .lang-filter-btn:not(.bg-primary) {
-      color: #e8eaed;
-    }
-    [data-theme="dark"] .tag-pill:not(.bg-primary) {
-      background-color: #3d4454;
-      color: #e8eaed;
-    }
-    /* Dark theme date text */
-    [data-theme="dark"] time {
-      color: #d1d5db;
     }
     /* Article card styling */
     article {
@@ -533,7 +515,7 @@ Gener",
   <script src="/static-search.js" defer></script>
   <script src="/static-giscus.js" defer></script>
 
-  <!-- Lazy load Google Analytics after page is interactive -->
+  <!-- Lazy load Google Analytics after page is fully interactive -->
   <script>
     (function() {
       function loadGTM() {
@@ -548,11 +530,11 @@ Gener",
         document.head.appendChild(script);
       }
 
-      // Load after page is idle, or after 2 seconds as fallback
+      // Load after page is idle, or after 5 seconds as fallback
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadGTM, { timeout: 2000 });
+        requestIdleCallback(loadGTM, { timeout: 5000 });
       } else {
-        setTimeout(loadGTM, 2000);
+        setTimeout(loadGTM, 5000);
       }
     })();
   </script>

@@ -9,9 +9,7 @@
   <!-- Google Fonts - Nunito for name, Caveat for bio -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- SEO Meta Tags -->
   <meta name="description" content="Software developer 15+ years building software for startups and enterprises worldwide.
@@ -97,10 +95,6 @@ Posts written occasionally in Brazilian Portuguese or English.",
     }
     [data-theme="dark"] .prose a {
       color: #8fb4ff;
-      text-decoration: underline;
-    }
-    .prose a {
-      text-decoration: underline;
     }
     [data-theme="dark"] .prose code {
       background-color: #3d4454;
@@ -137,18 +131,6 @@ Posts written occasionally in Brazilian Portuguese or English.",
     }
     [data-theme="dark"] .intro-text {
       color: #d4d4d8; /* Lighter pastel gray for dark theme */
-    }
-    /* Dark theme button contrast */
-    [data-theme="dark"] .lang-filter-btn:not(.bg-primary) {
-      color: #e8eaed;
-    }
-    [data-theme="dark"] .tag-pill:not(.bg-primary) {
-      background-color: #3d4454;
-      color: #e8eaed;
-    }
-    /* Dark theme date text */
-    [data-theme="dark"] time {
-      color: #d1d5db;
     }
   </style>
 </head>
@@ -235,9 +217,9 @@ Posts written occasionally in Brazilian Portuguese or English.",
 
         <!-- Language Switcher -->
         <div class="lang-switcher-bg flex gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 md:ml-auto shadow-sm">
-          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
-          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-gray-700" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
-          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-gray-700" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
+          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
+          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+          <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
         </div>
         <script>
           // Apply language state immediately (sync, no event listener)
@@ -251,9 +233,9 @@ Posts written occasionally in Brazilian Portuguese or English.",
             buttons.forEach(function(btn) {
               const lang = btn.getAttribute('data-lang');
               if (lang === currentLang) {
-                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
               } else {
-                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-gray-700';
+                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
               }
             });
           })();
@@ -268,13 +250,13 @@ Posts written occasionally in Brazilian Portuguese or English.",
           <div class="flex flex-wrap gap-2 items-center">
             <div id="tags-pills" class="flex flex-wrap gap-2 items-center">
               <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="haskell" onclick="window.blogFilters.setTag('haskell')">Haskell</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="assembly" onclick="window.blogFilters.setTag('assembly')">Assembly</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="bash" onclick="window.blogFilters.setTag('bash')">Bash</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="postgres" onclick="window.blogFilters.setTag('postgres')">Postgres</button>
-              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800" data-tag="kubernetes" onclick="window.blogFilters.setTag('kubernetes')">Kubernetes</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="haskell" onclick="window.blogFilters.setTag('haskell')">Haskell</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="assembly" onclick="window.blogFilters.setTag('assembly')">Assembly</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="bash" onclick="window.blogFilters.setTag('bash')">Bash</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="postgres" onclick="window.blogFilters.setTag('postgres')">Postgres</button>
+              <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="kubernetes" onclick="window.blogFilters.setTag('kubernetes')">Kubernetes</button>
             </div>
           </div>
         </div>
@@ -293,9 +275,9 @@ Posts written occasionally in Brazilian Portuguese or English.",
             const tag = btn.getAttribute('data-tag');
             const isActive = (tag === 'all' && !currentTag) || (tag === currentTag);
             if (isActive) {
-              btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+              btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
             } else {
-              btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-gray-100 hover:bg-base-200 text-gray-800';
+              btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
             }
           });
         })();
@@ -363,7 +345,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-15T03:02:32Z">
       15 Mar 2023
     </time>
@@ -400,7 +382,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2025-10-22T21:09:03Z">
       22 Oct 2025
     </time>
@@ -434,7 +416,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2025-10-21T00:06:14Z">
       21 Oct 2025
     </time>
@@ -468,7 +450,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2025-10-18T20:05:19Z">
       18 Oct 2025
     </time>
@@ -502,7 +484,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2025-10-18T20:05:17Z">
       18 Oct 2025
     </time>
@@ -536,7 +518,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-08-17T21:49:05Z">
       17 Aug 2024
     </time>
@@ -570,7 +552,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-07-14T02:37:25Z">
       14 Jul 2024
     </time>
@@ -604,7 +586,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-05-25T00:14:20Z">
       25 May 2024
     </time>
@@ -638,7 +620,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-05-13T11:33:03Z">
       13 May 2024
     </time>
@@ -672,7 +654,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-04-23T23:18:02Z">
       23 Apr 2024
     </time>
@@ -706,7 +688,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-04-11T23:26:28Z">
       11 Apr 2024
     </time>
@@ -740,7 +722,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-04-09T03:51:43Z">
       09 Apr 2024
     </time>
@@ -774,7 +756,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2024-03-09T17:34:25Z">
       09 Mar 2024
     </time>
@@ -808,7 +790,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-11-12T14:43:13Z">
       12 Nov 2023
     </time>
@@ -842,7 +824,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-11-01T04:15:27Z">
       01 Nov 2023
     </time>
@@ -876,7 +858,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-10-17T06:08:01Z">
       17 Oct 2023
     </time>
@@ -910,7 +892,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-09-08T03:25:48Z">
       08 Sep 2023
     </time>
@@ -944,7 +926,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-06-23T23:26:29Z">
       23 Jun 2023
     </time>
@@ -978,7 +960,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-06-06T04:05:36Z">
       06 Jun 2023
     </time>
@@ -1012,7 +994,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-06-01T04:29:59Z">
       01 Jun 2023
     </time>
@@ -1046,7 +1028,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-05-24T01:41:50Z">
       24 May 2023
     </time>
@@ -1080,7 +1062,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-05-19T03:35:54Z">
       19 May 2023
     </time>
@@ -1114,7 +1096,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-05-13T01:56:54Z">
       13 May 2023
     </time>
@@ -1148,7 +1130,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-04-29T23:45:28Z">
       29 Apr 2023
     </time>
@@ -1182,7 +1164,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-04-28T03:40:38Z">
       28 Apr 2023
     </time>
@@ -1216,7 +1198,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-04-05T03:46:25Z">
       05 Apr 2023
     </time>
@@ -1250,7 +1232,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-04-01T04:45:38Z">
       01 Apr 2023
     </time>
@@ -1284,7 +1266,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-17T00:39:12Z">
       17 Mar 2023
     </time>
@@ -1318,7 +1300,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-15T03:02:32Z">
       15 Mar 2023
     </time>
@@ -1352,7 +1334,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-12T21:02:50Z">
       12 Mar 2023
     </time>
@@ -1386,7 +1368,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-12T05:07:31Z">
       12 Mar 2023
     </time>
@@ -1420,7 +1402,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-03-01T05:14:08Z">
       01 Mar 2023
     </time>
@@ -1454,7 +1436,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-23T02:25:00Z">
       23 Feb 2023
     </time>
@@ -1488,7 +1470,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-22T02:28:13Z">
       22 Feb 2023
     </time>
@@ -1522,7 +1504,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-21T22:13:39Z">
       21 Feb 2023
     </time>
@@ -1556,7 +1538,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-19T19:15:03Z">
       19 Feb 2023
     </time>
@@ -1590,7 +1572,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-19T15:49:26Z">
       19 Feb 2023
     </time>
@@ -1624,7 +1606,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-19T06:47:01Z">
       19 Feb 2023
     </time>
@@ -1658,7 +1640,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2023-02-19T02:44:42Z">
       19 Feb 2023
     </time>
@@ -1692,7 +1674,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-10-21T23:37:42Z">
       21 Oct 2022
     </time>
@@ -1726,7 +1708,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-09-17T20:10:31Z">
       17 Sep 2022
     </time>
@@ -1760,7 +1742,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-09T14:06:00Z">
       09 Aug 2022
     </time>
@@ -1794,7 +1776,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-06T01:30:00Z">
       06 Aug 2022
     </time>
@@ -1828,7 +1810,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-01T03:35:17Z">
       01 Aug 2022
     </time>
@@ -1862,7 +1844,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-01T03:34:27Z">
       01 Aug 2022
     </time>
@@ -1896,7 +1878,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-01T03:33:37Z">
       01 Aug 2022
     </time>
@@ -1930,7 +1912,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-08-01T03:32:44Z">
       01 Aug 2022
     </time>
@@ -1964,7 +1946,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-14T03:40:13Z">
       14 Jul 2022
     </time>
@@ -1998,7 +1980,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-13T06:48:32Z">
       13 Jul 2022
     </time>
@@ -2032,7 +2014,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-12T06:11:29Z">
       12 Jul 2022
     </time>
@@ -2066,7 +2048,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-06T23:09:14Z">
       06 Jul 2022
     </time>
@@ -2100,7 +2082,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-06T04:31:45Z">
       06 Jul 2022
     </time>
@@ -2134,7 +2116,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-07-05T03:04:00Z">
       05 Jul 2022
     </time>
@@ -2168,7 +2150,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-06-15T04:42:22Z">
       15 Jun 2022
     </time>
@@ -2202,7 +2184,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-06-15T03:35:29Z">
       15 Jun 2022
     </time>
@@ -2236,7 +2218,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-06-13T16:41:39Z">
       13 Jun 2022
     </time>
@@ -2270,7 +2252,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-03-03T18:34:04Z">
       03 Mar 2022
     </time>
@@ -2304,7 +2286,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2022-02-05T01:06:00Z">
       05 Feb 2022
     </time>
@@ -2338,7 +2320,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-12-04T22:11:13Z">
       04 Dec 2021
     </time>
@@ -2372,7 +2354,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-09-16T18:15:57Z">
       16 Sep 2021
     </time>
@@ -2406,7 +2388,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-08-10T02:50:43Z">
       10 Aug 2021
     </time>
@@ -2440,7 +2422,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-08-03T21:05:28Z">
       03 Aug 2021
     </time>
@@ -2474,7 +2456,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-06-29T23:32:00Z">
       29 Jun 2021
     </time>
@@ -2508,7 +2490,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-05-09T01:23:45Z">
       09 May 2021
     </time>
@@ -2542,7 +2524,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-05-03T19:10:30Z">
       03 May 2021
     </time>
@@ -2576,7 +2558,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-30T23:56:54Z">
       30 Apr 2021
     </time>
@@ -2610,7 +2592,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-28T23:24:48Z">
       28 Apr 2021
     </time>
@@ -2644,7 +2626,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-16T23:30:24Z">
       16 Apr 2021
     </time>
@@ -2678,7 +2660,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-14T23:48:05Z">
       14 Apr 2021
     </time>
@@ -2712,7 +2694,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-10T23:25:52Z">
       10 Apr 2021
     </time>
@@ -2746,7 +2728,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-10T23:21:53Z">
       10 Apr 2021
     </time>
@@ -2780,7 +2762,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   </p>
 
   <!-- Meta Footer -->
-  <div class="flex items-center gap-3 text-sm text-gray-600">
+  <div class="flex items-center gap-3 text-sm text-base-content/60">
     <time datetime="2021-04-10T23:17:45Z">
       10 Apr 2021
     </time>
@@ -2854,7 +2836,7 @@ Posts written occasionally in Brazilian Portuguese or English.",
   <script src="/static-search.js" defer></script>
   <script src="/static-pagination.js" defer></script>
 
-  <!-- Lazy load Google Analytics after page is interactive -->
+  <!-- Lazy load Google Analytics after page is fully interactive -->
   <script>
     (function() {
       function loadGTM() {
@@ -2869,11 +2851,11 @@ Posts written occasionally in Brazilian Portuguese or English.",
         document.head.appendChild(script);
       }
 
-      // Load after page is idle, or after 2 seconds as fallback
+      // Load after page is idle, or after 5 seconds as fallback
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadGTM, { timeout: 2000 });
+        requestIdleCallback(loadGTM, { timeout: 5000 });
       } else {
-        setTimeout(loadGTM, 2000);
+        setTimeout(loadGTM, 5000);
       }
     })();
   </script>
