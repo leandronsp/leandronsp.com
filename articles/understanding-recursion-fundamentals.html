@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Recursion Fundamentals - Leandro Proença</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="If for you:
+
+* **Recursion** is an obscure topic or you want to understand it a bit better;
+* **Tail call and TCO** are alien communication methods and;
+* **Tram">
+  <meta name="author" content="Leandro Proença">
+  <link rel="canonical" href="https://leandronsp.com/articles/understanding-recursion-fundamentals.html">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://leandronsp.com/articles/understanding-recursion-fundamentals.html">
+  <meta property="og:title" content="Understanding Recursion Fundamentals">
+  <meta property="og:description" content="If for you:
+
+* **Recursion** is an obscure topic or you want to understand it a bit better;
+* **Tail call and TCO** are alien communication methods and;
+* **Tram">
+  <meta property="og:site_name" content="Leandro Proença">
+  <meta property="article:published_time" content="2025-11-14T02:28:33Z">
+  <meta property="article:tag" content="ruby">
+
+  <!-- JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Understanding Recursion Fundamentals",
+    "datePublished": "2025-11-14T02:28:33Z",
+    "author": {
+      "@type": "Person",
+      "name": "Leandro Proença"
+    },
+    "description": "If for you:
+
+* **Recursion** is an obscure topic or you want to understand it a bit better;
+* **Tail call and TCO** are alien communication methods and;
+* **Tram",
+        "keywords": "ruby"
+  }
+  </script>
+
+  <link rel="preload" href="/assets/css/app.cf141171.css" as="style">
+  <script>
+    // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.cf141171.css">
+  <style>
+    /* Force scrollbar to always be visible to prevent layout shift */
+    html {
+      overflow-y: scroll;
+    }
+
+    /* Softer dark theme colors */
+    [data-theme="dark"] {
+      --base-100: #2a2f3a;
+      --base-200: #232831;
+      --base-300: #1e222a;
+      --base-content: #e8eaed;
+    }
+    [data-theme="dark"] .article-card {
+      background-color: transparent;
+    }
+    /* Keep pinned article with background for prominence in dark theme - lighter pastel */
+    [data-theme="dark"] .pinned-article {
+      background-color: #3a4050 !important;
+    }
+    [data-theme="dark"] .prose {
+      color: #e8eaed;
+    }
+    [data-theme="dark"] .prose h1,
+    [data-theme="dark"] .prose h2,
+    [data-theme="dark"] .prose h3,
+    [data-theme="dark"] .prose h4 {
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose a {
+      color: #8fb4ff;
+    }
+    [data-theme="dark"] .prose code {
+      background-color: #3d4454;
+      color: #f0f2f5;
+    }
+    [data-theme="dark"] .prose pre {
+      background-color: #1e222a;
+      border: 1px solid #3d4454;
+    }
+    [data-theme="dark"] input {
+      background-color: #2f3542;
+      border-color: #3d4454;
+      color: #e8eaed;
+    }
+    [data-theme="dark"] input::placeholder {
+      color: #9ca3af;
+    }
+    /* Language switcher dark theme styling */
+    [data-theme="dark"] .lang-switcher-bg {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+    /* Blog name styling - system font first, Google Font loads async */
+    .blog-name {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    /* Intro text styling - system font first, Google Font loads async */
+    .intro-text {
+      font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive;
+      font-weight: 600;
+      color: #6b7280; /* Darker pastel gray for light theme */
+    }
+    [data-theme="dark"] .intro-text {
+      color: #d4d4d8; /* Lighter pastel gray for dark theme */
+    }
+    /* Article card styling */
+    article {
+      background-color: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 2rem;
+    }
+    [data-theme="dark"] article {
+      background-color: transparent;
+    }
+    /* Article images styling - consistent sizing */
+    .prose img {
+      max-width: 800px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-100">
+  <!-- Fixed Header - Article page: focus on reading -->
+  <header class="sticky top-0 z-50 bg-base-100 border-b border-base-300 shadow-sm">
+    <div class="container mx-auto px-4 sm:px-6 py-4 max-w-6xl">
+      <!-- Same structure as homepage, no search/language/tags -->
+      <div class="flex flex-col gap-2">
+        <!-- Name + Social Icons + Guide Links (all screens) -->
+        <div class="flex items-center gap-3">
+          <a href="/" class="blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0 no-underline cursor-pointer hover:opacity-80 transition-opacity">Leandro Proença</a>
+          <div class="flex items-center gap-2">
+            <a href="https://linkedin.com/in/leandronsp" target="_blank" rel="noopener noreferrer" class="text-base-content/60 hover:text-primary transition-colors" title="LinkedIn">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="https://github.com/leandronsp" target="_blank" rel="noopener noreferrer" class="text-base-content/60 hover:text-primary transition-colors" title="GitHub">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+            </a>
+            <button id="theme-toggle" class="text-base-content/60 hover:text-primary transition-colors" title="Toggle theme">
+              <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </button>
+          </div>
+          <!-- Guide Links (medium and up) -->
+          <div class="hidden md:flex items-center gap-3 ml-4">
+            <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Concorrência 101">
+              <span>Concorrência 101</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Web 101">
+              <span>Web 101</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="AWS 101">
+              <span>AWS 101</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <p class="intro-text text-xl sm:text-2xl leading-tight">
+          Software Developer 15+ years working for companies worldwide
+        </p>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto max-w-6xl">
+    <article class="bg-base-100">
+      <!-- Back to home link -->
+      <a href="/" class="inline-flex items-center gap-2 text-lg font-medium transition-colors text-base-content/70 hover:text-primary mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to home
+      </a>
+
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">Understanding Recursion Fundamentals</h1>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
+        <div class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Published 14 Nov 2025</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+  </svg>
+  <div class="flex gap-2 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">ruby</span>
+  </div>
+</div>
+
+      </div>
+
+      <div class="prose prose-lg max-w-none">
+        <p>If for you:</p>
+<ul>
+<li><strong>Recursion</strong> is an obscure topic or you want to understand it a bit better;</li>
+<li><strong>Tail call and TCO</strong> are alien communication methods and;</li>
+<li><strong>Trampoline</strong> is a medicine name</li>
+</ul>
+<p><em>Then this article is for you.</em></p>
+<p>Here, I’ll explain what these terms are in a didactic way and the problems they solve, with examples in <strong>Ruby</strong>. But don’t worry because the examples are quite simple to understand, especially since the concepts shown here are <em>language-agnostic</em>.</p>
+<p>So, come with me on this <strong>endless</strong> journey.</p>
+<blockquote>
+<p>✋ To continue, go back to the beginning</p>
+</blockquote>
+<p><em>Note: This is an English translation of the original article in Portuguese: <a href="https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4">Entendendo fundamentos de recursão</a></em></p>
+<hr />
+<h2><a href="#agenda" aria-hidden="true" class="anchor" id="agenda"></a>Agenda</h2>
+<ul>
+<li><a href="#what-is-recursion">What is recursion</a></li>
+<li><a href="#meet-fibo">Meet Fibo</a></li>
+<li><a href="#tail-call">Tail call</a></li>
+<li><a href="#stack-and-stack-overflow">Stack and stack overflow</a></li>
+<li><a href="#tail-call-optimization">Tail call optimization</a></li>
+<li><a href="#trampoline">Trampoline</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<hr />
+<h2><a href="#what-is-recursion" aria-hidden="true" class="anchor" id="what-is-recursion"></a>What is recursion</h2>
+<p>In computer programs, we’re used to <strong>breaking large problems into smaller problems</strong> through the use of functions or methods.</p>
+<p><strong>Recursion</strong> is, in an extremely simplified way, a technique in computing where these problems are broken down so that a <em>certain function is executed recursively</em>.</p>
+<p>With this, the function “calls itself” to solve some computation and continue its execution.</p>
+<hr />
+<h2><a href="#meet-fibo" aria-hidden="true" class="anchor" id="meet-fibo"></a>Meet Fibo</h2>
+<p>A very classic example of recursion is discovering, given the <strong>Fibonacci sequence</strong>, or Fibo, which number is found at a certain position.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55.........
+</div></code></pre>
+<p>With this in place, the <strong>fib</strong> function would return results like:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-plaintext" translate="no" tabindex="0"><div class="line" data-line="1">fib(0) = 0
+</div><div class="line" data-line="2">fib(1) = 1
+</div><div class="line" data-line="3">fib(2) = 1
+</div><div class="line" data-line="4">...
+</div><div class="line" data-line="5">fib(7) = 13
+</div><div class="line" data-line="6">fib(10) = 55
+</div></code></pre>
+<p>We then have a possible recursive implementation in Ruby:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">position</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">2</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span> <span style="color: #56b6c2;">+</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>This code, however, is not performant. When trying to find the number at position <code>10_000</code> (ten thousand) in the sequence, the program becomes very slow because it makes numerous <strong>redundant recursive calls</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1">                 <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">             <span style="color: #c678dd;">/</span><span style="color: #61afef;">                </span><span style="color: #56b6c2;">\</span>
+</div><div class="line" data-line="3"><span style="color: #56b6c2;"></span><span style="color: #61afef;">     fib<span style="color: #c678dd;">(</span>9<span style="color: #c678dd;">)</span>                 fib<span style="color: #c678dd;">(</span>8<span style="color: #c678dd;">)</span></span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">        </span><span style="color: #c678dd;">/</span>          \          <span style="color: #56b6c2;">/</span>   \
+</div><div class="line" data-line="5"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">8</span><span style="color: #c678dd;">)</span>     <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">7</span><span style="color: #c678dd;">)</span>     <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">7</span><span style="color: #c678dd;">)</span>    <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">6</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">/</span><span style="color: #61afef;">      </span><span style="color: #56b6c2;">\ </span><span style="color: #61afef;">      </span><span style="color: #c678dd;">/</span>       \       <span style="color: #56b6c2;">/</span>   \
+</div><div class="line" data-line="7"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">7</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">6</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">6</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">6</span><span style="color: #c678dd;">)</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8">   <span style="color: #c678dd;">/</span><span style="color: #61afef;">    </span><span style="color: #56b6c2;">\ </span><span style="color: #61afef;">    </span><span style="color: #c678dd;">/</span>     \     <span style="color: #56b6c2;">/</span>     \     <span style="color: #c678dd;">/</span><span style="color: #61afef;">    </span><span style="color: #56b6c2;">\</span>
+</div><div class="line" data-line="9"><span style="color: #56b6c2;"></span><span style="color: #61afef;">fib<span style="color: #c678dd;">(</span>6<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>5<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>5<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>4<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>5<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>4<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>5<span style="color: #c678dd;">)</span> fib<span style="color: #c678dd;">(</span>4<span style="color: #c678dd;">)</span></span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">  </span><span style="color: #c678dd;">/</span>   \   <span style="color: #56b6c2;">/</span>   \   <span style="color: #c678dd;">/</span><span style="color: #61afef;">   </span><span style="color: #56b6c2;">\ </span><span style="color: #61afef;">  </span><span style="color: #c678dd;">/</span>   \   <span style="color: #56b6c2;">/</span>   \   <span style="color: #c678dd;">/</span><span style="color: #61afef;">   </span><span style="color: #56b6c2;">\ </span><span style="color: #61afef;">  </span><span style="color: #c678dd;">/</span>   \
+</div><div class="line" data-line="11"><span style="color: #56b6c2;">...</span>
+</div></code></pre>
+<p>Consequently, the larger the function input, the execution time of this code tends to grow exponentially, which in <strong>Big-O</strong> notation would be <code>O(2^n)</code>.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/n9udpxmgl34093mpmqvc.png" alt="big O exponential" /></p>
+<p>Is it possible to reduce this complexity?</p>
+<p>What if we try to apply a technique where the last function call, instead of being the sum of two recursive calls, becomes just <strong>one recursive call</strong>, without performing additional computations?</p>
+<p>This technique exists and is called <strong>tail call</strong>, or <em>tail recursion</em>.</p>
+<hr />
+<h2><a href="#tail-call" aria-hidden="true" class="anchor" id="tail-call"></a>Tail call</h2>
+<p><strong>Tail call</strong>, or <strong>TC</strong>, consists of a recursive function where the last recursive call is the function itself without additional computation.</p>
+<p>With this in place, we reduce the complexity from exponential to linear, as if it were a <em>simple loop iterating over a list of inputs</em>.</p>
+<p>In Big-O notation this becomes <code>O(n)</code>, meaning the complexity grows linearly following the growth of the input.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/z8uj2fzw9090971awu89.png" alt="big O linear" /></p>
+<p>Example in Ruby:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">_current</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">_next</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Therefore, the number of recursive calls is drastically reduced to something like:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">9</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="3"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">7</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">6</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">5</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">4</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">8</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">13</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">3</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">13</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">21</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="9"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">2</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">21</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">34</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">34</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">55</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="11"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">55</span><span style="color: #abb2bf;">,</span> <span style="color: #d19a66;">89</span><span style="color: #c678dd;">)</span>
+</div></code></pre>
+<p>Notice how the number of recursive calls decreased, meaning the code is following a more <strong>linear</strong> path with this approach.</p>
+<p>Thus, when running the <strong>fib with TC</strong> program, the execution time is exponentially less than running without TC, being <em>tens of thousands of times faster</em>.</p>
+<blockquote>
+<p>✋<br />
+Clearly a program that takes exponential time is terribly poor performance-wise, right?</p>
+</blockquote>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #7f848e;"># Without TC</span>
+</div><div class="line" data-line="2"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">30</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># 0.75 seconds</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4"><span style="color: #7f848e;"># With TC</span>
+</div><div class="line" data-line="5"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">30</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># 0.000075 seconds</span>
+</div></code></pre>
+<p>Going back to the example of <code>fib(10000)</code>, when running with TC, we see that execution is much faster, however:</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">recursion</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">fib</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rb</span><span style="color: #56b6c2;">:</span><span style="color: #d19a66;">10</span><span style="color: #e06c75;">:in</span> <span style="color: #98c379;">`</span><span style="color: #98c379;">fib_tc&#39;: stack level too deep (SystemStackError)</span>
+</div><div class="line" data-line="2"><span style="color: #98c379;">        from recursion/fib.rb:10:in </span><span style="color: #98c379;">`</span><span style="color: #e06c75;">fib_tc</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;"></span>
+</div><div class="line" data-line="3"><span style="color: #98c379;">        from recursion/fib.rb:10:in `fib_tc</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="4">        <span style="color: #61afef;">from</span> <span style="color: #e06c75;">recursion</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">fib</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rb</span><span style="color: #56b6c2;">:</span><span style="color: #d19a66;">10</span><span style="color: #e06c75;">:in</span> <span style="color: #98c379;">`</span><span style="color: #98c379;">fib_tc&#39;</span>
+</div><div class="line" data-line="5"><span style="color: #98c379;">        from recursion/fib.rb:10:in </span><span style="color: #98c379;">`</span><span style="color: #e06c75;">fib_tc</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;"></span>
+</div><div class="line" data-line="6"><span style="color: #98c379;">        from recursion/fib.rb:10:in `fib_tc</span><span style="color: #98c379;">&#39;</span>
+</div><div class="line" data-line="7">        <span style="color: #61afef;">from</span> <span style="color: #e06c75;">recursion</span><span style="color: #56b6c2;">/</span><span style="color: #e06c75;">fib</span><span style="color: #abb2bf;">.</span><span style="color: #e06c75;">rb</span><span style="color: #56b6c2;">:</span><span style="color: #d19a66;">10</span><span style="color: #e06c75;">:in</span> <span style="color: #98c379;">`</span><span style="color: #98c379;">fib_tc&#39;</span>
+</div><div class="line" data-line="8"><span style="color: #98c379;">        from recursion/fib.rb:10:in </span><span style="color: #98c379;">`</span><span style="color: #e06c75;">fib_tc</span><span style="color: #98c379;">&#39;</span><span style="color: #98c379;"></span>
+</div><div class="line" data-line="9"><span style="color: #98c379;">        from recursion/fib.rb:10:in `fib_tc</span><span style="color: #98c379;">&#39;</span>
+</div></code></pre>
+<p><em>Uh oh</em>, a <strong>stack overflow!</strong></p>
+<p>To understand what’s happening, let’s first understand what the heck is a <strong>stack</strong> and <strong>stack overflow</strong>.</p>
+<hr />
+<h2><a href="#stack-and-stack-overflow" aria-hidden="true" class="anchor" id="stack-and-stack-overflow"></a>Stack and stack overflow</h2>
+<p>When a program is executed, a data structure in the form of a <em>stack</em>, called <strong>Stack</strong> (duh), is allocated in memory and is used to store the data being used in a running function.</p>
+<blockquote>
+<p>✋<br />
+There’s also another structure in the program’s memory called <strong>Heap</strong>, which is not a stack and has other traits that are beyond the scope of this article. To understand recursion, we focus only on the stack</p>
+</blockquote>
+<p>When the program enters a function or method, each piece of data is <em>pushed onto the stack</em>. When the function finishes, the <em>removal (pop) of each piece of data</em> is done.</p>
+<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rstqf6yz2yph2d7byeuq.png" alt="stack" /></p>
+<p>With each function call, a new <em>stack frame</em> is assigned. Since a recursive call never ends, the runtime doesn’t know it needs to “pop” the data and finish the frame, so at every call, a new stack frame is created and <strong>more elements are added</strong> to the stack.</p>
+<p>Guess what happens when we add too much data to the stack to the point of <strong>exceeding its limit</strong> in the computer’s memory?</p>
+<p>Yes, the infamous <strong>Stack overflow</strong> happens 💥🪲, and this explains that error in Ruby when running fib of 10000 with tail call.</p>
+<blockquote>
+<p>✋<br />
+So does that mean calculating fib of 10000 is an impossible problem to solve with recursion?</p>
+</blockquote>
+<p>Hold on, some languages employ an optimization technique that consists of using the tail call with <em>just one stack frame</em>, hence ensuring that each recursive call is treated as if it were <strong>an iteration in a primitive loop.</strong></p>
+<p>With this, the function’s arguments and data are manipulated in a single stack frame, exactly as if we had written a primitive loop. And consequently, new tail recursive calls won’t cause stack overflow.</p>
+<p>We call this technique <strong>Tail call optimization</strong>, or <em>TCO</em>.</p>
+<hr />
+<h2><a href="#tail-call-optimization" aria-hidden="true" class="anchor" id="tail-call-optimization"></a>Tail call optimization</h2>
+<p>Due to its imperative nature, and like several other general-purpose languages, <em>Ruby doesn’t have native TCO support</em>.</p>
+<p>Usually this optimization is more commonly found in languages with a strong inclination toward the functional paradigm, rather than the imperative one.</p>
+<p>But in Ruby it’s possible to <em>enable TCO mode</em> with a simple configuration in the Ruby runtime instruction (YARV), and thus we can execute fib of 10000 without pain.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e5c07b;">RubyVM</span><span style="color: #abb2bf;">::</span><span style="color: #e5c07b;">InstructionSequence</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">compile_option</span> <span style="color: #56b6c2;">=</span> <span style="color: #c678dd;">&lbrace;</span>
+</div><div class="line" data-line="2">  <span style="color: #e06c75;">tailcall_optimization</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">true</span><span style="color: #abb2bf;">,</span>
+</div><div class="line" data-line="3">  <span style="color: #e06c75;">trace_instruction</span><span style="color: #abb2bf;">:</span> <span style="color: #d19a66;">false</span>
+</div><div class="line" data-line="4"><span style="color: #c678dd;">&rbrace;</span>
+</div><div class="line" data-line="5">
+</div><div class="line" data-line="6"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="7">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">_current</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="8">
+</div><div class="line" data-line="9">  <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">_next</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="10"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="11">
+</div><div class="line" data-line="12"><span style="color: #7f848e;"># TC with TCO</span>
+</div><div class="line" data-line="13"><span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10000</span><span style="color: #c678dd;">)</span> <span style="color: #7f848e;"># 0.02 seconds</span>
+</div></code></pre>
+<p><strong>Superb</strong>! With TCO enabled, a fib 10000 with tail call is executed in <em>0.02 seconds</em>!</p>
+<p><em>It’s worth remembering that TCO is a technique used not only in recursion but also in instruction generation optimization in compilers, but this is beyond the scope of this article.</em></p>
+<blockquote>
+<p>✋<br />
+Okay, but what if it’s not possible to enable TCO for tail recursion or I’m programming in a language that doesn’t have TCO support?</p>
+</blockquote>
+<p><strong>Trampoline</strong> to the rescue.</p>
+<hr />
+<h2><a href="#trampoline" aria-hidden="true" class="anchor" id="trampoline"></a>Trampoline</h2>
+<p>To understand <em>trampoline</em>, let’s think about the problem and a possible solution.</p>
+<p>If we think smart, we can initially conclude that recursion should be avoided, and this is <em>premise number one</em>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">_current</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #7f848e;">###################################</span>
+</div><div class="line" data-line="5">  <span style="color: #7f848e;">#### We must avoid this!!!!!! ####</span>
+</div><div class="line" data-line="6">  <span style="color: #7f848e;">###################################</span>
+</div><div class="line" data-line="7">  <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">_next</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="8"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>Premise two, instead of returning a recursive call directly, what if we return it <strong>encapsulated in an anonymous function structure that stores context</strong> to be executed in another context?</p>
+<blockquote>
+<p>Yes, like a closure or lambda for the more attentive readers</p>
+</blockquote>
+<p>In Ruby, we can use the concept of <strong>lambdas</strong>.</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #c678dd;">def</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">0</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span> <span style="color: #56b6c2;">=</span> <span style="color: #d19a66;">1</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">  <span style="color: #c678dd;">return</span> <span style="color: #e06c75;">_current</span> <span style="color: #c678dd;">if</span> <span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">&lt;</span> <span style="color: #d19a66;">1</span>
+</div><div class="line" data-line="3">
+</div><div class="line" data-line="4">  <span style="color: #61afef;">lambda</span> <span style="color: #c678dd;">do</span>
+</div><div class="line" data-line="5">    <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #e06c75;">position</span> <span style="color: #56b6c2;">-</span> <span style="color: #d19a66;">1</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_next</span><span style="color: #abb2bf;">,</span> <span style="color: #e06c75;">_current</span> <span style="color: #56b6c2;">+</span> <span style="color: #e06c75;">_next</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="6">  <span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="7"><span style="color: #c678dd;">end</span>
+</div></code></pre>
+<p>If we call <code>result = fib(0)</code>, because of the first line’s short-circuit (<code>position &lt; 1</code>), the method’s return is <code>0</code>.</p>
+<p>But if we call <code>result = fib(10)</code>, the return won’t be a recursive call, but rather the <strong>return will be an anonymous function</strong> (lambda).</p>
+<p>By doing this, the method is then finished and the <em>stack is cleared</em>, meaning the <strong>pop of data</strong> is done from within the method.</p>
+<p>Since lambdas store context, if we call <code>result.call</code>, the lambda is executed with the previous context, which can return the final number (if it enters the short-circuit) or another lambda with the new context.</p>
+<p>And so, <strong>we loop until we have the final value</strong>, while the current return continues to be a lambda. Did you understand what we can do?</p>
+<p>Yes, a <em>loop!</em></p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #e06c75;">result</span> <span style="color: #56b6c2;">=</span> <span style="color: #61afef;">fib</span><span style="color: #c678dd;">(</span><span style="color: #d19a66;">10000</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="2">
+</div><div class="line" data-line="3"><span style="color: #c678dd;">while</span> <span style="color: #e06c75;">result</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">is_a?</span><span style="color: #c678dd;">(</span><span style="color: #e5c07b;">Proc</span><span style="color: #c678dd;">)</span>
+</div><div class="line" data-line="4">  <span style="color: #e06c75;">result</span> <span style="color: #56b6c2;">=</span> <span style="color: #e06c75;">result</span><span style="color: #abb2bf;">.</span><span style="color: #61afef;">call</span>
+</div><div class="line" data-line="5"><span style="color: #c678dd;">end</span>
+</div><div class="line" data-line="6">
+</div><div class="line" data-line="7"><span style="color: #61afef;">puts</span> <span style="color: #e06c75;">result</span>
+</div></code></pre>
+<p>Output (a really very large number):</p>
+<pre class="athl" style="color: #abb2bf; background-color: #282c34;"><code class="language-ruby" translate="no" tabindex="0"><div class="line" data-line="1"><span style="color: #d19a66;">33644764876431783266621612005107543310302148460680063906564769974680081442166662368155595513633734025582065332680836159373734790483865268263040892463056431887354544369559827491606602099884183933864652731300088830269235673613135117579297437854413752130520504347701602264758318906527890855154366159582987279682987510631200575428783453215515103870818298969791613127856265033195487140214287532698187962046936097879900350962302291026368131493195275630227837628441540360584402572114334961180023091208287046088923962328835461505776583271252546093591128203925285393434620904245248929403901706233888991085841065183173360437470737908552631764325733993712871937587746897479926305837065742830161637408969178426378624212835258112820516370298089332099905707920064367426202389783111470054074998459250360633560933883831923386783056136435351892133279732908133732642652633989763922723407882928177953580570993691049175470808931841056146322338217465637321248226383092103297701648054726243842374862411453093812206564914032751086643394517512161526545361333111314042436854805106765843493523836959653428071768775328348234345557366719731392746273629108210679280784718035329131176778924659089938635459327894523777674406192240337638674004021330343297496902028328145933418826817683893072003634795623117103101291953169794607632737589253530772552375943788434504067715555779056450443016640119462580972216729758615026968443146952034614932291105970676243268515992834709891284706740862008587135016260312071903172086094081298321581077282076353186624611278245537208532365305775956430072517744315051539600905168603220349163222640885248852433158051534849622434848299380905070483482449327453732624567755879089187190803662058009594743150052402532709746995318770724376825907419939632265984147498193609285223945039707165443156421328157688908058783183404917434556270520223564846495196112460268313970975069382648706613264507665074611512677522748621598642530711298441182622661057163515069260029861704945425047491378115154139941550671256271197133252763631939606902895650288268608362241082050562430701794976171121233066073310059947366875</span>
+</div></code></pre>
+<p>🔑 <strong>Key point</strong><br />
+And with this, friends, we have the <strong>trampoline</strong> technique: a non-recursive primitive <strong>loop</strong> that keeps calling another function <em>written recursively</em> but that returns a lambda with context, <strong>until reaching the final value</strong>.</p>
+<p>This code, <strong>without TCO</strong>, for <strong>fib of 10000</strong>, takes 0.04 seconds, a result very close to TCO and without causing stack overflow.</p>
+<p><em>Incredible, right?</em> Now there are no excuses for not writing a function recursively in languages that don’t have TCO support 😛</p>
+<hr />
+<h2><a href="#conclusion" aria-hidden="true" class="anchor" id="conclusion"></a>Conclusion</h2>
+<p>In this article, the intent was to bring some concepts and fundamentals around the <strong>recursion</strong> topic. These concepts overlap with very academic topics that sometimes make it difficult for people who are starting in the field or who don’t have a very academic background to understand.</p>
+<p>I hope I’ve clarified the recursion subject in a didactic way. If you can, leave any corrections or relevant information in the comments.</p>
+<hr />
+<h2><a href="#references" aria-hidden="true" class="anchor" id="references"></a>References</h2>
+<p><a href="https://en.wikipedia.org/wiki/Fibonacci_sequence">https://en.wikipedia.org/wiki/Fibonacci_sequence</a><br />
+<a href="https://en.wikipedia.org/wiki/Recursion">https://en.wikipedia.org/wiki/Recursion</a><br />
+<a href="https://www.geeksforgeeks.org/stack-data-structure/">https://www.geeksforgeeks.org/stack-data-structure/</a><br />
+<a href="https://en.wikipedia.org/wiki/Tail_call">https://en.wikipedia.org/wiki/Tail_call</a><br />
+<a href="https://en.wikipedia.org/wiki/Trampoline_(computing)">https://en.wikipedia.org/wiki/Trampoline_(computing)</a><br />
+<a href="https://nithinbekal.com/posts/ruby-tco/">https://nithinbekal.com/posts/ruby-tco/</a><br />
+<a href="https://www.bigocheatsheet.com/">https://www.bigocheatsheet.com/</a><br />
+<a href="https://ruby-doc.org/core-3.1.0/RubyVM/InstructionSequence.html#method-c-compile_option">https://ruby-doc.org/core-3.1.0/RubyVM/InstructionSequence.html#method-c-compile_option</a></p>
+      </div>
+
+      <!-- Back to top -->
+      <div class="mt-12 mb-8 text-center">
+        <a href="#" onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });" class="inline-flex items-center gap-2 text-xl font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+          Back to top
+        </a>
+      </div>
+    </article>
+
+    <!-- Giscus Comments -->
+    <div class="mt-16">
+      <div class="border-t border-base-300 pt-8">
+        <h2 class="text-2xl font-bold mb-6">Comments</h2>
+        <script src="https://giscus.app/client.js"
+                data-repo="leandronsp/leandronsp.com"
+                data-repo-id="R_kgDOQGG-eQ"
+                data-category="Announcements"
+                data-category-id="DIC_kwDOQGG-ec4Cw4TN"
+                data-mapping="pathname"
+                data-strict="0"
+                data-reactions-enabled="1"
+                data-emit-metadata="0"
+                data-input-position="bottom"
+                data-theme="preferred_color_scheme"
+                data-lang="en"
+                crossorigin="anonymous"
+                async>
+        </script>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+      <div class="text-center text-sm text-base-content/80">
+        <p>
+          Powered by
+          <a
+            href="https://github.com/leandronsp/curupira"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold text-blue-600 hover:underline"
+          >
+            Curupira
+          </a>
+          | Open source blog platform built with Phoenix LiveView
+        </p>
+        <p class="mt-2 text-xs text-base-content/70">
+          Licensed under
+          <a
+            href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-600 hover:underline"
+          >
+            AGPL-3.0
+          </a>
+        </p>
+      </div>
+    </footer>
+  </main>
+
+  <script src="/static-theme.7c342999.js" defer></script>
+  <script src="/static-filters.ff26a35d.js" defer></script>
+  <script src="/static-search.f956387a.js" defer></script>
+  <script src="/static-giscus.ff40d264.js" defer></script>
+
+  <!-- Lazy load Google Analytics after page is fully interactive -->
+  <script>
+    (function() {
+      function loadGTM() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-0Y5RNLZMKN');
+
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+        document.head.appendChild(script);
+      }
+
+      // Load after page is idle, or after 5 seconds as fallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadGTM, { timeout: 5000 });
+      } else {
+        setTimeout(loadGTM, 5000);
+      }
+    })();
+  </script>
+</body>
+</html>
