@@ -7,13 +7,6 @@ status: "published"
 tags: ["ruby", "programming", "softwaredevelopment"]
 ---
 
----
-title: Ruby blocks made easy, part II, curry and procs as arguments
-published: true
-description: Understanding the fundamentals of Ruby blocks
-tags: ruby, programming, softwaredevelopment
-cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/imojdiw5a8hijxe7l633.png
----
 [In the previous post](https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2), we learned that methods can be transformed into procs to be evaluated _later_.
 
 One thing worth to mention is that, the method itself can be used like a proc: every `Method` structure has a method called `call`:

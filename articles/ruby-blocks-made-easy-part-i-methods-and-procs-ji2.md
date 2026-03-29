@@ -7,13 +7,6 @@ status: "published"
 tags: ["ruby", "programming", "softwaredevelopment"]
 ---
 
----
-title: Ruby blocks made easy, part I, methods and procs
-published: true
-description: Understanding the fundamentals of Ruby blocks
-tags: ruby, programming, softwaredevelopment
-cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ldzucvwksisneqd8vssa.png
----
 Blocks in Ruby are powerful structures that are part of our daily basis as Ruby developers. We see them being used across a variety of standard classes as well as in almost every popular gem. 
 
 A few examples:

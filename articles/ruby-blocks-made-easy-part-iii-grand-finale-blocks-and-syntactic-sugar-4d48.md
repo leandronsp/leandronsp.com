@@ -7,13 +7,6 @@ status: "published"
 tags: ["ruby", "programming", "softwaredevelopment"]
 ---
 
----
-title: Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar
-published: true
-description: Understanding the fundamentals of Ruby blocks
-tags: ruby, programming, softwaredevelopment
-cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9ob6kb11iq2ugylftpln.png
----
 In this series of posts, we already covered that [_methods can be transformed into procs_](https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2) and as such, can be evaluated **later**. Furthermore, we've seen that [procs can be used as arguments to another methods](https://leandronsp.com/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments-3c25) and that such procs can optionally use curried arguments. 
 
 Until now, we have been using methods as a way to represent "blocks" of code:

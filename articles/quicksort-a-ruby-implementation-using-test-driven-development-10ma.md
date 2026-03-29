@@ -7,13 +7,6 @@ status: "published"
 tags: ["ruby", "quicksort", "algorithms", "tdd"]
 ---
 
----
-title: Quicksort, a Ruby implementation using Test-driven development
-published: true
-description: Implementing Quicksort with TDD
-tags: ruby,quicksort,algorithms,tdd
-cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/9q0pcat6jd54g5t1o7b7.png
----
 [Quicksort](https://en.wikipedia.org/wiki/Quicksort) is a sorting algorithm designed to have a _reasonable time complexity_. 
 
 In average, most implementations of this algorithm are capable of coming to [_O(n log(n))_](https://www.bigocheatsheet.com). It is implemented by many programming languages and platforms, being one of the most important algorithms for sorting.

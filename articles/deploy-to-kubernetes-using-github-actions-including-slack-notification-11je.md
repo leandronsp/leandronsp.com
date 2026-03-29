@@ -7,13 +7,6 @@ status: "published"
 tags: ["github", "aws", "eks", "kubernetes"]
 ---
 
----
-title: Deploy to Kubernetes using Github Actions (including Slack notification)
-published: true
-description: Deploy to Kubernetes using Github Actions
-tags: github,aws,eks,kubernetes
-cover_image: https://dev-to-uploads.s3.amazonaws.com/uploads/articles/amdtmuxrrcu6gtwjbsag.png
----
 In this guide we'll cover the full cycle of deploying to Kubernetes using [Github Actions](https://github.com/features/actions). Batteries included:
 
 - Kubernetes cluster running in [AWS EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html)
