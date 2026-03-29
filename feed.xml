@@ -9,175 +9,175 @@
 <title>You don't need Kafka: Building a message queue with only two UNIX signals</title>
 <link>https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html</link>
 <guid>https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html</guid>
-<description></description>
+<description>Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you didn</description>
 <pubDate>2025-10-21</pubDate>
 </item>
 <item>
 <title>Winning at floating-point issues: a survival guide</title>
 <link>https://leandronsp.com/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html</link>
 <guid>https://leandronsp.com/articles/winning-at-floating-point-issues-a-survival-guide-4g1g.html</guid>
-<description></description>
+<description>For precise calculations, favor arbitrary-precision decimals or equivalents like BigDecimal over floating-point numbers. Additionally, avoid unnecessary roundin</description>
 <pubDate>2023-06-01</pubDate>
 </item>
 <item>
 <title>Web basics: sending HTML, CSS and Javascript content through HTTP</title>
 <link>https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html</link>
 <guid>https://leandronsp.com/articles/web-basics-sending-html-css-and-javascript-content-through-http-3g1m.html</guid>
-<description></description>
+<description>Now that we have [an HTTP server](https://leandronsp.com/articles/web-basics-a-simple-http-server-in-ruby-2jj4) sending plain text content, it's time to enhance</description>
 <pubDate>2021-05-09</pubDate>
 </item>
 <item>
 <title>Web basics: a TCP Server in Ruby</title>
 <link>https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html</link>
 <guid>https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947.html</guid>
-<description></description>
+<description>This series guide covers the very basics of Web and the building blocks of a Web server.  If you have ever wondered on how a Web server works and have a basic k</description>
 <pubDate>2021-04-30</pubDate>
 </item>
 <item>
 <title>Web basics: a simple HTTP Server in Ruby</title>
 <link>https://leandronsp.com/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html</link>
 <guid>https://leandronsp.com/articles/web-basics-a-simple-http-server-in-ruby-2jj4.html</guid>
-<description></description>
+<description>[In the previous article](https://leandronsp.com/articles/web-basics-a-tcp-server-in-ruby-947), we learned the very basics of networking and how to write a simp</description>
 <pubDate>2021-05-03</pubDate>
 </item>
 <item>
 <title>Voltando às raízes de blogueiro</title>
 <link>https://leandronsp.com/articles/voltando-as-raizes-de-blogueiro.html</link>
 <guid>https://leandronsp.com/articles/voltando-as-raizes-de-blogueiro.html</guid>
-<description></description>
+<description>Já faz um tempo que não escrevo aqui no blog.  E também já faz bastante tempo que tenho o interesse em voltar a escrever mais como fazia antigamente, quando</description>
 <pubDate>2025-10-18</pubDate>
 </item>
 <item>
 <title>Vencendo os números de ponto flutuante: um guia de sobrevivência</title>
 <link>https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html</link>
 <guid>https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html</guid>
-<description></description>
+<description>Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de númer</description>
 <pubDate>2023-06-06</pubDate>
 </item>
 <item>
 <title>Using Docker in development the right way</title>
 <link>https://leandronsp.com/articles/using-docker-in-development-the-right-way-15j3.html</link>
 <guid>https://leandronsp.com/articles/using-docker-in-development-the-right-way-15j3.html</guid>
-<description></description>
+<description>_If you are not proficient in Docker, or that topics like containers and virtual machines are still a bit &quot;fuzzy&quot;, have problems working with Docker in developm</description>
 <pubDate>2021-06-29</pubDate>
 </item>
 <item>
 <title>Understanding the basics of Smart Pointers in Rust</title>
 <link>https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff.html</link>
 <guid>https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff.html</guid>
-<description></description>
+<description>In today's post we'll delve into the basics of smart pointers in Rust, while we build from scratch a simple linked list - starting from a singly linked list and</description>
 <pubDate>2023-11-01</pubDate>
 </item>
 <item>
 <title>Understanding Recursion Fundamentals</title>
 <link>https://leandronsp.com/articles/understanding-recursion-fundamentals.html</link>
 <guid>https://leandronsp.com/articles/understanding-recursion-fundamentals.html</guid>
-<description></description>
+<description>If for you: * **Recursion** is an obscure topic or you want to understand it a bit better; * **Tail call and TCO** are alien communication methods and;</description>
 <pubDate>2025-11-14</pubDate>
 </item>
 <item>
 <title>Um resumo do meu 2024</title>
 <link>https://leandronsp.com/articles/um-resumo-do-meu-2024.html</link>
 <guid>https://leandronsp.com/articles/um-resumo-do-meu-2024.html</guid>
-<description></description>
+<description>31 de Dezembro de 2024. Sentado no sofá e assistindo Frozen, tive a ideia de escrever sobre minha retrospectiva deste ano. Nunca fiz isso antes, então bora l�</description>
 <pubDate>2025-10-18</pubDate>
 </item>
 <item>
 <title>Um resumo do meu 2024</title>
 <link>https://leandronsp.com/articles/um-resumo-do-meu-2024-1lf4.html</link>
 <guid>https://leandronsp.com/articles/um-resumo-do-meu-2024-1lf4.html</guid>
-<description></description>
+<description>31 de Dezembro de 2024. Sentado no sofá e assistindo Frozen, tive a ideia de escrever sobre minha retrospectiva deste ano. Nunca fiz isso antes, então bora l�</description>
 <pubDate>2025-10-18</pubDate>
 </item>
 <item>
 <title>Thinking like containers</title>
 <link>https://leandronsp.com/articles/thinking-like-containers-3k24.html</link>
 <guid>https://leandronsp.com/articles/thinking-like-containers-3k24.html</guid>
-<description></description>
+<description>We can't deny how popular [Docker containers](https://www.docker.com/resources/what-container) became on the daily basis of many software developers around the</description>
 <pubDate>2022-08-09</pubDate>
 </item>
 <item>
 <title>Tekton CI/CD, the grand finale, interceptors</title>
 <link>https://leandronsp.com/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html</link>
 <guid>https://leandronsp.com/articles/tekton-cicd-the-grand-finale-interceptors-2d36.html</guid>
-<description></description>
+<description>We learned in [the previous article](https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m) how to delivery applications using Tekton and</description>
 <pubDate>2023-02-22</pubDate>
 </item>
 <item>
 <title>Tekton CI/CD, part IV, continuous delivery</title>
 <link>https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m.html</link>
 <guid>https://leandronsp.com/articles/tekton-cicd-part-iv-continuous-delivery-206m.html</guid>
-<description></description>
+<description>The [previous post](https://leandronsp.com/articles/tekton-ci-part-iii-listen-to-github-events-1h3i) demonstrated how to _listen to Github events_ and trigger a</description>
 <pubDate>2023-02-21</pubDate>
 </item>
 <item>
 <title>Tekton CI, part III, listen to Github events</title>
 <link>https://leandronsp.com/articles/tekton-ci-part-iii-listen-to-github-events-1h3i.html</link>
 <guid>https://leandronsp.com/articles/tekton-ci-part-iii-listen-to-github-events-1h3i.html</guid>
-<description></description>
+<description>_For this guide I'm assuming you are running a local Kubernetes cluster._ [In the previous article](https://leandronsp.com/articles/tekton-ci-part-ii-sharing-in</description>
 <pubDate>2023-02-19</pubDate>
 </item>
 <item>
 <title>Tekton CI, part II, sharing information</title>
 <link>https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81.html</link>
 <guid>https://leandronsp.com/articles/tekton-ci-part-ii-sharing-information-j81.html</guid>
-<description></description>
+<description>[In the previous post](https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj), we viewed an introduction to Tekton and a brief overview thr</description>
 <pubDate>2023-02-19</pubDate>
 </item>
 <item>
 <title>Tekton CI, part I, a gentle introduction</title>
 <link>https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html</link>
 <guid>https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj.html</guid>
-<description></description>
+<description>In [another post](https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a) I talked about **CI/CD in a nutshell** and its fundamentals, before going further on</description>
 <pubDate>2023-02-19</pubDate>
 </item>
 <item>
 <title>Taming non-determinism: from logic gates to LLMs</title>
 <link>https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms.html</link>
 <guid>https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms.html</guid>
-<description></description>
+<description>Or: _how engineering keeps turning chaos into reliable computation. And why agentic AI still hasn't solved this._ There's a pattern that repeats across the enti</description>
 <pubDate>2026-02-19</pubDate>
 </item>
 <item>
 <title>Superficial, básico e avançado</title>
 <link>https://leandronsp.com/articles/superficial-basico-e-avancado-148n.html</link>
 <guid>https://leandronsp.com/articles/superficial-basico-e-avancado-148n.html</guid>
-<description></description>
+<description>Ufa, finalmente meu primeiro artigo de 2024. Criei ~~vergonha na cara~~ coragem e resolvi sentar e escrever um pouco. &gt; Vou voltar a escrever coisas técnicas c</description>
 <pubDate>2024-03-09</pubDate>
 </item>
 <item>
 <title>SQL JOIN explained</title>
 <link>https://leandronsp.com/articles/sql-join-explained-53lc.html</link>
 <guid>https://leandronsp.com/articles/sql-join-explained-53lc.html</guid>
-<description></description>
+<description>In this post we're going to see how the **SQL JOIN** works, guided by a practical example while covering SQL and [Set theory](https://en.wikipedia.org/wiki/Set_</description>
 <pubDate>2023-03-17</pubDate>
 </item>
 <item>
 <title>Simulating OOP in Bash</title>
 <link>https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html</link>
 <guid>https://leandronsp.com/articles/simulating-oop-in-bash-3mop.html</guid>
-<description></description>
+<description>Everyone knows that OOP stands for &quot;Object-oriented programming&quot;. But what is **in fact** OOP? Is it a _Class_? Is it _inheritance_ and polymorphism like we lea</description>
 <pubDate>2022-08-06</pubDate>
 </item>
 <item>
 <title>Seu dinheiro não é infinito</title>
 <link>https://leandronsp.com/articles/seu-dinheiro-nao-e-infinito-2l2k.html</link>
 <guid>https://leandronsp.com/articles/seu-dinheiro-nao-e-infinito-2l2k.html</guid>
-<description></description>
+<description>Se você tem algum tipo de influência nas **decisões arquiteturais** de software no local onde trabalha, e a empresa ou instituição **não** tem dinheiro in</description>
 <pubDate>2022-10-21</pubDate>
 </item>
 <item>
 <title>Rust, Go, Rinha e I/O</title>
 <link>https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html</link>
 <guid>https://leandronsp.com/articles/rust-go-rinha-e-io-39o2.html</guid>
-<description></description>
+<description>Este artigo é o início de um formato diferente de conteúdo que quero experimentar, um apanhado (ou resumão, ou dump, como queiram chamar) de coisas que tenh</description>
 <pubDate>2023-09-08</pubDate>
 </item>
 <item>
 <title>Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar</title>
 <link>https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar.html</link>
 <guid>https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar.html</guid>
-<description></description>
+<description>In this series of posts, we already covered that [_methods can be transformed into procs_](https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-</description>
 <pubDate>2021-04-10</pubDate>
 </item>
 <item>
@@ -192,7 +192,7 @@ Ruby blocks made easy, part III ~grand finale~, blocks and syntactic sugar</titl
 <title>Ruby blocks made easy, part II, curry and procs as arguments</title>
 <link>https://leandronsp.com/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments.html</link>
 <guid>https://leandronsp.com/articles/ruby-blocks-made-easy-part-ii-curry-and-procs-as-arguments.html</guid>
-<description></description>
+<description>[In the previous post](https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs-ji2), we learned that methods can be transformed into proc</description>
 <pubDate>2021-04-10</pubDate>
 </item>
 <item>
@@ -207,7 +207,7 @@ Ruby blocks made easy, part II, curry and procs as arguments</title>
 <title>Ruby blocks made easy, part I, methods and procs</title>
 <link>https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs.html</link>
 <guid>https://leandronsp.com/articles/ruby-blocks-made-easy-part-i-methods-and-procs.html</guid>
-<description></description>
+<description>Blocks in Ruby are powerful structures that are part of our daily basis as Ruby developers. We see them being used across a variety of standard classes as well</description>
 <pubDate>2021-04-10</pubDate>
 </item>
 <item>
@@ -222,14 +222,14 @@ Ruby blocks made easy, part I, methods and procs</title>
 <title>Resolvendo problema de performance no PostgreSQL com CTE</title>
 <link>https://leandronsp.com/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html</link>
 <guid>https://leandronsp.com/articles/resolvendo-problema-de-performance-no-postgresql-com-cte-468d.html</guid>
-<description></description>
+<description>**Spoiler**: *a query ficou 23x mais rápida com CTE's apenas transformando o problema quadrático em linear. Sem índices*. Um dos [cenários mais comuns](http</description>
 <pubDate>2022-06-13</pubDate>
 </item>
 <item>
 <title>Quicksort, a Ruby implementation using Test-driven development</title>
 <link>https://leandronsp.com/articles/quicksort-a-ruby-implementation-using-test-driven-development.html</link>
 <guid>https://leandronsp.com/articles/quicksort-a-ruby-implementation-using-test-driven-development.html</guid>
-<description></description>
+<description>[Quicksort](https://en.wikipedia.org/wiki/Quicksort) is a sorting algorithm designed to have a _reasonable time complexity_.  In average, most implementations o</description>
 <pubDate>2021-04-16</pubDate>
 </item>
 <item>
@@ -244,161 +244,161 @@ Quicksort, a Ruby implementation using Test-driven development</title>
 <title>[pt-BR] Fundamentos do Git, um guia completo</title>
 <link>https://leandronsp.com/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html</link>
 <guid>https://leandronsp.com/articles/pt-br-fundamentos-do-git-um-guia-completo-2djh.html</guid>
-<description></description>
+<description>Se você já trabalha com [Git](https://git-scm.com/book/en/v2) diariamente, mas deseja ter uma boa compreensão dos **fundamentos** do Git, então este post é</description>
 <pubDate>2023-05-24</pubDate>
 </item>
 <item>
 <title>Prometheus on Kubernetes 101</title>
 <link>https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j.html</link>
 <guid>https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j.html</guid>
-<description></description>
+<description>[Prometheus](https://prometheus.io/docs/introduction/overview/) é um projeto open-source escrito em Go, criado em 2012 e utilizado para monitoramento e sistema</description>
 <pubDate>2022-07-06</pubDate>
 </item>
 <item>
 <title>Métricas cAdvisor no Kubernetes com Prometheus e Grafana</title>
 <link>https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html</link>
 <guid>https://leandronsp.com/articles/metricas-cadvisor-no-kubernetes-com-prometheus-e-grafana-5cng.html</guid>
-<description></description>
+<description>No [último artigo](https://leandronsp.com/articles/prometheus-on-kubernetes-101-296j) vimos o funcionamento básico do Prometheus e como configurar um servidor</description>
 <pubDate>2022-07-06</pubDate>
 </item>
 <item>
 <title>Mastering the Docker networking</title>
 <link>https://leandronsp.com/articles/mastering-the-docker-networking-2h57.html</link>
 <guid>https://leandronsp.com/articles/mastering-the-docker-networking-2h57.html</guid>
-<description></description>
+<description>Few months ago I demonstrated [through a practical example](https://leandronsp.com/articles/mastering-docker-volumes-j7m) the reasons to understand and take adv</description>
 <pubDate>2022-07-05</pubDate>
 </item>
 <item>
 <title>Mastering Docker Volumes</title>
 <link>https://leandronsp.com/articles/mastering-docker-volumes-j7m.html</link>
 <guid>https://leandronsp.com/articles/mastering-docker-volumes-j7m.html</guid>
-<description></description>
+<description>For those just starting with Docker, I've written some posts on [how to think like containers](https://leandronsp.com/articles/thinking-like-containers-3k24), w</description>
 <pubDate>2022-02-05</pubDate>
 </item>
 <item>
 <title>Liderança começa com confiança: minha trajetória</title>
 <link>https://leandronsp.com/articles/lideranca-comeca-com-confianca-minha-trajetoria-4i68.html</link>
 <guid>https://leandronsp.com/articles/lideranca-comeca-com-confianca-minha-trajetoria-4i68.html</guid>
-<description></description>
+<description>Neste post, quero compartilhar um pouco da minha trajetória e alguns valores sobre _trabalho em equipe_ e **liderança** que costumo aplicar no meu dia-dia. H�</description>
 <pubDate>2022-09-17</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part VIII, networking fundamentals</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-viii-networking-fundamentals-mo7.html</guid>
-<description></description>
+<description>So far, we have gained an understanding of the primary workload objects in Kubernetes.  These objects enable us to effectively run and manage multiple applicati</description>
 <pubDate>2023-05-13</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part VII, jobs and cronjobs</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-vii-jobs-and-cronjobs-12kg.html</guid>
-<description></description>
+<description>Our previous article, we learned how DaemonSets can effectively [collect data](https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0) from Kube</description>
 <pubDate>2023-04-29</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part VI, daemonsets</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-vi-daemonsets-1ph0.html</guid>
-<description></description>
+<description>For most use cases, deploying **core business apps** in Kubernetes using [Deployments](https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3)</description>
 <pubDate>2023-04-05</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part V, statefulsets</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-v-statefulsets-5dob.html</guid>
-<description></description>
+<description>[In the previous article](https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3), we explored ways to handle pod updates without affecting **a</description>
 <pubDate>2023-04-01</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part IV, deployments</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-iv-deployments-20m3.html</guid>
-<description></description>
+<description>In the [third part](https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5), we went a bit further and learned how Kubernetes</description>
 <pubDate>2023-03-12</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part III, controllers and self-healing</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-iii-controllers-and-self-healing-4ki5.html</guid>
-<description></description>
+<description>The [second part](https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb) of this series explained **how Pods work** while building a Pod having two c</description>
 <pubDate>2023-03-12</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part II, pods</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-ii-pods-19pb.html</guid>
-<description></description>
+<description>In the [previous post](https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1) we've seen the **fundamentals** of Kubernetes as well as an</description>
 <pubDate>2023-03-01</pubDate>
 </item>
 <item>
 <title>Kubernetes 101, part I, the fundamentals</title>
 <link>https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html</link>
 <guid>https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1.html</guid>
-<description></description>
+<description>It's been a while I wanted to take a time to sit down and write about _Kubernetes_. **The time has come.** In short, [Kubernetes](https://kubernetes.io/) is an</description>
 <pubDate>2023-02-23</pubDate>
 </item>
 <item>
 <title>Inter-process communication: pipes</title>
 <link>https://leandronsp.com/articles/inter-process-communication-pipes-52nj.html</link>
 <guid>https://leandronsp.com/articles/inter-process-communication-pipes-52nj.html</guid>
-<description></description>
+<description>After learning how [OS processes can use file descriptors](https://leandronsp.com/articles/inter-process-communication-files-1m34) for IPC, it's time to analyse</description>
 <pubDate>2022-07-14</pubDate>
 </item>
 <item>
 <title>Inter-process communication: files</title>
 <link>https://leandronsp.com/articles/inter-process-communication-files-1m34.html</link>
 <guid>https://leandronsp.com/articles/inter-process-communication-files-1m34.html</guid>
-<description></description>
+<description>[In the previous post](https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn) we learned that computers ev</description>
 <pubDate>2022-07-13</pubDate>
 </item>
 <item>
 <title>Implementando um simples background job com UNIX named pipes</title>
 <link>https://leandronsp.com/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html</link>
 <guid>https://leandronsp.com/articles/implementando-um-simples-background-job-com-unix-named-pipes-3eja.html</guid>
-<description></description>
+<description>No [último artigo](https://leandronsp.com/articles/entendendo-unix-pipes-3k56) vimos o funcionamento de UNIX streams, pipes e mais precisamente, **anonymous pi</description>
 <pubDate>2022-06-15</pubDate>
 </item>
 <item>
 <title>How to reduce the time complexity of nested loops</title>
 <link>https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html</link>
 <guid>https://leandronsp.com/articles/how-to-reduce-the-time-complexity-of-nested-loops-1lkd.html</guid>
-<description></description>
+<description>In this post I'll demonstrate a way to understand, analyse and reduce the time complexity on algorithms, specially on **nested loops**. The examples will use Ru</description>
 <pubDate>2021-12-04</pubDate>
 </item>
 <item>
 <title>Git fundamentals, a complete guide</title>
 <link>https://leandronsp.com/articles/git-fundamentals-a-complete-guide.html</link>
 <guid>https://leandronsp.com/articles/git-fundamentals-a-complete-guide.html</guid>
-<description></description>
+<description>If you already work with [Git](https://git-scm.com/book/en/v2) daily but want to have a good comprehension of Git **fundamentals**, then this post is for you. H</description>
 <pubDate>2023-03-15</pubDate>
 </item>
 <item>
 <title>Git fundamentals, a complete guide</title>
 <link>https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7.html</link>
 <guid>https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7.html</guid>
-<description></description>
+<description>If you already work with [Git](https://git-scm.com/book/en/v2) daily but want to have a good comprehension of Git **fundamentals**, then this post is for you. H</description>
 <pubDate>2023-03-15</pubDate>
 </item>
 <item>
 <title>Entendendo UNIX pipes</title>
 <link>https://leandronsp.com/articles/entendendo-unix-pipes-3k56.html</link>
 <guid>https://leandronsp.com/articles/entendendo-unix-pipes-3k56.html</guid>
-<description></description>
+<description>Basicamente, a todo comando UNIX é atribuído um conjunto de [streams](https://en.wikipedia.org/wiki/Standard_streams), que são canais de comunicação. Ou se</description>
 <pubDate>2022-06-15</pubDate>
 </item>
 <item>
 <title>Entendendo fundamentos de recursão</title>
 <link>https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4.html</link>
 <guid>https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4.html</guid>
-<description></description>
+<description>Se pra você: * **Recursão** é um tema obscuro ou quer entender mais um pouco sobre; * **Tail call e TCO** são meios de comunicação alienígena e;</description>
 <pubDate>2023-06-23</pubDate>
 </item>
 <item>
 <title>Deploy to Kubernetes using Github Actions (including Slack notification)</title>
 <link>https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification.html</link>
 <guid>https://leandronsp.com/articles/deploy-to-kubernetes-using-github-actions-including-slack-notification.html</guid>
-<description></description>
+<description>In this guide we'll cover the full cycle of deploying to Kubernetes using [Github Actions](https://github.com/features/actions). Batteries included: - Kubernete</description>
 <pubDate>2021-04-14</pubDate>
 </item>
 <item>
@@ -413,203 +413,203 @@ Deploy to Kubernetes using Github Actions (including Slack notification)</title>
 <title>Construindo um web server em Assembly x86, the grand finale, multi-threading</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading.html</guid>
-<description></description>
+<description>Uma vez que temos um [web server funcional](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server), podemos dar</description>
 <pubDate>2024-07-14</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, the grand finale, multi-threading</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-the-grand-finale-multi-threading-24hp.html</guid>
-<description></description>
+<description>Uma vez que temos um [web server funcional](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5), podemos</description>
 <pubDate>2024-07-14</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte V, finalmente o server</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server.html</guid>
-<description></description>
+<description>No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de</description>
 <pubDate>2024-05-25</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte V, finalmente o server</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-v-finalmente-o-server-9e5.html</guid>
-<description></description>
+<description>No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif), passamos pelos fundamentos de</description>
 <pubDate>2024-05-25</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte IV, um assembly modesto</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto.html</guid>
-<description></description>
+<description>Uma vez que temos [uma compreensão](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk) sobre sistema bi</description>
 <pubDate>2024-05-13</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte IV, um assembly modesto</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif.html</guid>
-<description></description>
+<description>Uma vez que temos [uma compreensão](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk) sobre sistema bi</description>
 <pubDate>2024-05-13</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte III, código de máquina</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina.html</guid>
-<description></description>
+<description>Agora que já temos uma [base de entendimento](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) s</description>
 <pubDate>2024-04-23</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte III, código de máquina</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iii-codigo-de-maquina-bgk.html</guid>
-<description></description>
+<description>Agora que já temos uma [base de entendimento](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9) s</description>
 <pubDate>2024-04-23</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte II, história e arquitetura</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura.html</guid>
-<description></description>
+<description>No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) demos uma introdução não-técnica sob</description>
 <pubDate>2024-04-11</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte II, história e arquitetura</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-ii-historia-e-arquitetura-2jb9.html</guid>
-<description></description>
+<description>No [artigo anterior](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) demos uma introdução não-técnica sob</description>
 <pubDate>2024-04-11</pubDate>
 </item>
 <item>
 <title>Construindo um web server em Assembly x86, parte I, introdução</title>
 <link>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html</link>
 <guid>https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5.html</guid>
-<description></description>
+<description>_Assembly_.  Para alguns, um monstrinho. Pra outros, algo antiquado. Mas pra quem tem curiosidade em entender como as coisas funcionam, **oportunidade**. Nesta</description>
 <pubDate>2024-04-09</pubDate>
 </item>
 <item>
 <title>Compiladores, trampolim, deque e thread pool</title>
 <link>https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html</link>
 <guid>https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1.html</guid>
-<description></description>
+<description>Faz alguns dias que não escrevo. Minha rotina mudou um pouco e também tenho focado em estudar algumas coisas que eu não tinha tanto domínio. Entretanto tenh</description>
 <pubDate>2023-10-17</pubDate>
 </item>
 <item>
 <title>CI/CD in a nutshell</title>
 <link>https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html</link>
 <guid>https://leandronsp.com/articles/cicd-in-a-nutshell-3k6a.html</guid>
-<description></description>
+<description>CI/CD is a popular practice that many companies and projects use today. However, sometimes we use these terms mistakenly, but in this article we'll dive into th</description>
 <pubDate>2023-02-19</pubDate>
 </item>
 <item>
 <title>Building a Web server in Bash, the grand finale</title>
 <link>https://leandronsp.com/articles/building-a-web-server-in-bash-the-grand-finale-n14.html</link>
 <guid>https://leandronsp.com/articles/building-a-web-server-in-bash-the-grand-finale-n14.html</guid>
-<description></description>
+<description>What a journey. In the [previous post](https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03) we experienced a refactoring in our She</description>
 <pubDate>2022-08-01</pubDate>
 </item>
 <item>
 <title>Building a Web server in Bash, part III - Login</title>
 <link>https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03.html</link>
 <guid>https://leandronsp.com/articles/building-a-web-server-in-bash-part-iii-login-a03.html</guid>
-<description></description>
+<description>In the [previous posts](https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg) we've seen how to manipulate sockets using *net</description>
 <pubDate>2022-08-01</pubDate>
 </item>
 <item>
 <title>Building a Web server in Bash, part II - parsing HTTP</title>
 <link>https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html</link>
 <guid>https://leandronsp.com/articles/building-a-web-server-in-bash-part-ii-parsing-http-14kg.html</guid>
-<description></description>
+<description>In the [first part](https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b) of this guide, we walked through the basics of netcat `nc</description>
 <pubDate>2022-08-01</pubDate>
 </item>
 <item>
 <title>Building a Web server in Bash, part I - sockets</title>
 <link>https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html</link>
 <guid>https://leandronsp.com/articles/building-a-web-server-in-bash-part-i-sockets-2n8b.html</guid>
-<description></description>
+<description>Have you ever wondered _how a Web server works under the hood_? Moreover, would you be willing to sharpen your Shell scripting skills? Maybe this guide is for y</description>
 <pubDate>2022-08-01</pubDate>
 </item>
 <item>
 <title>Building a dead simple background job in Rust</title>
 <link>https://leandronsp.com/articles/building-a-dead-simple-background-job-in-rust-4m1d.html</link>
 <guid>https://leandronsp.com/articles/building-a-dead-simple-background-job-in-rust-4m1d.html</guid>
-<description></description>
+<description>In today's post we'll explore how to create a basic background job in Rust, simulating Rust channels with a Vector-based queue. Generally, a background job oper</description>
 <pubDate>2023-11-12</pubDate>
 </item>
 <item>
 <title>Boilerplate for a containerized plain Ruby application</title>
 <link>https://leandronsp.com/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html</link>
 <guid>https://leandronsp.com/articles/boilerplate-for-a-containerized-plain-ruby-application-3094.html</guid>
-<description></description>
+<description>Recently I've been poking around automation in order to experiment and build software on destroyable environments, so that I won't mess up with my operating sys</description>
 <pubDate>2021-04-28</pubDate>
 </item>
 <item>
 <title>Arrays in x86 Assembly</title>
 <link>https://leandronsp.com/articles/arrays-in-x86-assembly.html</link>
 <guid>https://leandronsp.com/articles/arrays-in-x86-assembly.html</guid>
-<description></description>
+<description>_Originally posted in [Portuguese](https://leandronsp.com/articles/arrays-em-assembly-x86-55hb)_ Recently I wrote [a 6-article series](https://leandronsp.com/ar</description>
 <pubDate>2025-10-22</pubDate>
 </item>
 <item>
 <title>Arrays em Assembly x86</title>
 <link>https://leandronsp.com/articles/arrays-em-assembly-x86.html</link>
 <guid>https://leandronsp.com/articles/arrays-em-assembly-x86.html</guid>
-<description></description>
+<description>Recentemente escrevi [uma saga de 6 artigos](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) sobre Assembly x</description>
 <pubDate>2024-08-17</pubDate>
 </item>
 <item>
 <title>Arrays em Assembly x86</title>
 <link>https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html</link>
 <guid>https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html</guid>
-<description></description>
+<description>Recentemente escrevi [uma saga de 6 artigos](https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5) sobre Assembly x</description>
 <pubDate>2024-08-17</pubDate>
 </item>
 <item>
 <title>AI &amp; Ruby: an introduction to neural networks</title>
 <link>https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html</link>
 <guid>https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3.html</guid>
-<description></description>
+<description>Currently we find ourselves in the middle of the hype surrounding **Artificial Intelligence** (AI) and all its buzzwords. It's natural to feel that terms relate</description>
 <pubDate>2023-05-19</pubDate>
 </item>
 <item>
 <title>A very simple GraphQL tutorial in Ruby</title>
 <link>https://leandronsp.com/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html</link>
 <guid>https://leandronsp.com/articles/a-very-simple-graphql-tutorial-in-ruby-54ck.html</guid>
-<description></description>
+<description>According to Wikipedia &gt; GraphQL is an open-source data query and manipulation language for APIs, and a runtime for fulfilling queries with existing data.[2] Gr</description>
 <pubDate>2022-03-03</pubDate>
 </item>
 <item>
 <title>A powerful full-text search in PostgreSQL in less than 20 lines</title>
 <link>https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html</link>
 <guid>https://leandronsp.com/articles/a-powerful-full-text-search-in-postgresql-in-less-than-20-lines-5c0d.html</guid>
-<description></description>
+<description>This blogpost will guide you to understand the fundamental pieces needed to implement a **good enough** [full-text search](https://en.wikipedia.org/wiki/Full-te</description>
 <pubDate>2021-09-16</pubDate>
 </item>
 <item>
 <title>A CRUD journey in Haskell, part II, Socket programming</title>
 <link>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html</link>
 <guid>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-ii-socket-programming-2po1.html</guid>
-<description></description>
+<description>Assuming that [we've got some introduction](https://leandronsp.com/a-crud-journey-in-haskell-part-i-introduction) to Haskell, let's start doing some Socket prog</description>
 <pubDate>2021-08-10</pubDate>
 </item>
 <item>
 <title>A CRUD journey in Haskell, part I, introduction</title>
 <link>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html</link>
 <guid>https://leandronsp.com/articles/a-crud-journey-in-haskell-part-i-introduction-2c3j.html</guid>
-<description></description>
+<description>In the past few days, [I've been learning some Haskell](https://twitter.com/leandronsp/status/1421991890346463233?s=20) after years of seeing people praising th</description>
 <pubDate>2021-08-03</pubDate>
 </item>
 <item>
 <title>A comprehensive introduction to Ruby</title>
 <link>https://leandronsp.com/articles/a-comprehensive-introduction-to-ruby-8o7.html</link>
 <guid>https://leandronsp.com/articles/a-comprehensive-introduction-to-ruby-8o7.html</guid>
-<description></description>
+<description>Another tutorial for learning Ruby? **Absolutely not**. This guide is different from the typical tutorials you'll find online. As someone new to Ruby, you've li</description>
 <pubDate>2023-04-28</pubDate>
 </item>
 <item>
 <title>A brief history of modern computers, multitasking and operating systems</title>
 <link>https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html</link>
 <guid>https://leandronsp.com/articles/a-brief-history-of-modern-computers-multitasking-and-operating-systems-2cbn.html</guid>
-<description></description>
+<description>In this article I'll try to write a brief history of modern computers, multitasking and how operating systems tackle concurrency.  The first *modern* computers</description>
 <pubDate>2022-07-12</pubDate>
 </item>
 </channel></rss>
