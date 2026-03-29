@@ -249,16 +249,16 @@ loops</strong>; which can be described with the following practical list
 of skills I created and have been using on a daily basis for every
 project in production:</p>
 <ul>
-<li><strong>PO (product owner)</strong>: agent receives a prompt and
+<li><p><strong>PO (product owner)</strong>: agent receives a prompt and
 outputs a well-scoped task based on initial requirements and prior
-knowledge on the codebase. Clearer context.</li>
-<li><strong>TDD (test-driven development)</strong>: the developer agent
-outputs the code, guided by TDD - red, green, refactor. Granular tests
-as noise margins.</li>
-<li><strong>Review</strong>: agent and human checks before merging.
-Explicit checkpoint.</li>
-<li><strong>Small PRs</strong>: small PR’s enable development and
-testing with reviewable increments. Tighter feedback loops.</li>
+knowledge on the codebase. Clearer context.</p></li>
+<li><p><strong>TDD (test-driven development)</strong>: the developer
+agent outputs the code, guided by TDD - red, green, refactor. Granular
+tests as noise margins.</p></li>
+<li><p><strong>Review</strong>: agent and human checks before merging.
+Explicit checkpoint.</p></li>
+<li><p><strong>Small PRs</strong>: small PR’s enable development and
+testing with reviewable increments. Tighter feedback loops.</p></li>
 </ul>
 <p>Yes, that’s <strong>software engineering practices</strong> all the
 way down (and they are not new). Yet we don’t have the formal tools
@@ -314,11 +314,11 @@ class="uri">https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-ne
 <guid>https://leandronsp.com/articles/understanding-recursion-fundamentals.html</guid>
 <description><![CDATA[<p>If for you:</p>
 <ul>
-<li><strong>Recursion</strong> is an obscure topic or you want to
-understand it a bit better;</li>
-<li><strong>Tail call and TCO</strong> are alien communication methods
-and;</li>
-<li><strong>Trampoline</strong> is a medicine name</li>
+<li><p><strong>Recursion</strong> is an obscure topic or you want to
+understand it a bit better;</p></li>
+<li><p><strong>Tail call and TCO</strong> are alien communication
+methods and;</p></li>
+<li><p><strong>Trampoline</strong> is a medicine name</p></li>
 </ul>
 <p><em>Then this article is for you.</em></p>
 <p>Here, I’ll explain what these terms are in a didactic way and the
@@ -336,15 +336,16 @@ fundamentos de recursão</a></em></p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#what-is-recursion">What is recursion</a></li>
-<li><a href="#meet-fibo">Meet Fibo</a></li>
-<li><a href="#tail-call">Tail call</a></li>
-<li><a href="#stack-and-stack-overflow">Stack and stack
-overflow</a></li>
-<li><a href="#tail-call-optimization">Tail call optimization</a></li>
-<li><a href="#trampoline">Trampoline</a></li>
-<li><a href="#conclusion">Conclusion</a></li>
-<li><a href="#references">References</a></li>
+<li><p><a href="#what-is-recursion">What is recursion</a></p></li>
+<li><p><a href="#meet-fibo">Meet Fibo</a></p></li>
+<li><p><a href="#tail-call">Tail call</a></p></li>
+<li><p><a href="#stack-and-stack-overflow">Stack and stack
+overflow</a></p></li>
+<li><p><a href="#tail-call-optimization">Tail call
+optimization</a></p></li>
+<li><p><a href="#trampoline">Trampoline</a></p></li>
+<li><p><a href="#conclusion">Conclusion</a></p></li>
+<li><p><a href="#references">References</a></p></li>
 </ul>
 <hr />
 <h2 id="what-is-recursion">What is recursion</h2>
@@ -677,18 +678,18 @@ tool. If not, I strongly recommend reading my series.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#arrays-dont-exist">Arrays don’t exist</a></li>
-<li><a href="#strings-dont-exist-either">Strings don’t exist
-either</a></li>
-<li><a href="#the-simplest-array-in-the-universe">The simplest array in
-the universe</a></li>
-<li><a href="#using-an-array-with-uninitialized-data">Using an array
-with uninitialized data</a>
+<li><p><a href="#arrays-dont-exist">Arrays don’t exist</a></p></li>
+<li><p><a href="#strings-dont-exist-either">Strings don’t exist
+either</a></p></li>
+<li><p><a href="#the-simplest-array-in-the-universe">The simplest array
+in the universe</a></p></li>
+<li><p><a href="#using-an-array-with-uninitialized-data">Using an array
+with uninitialized data</a></p>
 <ul>
 <li><a href="#index-to-the-rescue">Index to the rescue</a></li>
 <li><a href="#hitting-the-array-limit">Hitting the array limit</a></li>
 </ul></li>
-<li><a href="#heap-heap-hooray">Heap, heap, hooray!</a>
+<li><p><a href="#heap-heap-hooray">Heap, heap, hooray!</a></p>
 <ul>
 <li><a href="#dynamic-memory-allocation-with-brk">Dynamic memory
 allocation with brk</a></li>
@@ -696,9 +697,9 @@ allocation with brk</a></li>
 everywhere</a></li>
 <li><a href="#resize-with-brk">Resize with brk</a></li>
 </ul></li>
-<li><a href="#the-final-program">The final program</a></li>
-<li><a href="#conclusion">Conclusion</a></li>
-<li><a href="#references">References</a></li>
+<li><p><a href="#the-final-program">The final program</a></p></li>
+<li><p><a href="#conclusion">Conclusion</a></p></li>
+<li><p><a href="#references">References</a></p></li>
 </ul>
 <hr />
 <h2 id="arrays-dont-exist">Arrays don’t exist</h2>
@@ -917,12 +918,12 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb22-1"><a
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>mov al<span class="op">,</span> byte <span class="op">[</span>pointer<span class="op">]</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mov byte <span class="op">[</span>array <span class="op">+</span> rax<span class="op">],</span> <span class="dv">1</span>   <span class="op">;</span> array <span class="op">+</span> <span class="dv">0</span></span></code></pre></div>
 <ul>
-<li>the first instruction moves the first byte contained at the
-<code>pointer</code> address and stores it in register AL</li>
-<li>the second instruction moves immediate value 1 (array element) to
+<li><p>the first instruction moves the first byte contained at the
+<code>pointer</code> address and stores it in register AL</p></li>
+<li><p>the second instruction moves immediate value 1 (array element) to
 the array’s memory address. Since RAX (64-bit version of AL) has value
 <code>0x0</code> representing the pointer, we’re inserting at the first
-byte of the array</li>
+byte of the array</p></li>
 </ul>
 <p>And to store the second element in the array?</p>
 <div class="sourceCode" id="cb23"><pre
@@ -1123,22 +1124,22 @@ alt="memory layout" />
 <figcaption aria-hidden="true">memory layout</figcaption>
 </figure>
 <ul>
-<li>the layout is represented as an area in computer memory where we
+<li><p>the layout is represented as an area in computer memory where we
 have the program’s lowest memory addresses toward the highest addresses
-at the top</li>
-<li>at the lowest memory addresses, we have the <code>.text</code>
+at the top</p></li>
+<li><p>at the lowest memory addresses, we have the <code>.text</code>
 section, where we’ve already seen that it refers to the program
-itself</li>
-<li>then we have the <strong>data section</strong> which encompasses
+itself</p></li>
+<li><p>then we have the <strong>data section</strong> which encompasses
 initialized data <code>.data</code> and the following section
-representing uninitialized data <code>.bss</code></li>
-<li>at the highest addresses, we have the program’s <em>stack</em>,
+representing uninitialized data <code>.bss</code></p></li>
+<li><p>at the highest addresses, we have the program’s <em>stack</em>,
 which stores metadata such as the program name, its arguments and any
 program information that has a fixed size fitting within the stack, as
-well as function calls and their respective arguments</li>
-<li>the stack has a <em>stack</em> format and “grows downward”, that is,
-as we add elements to the stack, it grows toward lower addresses in
-memory</li>
+well as function calls and their respective arguments</p></li>
+<li><p>the stack has a <em>stack</em> format and “grows downward”, that
+is, as we add elements to the stack, it grows toward lower addresses in
+memory</p></li>
 </ul>
 <p>In the “middle” of the layout, between the data section and the
 stack, we have a large area in memory that many end up associating as
@@ -1214,14 +1215,14 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href=
 <span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="fu">gdb</span><span class="kw">)</span> <span class="ex">i</span> r rax</span>
 <span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a><span class="ex">rax</span>            0x403000            4206592</span></code></pre></div>
 <ul>
-<li><code>0x401000</code>: <code>.text</code> section which is where the
-program begins</li>
-<li><code>0x402000</code>: <code>.data</code> section where initialized
-data is</li>
-<li><code>0x402004</code>: <code>.bss</code> section where uninitialized
-data is</li>
-<li><code>0x403000</code>: program break, which is where the data
-section ends and our “heap” begins</li>
+<li><p><code>0x401000</code>: <code>.text</code> section which is where
+the program begins</p></li>
+<li><p><code>0x402000</code>: <code>.data</code> section where
+initialized data is</p></li>
+<li><p><code>0x402004</code>: <code>.bss</code> section where
+uninitialized data is</p></li>
+<li><p><code>0x403000</code>: program break, which is where the data
+section ends and our “heap” begins</p></li>
 </ul>
 <p>With this, from address <code>0x403000</code> onwards is where we’ll
 put our array elements, so the array address can use just one byte,
@@ -1531,26 +1532,26 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb52-1"><a
 <span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>    syscall</span>
 <span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>    jmp <span class="op">.</span><span class="fu">append</span></span></code></pre></div>
 <ul>
-<li>the first resize syscall brings the current break, in this case we
-already know it’s <code>0x403003</code>, which was allocated at the
-beginning of the program for the array</li>
-<li>the second resize syscall modifies the current break, thus
-allocating 3 more bytes in the heap</li>
-<li>at the end of resize, instead of returning the function, we’ll go
+<li><p>the first resize syscall brings the current break, in this case
+we already know it’s <code>0x403003</code>, which was allocated at the
+beginning of the program for the array</p></li>
+<li><p>the second resize syscall modifies the current break, thus
+allocating 3 more bytes in the heap</p></li>
+<li><p>at the end of resize, instead of returning the function, we’ll go
 back to the beginning of <code>.append</code> and execute the necessary
-logic to add the element to the array</li>
+logic to add the element to the array</p></li>
 </ul>
 <p>This way, we can manipulate this new memory area to add more elements
 to the array, thus dynamically modifying its capacity.</p>
 <p>If we run the program exactly like this, we’ll face a problem,
 because:</p>
 <ul>
-<li>every time resize is done, it jumps to the beginning of the
-routine</li>
-<li>the array size (pointer) is checked against the initial capacity,
+<li><p>every time resize is done, it jumps to the beginning of the
+routine</p></li>
+<li><p>the array size (pointer) is checked against the initial capacity,
 which in this case is 3. Since the pointer reached value 3, it will
 enter resize again characterizing an infinite loop with infinite resize
-until memory runs out</li>
+until memory runs out</p></li>
 </ul>
 <p>To solve this, we need to compare the pointer with the current
 capacity (modified), and therefore we’ll add a value in the
@@ -1711,11 +1712,11 @@ other data structures.</p>
 <hr />
 <h2 id="references">References</h2>
 <ul>
-<li><a href="https://man7.org/linux/man-pages/man2/brk.2.html">brk
-syscall</a></li>
-<li><a
+<li><p><a href="https://man7.org/linux/man-pages/man2/brk.2.html">brk
+syscall</a></p></li>
+<li><p><a
 href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5">x86
-Assembly series</a></li>
+Assembly series</a></p></li>
 </ul>]]></description>
 <pubDate>2025-10-22</pubDate>
 </item>
@@ -1746,38 +1747,59 @@ processes:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> echo <span class="st">&#39;hello&#39;</span> <span class="kw">|</span> <span class="fu">base64</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">aGVsbG8K</span></span></code></pre></div>
-<p>Here’s what’s happening: * The process <code>echo</code> is started
-with the content “hello” * <code>echo</code> is a program that prints
-the message to <em>STDOUT</em> * Through the pipe, the content in
-<em>STDOUT</em> is <strong>sent</strong> directly to the <em>STDIN</em>
-of the <code>base64</code> process * The <code>base64</code> process
-encodes its input to Base64 and then puts the result in
-<em>STDOUT</em></p>
+<p>Here’s what’s happening:</p>
+<ul>
+<li><p>The process <code>echo</code> is started with the content
+“hello”</p></li>
+<li><p><code>echo</code> is a program that prints the message to
+<em>STDOUT</em></p></li>
+<li><p>Through the pipe, the content in <em>STDOUT</em> is
+<strong>sent</strong> directly to the <em>STDIN</em> of the
+<code>base64</code> process</p></li>
+<li><p>The <code>base64</code> process encodes its input to Base64 and
+then puts the result in <em>STDOUT</em></p></li>
+</ul>
 <p>Note the word “send”. Yes, anonymous pipes are a form of <strong>IPC
 (Inter-process communication).</strong> Other forms of IPC in UNIX
-include: * named pipes (mkfifo) * sockets * regular files * or even a
-simple <strong>signal</strong></p>
+include:</p>
+<ul>
+<li><p>named pipes (mkfifo)</p></li>
+<li><p>sockets</p></li>
+<li><p>regular files</p></li>
+<li><p>or even a simple <strong>signal</strong></p></li>
+</ul>
 <h2 id="unix-signals">UNIX signals</h2>
-<p>According to <a href="url">Wikipedia</a>: &gt; A UNIX signal is a
-standardized message sent to a program to trigger specific behaviour,
-such as quitting or error handling</p>
-<p>There are many signals we can send to a process, including: * SIGTERM
-- sends a notification to the process to terminate. It can be “trapped,”
-which means the process can do some cleanup work before termination,
-like releasing OS resources and closing file descriptors * SIGKILL -
-sends a termination signal that cannot be trapped or ignored, forcing
-immediate termination * SIGINT - the interrupt signal, typically sent
-when you press <code>Ctrl+C</code> in the terminal. It can be trapped,
-allowing the process to perform cleanup before exiting gracefully *
-SIGHUP - the hangup signal, originally sent when a terminal connection
-was lost. Modern applications often use it to reload configuration files
-without restarting the process * SIGQUIT - similar to SIGINT but also
-generates a core dump for debugging * SIGSTOP - pauses (suspends) a
-process. Cannot be trapped or ignored * SIGCONT - resumes a process that
-was paused by <em>SIGSTOP</em> * SIGCHLD - sent to a parent process when
-a child process terminates or stops * <strong>SIGUSR1</strong> and
-<strong>SIGUSR2</strong> - user-defined signals that applications can
-use for custom purposes</p>
+<p>According to <a href="url">Wikipedia</a>:</p>
+<blockquote>
+<p>A UNIX signal is a standardized message sent to a program to trigger
+specific behaviour, such as quitting or error handling</p>
+</blockquote>
+<p>There are many signals we can send to a process, including:</p>
+<ul>
+<li><p>SIGTERM - sends a notification to the process to terminate. It
+can be “trapped,” which means the process can do some cleanup work
+before termination, like releasing OS resources and closing file
+descriptors</p></li>
+<li><p>SIGKILL - sends a termination signal that cannot be trapped or
+ignored, forcing immediate termination</p></li>
+<li><p>SIGINT - the interrupt signal, typically sent when you press
+<code>Ctrl+C</code> in the terminal. It can be trapped, allowing the
+process to perform cleanup before exiting gracefully</p></li>
+<li><p>SIGHUP - the hangup signal, originally sent when a terminal
+connection was lost. Modern applications often use it to reload
+configuration files without restarting the process</p></li>
+<li><p>SIGQUIT - similar to SIGINT but also generates a core dump for
+debugging</p></li>
+<li><p>SIGSTOP - pauses (suspends) a process. Cannot be trapped or
+ignored</p></li>
+<li><p>SIGCONT - resumes a process that was paused by
+<em>SIGSTOP</em></p></li>
+<li><p>SIGCHLD - sent to a parent process when a child process
+terminates or stops</p></li>
+<li><p><strong>SIGUSR1</strong> and <strong>SIGUSR2</strong> -
+user-defined signals that applications can use for custom
+purposes</p></li>
+</ul>
 <h2 id="sending-messages-using-signals">Sending messages using
 signals</h2>
 <p>Okay, we know that signals are a primitive form of IPC. UNIX-like
@@ -1840,13 +1862,17 @@ at a high-level, messages are simply <em>strings</em>. But in memory,
 they are stored as <strong>bytes</strong>.</p>
 <p>We know that bytes are made of bits. In computer terms, what’s a bit?
 It’s simply an abstraction representing <strong>only two
-states</strong>: * zero * one</p>
+states</strong>:</p>
+<ul>
+<li><p>zero</p></li>
+<li><p>one</p></li>
+</ul>
 <p>That’s it. For instance, using <a href="url">ASCII</a>, we know that
 the letter “h” has the following codes:</p>
 <ul>
-<li>104 in decimal</li>
-<li><code>0x68</code> in hexadecimal</li>
-<li><code>01101000</code> in binary</li>
+<li><p>104 in decimal</p></li>
+<li><p><code>0x68</code> in hexadecimal</p></li>
+<li><p><code>01101000</code> in binary</p></li>
 </ul>
 <p>Binary-wise, what if we represented each “0” with a specific signal
 and each “1” with another? We know that some signals such as SIGTERM,
@@ -1906,8 +1932,8 @@ binary representation and sending it via signals</p>
 <p>On the other side, the receiver should be capable of decoding the
 message and converting it back to the letter “h”:</p>
 <ul>
-<li>sender <em>encodes</em> the message</li>
-<li>receiver <em>decodes</em> the message</li>
+<li><p>sender <em>encodes</em> the message</p></li>
+<li><p>receiver <em>decodes</em> the message</p></li>
 </ul>
 <p>So, how do we decode <code>01101000</code> (the letter “h” in ASCII)?
 Let’s break it down into a few steps:</p>
@@ -1925,15 +1951,20 @@ on each bit and then sum all the values, in this case from MSB to LSB
 _left shift on <em>zeros</em> will always produce a _zero__</li>
 </ol>
 <ul>
-<li><code>0 &lt;&lt; 7</code> = <code>(2 ** 7) * 0</code> =
-<code>128 * 0</code> = 0</li>
-<li><code>1 &lt;&lt; 6</code> = <code>(2 ** 6) * 1</code> =
-<code>64 * 1</code> = 64</li>
+<li><p><code>0 &lt;&lt; 7</code> = <code>(2 ** 7) * 0</code> =
+<code>128 * 0</code> = 0</p></li>
+<li><p><code>1 &lt;&lt; 6</code> = <code>(2 ** 6) * 1</code> =
+<code>64 * 1</code> = 64</p></li>
 </ul>
-<p>Similarly to the remaining bits: * <code>1 &lt;&lt; 5</code> = 32 *
-<code>0 &lt;&lt; 4</code> = 0 * <code>1 &lt;&lt; 3</code> = 8 *
-<code>0 &lt;&lt; 2</code> = 0 * <code>0 &lt;&lt; 1</code> = 0 *
-<code>0 &lt;&lt; 0</code> = 0</p>
+<p>Similarly to the remaining bits:</p>
+<ul>
+<li><p><code>1 &lt;&lt; 5</code> = 32</p></li>
+<li><p><code>0 &lt;&lt; 4</code> = 0</p></li>
+<li><p><code>1 &lt;&lt; 3</code> = 8</p></li>
+<li><p><code>0 &lt;&lt; 2</code> = 0</p></li>
+<li><p><code>0 &lt;&lt; 1</code> = 0</p></li>
+<li><p><code>0 &lt;&lt; 0</code> = 0</p></li>
+</ul>
 <p>So, our sum becomes, from MSB to LSB:</p>
 <pre class="text"><code>MSB                          LSB
 0   1    1    0   1   0   0   0
@@ -1995,9 +2026,9 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb14-1"><a href=
 instance. According to the <a href="https://www.ascii-code.com/">ASCII
 table</a>, it should be the following:</p>
 <ul>
-<li><code>e</code> in decimal is <code>101</code></li>
-<li><code>l</code> in decimal is <code>108</code></li>
-<li><code>o</code> in decimal is <code>111</code></li>
+<li><p><code>e</code> in decimal is <code>101</code></p></li>
+<li><p><code>l</code> in decimal is <code>108</code></p></li>
+<li><p><code>o</code> in decimal is <code>111</code></p></li>
 </ul>
 <p>Let’s check if Ruby knows that:</p>
 <div class="sourceCode" id="cb15"><pre
@@ -2043,14 +2074,14 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb17-1"><a href=
 <p><em>Read that code and its comments. It’s very important. Do not
 continue reading until you really get what’s happening here.</em></p>
 <ul>
-<li>Whenever we get <code>SIGUSR1</code>, we accumulate the bit
-<code>0</code></li>
-<li>When getting <code>SIGUSR2</code>, accumulate then the bit
-<code>1</code></li>
-<li>When accumulator reaches the position<code>8</code>, it means we
+<li><p>Whenever we get <code>SIGUSR1</code>, we accumulate the bit
+<code>0</code></p></li>
+<li><p>When getting <code>SIGUSR2</code>, accumulate then the bit
+<code>1</code></p></li>
+<li><p>When accumulator reaches the position<code>8</code>, it means we
 have a byte. At this moment we should print the ASCII representation
 using the <code>.chr</code> we seen earlier. Then, reset bit position
-and accumulator</li>
+and accumulator</p></li>
 </ul>
 <p>Let’s see our receiver in action! Start the receiver in one
 terminal:</p>
@@ -2096,51 +2127,63 @@ individual bits from a byte?</strong> To extract the bit at position
 <pre class="text"><code>bit = (byte &gt;&gt; i) &amp; 1</code></pre>
 <p>Let me break this down:</p>
 <ul>
-<li><code>byte &gt;&gt; i</code> performs a <em>right shift</em> by
-<code>i</code> positions</li>
-<li><code>&amp; 1</code> is a bitwise <code>AND</code> operation that
-extracts only the <em>rightmost</em> bit</li>
+<li><p><code>byte &gt;&gt; i</code> performs a <em>right shift</em> by
+<code>i</code> positions</p></li>
+<li><p><code>&amp; 1</code> is a bitwise <code>AND</code> operation that
+extracts only the <em>rightmost</em> bit</p></li>
 </ul>
 <p>For the letter “h” (<code>01101000</code> in binary, <code>104</code>
 in decimal):</p>
-<p><strong>Position 0 (LSB):</strong> * <code>(104 &gt;&gt; 0)</code> =
-<code>104 / (2 ** 0)</code> = <code>104 / 1</code> = 104 *
-<code>01101000</code> &gt;&gt; 0 = <code>01101000</code> *
-<code>01101000</code> &amp; <code>00000001</code> = 0 (<em>one</em> AND
-<em>zero</em> is <em>zero</em>)</p>
-<p><strong>Position 1:</strong> * <code>(104 &gt;&gt; 1)</code> =
-<code>104 / (2 ** 1)</code> = <code>104 / 2</code> = 52 *
-<code>01101000</code> &gt;&gt; 1 = <code>00110100</code> *
-<code>00110100</code> &amp; <code>00000001</code> = 0</p>
-<p><strong>Position 2:</strong> * <code>(104 &gt;&gt; 2)</code> =
-<code>104 / (2 ** 2)</code> = <code>104 / 4</code> = 26 *
-<code>01101000</code> &gt;&gt; 2 = <code>00011010</code> *
-<code>00011010</code> &amp; <code>00000001</code> = 0</p>
-<p><strong>Position 3:</strong> * <code>(104 &gt;&gt; 3)</code> =
-<code>104 / (2 ** 3)</code> = <code>104 / 8</code> = 13 *
-<code>01101000</code> &gt;&gt; 3 = <code>00001101</code> *
-<code>00001101</code> &amp; <code>00000001</code> = 1 (<em>one</em> AND
-<em>one</em> equals <em>one</em>)</p>
+<p><strong>Position 0 (LSB):</strong></p>
+<ul>
+<li><p><code>(104 &gt;&gt; 0)</code> = <code>104 / (2 ** 0)</code> =
+<code>104 / 1</code> = 104</p></li>
+<li><p><code>01101000</code> &gt;&gt; 0 = <code>01101000</code></p></li>
+<li><p><code>01101000</code> &amp; <code>00000001</code> = 0
+(<em>one</em> AND <em>zero</em> is <em>zero</em>)</p></li>
+</ul>
+<p><strong>Position 1:</strong></p>
+<ul>
+<li><p><code>(104 &gt;&gt; 1)</code> = <code>104 / (2 ** 1)</code> =
+<code>104 / 2</code> = 52</p></li>
+<li><p><code>01101000</code> &gt;&gt; 1 = <code>00110100</code></p></li>
+<li><p><code>00110100</code> &amp; <code>00000001</code> = 0</p></li>
+</ul>
+<p><strong>Position 2:</strong></p>
+<ul>
+<li><p><code>(104 &gt;&gt; 2)</code> = <code>104 / (2 ** 2)</code> =
+<code>104 / 4</code> = 26</p></li>
+<li><p><code>01101000</code> &gt;&gt; 2 = <code>00011010</code></p></li>
+<li><p><code>00011010</code> &amp; <code>00000001</code> = 0</p></li>
+</ul>
+<p><strong>Position 3:</strong></p>
+<ul>
+<li><p><code>(104 &gt;&gt; 3)</code> = <code>104 / (2 ** 3)</code> =
+<code>104 / 8</code> = 13</p></li>
+<li><p><code>01101000</code> &gt;&gt; 3 = <code>00001101</code></p></li>
+<li><p><code>00001101</code> &amp; <code>00000001</code> = 1
+(<em>one</em> AND <em>one</em> equals <em>one</em>)</p></li>
+</ul>
 <p>And so on for positions 4, 5, 6, and 7. This gives us:
 <code>0, 0, 0, 1, 0, 1, 1, 0</code> — exactly the bits we need from LSB
 to MSB!</p>
 <ul>
-<li><code>(104 &gt;&gt; 0) &amp; 1</code> = <code>104 &amp; 1</code> =
-0</li>
-<li><code>(104 &gt;&gt; 1) &amp; 1</code> = <code>52 &amp; 1</code> =
-0</li>
-<li><code>(104 &gt;&gt; 2) &amp; 1</code> = <code>26 &amp; 1</code> =
-0</li>
-<li><code>(104 &gt;&gt; 3) &amp; 1</code> = <code>13 &amp; 1</code> =
-1</li>
-<li><code>(104 &gt;&gt; 4) &amp; 1</code> = <code>6 &amp; 1</code> =
-0</li>
-<li><code>(104 &gt;&gt; 5) &amp; 1</code> = <code>3 &amp; 1</code> =
-1</li>
-<li><code>(104 &gt;&gt; 6) &amp; 1</code> = <code>1 &amp; 1</code> =
-1</li>
-<li><code>(104 &gt;&gt; 7) &amp; 1</code> = <code>0 &amp; 1</code> =
-0</li>
+<li><p><code>(104 &gt;&gt; 0) &amp; 1</code> = <code>104 &amp; 1</code>
+= 0</p></li>
+<li><p><code>(104 &gt;&gt; 1) &amp; 1</code> = <code>52 &amp; 1</code> =
+0</p></li>
+<li><p><code>(104 &gt;&gt; 2) &amp; 1</code> = <code>26 &amp; 1</code> =
+0</p></li>
+<li><p><code>(104 &gt;&gt; 3) &amp; 1</code> = <code>13 &amp; 1</code> =
+1</p></li>
+<li><p><code>(104 &gt;&gt; 4) &amp; 1</code> = <code>6 &amp; 1</code> =
+0</p></li>
+<li><p><code>(104 &gt;&gt; 5) &amp; 1</code> = <code>3 &amp; 1</code> =
+1</p></li>
+<li><p><code>(104 &gt;&gt; 6) &amp; 1</code> = <code>1 &amp; 1</code> =
+1</p></li>
+<li><p><code>(104 &gt;&gt; 7) &amp; 1</code> = <code>0 &amp; 1</code> =
+0</p></li>
 </ul>
 <blockquote>
 <p>Pay close attention to this technique. It’s a fundamental operation
@@ -2230,10 +2273,10 @@ print the next one on a new line with <code>\n</code>.</p>
 message. How about being it all <em>zeroes</em>
 (<code>0000 0000</code>)?</p>
 <ul>
-<li>We send the message: first 5 bytes representing the “hello”
-message</li>
-<li>Then we send a “NULL terminator”, just one byte <em>0</em>
-(<code>0000 0000</code>)</li>
+<li><p>We send the message: first 5 bytes representing the “hello”
+message</p></li>
+<li><p>Then we send a “NULL terminator”, just one byte <em>0</em>
+(<code>0000 0000</code>)</p></li>
 </ul>
 <pre class="text"><code>0110 1000 # h
 0110 0101 # e
@@ -2408,12 +2451,12 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb34-1"><a href=
 <span id="cb34-67"><a href="#cb34-67" aria-hidden="true" tabindex="-1"></a>  broker<span class="at">.start</span></span>
 <span id="cb34-68"><a href="#cb34-68" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
 <ul>
-<li>The broker registers itself</li>
-<li>Traps incoming signals <code>USR1</code> (bit 0) and
-<code>USR2</code> (bit 1)</li>
-<li>Enqueues the messages</li>
-<li>Send messages to consumers using outgoing signals (<code>USR1</code>
-and <code>USR2</code> too)</li>
+<li><p>The broker registers itself</p></li>
+<li><p>Traps incoming signals <code>USR1</code> (bit 0) and
+<code>USR2</code> (bit 1)</p></li>
+<li><p>Enqueues the messages</p></li>
+<li><p>Send messages to consumers using outgoing signals
+(<code>USR1</code> and <code>USR2</code> too)</p></li>
 </ul>
 <p><em>Note that we’re using a module called <code>SignalCodec</code>
 which will be explained soon. Basically this module contains all core
@@ -2472,9 +2515,9 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb35-1"><a href=
 <span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>  consumer<span class="at">.start</span></span>
 <span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div>
 <ul>
-<li>The consumer starts and registers itself with the broker</li>
-<li>Consumer then traps incoming signals (bit 0 and bit 1)</li>
-<li>Decodes and prints messages</li>
+<li><p>The consumer starts and registers itself with the broker</p></li>
+<li><p>Consumer then traps incoming signals (bit 0 and bit 1)</p></li>
+<li><p>Decodes and prints messages</p></li>
 </ul>
 <ol start="3" type="1">
 <li>Last but not least, the <code>Producer</code> implementation, which
@@ -2504,8 +2547,10 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb36-1"><a href=
 <span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>codec<span class="at">.send_message</span>(message, broker_pid)</span>
 <span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Message sent to broker (PID: </span><span class="sc">#{</span>broker_pid<span class="sc">}</span><span class="st">)&quot;</span></span></code></pre></div>
 <ul>
-<li>Producer receives a ASCII message from the <em>STDIN</em></li>
-<li>Encode and sends the message to the broker via outgoing signals</li>
+<li><p>Producer receives a ASCII message from the
+<em>STDIN</em></p></li>
+<li><p>Encode and sends the message to the broker via outgoing
+signals</p></li>
 </ul>
 <p>So far, this architecture should look familiar. Many broker
 implementations follow these basic foundations.</p>
@@ -2563,15 +2608,15 @@ class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb37-1"><a href=
 <p>If you’ve been following along, this shouldn’t be hard to understand,
 but I’ll break down how this beautiful piece of code works:</p>
 <ul>
-<li>The codec is initialized with the bit position at zero, as well as
-the accumulator</li>
-<li>A buffer is also initialized to store accumulated bits until a
-complete byte is formed</li>
-<li>The <code>accumulate_bit</code> method should be familiar from our
-earlier implementation, but it now accepts a closure (block) that lets
-the caller decide what to do with each decoded byte</li>
-<li><code>send_message</code> encodes a message into bits and sends them
-via UNIX signals</li>
+<li><p>The codec is initialized with the bit position at zero, as well
+as the accumulator</p></li>
+<li><p>A buffer is also initialized to store accumulated bits until a
+complete byte is formed</p></li>
+<li><p>The <code>accumulate_bit</code> method should be familiar from
+our earlier implementation, but it now accepts a closure (block) that
+lets the caller decide what to do with each decoded byte</p></li>
+<li><p><code>send_message</code> encodes a message into bits and sends
+them via UNIX signals</p></li>
 </ul>
 <p>Everything in action:</p>
 <figure>
@@ -2818,30 +2863,30 @@ compartilhar minha jornada <em>coding in public</em>.</p>
 <p>Na parte de artigos, <a href="https://dev.to/leandronsp">escrevi
 muita coisa</a> em 2023:</p>
 <ul>
-<li>Introdução ao <a
+<li><p>Introdução ao <a
 href="https://leandronsp.com/articles/tekton-ci-part-i-a-gentle-introduction-ilj">Tekton
-CI/CD</a></li>
-<li><a
+CI/CD</a></p></li>
+<li><p><a
 href="https://leandronsp.com/articles/kubernetes-101-part-i-the-fundamentals-23a1">Kubernetes
-101</a></li>
-<li>Um guia completo cobrindo <a
+101</a></p></li>
+<li><p>Um guia completo cobrindo <a
 href="https://leandronsp.com/articles/git-fundamentals-a-complete-guide-do7">os
-fundamentos de Git</a></li>
-<li>Criando <a
+fundamentos de Git</a></p></li>
+<li><p>Criando <a
 href="https://leandronsp.com/articles/ai-ruby-an-introduction-to-neural-networks-23f3">redes
-neurais em Ruby</a></li>
-<li>Teve até artigo sobre <a
+neurais em Ruby</a></p></li>
+<li><p>Teve até artigo sobre <a
 href="https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n">ponto
-flutuante</a></li>
-<li><a
+flutuante</a></p></li>
+<li><p><a
 href="https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4">Fundamentos
-de recursão</a></li>
-<li><a
+de recursão</a></p></li>
+<li><p><a
 href="https://leandronsp.com/articles/compiladores-trampolim-deque-e-thread-pool-dd1">Resumo
-da rinha de compiladores</a> e trampolim</li>
-<li><a
+da rinha de compiladores</a> e trampolim</p></li>
+<li><p><a
 href="https://leandronsp.com/articles/understanding-the-basics-of-smart-pointers-in-rust-3dff">Mais
-Rust</a></li>
+Rust</a></p></li>
 </ul>
 <p>E o famoso <a href="https://web101.leandronsp.com/">Guia Web 101</a>
 também.</p>
@@ -2888,19 +2933,19 @@ href="https://github.com/leandronsp/agostinho">agostinho</a>.</p>
 href="https://www.youtube.com/watch?v=5nDfz1dkX2o">engano</a>. Acabei
 por submeter 5 diferentes soluções:</p>
 <ul>
-<li>3 em Ruby: <a
+<li><p>3 em Ruby: <a
 href="https://github.com/leandronsp/agostinho">agostinho</a>, que usa
 meus micro frameworks favoritos Adelnor e Chespirito; <a
 href="https://github.com/leandronsp/tortuga">tortuga</a> que não usa
 framework nem biblioteca alguma, o puro suco de uma linguagem criada no
 Japão; e <a href="https://github.com/leandronsp/tonico">tonico</a>, uma
 versão sem frameworks que usa I/O assíncrono <em>all the way
-down</em></li>
-<li>1 em Rust: <a
+down</em></p></li>
+<li><p>1 em Rust: <a
 href="https://github.com/leandronsp/quokka">quokka</a>, criado durante
-uma live</li>
-<li>e claro, a famosa versão em Bash, <a
-href="https://github.com/leandronsp/canabrava">canabrava</a></li>
+uma live</p></li>
+<li><p>e claro, a famosa versão em Bash, <a
+href="https://github.com/leandronsp/canabrava">canabrava</a></p></li>
 </ul>
 <p>Foram muitas horas em lives, inclusive esta onde eu mostrava como
 criar uma <a href="https://www.youtube.com/watch?v=lD3gaazwptk">thread
@@ -2987,16 +3032,16 @@ com Pix, revisão ou mesmo compartlihamento do conteúdo.</p>
 <p>Outras coisas que explorei ao longo deste ano, enquanto ia focando
 nas coisas de Assembly e concorrência:</p>
 <ul>
-<li><a
+<li><p><a
 href="https://github.com/leandronsp/necelu">leandronsp/necelu</a>,
 brincando com Lucene em Java (relembrando <em>the good old
-days</em>)</li>
-<li><a href="https://github.com/leandronsp/otel-rails">open
+days</em>)</p></li>
+<li><p><a href="https://github.com/leandronsp/otel-rails">open
 telemetry</a>: OTel é um assunto bem interessante, onde quero me
-aprofundar em 2025</li>
-<li><a href="https://github.com/leandronsp/yacs">leandronsp/yacs</a>,
+aprofundar em 2025</p></li>
+<li><p><a href="https://github.com/leandronsp/yacs">leandronsp/yacs</a>,
 Yet Another City Search, uma busca textual ultra-rápida em PostgreSQL em
-mais de 12 milhões de geonames/cidades</li>
+mais de 12 milhões de geonames/cidades</p></li>
 </ul>
 <hr />
 <h2 id="o-que-esperar-pra-2025">O que esperar pra 2025</h2>
@@ -3034,20 +3079,20 @@ saga.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#arrays-não-existem">Arrays não existem</a></li>
-<li><a href="#strings-também-não-existem">Strings também não
-existem</a></li>
-<li><a href="#o-array-mais-simples-do-universo">O array mais simples do
-universo</a></li>
-<li><a
+<li><p><a href="#arrays-não-existem">Arrays não existem</a></p></li>
+<li><p><a href="#strings-também-não-existem">Strings também não
+existem</a></p></li>
+<li><p><a href="#o-array-mais-simples-do-universo">O array mais simples
+do universo</a></p></li>
+<li><p><a
 href="#utilizando-um-array-com-dados-não-inicializados">Utilizando um
-array com dados não inicializados</a>
+array com dados não inicializados</a></p>
 <ul>
 <li><a href="#índice-para-o-resgate">Índice para o resgate</a></li>
 <li><a href="#atingindo-o-limite-do-array">Atingindo o limite do
 array</a></li>
 </ul></li>
-<li><a href="#heap-heap-horray">Heap, heap, hooray!</a>
+<li><p><a href="#heap-heap-horray">Heap, heap, hooray!</a></p>
 <ul>
 <li><a href="#alocação-dinâmica-de-memória-com-brk">Alocação dinâmica de
 memória com brk</a></li>
@@ -3055,9 +3100,9 @@ memória com brk</a></li>
 everywhere</a></li>
 <li><a href="#resize-com-brk">Resize com brk</a></li>
 </ul></li>
-<li><a href="#o-programa-final">O programa final</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#o-programa-final">O programa final</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="arrays-não-existem">Arrays não existem</h2>
@@ -3281,12 +3326,12 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb22-1"><a
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>mov al<span class="op">,</span> byte <span class="op">[</span>pointer<span class="op">]</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>mov byte <span class="op">[</span>array <span class="op">+</span> rax<span class="op">],</span> <span class="dv">1</span>   <span class="op">;</span> array <span class="op">+</span> <span class="dv">0</span></span></code></pre></div>
 <ul>
-<li>a primeira instrução move o primeiro byte contido no endereço de
-<code>pointer</code> e armazena no registrador AL</li>
-<li>a segunda instrução move o valor imediato 1 (elemento do array) para
-o endereço de memória do array. Como em RAX (versão 64-bits de AL) temos
-o valor <code>0x0</code> que representa o ponteiro, então estamos
-fazendo a inserção no primeiro byte do array</li>
+<li><p>a primeira instrução move o primeiro byte contido no endereço de
+<code>pointer</code> e armazena no registrador AL</p></li>
+<li><p>a segunda instrução move o valor imediato 1 (elemento do array)
+para o endereço de memória do array. Como em RAX (versão 64-bits de AL)
+temos o valor <code>0x0</code> que representa o ponteiro, então estamos
+fazendo a inserção no primeiro byte do array</p></li>
 </ul>
 <p>E para armazenar o segundo elemento no array?</p>
 <div class="sourceCode" id="cb23"><pre
@@ -3487,22 +3532,23 @@ alt="layout de memória" />
 <figcaption aria-hidden="true">layout de memória</figcaption>
 </figure>
 <ul>
-<li>o layout é representado como uma área na memória do computador onde
-temos os endereços de memória mais baixos do programa em direção aos
-endereços mais altos que ficam no topo</li>
-<li>nos endereços de memória mais baixos, temos a seção
-<code>.text</code>, onde já vimos que é referente ao programa em si</li>
-<li>depois temos a <strong>seção de dados</strong> que contempla os
+<li><p>o layout é representado como uma área na memória do computador
+onde temos os endereços de memória mais baixos do programa em direção
+aos endereços mais altos que ficam no topo</p></li>
+<li><p>nos endereços de memória mais baixos, temos a seção
+<code>.text</code>, onde já vimos que é referente ao programa em
+si</p></li>
+<li><p>depois temos a <strong>seção de dados</strong> que contempla os
 dados inicializados <code>.data</code> e a seção a seguir que representa
-os dados não-inicializados <code>.bss</code></li>
-<li>nos endereços mais altos, temos a <em>stack</em> do programa, que
+os dados não-inicializados <code>.bss</code></p></li>
+<li><p>nos endereços mais altos, temos a <em>stack</em> do programa, que
 armazena metadados tais como o nome do programa, seus argumentos e
 qualquer informação do programa que tenha um tamanho fixo cabendo dentro
 da stack, bem como chamadas de funções e seus respectivos
-argumentos</li>
-<li>a stack tem um formato de <em>pilha</em> e “cresce pra baixo”, ou
+argumentos</p></li>
+<li><p>a stack tem um formato de <em>pilha</em> e “cresce pra baixo”, ou
 seja, conforme adicionamos elementos na stack, esta cresce em direção
-aos endereços mais baixos na memória</li>
+aos endereços mais baixos na memória</p></li>
 </ul>
 <p>No “meio” do layout, entre a seção de dados e a stack, temos uma
 grande área na memória que muitos acabam associando como <em>heap</em>.
@@ -3578,14 +3624,14 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb37-1"><a href=
 <span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="fu">gdb</span><span class="kw">)</span> <span class="ex">i</span> r rax</span>
 <span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a><span class="ex">rax</span>            0x403000            4206592</span></code></pre></div>
 <ul>
-<li><code>0x401000</code>: seção <code>.text</code> que é onde começa o
-programa</li>
-<li><code>0x402000</code>: seção <code>.data</code> onde ficam os dados
-inicializados</li>
-<li><code>0x402004</code>: seção <code>.bss</code> onde ficam os dados
-não-inicializados</li>
-<li><code>0x403000</code>: program break, que é onde termina a seção de
-dados e começa o nosso “heap”</li>
+<li><p><code>0x401000</code>: seção <code>.text</code> que é onde começa
+o programa</p></li>
+<li><p><code>0x402000</code>: seção <code>.data</code> onde ficam os
+dados inicializados</p></li>
+<li><p><code>0x402004</code>: seção <code>.bss</code> onde ficam os
+dados não-inicializados</p></li>
+<li><p><code>0x403000</code>: program break, que é onde termina a seção
+de dados e começa o nosso “heap”</p></li>
 </ul>
 <p>Com isto, a partir do endereço <code>0x403000</code> é onde vamos
 colocar os elementos do nosso array, pelo que o endereço do array pode
@@ -3897,14 +3943,14 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb52-1"><a
 <span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>    syscall</span>
 <span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>    jmp <span class="op">.</span><span class="fu">append</span></span></code></pre></div>
 <ul>
-<li>a primeira syscall de resize traz o break atual, no caso já sabemos
-que é <code>0x403003</code>, que foi alocado no início do programa para
-o array</li>
-<li>a segunda syscall de resize modifica o break atual, alocando assim
-mais 3 bytes no heap</li>
-<li>ao fim do resize, ao invés de retornar a função, vamos voltar para o
-início do <code>.append</code> e executar a lógica necessária para
-adicionar o elemento no array</li>
+<li><p>a primeira syscall de resize traz o break atual, no caso já
+sabemos que é <code>0x403003</code>, que foi alocado no início do
+programa para o array</p></li>
+<li><p>a segunda syscall de resize modifica o break atual, alocando
+assim mais 3 bytes no heap</p></li>
+<li><p>ao fim do resize, ao invés de retornar a função, vamos voltar
+para o início do <code>.append</code> e executar a lógica necessária
+para adicionar o elemento no array</p></li>
 </ul>
 <p>Desta forma, podemos manipular esta nova área na memória para
 adicionar mais elementos no array, modificando assim sua capacidade
@@ -3912,11 +3958,12 @@ dinamicamente.</p>
 <p>Se executarmos o programa exatamente assim, vamos enfrentar um
 problema, pois:</p>
 <ul>
-<li>a cada vez que é feito o resize, salta para o início da rotina</li>
-<li>é verificado o tamanho do array (pointeiro) com a capacidade
+<li><p>a cada vez que é feito o resize, salta para o início da
+rotina</p></li>
+<li><p>é verificado o tamanho do array (pointeiro) com a capacidade
 inicial, que no caso é 3. Como o ponteiro atingiu o valor 3, então vai
 entrar novamente no resize caracterizando assim um loop infinito com
-resize infinito até acabar a memória</li>
+resize infinito até acabar a memória</p></li>
 </ul>
 <p>Para resolver isto, precisamos comparar o pointer com a capacidade
 atual (modificada), e portanto vamos adicionar um valor na seção
@@ -4111,15 +4158,16 @@ conceitos.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#simulando-a-latência-com-nanosleep">Simulando a latência
-com nanosleep</a></li>
-<li><a href="#simulando-requests-em-escala-com-xargs">Simulando requests
-em escala com xargs</a></li>
-<li><a href="#concorrência-com-forking-de-processos">Concorrência com
-forking de processos</a></li>
-<li><a href="#concorrência-com-clone-de-processo">Concorrência com clone
-de processo</a></li>
-<li><a href="#concorrência-com-threads">Concorrência com threads</a>
+<li><p><a href="#simulando-a-latência-com-nanosleep">Simulando a
+latência com nanosleep</a></p></li>
+<li><p><a href="#simulando-requests-em-escala-com-xargs">Simulando
+requests em escala com xargs</a></p></li>
+<li><p><a href="#concorrência-com-forking-de-processos">Concorrência com
+forking de processos</a></p></li>
+<li><p><a href="#concorrência-com-clone-de-processo">Concorrência com
+clone de processo</a></p></li>
+<li><p><a href="#concorrência-com-threads">Concorrência com
+threads</a></p>
 <ul>
 <li><a href="#entendendo-a-criação-de-uma-thread">Entendendo a criação
 de uma thread</a></li>
@@ -4130,17 +4178,17 @@ brk</a></li>
 href="#modificando-o-server-para-suportar-multi--threading">Modificando
 o server para suportar multi-threading</a></li>
 </ul></li>
-<li><a href="#concorrência-com-thread-pool">Concorrência com thread
-pool</a>
+<li><p><a href="#concorrência-com-thread-pool">Concorrência com thread
+pool</a></p>
 <ul>
 <li><a href="#uma-thread-em-loop">Uma thread em loop</a></li>
 <li><a href="#5-threads-em-loop">5 threads em loop</a></li>
 <li><a href="#sincronização-com-futex">Sincronização com futex</a></li>
 </ul></li>
-<li><a href="#alocação-de-memória-com-mmap">Alocação de memória com
-mmap</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#alocação-de-memória-com-mmap">Alocação de memória com
+mmap</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="simulando-a-latência-com-nanosleep">Simulando a latência com
@@ -4425,10 +4473,12 @@ tempo. Muito pelo contrário, pode até piorar e prejudicar a latência
 total, pois há diversos requests na fila esperando para serem
 atendidos.</p>
 <ul>
-<li>o primeiro request demora 1 segundo</li>
-<li>o segundo request chega ao mesmo tempo mas demora 2 segundos</li>
-<li>o terceiro request chega ao mesmo tempo mas demora 3 segundos</li>
-<li>e assim sucessivamente…</li>
+<li><p>o primeiro request demora 1 segundo</p></li>
+<li><p>o segundo request chega ao mesmo tempo mas demora 2
+segundos</p></li>
+<li><p>o terceiro request chega ao mesmo tempo mas demora 3
+segundos</p></li>
+<li><p>e assim sucessivamente…</p></li>
 </ul>
 <p>Nosso server é síncrono, e com isto podemos criar gargalos.
 Precisamos então que o server consiga lidar com
@@ -4517,13 +4567,13 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb15-1"><a
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">;</span> principal continuou<span class="op">.</span> Então o processo principal volta para o loop</span>
 <span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    jmp <span class="op">.</span><span class="fu">accept</span></span></code></pre></div>
 <ul>
-<li>depois de uma chamada ao <strong>fork</strong>, a syscall retorna
+<li><p>depois de uma chamada ao <strong>fork</strong>, a syscall retorna
 ZERO quando se está dentro do processo filho. Neste caso, a execução do
 processo filho continua com a rotina <em>handle</em> e depois
-termina</li>
-<li>após a chamada do fork, se o retorno NÃO for ZERO, significa que a
-execução é do programa principal, então neste caso volta-se ao loop para
-esperar um novo request no socket</li>
+termina</p></li>
+<li><p>após a chamada do fork, se o retorno NÃO for ZERO, significa que
+a execução é do programa principal, então neste caso volta-se ao loop
+para esperar um novo request no socket</p></li>
 </ul>
 <p>Ao executar com strace, podemos ver várias chamadas à syscall
 <em>fork</em>:</p>
@@ -4615,13 +4665,13 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb19-1"><a
 <span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">;</span> continuação da execução <span class="kw">do</span> processo principal</span>
 <span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    jmp <span class="op">.</span><span class="fu">accept</span></span></code></pre></div>
 <ul>
-<li>depois de uma chamada ao <strong>clone</strong>, a syscall retorna
-ZERO quando se está dentro do processo filho. Neste caso, a execução do
-processo filho continua com a rotina <em>handle</em> e depois
-termina</li>
-<li>após a chamada do clone, se o retorno NÃO for ZERO, significa que a
-execução é do programa principal, então neste caso volta-se ao loop para
-esperar um novo request no socket</li>
+<li><p>depois de uma chamada ao <strong>clone</strong>, a syscall
+retorna ZERO quando se está dentro do processo filho. Neste caso, a
+execução do processo filho continua com a rotina <em>handle</em> e
+depois termina</p></li>
+<li><p>após a chamada do clone, se o retorno NÃO for ZERO, significa que
+a execução é do programa principal, então neste caso volta-se ao loop
+para esperar um novo request no socket</p></li>
 </ul>
 <p>Executamos com strace e:</p>
 <div class="sourceCode" id="cb20"><pre
@@ -4680,10 +4730,10 @@ filho.</p>
 class="sourceCode as"><code class="sourceCode actionscript"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>define SYS_clone <span class="dv">56</span></span></code></pre></div>
 <p>Coisas que podem ser compartilhadas (ou não):</p>
 <ul>
-<li>espaço de endereço de memória virtual</li>
-<li>tabela de descritores de arquivos</li>
-<li>tabela de handlers de sinais</li>
-<li>entre outros recursos…</li>
+<li><p>espaço de endereço de memória virtual</p></li>
+<li><p>tabela de descritores de arquivos</p></li>
+<li><p>tabela de handlers de sinais</p></li>
+<li><p>entre outros recursos…</p></li>
 </ul>
 <blockquote>
 <p>No exemplo anterior utilizamos a syscall clone passando argumentos a
@@ -4691,34 +4741,37 @@ ZERO, o que significa que não queríamos compartilhar nada entre os
 processos, portanto uma cópia seria feita como no forking de
 processos</p>
 </blockquote>
-<p>Para a execução da syscall, precisamos enviar 2 argumentos: -
-<strong>rdi</strong>: representa as <em>flags</em>, que modificam o
-comportamento do que será compartilhado com o processo filho (thread) -
-<strong>rsi</strong>: ponteiro para a função que a thread irá executar,
-que precisa ser definido dentro de uma <strong>área reservada na
-memória</strong>, ou seja, precisamos alocar um novo bloco de memória
-para a thread poder colocar a função e seus argumentos</p>
+<p>Para a execução da syscall, precisamos enviar 2 argumentos:</p>
+<ul>
+<li><p><strong>rdi</strong>: representa as <em>flags</em>, que modificam
+o comportamento do que será compartilhado com o processo filho
+(thread)</p></li>
+<li><p><strong>rsi</strong>: ponteiro para a função que a thread irá
+executar, que precisa ser definido dentro de uma <strong>área reservada
+na memória</strong>, ou seja, precisamos alocar um novo bloco de memória
+para a thread poder colocar a função e seus argumentos</p></li>
+</ul>
 <p>Portanto, para criar uma thread, precisamos de <strong>thread
 flags</strong> e <strong>alocação de memória</strong>. ### Thread
 flags</p>
 <p>Em RDI, vamos passar as seguintes flags:</p>
 <ul>
-<li><strong>CLONE_VM</strong>: processo principal e processo filho
-compartilham o mesmo espaço de memória virtual</li>
-<li><strong>CLONE_FS</strong>: processos compartilham o mesmo sistema de
-arquivos</li>
-<li><strong>CLONE_FILES</strong>: processos compartilham a mesma tabela
-de descritor de arquivos (file descriptor table)</li>
-<li><strong>CLONE_SIGHAND</strong>: processos compartilham a mesma
-tabela de handlers de sinais (signal handlers)</li>
-<li><strong>CLONE_PARENT</strong>: processos compartilham o mesmo
+<li><p><strong>CLONE_VM</strong>: processo principal e processo filho
+compartilham o mesmo espaço de memória virtual</p></li>
+<li><p><strong>CLONE_FS</strong>: processos compartilham o mesmo sistema
+de arquivos</p></li>
+<li><p><strong>CLONE_FILES</strong>: processos compartilham a mesma
+tabela de descritor de arquivos (file descriptor table)</p></li>
+<li><p><strong>CLONE_SIGHAND</strong>: processos compartilham a mesma
+tabela de handlers de sinais (signal handlers)</p></li>
+<li><p><strong>CLONE_PARENT</strong>: processos compartilham o mesmo
 parent, ou seja, o processo “filho” na verdade é filho do processo
 parent do processo original (mesmo porque estamos falando de uma thread
-que compartilha o mesmo processo)</li>
-<li><strong>CLONE_THREAD</strong>: o processo filho é colocado no mesmo
-grupo de threads do processo original</li>
-<li><strong>CLONE_IO</strong>: processos compartilham o mesmo contexto
-de I/O</li>
+que compartilha o mesmo processo)</p></li>
+<li><p><strong>CLONE_THREAD</strong>: o processo filho é colocado no
+mesmo grupo de threads do processo original</p></li>
+<li><p><strong>CLONE_IO</strong>: processos compartilham o mesmo
+contexto de I/O</p></li>
 </ul>
 <blockquote>
 <p>No fim das contas, estamos criando um processo “filho” mas que
@@ -4996,17 +5049,17 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href=
 <span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="ex">accept4</span><span class="er">(</span><span class="ex">3,</span> NULL, NULL, 0</span></code></pre></div>
 <p>Vamos reparar na sequência de chamadas:</p>
 <ul>
-<li>depois do accept, foi feita uma chamada a <strong>brk</strong>
-modificando o program break (alocando memória)</li>
-<li>a seguir, vemos a chamada <strong>clone</strong>, que acoplou o
-processo filho 13078</li>
-<li>a thread (13078) é suspensa com <strong>nanosleep</strong> por 1
-segundo</li>
-<li>o processo principal (13077) volta para o <strong>accept</strong> e
-fica a espera de mais requests</li>
-<li>a thread <strong>escreve</strong> no socket</li>
-<li>a thread <strong>fecha</strong> o socket</li>
-<li>a thread é encerrada com <strong>exit</strong></li>
+<li><p>depois do accept, foi feita uma chamada a <strong>brk</strong>
+modificando o program break (alocando memória)</p></li>
+<li><p>a seguir, vemos a chamada <strong>clone</strong>, que acoplou o
+processo filho 13078</p></li>
+<li><p>a thread (13078) é suspensa com <strong>nanosleep</strong> por 1
+segundo</p></li>
+<li><p>o processo principal (13077) volta para o <strong>accept</strong>
+e fica a espera de mais requests</p></li>
+<li><p>a thread <strong>escreve</strong> no socket</p></li>
+<li><p>a thread <strong>fecha</strong> o socket</p></li>
+<li><p>a thread é encerrada com <strong>exit</strong></p></li>
 </ul>
 <p>Agora, simulando os 10 requests simultâneos:</p>
 <div class="sourceCode" id="cb36"><pre
@@ -5051,15 +5104,15 @@ alt="thread pool" />
 <p>Vamos inicialmente definir que teremos apenas UMA thread em loop
 lendo mensagens da fila. O processo deverá ser o seguinte:</p>
 <ul>
-<li>processo principal inicia uma thread</li>
-<li>a thread fica em loop lendo mensagens (socket) da fila. Quando tiver
-vazia, repete o loop. Quando houver algum socket na fila, a thread
+<li><p>processo principal inicia uma thread</p></li>
+<li><p>a thread fica em loop lendo mensagens (socket) da fila. Quando
+tiver vazia, repete o loop. Quando houver algum socket na fila, a thread
 executa a lógica que é fazer o <em>nanosleep</em>, escrever no socket,
-fechar o socket, e voltar para o loop de leitura da fila</li>
-<li>processo principal continua execução após criação da thread, onde
+fechar o socket, e voltar para o loop de leitura da fila</p></li>
+<li><p>processo principal continua execução após criação da thread, onde
 fica em loop lendo requisições que chegam no socket (accept). Quando uma
 requisição chega, adiciona o socket na fila e volta para o loop do
-<strong>accept</strong>.</li>
+<strong>accept</strong>.</p></li>
 </ul>
 <p>Vamos passo a passo, começando pelas constantes:</p>
 <div class="sourceCode" id="cb37"><pre
@@ -5328,17 +5381,17 @@ também na variável condicional.</p>
 primitivo de sincronização bastante utilizado. No nosso caso para
 controle da fila, queremos o seguinte cenário:</p>
 <ul>
-<li>a thread verifica se há algo na fila. Caso a fila esteja vazia, a
+<li><p>a thread verifica se há algo na fila. Caso a fila esteja vazia, a
 thread é suspensa com <em>futex wait</em> através de uma variável
-condicional</li>
-<li>quando algo for adicionado na fila, outra thread/processo “emite um
-sinal” chamando a syscall <em>futex wake</em> na mesma variável
-condicional.</li>
-<li>quando o sinal é emitido, neste momento a thread que tem o acesso ao
-lock (variável condicional) é trazida de volta ao contexto, então lê a
-mensagem da fila e executa a ação necessária. Após, se a fila estiver
+condicional</p></li>
+<li><p>quando algo for adicionado na fila, outra thread/processo “emite
+um sinal” chamando a syscall <em>futex wake</em> na mesma variável
+condicional.</p></li>
+<li><p>quando o sinal é emitido, neste momento a thread que tem o acesso
+ao lock (variável condicional) é trazida de volta ao contexto, então lê
+a mensagem da fila e executa a ação necessária. Após, se a fila estiver
 vazia, repete o processo com <em>futex wait</em> e fica novamente
-suspensa</li>
+suspensa</p></li>
 </ul>
 <blockquote>
 <p>Desta forma, garantimos que as threads não ficam consumindo a CPU em
@@ -5484,15 +5537,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb56-1"><a href=
 <span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a><span class="ex">[pid</span> 13539] close<span class="er">(</span><span class="ex">4</span><span class="kw">)</span>                    <span class="ex">=</span> 0</span>
 <span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a><span class="ex">[pid</span> 13539] futex<span class="er">(</span><span class="ex">0x402088,</span> FUTEX_WAIT_PRIVATE, 0, NULL</span></code></pre></div>
 <ul>
-<li>o processo principal recebeu a mensagem no socket, enfileirou e
-executou <em>futex</em> com <strong>FUTEX_WAKE</strong></li>
-<li>uma das threads foi trazida de volta ao contexto e fez a sua devida
-execução (nanosleep + write + close)</li>
-<li>o processo principal voltou para o accept a espera de mais requests
-no socket</li>
-<li>a thread terminou seu trabalho, viu que não tinha mais nada na fila
-e executou <em>futex</em> com <strong>FUTEX_WAIT</strong>, ficando
-novamente suspensa</li>
+<li><p>o processo principal recebeu a mensagem no socket, enfileirou e
+executou <em>futex</em> com <strong>FUTEX_WAKE</strong></p></li>
+<li><p>uma das threads foi trazida de volta ao contexto e fez a sua
+devida execução (nanosleep + write + close)</p></li>
+<li><p>o processo principal voltou para o accept a espera de mais
+requests no socket</p></li>
+<li><p>a thread terminou seu trabalho, viu que não tinha mais nada na
+fila e executou <em>futex</em> com <strong>FUTEX_WAIT</strong>, ficando
+novamente suspensa</p></li>
 </ul>
 <p>Finalmente, podemos executar 10 requests simultâneos e…</p>
 <div class="sourceCode" id="cb57"><pre
@@ -5511,10 +5564,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb57-1"><a href=
 <strong>2,1 segundos</strong> para 10 requests concorrentes. Agora temos
 concorrência consumindo muito menos recursos:</p>
 <ul>
-<li>menos memória, pois não é forking de processos</li>
-<li>menos CPU, pois as threads não ficam em loop infinito</li>
-<li>menos latência, pois com uma limitação de 5 threads, novos requests
-não criam novas threads</li>
+<li><p>menos memória, pois não é forking de processos</p></li>
+<li><p>menos CPU, pois as threads não ficam em loop infinito</p></li>
+<li><p>menos latência, pois com uma limitação de 5 threads, novos
+requests não criam novas threads</p></li>
 </ul>
 <hr />
 <h2 id="alocação-de-memória-com-mmap">Alocação de memória com mmap</h2>
@@ -5542,15 +5595,15 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb58-1"><a
 <p>Ao invés de chamar <em>brk</em>, podemos chamar
 <strong>mmap</strong>, especificando:</p>
 <ul>
-<li><strong>rdi</strong>: endereço de memória onde deve ser mapeado. Se
-tiver ZERO, o sistema operacional se encarrega de trazer um endereço de
-memória disponível</li>
-<li><strong>rsi</strong>: tamanho do espaço reservado na memória. No
-nosso caso, queremos 4096 bytes para a thread</li>
-<li><strong>rdx</strong>: proteção de memória, neste caso queremos que a
-memória possa ser tanto escrita (PROT_WRITE) quanto lida (PROT_READ)
-pela thread</li>
-<li><strong>r10</strong>: flags de mapeamento
+<li><p><strong>rdi</strong>: endereço de memória onde deve ser mapeado.
+Se tiver ZERO, o sistema operacional se encarrega de trazer um endereço
+de memória disponível</p></li>
+<li><p><strong>rsi</strong>: tamanho do espaço reservado na memória. No
+nosso caso, queremos 4096 bytes para a thread</p></li>
+<li><p><strong>rdx</strong>: proteção de memória, neste caso queremos
+que a memória possa ser tanto escrita (PROT_WRITE) quanto lida
+(PROT_READ) pela thread</p></li>
+<li><p><strong>r10</strong>: flags de mapeamento</p>
 <ul>
 <li><strong>MAP_ANONYMOUS</strong>: o mapeamento não é associado a
 nenhum arquivo ou descritor de arquivo (modo anônimo)</li>
@@ -5637,21 +5690,21 @@ explorando conceitos práticos em Assembly x86.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#arquitetura-web">Arquitetura Web</a>
+<li><p><a href="#arquitetura-web">Arquitetura Web</a></p>
 <ul>
 <li><a href="#clienteservidor">Cliente-servidor</a></li>
 <li><a href="#modelo-osi">Modelo OSI</a></li>
 <li><a href="#sockets-e-tcp">Sockets e TCP</a></li>
 <li><a href="#http">HTTP</a></li>
 </ul></li>
-<li><a href="#como-funciona-um-servidor-web">Como funciona um servidor
-web</a>
+<li><p><a href="#como-funciona-um-servidor-web">Como funciona um
+servidor web</a></p>
 <ul>
 <li><a href="#4-syscalls-para-o-resgate">4 syscalls para o
 resgate</a></li>
 </ul></li>
-<li><a href="#um-server-modesto-em-assembly">Um server modesto em
-Assembly</a>
+<li><p><a href="#um-server-modesto-em-assembly">Um server modesto em
+Assembly</a></p>
 <ul>
 <li><a href="#criando-o-socket">Criando o socket</a></li>
 <li><a href="#fazendo-bind-no-socket">Fazendo bind no socket</a></li>
@@ -5664,8 +5717,8 @@ servidor e fechamento da conexão</a></li>
 <li><a href="#mas-o-servidor-deve-ficar-em-loop-não">Mas o servidor deve
 ficar em loop, não?</a></li>
 </ul></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="arquitetura-web">Arquitetura Web</h2>
@@ -5714,15 +5767,15 @@ alt="modelo OSI" />
 <figcaption aria-hidden="true">modelo OSI</figcaption>
 </figure>
 <ul>
-<li><strong>Camada física</strong>: responsável pelo tráfego de
+<li><p><strong>Camada física</strong>: responsável pelo tráfego de
 informações através de meios físicos, tais como bluetooth, frequência de
-rádio, cabos etc</li>
-<li><strong>Camada de enlace de rede</strong>: responsável pela
+rádio, cabos etc</p></li>
+<li><p><strong>Camada de enlace de rede</strong>: responsável pela
 decodificação e codificação de mensagens em frames, do meio físico para
-o meio digital e vice-versa</li>
-<li><strong>Camada de rede</strong>: é aqui que definimos protocolos de
-rede, tais como o <em>protocolo de internet</em>, também conhecido como
-<strong>IP</strong> (Internet Protocol)</li>
+o meio digital e vice-versa</p></li>
+<li><p><strong>Camada de rede</strong>: é aqui que definimos protocolos
+de rede, tais como o <em>protocolo de internet</em>, também conhecido
+como <strong>IP</strong> (Internet Protocol)</p></li>
 </ul>
 <blockquote>
 <p>Na web, os dados trafegam geralmente através de uma rede de
@@ -5730,19 +5783,19 @@ computadores pública, global e descentralizada, neste caso a
 Internet</p>
 </blockquote>
 <ul>
-<li><strong>Camada de transporte</strong>: camada responsável por
+<li><p><strong>Camada de transporte</strong>: camada responsável por
 características de entrega, tais como definir critérios de
 confiabilidade e ordem dos pacotes de mensagens. Por exemplo, nesta
 camada temos o <em>protocolo de controle de transmissão</em>, ou
-<strong>TCP</strong></li>
-<li><strong>Camada de sessão e apresentação</strong>: aqui vão critérios
-de informações que podem ser vinculadas a uma determinada conexão entre
-diferentes dispositivos, bem como o formato de apresentação das
-informações na rede</li>
-<li><strong>Camada de aplicação</strong>: nesta camada, temos a
+<strong>TCP</strong></p></li>
+<li><p><strong>Camada de sessão e apresentação</strong>: aqui vão
+critérios de informações que podem ser vinculadas a uma determinada
+conexão entre diferentes dispositivos, bem como o formato de
+apresentação das informações na rede</p></li>
+<li><p><strong>Camada de aplicação</strong>: nesta camada, temos a
 definição do formato de mensagens em um nível mais “aplicacional”, como
 por exemplo protocolo HTTP (Hypertext Transfer Protocol), FTP, SSH entre
-outros</li>
+outros</p></li>
 </ul>
 <p>Entretanto fica aqui uma questão: como que todo esse modelo de
 comunicação em rede se converte em algo prático num programa dentro de
@@ -5896,8 +5949,10 @@ vai ser criado.</p>
 não vamos colocar na seção <code>.data</code> como temos utilizado até o
 momento na saga, mas sim na seção <code>.bss</code>.</p>
 <ul>
-<li>Na seção <code>.data</code>, ficam apenas dados inicializados</li>
-<li>Na seção <code>.bss</code>, ficam os dados não-inicializados</li>
+<li><p>Na seção <code>.data</code>, ficam apenas dados
+inicializados</p></li>
+<li><p>Na seção <code>.bss</code>, ficam os dados
+não-inicializados</p></li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="sourceCode as"><code class="sourceCode actionscript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>section <span class="op">.</span><span class="fu">bss</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sockfd<span class="op">:</span> resb <span class="dv">1</span></span></code></pre></div>
@@ -5928,19 +5983,19 @@ e a ordem dos parâmetros da função <em>socket</em> na libc:</p>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    mov rax<span class="op">,</span> <span class="dv">60</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    syscall</span></code></pre></div>
 <ul>
-<li><strong>domain</strong>: representa o domínio de comunicação. No
+<li><p><strong>domain</strong>: representa o domínio de comunicação. No
 caso queremos usar AF_INET, que significa IPv4, e tem o valor 2 conforme
 especificado no <a
-href="https://github.com/bminor/glibc/blob/8f58e412b1e26d2c7e65c13a0ce758fbaf18d83f/bits/socket.h#L78">glibc</a></li>
-<li><strong>type</strong>: representa o tipo de comunicação, que no caso
-vamos usar SOCK_STREAM que é sequencial, confiável, duplex e baseado em
-conexão. O valor <a
+href="https://github.com/bminor/glibc/blob/8f58e412b1e26d2c7e65c13a0ce758fbaf18d83f/bits/socket.h#L78">glibc</a></p></li>
+<li><p><strong>type</strong>: representa o tipo de comunicação, que no
+caso vamos usar SOCK_STREAM que é sequencial, confiável, duplex e
+baseado em conexão. O valor <a
 href="https://github.com/bminor/glibc/blob/8f58e412b1e26d2c7e65c13a0ce758fbaf18d83f/bits/socket.h#L42">conforme
-glibc</a> é 1</li>
-<li><strong>protocol</strong>: esta opção é usada no caso da utilização
-de um protocolo em específico. Neste caso, vamos deixar o valor como 0
-que é o default para AF_INET e SOCK_STREAM, <em>indicando que se trata
-de um socket TCP</em></li>
+glibc</a> é 1</p></li>
+<li><p><strong>protocol</strong>: esta opção é usada no caso da
+utilização de um protocolo em específico. Neste caso, vamos deixar o
+valor como 0 que é o default para AF_INET e SOCK_STREAM, <em>indicando
+que se trata de um socket TCP</em></p></li>
 </ul>
 <blockquote>
 <p>Lembrando que existem sockets da família UNIX que não funcionam na
@@ -6292,11 +6347,11 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href=
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="ex">listen</span><span class="er">(</span><span class="ex">3,</span> 2<span class="kw">)</span>                            <span class="ex">=</span> 0</span>
 <span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="ex">accept4</span><span class="er">(</span><span class="ex">3,</span> NULL, NULL, 0</span></code></pre></div>
 <ul>
-<li>primeiro foi feita a syscall <em>socket</em></li>
-<li>a seguir foi feito o <em>bind</em></li>
-<li>depois o <em>listen</em></li>
-<li>e por fim, o <em>accept</em> ficou bloqueado a espera de uma
-requisição</li>
+<li><p>primeiro foi feita a syscall <em>socket</em></p></li>
+<li><p>a seguir foi feito o <em>bind</em></p></li>
+<li><p>depois o <em>listen</em></p></li>
+<li><p>e por fim, o <em>accept</em> ficou bloqueado a espera de uma
+requisição</p></li>
 </ul>
 <p>Em outra janela, vamos fazer a requisição:</p>
 <div class="sourceCode" id="cb33"><pre
@@ -6524,27 +6579,28 @@ aqui descritos.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#humanizar-é-preciso">Humanizar é preciso</a>
+<li><p><a href="#humanizar-é-preciso">Humanizar é preciso</a></p>
 <ul>
 <li><a href="#mnemonics">Mnemonics</a></li>
 </ul></li>
-<li><a href="#assemblers">Assemblers</a></li>
-<li><a href="#nosso-primeiro-programa">Nosso primeiro programa</a>
+<li><p><a href="#assemblers">Assemblers</a></p></li>
+<li><p><a href="#nosso-primeiro-programa">Nosso primeiro
+programa</a></p>
 <ul>
 <li><a href="#a-chamada-de-sistema-exit">A chamada de sistema
 exit</a></li>
 <li><a href="#arquivos-objeto">Arquivos Objeto</a></li>
 <li><a href="#linker">Linker</a></li>
 </ul></li>
-<li><a href="#depurando-o-programa">Depurando o programa</a>
+<li><p><a href="#depurando-o-programa">Depurando o programa</a></p>
 <ul>
 <li><a href="#o-utilitário-size">O utilitário size</a></li>
 <li><a href="#debugging-com-gdb">Debugging com gdb</a></li>
 <li><a href="#rastreando-execução-com-strace">Rastreando execução com
 strace</a></li>
 </ul></li>
-<li><a href="#evoluindo-nosso-primeiro-programa">Evoluindo nosso
-primeiro programa</a>
+<li><p><a href="#evoluindo-nosso-primeiro-programa">Evoluindo nosso
+primeiro programa</a></p>
 <ul>
 <li><a href="#alocando-bytes-para-hello-world">Alocando bytes para
 “Hello, World”</a></li>
@@ -6553,8 +6609,8 @@ chamada de sistema write</a></li>
 <li><a href="#layout-de-memória">Layout de memória</a></li>
 <li><a href="#definindo-constantes">Definindo constantes</a></li>
 </ul></li>
-<li><a href="#um-programa-mais-sofisticado">Um programa mais
-sofisticado</a>
+<li><p><a href="#um-programa-mais-sofisticado">Um programa mais
+sofisticado</a></p>
 <ul>
 <li><a href="#definindo-labels">Definindo labels</a></li>
 <li><a href="#desvio-de-fluxo-com-jump">Desvio de fluxo com
@@ -6570,8 +6626,8 @@ negócio</a></li>
 <li><a href="#depurando-o-programa-final-com-strace">Depurando o
 programa final com strace</a></li>
 </ul></li>
-<li><a href="#falando-um-pouco-de-registradores">Falando um pouco de
-registradores</a>
+<li><p><a href="#falando-um-pouco-de-registradores">Falando um pouco de
+registradores</a></p>
 <ul>
 <li><a href="#propósito-dos-registradores">Propósito dos
 registradores</a></li>
@@ -6581,10 +6637,10 @@ propósito geral</a></li>
 <li><a href="#precisamos-sempre-utilizar-todos-os-64-bits">Precisamos
 sempre utilizar todos os 64 bits?</a></li>
 </ul></li>
-<li><a href="#uma-side-note-sobre-stack-frames">Uma side note sobre
-stack frames</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#uma-side-note-sobre-stack-frames">Uma side note sobre
+stack frames</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <blockquote>
@@ -6647,20 +6703,20 @@ Assembler (as), NASM, FASM, pra mencionar alguns.</p>
 <p>Assemblers para esta arquitetura em específico podem seguir 2 tipos
 de sintaxe que são predominantes:</p>
 <ul>
-<li>AT&amp;T, desenvolvida pela AT&amp;T corporation</li>
-<li>Intel, desenvolvida pela Intel</li>
+<li><p>AT&amp;T, desenvolvida pela AT&amp;T corporation</p></li>
+<li><p>Intel, desenvolvida pela Intel</p></li>
 </ul>
 <p>Nesta saga, vamos focar no Assembler <strong>NASM</strong> para
 arquitetura X86 64-bits (x64), com <em>sintaxe Intel</em> e rodando em
 sistema GNU/Linux, como já mencionamos algumas vezes em artigos
 anteriores.</p>
 <ul>
-<li>Arquitetura x86_64 (x64)</li>
-<li>Sistema Operacional GNU/Linux (Ubuntu)</li>
-<li>Assembler NASM 2.16.01</li>
-<li>GNU ld 2.38 (ligador, ou linker)</li>
-<li>Debugger GNU gdb 12.1</li>
-<li>strace 5.16 (tracing de syscalls)</li>
+<li><p>Arquitetura x86_64 (x64)</p></li>
+<li><p>Sistema Operacional GNU/Linux (Ubuntu)</p></li>
+<li><p>Assembler NASM 2.16.01</p></li>
+<li><p>GNU ld 2.38 (ligador, ou linker)</p></li>
+<li><p>Debugger GNU gdb 12.1</p></li>
+<li><p>strace 5.16 (tracing de syscalls)</p></li>
 </ul>
 <p>Uma vez que definimos as ferramentas utilizadas, vamos seguir
 traduzindo o “Hello, World” para asm x86 enquanto entendemos o uso de
@@ -6690,8 +6746,8 @@ a <code>exit</code>, definida da seguinte forma no
 fizemos com os opcodes, que seguindo <a href="https://x64.syscall.sh/">a
 mesma tabela de syscalls</a>, é:</p>
 <ul>
-<li>nome da syscall vai em RAX</li>
-<li>primeiro argumento (o status de erro) vai em RDI</li>
+<li><p>nome da syscall vai em RAX</p></li>
+<li><p>primeiro argumento (o status de erro) vai em RDI</p></li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="sourceCode as"><code class="sourceCode actionscript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>global _start</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -6702,24 +6758,25 @@ mesma tabela de syscalls</a>, é:</p>
 <p>Este programa simplesmente faz aquilo que mencionamos no artigo
 anterior: <em>que todo programa deve terminar</em>.</p>
 <ul>
-<li><code>mov rdi, 0</code> move o valor imediato 1 para o registrador
-RDI; vai representar o error code da syscall <strong>exit</strong>: 0
-para término sem erros</li>
-<li><code>mov rax, 60</code> move o valor imediato 60 para o registrador
-RAX; vai representar o nome da syscall em si, <strong>exit</strong></li>
-<li><code>syscall</code> faz a chamada de sistema da syscall
-<strong>exit</strong>, definida em RAX</li>
+<li><p><code>mov rdi, 0</code> move o valor imediato 1 para o
+registrador RDI; vai representar o error code da syscall
+<strong>exit</strong>: 0 para término sem erros</p></li>
+<li><p><code>mov rax, 60</code> move o valor imediato 60 para o
+registrador RAX; vai representar o nome da syscall em si,
+<strong>exit</strong></p></li>
+<li><p><code>syscall</code> faz a chamada de sistema da syscall
+<strong>exit</strong>, definida em RAX</p></li>
 </ul>
 <p>Para que o programa seja compilado, precisamos primeiro fazer a
 “montagem” das instruções com NASM:</p>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> nasm <span class="at">-f</span> elf64 hello.asm <span class="at">-o</span> hello.o</span></code></pre></div>
 <ul>
-<li><code>-f elf64</code>: arquitetura de destino, x64</li>
-<li><code>hello.asm</code> input, ou seja, o arquivo que contém o código
-fonte</li>
-<li><code>-o hello.o</code>: define saída para o arquivo
-<code>hello.o</code></li>
+<li><p><code>-f elf64</code>: arquitetura de destino, x64</p></li>
+<li><p><code>hello.asm</code> input, ou seja, o arquivo que contém o
+código fonte</p></li>
+<li><p><code>-o hello.o</code>: define saída para o arquivo
+<code>hello.o</code></p></li>
 </ul>
 <blockquote>
 <p>Mas o quê é este arquivo <code>hello.o</code>?</p>
@@ -6801,14 +6858,14 @@ representação do valor total (em bytes) tanto em decimal quanto
 hexadecimal</p>
 </blockquote>
 <ul>
-<li><code>text</code>: esta seção contém todo o código fonte do nosso
-programa, também chamado de “texto”</li>
-<li><code>data</code>: seção de dados inicializados, logo a seguir neste
-artigos entramos em detalhe</li>
-<li><code>bss</code>: seção de dados não-inicializados, logo a seguir
-também falaremos deste</li>
-<li><code>dec</code>: o tamanho total em decimal</li>
-<li><code>hex</code>: o tamanho total em hexadecimal</li>
+<li><p><code>text</code>: esta seção contém todo o código fonte do nosso
+programa, também chamado de “texto”</p></li>
+<li><p><code>data</code>: seção de dados inicializados, logo a seguir
+neste artigos entramos em detalhe</p></li>
+<li><p><code>bss</code>: seção de dados não-inicializados, logo a seguir
+também falaremos deste</p></li>
+<li><p><code>dec</code>: o tamanho total em decimal</p></li>
+<li><p><code>hex</code>: o tamanho total em hexadecimal</p></li>
 </ul>
 <p>Nosso programa por enquanto só tem a seção text, que é exatamente
 todo o código a partir do rótulo <code>_start</code>.</p>
@@ -7041,41 +7098,41 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href=
 <p>__execve(“./hello”, [“./hello”], 0x7ffc504b5710 /_ 24 vars _/) =
 0:__</p>
 <ul>
-<li><code>execve</code> é uma chamada do Linux que executa um
-determinado programa</li>
-<li><code>./hello</code> é o caminho para o programa que será
-executado</li>
-<li><code>["./hello"]</code> é a lista de argumentos passados para o
+<li><p><code>execve</code> é uma chamada do Linux que executa um
+determinado programa</p></li>
+<li><p><code>./hello</code> é o caminho para o programa que será
+executado</p></li>
+<li><p><code>["./hello"]</code> é a lista de argumentos passados para o
 programa. Como só há o nome do programa (que entra na lista
 <em>ARGV</em>), indica que este programa não recebe argumentos extras na
-linha de comando</li>
-<li><code>0x7ffc504b5710</code> é o endereço de memória onde as
-variáveis de ambiente do processo em execução estão armazenadas</li>
-<li><code>/* 24 vars */</code> indica que há 24 variáveis de ambiente
-definidas no shell atual</li>
-<li><code>=0</code> é o resultado da chamada <code>execve</code>, o que
-significa que foi bem-sucedido e executado com sucesso</li>
+linha de comando</p></li>
+<li><p><code>0x7ffc504b5710</code> é o endereço de memória onde as
+variáveis de ambiente do processo em execução estão armazenadas</p></li>
+<li><p><code>/* 24 vars */</code> indica que há 24 variáveis de ambiente
+definidas no shell atual</p></li>
+<li><p><code>=0</code> é o resultado da chamada <code>execve</code>, o
+que significa que foi bem-sucedido e executado com sucesso</p></li>
 </ul>
 <p><strong>exit(0) = ?:</strong></p>
 <ul>
-<li><code>exit</code> é a chamada de sistema (syscall) feita no sistema
-operacional, e geralmente é definida no <code>libc</code>, sendo no caso
-de sistema GNU, <code>glibc</code>. Foi o valor <em>60</em> passado para
-o registrador RAX, lembra?</li>
-<li><code>(0)</code> é o parâmetro passado para a função, que neste caso
-foi o que determinamos no registrador RDI, indicando que nosso programa
-em execução vai terminar <em>sem erros</em></li>
-<li><code>= ?</code> indica que o resultado da chamada de sistema não é
-conhecido, ou seja não houve um retorno <em>explícito</em> de valor da
-chamada de sistema</li>
+<li><p><code>exit</code> é a chamada de sistema (syscall) feita no
+sistema operacional, e geralmente é definida no <code>libc</code>, sendo
+no caso de sistema GNU, <code>glibc</code>. Foi o valor <em>60</em>
+passado para o registrador RAX, lembra?</p></li>
+<li><p><code>(0)</code> é o parâmetro passado para a função, que neste
+caso foi o que determinamos no registrador RDI, indicando que nosso
+programa em execução vai terminar <em>sem erros</em></p></li>
+<li><p><code>= ?</code> indica que o resultado da chamada de sistema não
+é conhecido, ou seja não houve um retorno <em>explícito</em> de valor da
+chamada de sistema</p></li>
 </ul>
 <p><strong>+++ exited with 0 +++:</strong></p>
 <ul>
-<li><code>+++</code> sinaliza o início de uma mensagem de saída do
-strace</li>
-<li><code>exited with 0</code> indica que o programa terminou sem
-erros</li>
-<li><code>+++</code> sinaliza o fim da mensagem de saída</li>
+<li><p><code>+++</code> sinaliza o início de uma mensagem de saída do
+strace</p></li>
+<li><p><code>exited with 0</code> indica que o programa terminou sem
+erros</p></li>
+<li><p><code>+++</code> sinaliza o fim da mensagem de saída</p></li>
 </ul>
 <p>Uma vez que entendemos como depurar nosso programa, podemos evolui-lo
 para imprimir a mensagem “Hello, World” na saída do terminal.</p>
@@ -7124,13 +7181,13 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href=
 <span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="fu">gdb</span><span class="kw">)</span></span></code></pre></div>
 <p>Ora ora, o que temos aqui?</p>
 <ul>
-<li><code>msg</code> aponta para o endereço <code>0x401000</code> que
+<li><p><code>msg</code> aponta para o endereço <code>0x401000</code> que
 era o endereço usado pelo <code>_start</code> no nosso programa
-anterior</li>
-<li>e agora <code>_start</code> aponta para outro endereço,
+anterior</p></li>
+<li><p>e agora <code>_start</code> aponta para outro endereço,
 <code>0x40100d</code> que está <strong>13 bytes</strong> (“d” em hexa)
 acima de <code>msg</code>, exatamente os 13 bytes da string “Hello,
-World” adicionado com quebra de linha!!!!!1</li>
+World” adicionado com quebra de linha!!!!!1</p></li>
 </ul>
 <blockquote>
 <p>Superb! Mas o que significa o valor <code>0x6c6c6548</code>?</p>
@@ -7180,12 +7237,13 @@ sistema write</h3>
 forma no <code>glibc</code>:</p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="dt">ssize_t</span> write<span class="op">(</span><span class="dt">int</span> fd<span class="op">,</span> <span class="dt">const</span> <span class="dt">void</span> buf<span class="op">[.</span>count<span class="op">],</span> <span class="dt">size_t</span> count<span class="op">);</span></span></code></pre></div>
 <ul>
-<li>nome da syscall vai em RAX</li>
-<li>primeiro argumento (file descriptor, no caso o <em>STDOUT</em>) vai
-em RDI</li>
-<li>segundo argumento (ponteiro para o início do buffer) vai em RSI</li>
-<li>terceiro argumento (quantidade de bytes a serem escritos) vai em
-RDX</li>
+<li><p>nome da syscall vai em RAX</p></li>
+<li><p>primeiro argumento (file descriptor, no caso o <em>STDOUT</em>)
+vai em RDI</p></li>
+<li><p>segundo argumento (ponteiro para o início do buffer) vai em
+RSI</p></li>
+<li><p>terceiro argumento (quantidade de bytes a serem escritos) vai em
+RDX</p></li>
 </ul>
 <div class="sourceCode" id="cb32"><pre
 class="sourceCode as"><code class="sourceCode actionscript"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>global _start</span>
@@ -7270,9 +7328,9 @@ tal como vimos no artigo anterior. E sendo um processo, é submetido a um
 do programa segue um layout, que basicamente contém as seguintes seções,
 ou <em>segmentos</em> de memória:</p>
 <ul>
-<li>text</li>
-<li>data</li>
-<li>bss</li>
+<li><p>text</p></li>
+<li><p>data</p></li>
+<li><p>bss</p></li>
 </ul>
 <p>Já falamos disto anteriormente neste artigo, mas basicamente na seção
 <code>text</code> fica todo o código, instruções do programa.</p>
@@ -7444,8 +7502,8 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb44-1"><a
 <p>Este programa imprime “Hi” apenas. Mas podemos melhorar a organização
 separando em blocos com algum valor <em>semântico</em>:</p>
 <ul>
-<li>separar o bloco de <code>exit</code></li>
-<li>separar o bloco de <code>write</code></li>
+<li><p>separar o bloco de <code>exit</code></p></li>
+<li><p>separar o bloco de <code>write</code></p></li>
 </ul>
 <p>Assembly emprega o conceito de <strong>labels</strong>, que são
 rótulos, mas que podem ser definidas em qualquer parte do código.
@@ -7514,11 +7572,11 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb46-1"><a
 <p>Entretanto, para que isto funcione, vamos imaginar uma possível
 solução:</p>
 <ul>
-<li>definir algum registrador “especial” que guarda sempre o ponteiro da
-próxima instrução</li>
-<li>antes de desviar o fluxo, guardar o endereço de memória da próxima
-instrução do programa em alguma <em>estrutura de dados</em> para que
-possa ser resgatado quando a lógica do desvio terminar</li>
+<li><p>definir algum registrador “especial” que guarda sempre o ponteiro
+da próxima instrução</p></li>
+<li><p>antes de desviar o fluxo, guardar o endereço de memória da
+próxima instrução do programa em alguma <em>estrutura de dados</em> para
+que possa ser resgatado quando a lógica do desvio terminar</p></li>
 </ul>
 <p>Sim, estamos falando do desvio com <code>call</code>,
 <code>ret</code>, registradores e pilha.</p>
@@ -7839,12 +7897,12 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb63-1"><a
 <span id="cb63-28"><a href="#cb63-28" aria-hidden="true" tabindex="-1"></a>    ret</span></code></pre></div>
 <p>Podemos reparar 2 coisas:</p>
 <ul>
-<li>A rotina <code>.print</code> está ficando bastante genérica, ou seja
-ela não sabe o que está na pilha, simplesmente move para o registrador
-RSI e faz a syscall <code>write</code></li>
-<li>A rotina <code>.print</code> ainda usa o tamanho em bytes como valor
-fixo, no caso 3 bytes. Deveria ser dinâmico também se quisermos fazer
-com que esta rotina seja bem genérica</li>
+<li><p>A rotina <code>.print</code> está ficando bastante genérica, ou
+seja ela não sabe o que está na pilha, simplesmente move para o
+registrador RSI e faz a syscall <code>write</code></p></li>
+<li><p>A rotina <code>.print</code> ainda usa o tamanho em bytes como
+valor fixo, no caso 3 bytes. Deveria ser dinâmico também se quisermos
+fazer com que esta rotina seja bem genérica</p></li>
 </ul>
 <p>Colocamos o tamanho também na pilha? <em>Nah</em>, seria mais
 interessante ainda se calculássemos dinamicamente o que vem da pilha.
@@ -7902,9 +7960,9 @@ class="sourceCode as"><code class="sourceCode actionscript"><span id="cb66-1"><a
 <p>Ao rodarmos o programa, <em>obviamente</em> caímos em loop infinito.
 Precisamos definir uma condição de parada, que consiste em:</p>
 <ul>
-<li>mudar o estado de alguma variável condicional</li>
-<li>desviar o fluxo para outra <em>label</em> quando a condição for
-verdadeira</li>
+<li><p>mudar o estado de alguma variável condicional</p></li>
+<li><p>desviar o fluxo para outra <em>label</em> quando a condição for
+verdadeira</p></li>
 </ul>
 <p>Em Assembly, podemos fazer a mudança de estado utilizando a instrução
 <code>inc</code>:</p>
@@ -8054,12 +8112,13 @@ e “ELSE” em Assembly?</p>
 <p>Não. Não tem “IF” e “ELSE” em Assembly.</p>
 <p>Uma possível solução seria:</p>
 <ul>
-<li>utilizar uma instrução que compare o valor de um registrador ou em
-algum endereço de memória com <strong>qualquer outro valor</strong></li>
-<li>esta instrução iria guardar o resultado da comparação em outro
-registrador “especial”</li>
-<li>utilizar outra instrução para fazer <em>desvio do fluxo</em> de
-acordo com o valor que estive neste registrador especial</li>
+<li><p>utilizar uma instrução que compare o valor de um registrador ou
+em algum endereço de memória com <strong>qualquer outro
+valor</strong></p></li>
+<li><p>esta instrução iria guardar o resultado da comparação em outro
+registrador “especial”</p></li>
+<li><p>utilizar outra instrução para fazer <em>desvio do fluxo</em> de
+acordo com o valor que estive neste registrador especial</p></li>
 </ul>
 <p>Sim, é aí que entramos no tal do registrador
 <strong>RFLAGS</strong>.</p>
@@ -8157,10 +8216,10 @@ estamos buscando aqui.</p>
 quando a <em>flag zero está presente</em>. Para isto, temos a disposição
 diversas instruções de jump baseadas em flags:</p>
 <ul>
-<li>jz (jump if zero)</li>
-<li>jnz(jump if not zero)</li>
-<li>je (jump if equal)</li>
-<li>jne (jump if not equal)</li>
+<li><p>jz (jump if zero)</p></li>
+<li><p>jnz(jump if not zero)</p></li>
+<li><p>je (jump if equal)</p></li>
+<li><p>jne (jump if not equal)</p></li>
 </ul>
 <blockquote>
 <p>Isto pra mencionar apenas algumas, existem muitas outras que podem
@@ -8204,11 +8263,11 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb77-1"><a href=
 <span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="fu">gdb</span><span class="kw">)</span> <span class="ex">x/s</span> <span class="va">$rsi</span></span>
 <span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a><span class="ex">0x402003:</span>       <span class="st">&quot;&quot;</span></span></code></pre></div>
 <ul>
-<li>Em RDX, temos o contador, que está em 3, que é a quantidade de bytes
-que será passada como terceiro argumento da syscall write. Okay, aqui
-ficou tudo certo.</li>
-<li>Em RSI, temos <code>0x402003</code>, e o valor está vazio, ou
-<code>0x00</code>. Isto é um problema</li>
+<li><p>Em RDX, temos o contador, que está em 3, que é a quantidade de
+bytes que será passada como terceiro argumento da syscall write. Okay,
+aqui ficou tudo certo.</p></li>
+<li><p>Em RSI, temos <code>0x402003</code>, e o valor está vazio, ou
+<code>0x00</code>. Isto é um problema</p></li>
 </ul>
 <p>O problema reside no fato de que RSI precisa ter o ponteiro para a
 string em si, e as operações de <code>inc rsi</code> <strong>modificaram
@@ -8308,12 +8367,14 @@ shell que está executando o nosso programa</p>
 <p>Com isto, sabemos que o primeiro argumento está localizado em
 <code>rsp + 16</code>:</p>
 <ul>
-<li><code>rsp</code>: quantidade de argumentos</li>
-<li><code>rsp + 8</code>: ARG0, nome do programa</li>
-<li><code>rsp + 16</code>: ARG1, primeiro argumento (se existir)</li>
-<li><code>rsp + 24</code>: ARG2, segundo argumento (se existir)</li>
-<li>e assim sucessivamente…até chegar no vetor de variáveis de ambiente
-(vetor ambiente)</li>
+<li><p><code>rsp</code>: quantidade de argumentos</p></li>
+<li><p><code>rsp + 8</code>: ARG0, nome do programa</p></li>
+<li><p><code>rsp + 16</code>: ARG1, primeiro argumento (se
+existir)</p></li>
+<li><p><code>rsp + 24</code>: ARG2, segundo argumento (se
+existir)</p></li>
+<li><p>e assim sucessivamente…até chegar no vetor de variáveis de
+ambiente (vetor ambiente)</p></li>
 </ul>
 <figure>
 <img
@@ -8346,11 +8407,11 @@ definir <em>tipos de bytes</em>, que basicamente são grupos de bytes,
 podendo ou não caber em um registrador ou stack dependendo da
 arquitetura da CPU.</p>
 <ul>
-<li><strong>byte</strong>: especifica 1 byte (8-bit)</li>
-<li><strong>word</strong>: 2 bytes (16-bit)</li>
-<li><strong>dword</strong>: 4 bytes (32-bit)</li>
-<li><strong>qword</strong>: 8 bytes (64-bit)</li>
-<li><strong>tbyte</strong>: 10 bytes</li>
+<li><p><strong>byte</strong>: especifica 1 byte (8-bit)</p></li>
+<li><p><strong>word</strong>: 2 bytes (16-bit)</p></li>
+<li><p><strong>dword</strong>: 4 bytes (32-bit)</p></li>
+<li><p><strong>qword</strong>: 8 bytes (64-bit)</p></li>
+<li><p><strong>tbyte</strong>: 10 bytes</p></li>
 </ul>
 <p>Na arquitetura x86_64, precisamos especificar que o tipo de byte
 adicionado na stack, quando não vier de um registrador mas sim de um
@@ -8427,10 +8488,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb88-1"><a href=
 <span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a><span class="ex">+++</span> exited with 0 +++</span></code></pre></div>
 <p>Foram feitas 4 chamadas de sistema, sendo:</p>
 <ul>
-<li>1 write, “Hi,”</li>
-<li>1 write “Leandro”</li>
-<li>1 write “\n”</li>
-<li>1 exit</li>
+<li><p>1 write, “Hi,”</p></li>
+<li><p>1 write “Leandro”</p></li>
+<li><p>1 write “\n”</p></li>
+<li><p>1 exit</p></li>
 </ul>
 <hr />
 <h2 id="falando-um-pouco-de-registradores">Falando um pouco de
@@ -8508,9 +8569,9 @@ utilização correta importa bastante.</p>
 execução do programa, tais como o <code>rip</code> e
 <code>eflags</code>.</p>
 <ul>
-<li>Propósito original</li>
-<li>Convenções de chamadas</li>
-<li>Funcionamento crítico do programa</li>
+<li><p>Propósito original</p></li>
+<li><p>Convenções de chamadas</p></li>
+<li><p>Funcionamento crítico do programa</p></li>
 </ul>
 <p>Apesar destas características importantes de uso dos registradores,
 podem haver situações em que utilizar um registrador de propósito geral
@@ -8526,46 +8587,48 @@ chamamos de <em>valor imediato</em>, e nesta categoria podemos utilizar
 RAX, RBX, RCX, RDX e os registradores de rascunho que vão de R8 a
 R15.</p>
 <ul>
-<li><strong>RAX</strong>: operações aritméticas e armazenamento de
+<li><p><strong>RAX</strong>: operações aritméticas e armazenamento de
 resultados; também usado para o nome de chamadas de sistema em
-convenções de chamada (syscalls)</li>
-<li><strong>RBX</strong>: ponteiro de base, utilizado para o endereço de
-algumas informações na memória</li>
-<li><strong>RCX</strong>: geralmente usado como contador, para armazenar
-a quantidade de vezes que uma instrução deve ser executada</li>
-<li><strong>RDX</strong>: usado para algumas operações de multiplicação
-e divisão, muito utilizado para armazenar o resto de operações</li>
-<li><strong>R8 a R15</strong>: registradores de <em>rascunho</em>
-utilizados para propósito geral</li>
+convenções de chamada (syscalls)</p></li>
+<li><p><strong>RBX</strong>: ponteiro de base, utilizado para o endereço
+de algumas informações na memória</p></li>
+<li><p><strong>RCX</strong>: geralmente usado como contador, para
+armazenar a quantidade de vezes que uma instrução deve ser
+executada</p></li>
+<li><p><strong>RDX</strong>: usado para algumas operações de
+multiplicação e divisão, muito utilizado para armazenar o resto de
+operações</p></li>
+<li><p><strong>R8 a R15</strong>: registradores de <em>rascunho</em>
+utilizados para propósito geral</p></li>
 </ul>
 <p><strong>Endereços de memória</strong> Registradores também permitem
 manipular endereços de memória. Nesta categoria temos RSI, RDI, RBP e
 RSP.</p>
 <ul>
-<li><strong>RSI</strong>: utilizado como um ponteiro de origem em
+<li><p><strong>RSI</strong>: utilizado como um ponteiro de origem em
 operações de transferências de dados, frequentemente usado em loops para
-iterar sobre arrays ou buffers de dados</li>
-<li><strong>RDI</strong>: utilizado como ponteiro de destino em
+iterar sobre arrays ou buffers de dados</p></li>
+<li><p><strong>RDI</strong>: utilizado como ponteiro de destino em
 operações de transferências de dados, frequentemente usado junto com
-RSI</li>
-<li><strong>RBP</strong>: frequentemente usado como ponteiro base em
+RSI</p></li>
+<li><p><strong>RBP</strong>: frequentemente usado como ponteiro base em
 operações de memória, para referenciar variáveis locais e parâmetros de
-função na stack</li>
-<li><strong>RSP</strong>: ponteiro para o topo da pilha (stack) do
-programa em execução</li>
+função na stack</p></li>
+<li><p><strong>RSP</strong>: ponteiro para o topo da pilha (stack) do
+programa em execução</p></li>
 </ul>
 <h3 id="registradores-especiais">Registradores especiais</h3>
 <p>Vamos destacar apenas 2 dos registradores considerados
 “especiais”:</p>
 <ul>
-<li><strong>RFLAGS</strong>: utilizado para armazenar o estado da CPU,
-frequentemente modificado por instruções aritméticas e controle de
-paridade binária</li>
-<li><strong>RIP</strong>: ponteiro de instrução, que sempre contém o
+<li><p><strong>RFLAGS</strong>: utilizado para armazenar o estado da
+CPU, frequentemente modificado por instruções aritméticas e controle de
+paridade binária</p></li>
+<li><p><strong>RIP</strong>: ponteiro de instrução, que sempre contém o
 endereço da próxima instrução a ser executada. Por exemplo, a instrução
 <code>ret</code> busca o endereço do topo da pilha e modifica o
 <code>rip</code> para que o programa continue a partir daquele
-ponto</li>
+ponto</p></li>
 </ul>
 <figure>
 <img
@@ -8613,13 +8676,13 @@ totalidade.</p>
 <p>Seguindo esta lógica, podemos aplicar para todos os registradores,
 trazendo alguns como exemplo:</p>
 <ul>
-<li><strong>RAX</strong>:
-<code>EAX -&gt; AX -&gt; AH -&gt; AL</code></li>
-<li><strong>RBX</strong>:
-<code>EBX -&gt; BX -&gt; BH -&gt; BL</code></li>
-<li><strong>RDX</strong>:
-<code>RDX -&gt; DX -&gt; DH -&gt; DL</code></li>
-<li><strong>R8</strong>: <code>R8W -&gt; R8B</code></li>
+<li><p><strong>RAX</strong>:
+<code>EAX -&gt; AX -&gt; AH -&gt; AL</code></p></li>
+<li><p><strong>RBX</strong>:
+<code>EBX -&gt; BX -&gt; BH -&gt; BL</code></p></li>
+<li><p><strong>RDX</strong>:
+<code>RDX -&gt; DX -&gt; DH -&gt; DL</code></p></li>
+<li><p><strong>R8</strong>: <code>R8W -&gt; R8B</code></p></li>
 </ul>
 <figure>
 <img
@@ -9012,15 +9075,16 @@ espiral de código de máquina e manipulação de memória.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#o-que-é-um-programa-de-computador">O que é um programa de
-computador</a>
+<li><p><a href="#o-que-é-um-programa-de-computador">O que é um programa
+de computador</a></p>
 <ul>
 <li><a href="#sistemas-operacionais-e-processos">Sistemas Operacionais e
 Processos</a></li>
 <li><a href="#um-programa-deve-sempre-terminar">Um programa deve sempre
 terminar</a></li>
 </ul></li>
-<li><a href="#nosso-primeiro-programa">Nosso primeiro programa</a>
+<li><p><a href="#nosso-primeiro-programa">Nosso primeiro
+programa</a></p>
 <ul>
 <li><a href="#a-linguagem-das-cpus-o-sistema-binário">A linguagem das
 CPU’s, o sistema binário</a></li>
@@ -9031,7 +9095,7 @@ queridinho dos computadores</a></li>
 <li><a href="#opcodes">Opcodes</a></li>
 <li><a href="#endianness">Endianness</a></li>
 </ul></li>
-<li><a href="#nosso-segundo-programa">Nosso segundo programa</a>
+<li><p><a href="#nosso-segundo-programa">Nosso segundo programa</a></p>
 <ul>
 <li><a href="#alocando-dados-na-memória-do-programa">Alocando dados na
 memória do programa</a></li>
@@ -9041,12 +9105,12 @@ memória do programa</a></li>
 write</a></li>
 <li><a href="#montando-a-syscall-exit">Montando a syscall exit</a></li>
 </ul></li>
-<li><a href="#manipulando-o-nosso-programa">Manipulando o nosso
-programa</a></li>
-<li><a href="#a-vida-de-quem-programa-é-assim">A vida de quem programa é
-assim?</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#manipulando-o-nosso-programa">Manipulando o nosso
+programa</a></p></li>
+<li><p><a href="#a-vida-de-quem-programa-é-assim">A vida de quem
+programa é assim?</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="o-que-é-um-programa-de-computador">O que é um programa de
@@ -9172,26 +9236,26 @@ combinações:</p>
 111</code></pre>
 <p>Com isto, temos um padrão:</p>
 <ul>
-<li>1 dígito: 2 combinações</li>
-<li>2 dígitos: 4 combinações</li>
-<li>3 dígitos: 8 combinações</li>
+<li><p>1 dígito: 2 combinações</p></li>
+<li><p>2 dígitos: 4 combinações</p></li>
+<li><p>3 dígitos: 8 combinações</p></li>
 </ul>
 <p>Repare no padrão de exponenciação. Estamos pegando o número 2 como
 base e aplicando o número do dígito como expoente:</p>
 <p><em>numero de símbolos ^ número de dígitos</em></p>
 <ul>
-<li>2^1 = 2</li>
-<li>2^2 = 4</li>
-<li>2^3 = 8</li>
+<li><p>2^1 = 2</p></li>
+<li><p>2^2 = 4</p></li>
+<li><p>2^3 = 8</p></li>
 </ul>
 <p>Extrapolando para 4 ou mais dígitos, podemos chegar na seguinte
 conclusão:</p>
 <ul>
-<li>2^4 = 16 combinações</li>
-<li>2^5 = 32 combinações</li>
-<li>2^6 = 64 combinações</li>
-<li>2^7 = 128 combinações</li>
-<li>2^8 = 256 combinações</li>
+<li><p>2^4 = 16 combinações</p></li>
+<li><p>2^5 = 32 combinações</p></li>
+<li><p>2^6 = 64 combinações</p></li>
+<li><p>2^7 = 128 combinações</p></li>
+<li><p>2^8 = 256 combinações</p></li>
 </ul>
 <p>E assim por diante…</p>
 <blockquote>
@@ -9239,10 +9303,10 @@ exponenciação da base, sendo:</p>
 <p><em>numero de símbolos ^ número de dígitos</em></p>
 <p>Portanto:</p>
 <ul>
-<li>10^2 = 100 combinações</li>
-<li>10^3 = 1000 combinações</li>
-<li>10^4 = 10000 combinações</li>
-<li>etc etc etc</li>
+<li><p>10^2 = 100 combinações</p></li>
+<li><p>10^3 = 1000 combinações</p></li>
+<li><p>10^4 = 10000 combinações</p></li>
+<li><p>etc etc etc</p></li>
 </ul>
 <h3 id="convertendo-binário-em-decimal">Convertendo binário em
 decimal</h3>
@@ -9252,9 +9316,9 @@ modo a termos uma leitura mais intuitiva, não?</p>
 <p>Aplicando a regra de exponenciação, não fica difícil fazer a
 conversão:</p>
 <ul>
-<li>0 é sempre 0, pois este símbolo está presente em ambos sistemas de
-numeração</li>
-<li>Mesmo vale para 1, pois está presente em ambos</li>
+<li><p>0 é sempre 0, pois este símbolo está presente em ambos sistemas
+de numeração</p></li>
+<li><p>Mesmo vale para 1, pois está presente em ambos</p></li>
 </ul>
 <p>Se quisermos então converter <code>10</code> (que é o próximo número
 depois de 1 em binário) de binário pra decimal, vamos aplicar a seguinte
@@ -9271,10 +9335,10 @@ elevado a <em>zero</em> é *UM**.</p>
 </ul>
 <p>Vamos extrapolar um pouquinho?</p>
 <ul>
-<li>11 = <em>(1 x 2^1) + (1 x 2^0)</em> = 2 + 1 =
-<strong>3</strong></li>
-<li>100 = <em>(1 x 2^2) + (0 x 2^1) + (0 x 2^0)</em> = 2 + 0 + 0 =
-<strong>4</strong></li>
+<li><p>11 = <em>(1 x 2^1) + (1 x 2^0)</em> = 2 + 1 =
+<strong>3</strong></p></li>
+<li><p>100 = <em>(1 x 2^2) + (0 x 2^1) + (0 x 2^0)</em> = 2 + 0 + 0 =
+<strong>4</strong></p></li>
 </ul>
 <p>Yay! <em>Nice, uh?</em></p>
 <p>Agora vamos converter <em>byte a byte</em> do nosso programa:</p>
@@ -9282,11 +9346,11 @@ elevado a <em>zero</em> é *UM**.</p>
 10111000 00111100 00000000 00000000 00000000  
 00001111 00000101                            </code></pre>
 <ul>
-<li>10111111 = <em>(1 x 2^7) + (0 x 2^6) …</em> =
-<strong>191</strong></li>
-<li>00000001 = <em>(0 x 2^7) + (0 x 2^6) … + (1 + 2^0)</em> =
-<strong>1</strong></li>
-<li>etc etc etc até chegar ao 12º byte</li>
+<li><p>10111111 = <em>(1 x 2^7) + (0 x 2^6) …</em> =
+<strong>191</strong></p></li>
+<li><p>00000001 = <em>(0 x 2^7) + (0 x 2^6) … + (1 + 2^0)</em> =
+<strong>1</strong></p></li>
+<li><p>etc etc etc até chegar ao 12º byte</p></li>
 </ul>
 <p>Temos então um programa convertido para decimal da seguinte
 forma:</p>
@@ -9350,9 +9414,9 @@ possível:</p>
 <p>Com apenas 2 dígitos no sistema hexadecimal, podemos ter 256
 combinações de números diferentes!</p>
 <ul>
-<li>em binário, 2 dígitos = 4 combinações</li>
-<li>em decimal, 2 dígitos = 100 combinações</li>
-<li>em hexa, 2 dígitos = 256 combinações</li>
+<li><p>em binário, 2 dígitos = 4 combinações</p></li>
+<li><p>em decimal, 2 dígitos = 100 combinações</p></li>
+<li><p>em hexa, 2 dígitos = 256 combinações</p></li>
 </ul>
 <p>Por exemplo, para termos 256 combinações com 2 símbolos
 <code>FF</code>, precisaríamos de 8 símbolos <code>1111 1111</code> no
@@ -9362,18 +9426,18 @@ representar e visualizar programas.</p>
 <p>Aplicando regra de exponenciação para convertermos pra decimal, vamos
 ter o seguinte:</p>
 <ul>
-<li>do 0 ao 9 é tudo igual</li>
-<li>A = 10, B = 11, C = 12, D = 13, E = 14, F = 15</li>
+<li><p>do 0 ao 9 é tudo igual</p></li>
+<li><p>A = 10, B = 11, C = 12, D = 13, E = 14, F = 15</p></li>
 </ul>
 <p>Onde:</p>
 <p><em>dígito do sistema * 16^posição do dígito</em></p>
 <p>Com isto, convertendo <code>1A</code> e <code>FF</code> para decimal,
 ficaria:</p>
 <ul>
-<li>1A = <em>(1 * 16^1) + (10 * 16^0)</em> = 16 + 10 =
-<strong>26</strong></li>
-<li>FF = <em>(15 * 16^1) + (15 * 16^0)</em> = 240 + 15 =
-<strong>255</strong></li>
+<li><p>1A = <em>(1 * 16^1) + (10 * 16^0)</em> = 16 + 10 =
+<strong>26</strong></p></li>
+<li><p>FF = <em>(15 * 16^1) + (15 * 16^0)</em> = 240 + 15 =
+<strong>255</strong></p></li>
 </ul>
 <blockquote>
 <p>Ok, mas precisamos converter de binário para hexa</p>
@@ -9382,11 +9446,11 @@ ficaria:</p>
 para hexadecimal? Dá pra fazer por dedução da conversão decimal, por
 exemplo:</p>
 <ul>
-<li>sabendo que o byte <strong>11111111</strong> representa 255 em
+<li><p>sabendo que o byte <strong>11111111</strong> representa 255 em
 decimal, e sabendo que <code>FF</code> em decimal é 255, portanto
-concluímos que <code>11111111 = FF</code></li>
-<li>se dividirmos o byte em 2 partes, podemos calcular que
-<code>1111 = F</code>, portanto chegamos no mesmo resultado</li>
+concluímos que <code>11111111 = FF</code></p></li>
+<li><p>se dividirmos o byte em 2 partes, podemos calcular que
+<code>1111 = F</code>, portanto chegamos no mesmo resultado</p></li>
 </ul>
 <p>Geralmente empregamos a técnica de dividir o byte em 2 partes de 4
 bits cada. Assim fica mais fácil visualizar.</p>
@@ -9406,19 +9470,19 @@ operações de CPU.</p>
 <p>De acordo com o <a
 href="http://ref.x86asm.net/coder64.html">manual</a>:</p>
 <ul>
-<li>o opcode <code>BF</code> move um valor imediato para o registrador
-RDI</li>
-<li><code>01 00 00 00</code>: valor imediato hexa que representa
+<li><p>o opcode <code>BF</code> move um valor imediato para o
+registrador RDI</p></li>
+<li><p><code>01 00 00 00</code>: valor imediato hexa que representa
 <code>1</code> em decimal, mas na ordem inversa no formato
 <strong>little-endian</strong> (vamos falar de endianness mais a
-seguir)</li>
-<li>o opcode <code>B8</code> move um valor imediato para o registrador
-RAX</li>
-<li><code>3C 00 00 00</code>: valor imediato hexa que representa
+seguir)</p></li>
+<li><p>o opcode <code>B8</code> move um valor imediato para o
+registrador RAX</p></li>
+<li><p><code>3C 00 00 00</code>: valor imediato hexa que representa
 <code>60</code> em decimal, mas na ordem inversa no formato
-<strong>little-endian</strong></li>
-<li>o opcode <code>0F 05</code> entra no modo “kernel” do SO e aguarda a
-resposta de uma chamada de sistema (syscall)</li>
+<strong>little-endian</strong></p></li>
+<li><p>o opcode <code>0F 05</code> entra no modo “kernel” do SO e
+aguarda a resposta de uma chamada de sistema (syscall)</p></li>
 </ul>
 <p>Mas por quê os bytes são representados na ordem inversa nesta
 arquitetura de CPU?</p>
@@ -9430,10 +9494,10 @@ que sabemos que é <code>129</code> em decimal. Prestando atenção nos
 expoentes:</p>
 <p><em>2^7 + 2^6 + 2^5 + 2^4 + 2^3 + 2^2 + 2^1 + 2^0</em></p>
 <ul>
-<li>o bit mais à esquerda, <em>1 x 2^7</em> = 128</li>
-<li>somado com o bit mais à direita, <em>1 x 2^0</em> = 1</li>
-<li>o restante dos bits está tudo a zero, não precisam entrar pra
-soma</li>
+<li><p>o bit mais à esquerda, <em>1 x 2^7</em> = 128</p></li>
+<li><p>somado com o bit mais à direita, <em>1 x 2^0</em> = 1</p></li>
+<li><p>o restante dos bits está tudo a zero, não precisam entrar pra
+soma</p></li>
 </ul>
 <p>Podemos inferir que os bits mais à direita <em>não têm tanto
 peso</em> no valor final, por isso são chamados <strong>bits menos
@@ -9510,8 +9574,8 @@ artigos</a> que escrevi sobre UNIX pipes</p>
 de sistema, e terminar o programa é <strong>outra</strong> chamada de
 sistema. Portanto, temos:</p>
 <ul>
-<li>uma alocação de dados na memória do programa</li>
-<li>2 chamadas de sistema</li>
+<li><p>uma alocação de dados na memória do programa</p></li>
+<li><p>2 chamadas de sistema</p></li>
 </ul>
 <h3 id="alocando-dados-na-memória-do-programa">🔵 Alocando dados na
 memória do programa</h3>
@@ -9610,13 +9674,14 @@ representa 2. Tá lá no nosso outro artigo sobre Bash e UNIX pipes, corre
 dar uma olhada</p>
 </blockquote>
 <ul>
-<li><code>buf</code>, ou buffer, que é o ponteiro para o início do
+<li><p><code>buf</code>, ou buffer, que é o ponteiro para o início do
 buffer de dados. No caso de escrever “Hello, World” com quebra de linha,
-o buf apontaria para o início da string “Hello, World” na memória.</li>
-<li><code>count</code>, que é o tamanho do buffer de dados a ser
+o buf apontaria para o início da string “Hello, World” na
+memória.</p></li>
+<li><p><code>count</code>, que é o tamanho do buffer de dados a ser
 escrito. Para a string “Hello, World”, o count seria 13, pois isso
 inclui os 12 caracteres da string mais 1 byte para a quebra de
-linha.</li>
+linha.</p></li>
 </ul>
 <h3 id="montando-a-syscall-write">🔵 Montando a syscall write</h3>
 <p>Para montar uma chamada de sistema, é necessário seguir uma
@@ -9851,8 +9916,8 @@ verdadeiro Assembly são os amigos que fazemos no caminho</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#um-pouco-de-história">Um pouco de história</a></li>
-<li><a href="#computar-informações">Computar informações</a>
+<li><p><a href="#um-pouco-de-história">Um pouco de história</a></p></li>
+<li><p><a href="#computar-informações">Computar informações</a></p>
 <ul>
 <li><a href="#máquina-de-turing">Máquina de Turing</a></li>
 <li><a href="#arquitetura-de-von-neumann">Arquitetura de von
@@ -9860,20 +9925,20 @@ Neumann</a></li>
 <li><a href="#o-gargalo-de-von-neumann">O gargalo de von
 Neumann</a></li>
 </ul></li>
-<li><a href="#hierarquia-de-memória">Hierarquia de memória</a>
+<li><p><a href="#hierarquia-de-memória">Hierarquia de memória</a></p>
 <ul>
 <li><a href="#como-a-cpu-executa-instruções">Como a CPU executa
 instruções</a></li>
 <li><a href="#registradores-de-cpu">Registradores de CPU</a></li>
 </ul></li>
-<li><a href="#isa">ISA</a>
+<li><p><a href="#isa">ISA</a></p>
 <ul>
 <li><a href="#cisc">CISC</a></li>
 <li><a href="#risc">RISC</a></li>
 </ul></li>
-<li><a href="#por-quê-x86">Por quê x86?</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#por-quê-x86">Por quê x86?</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="um-pouco-de-história">Um pouco de história</h2>
@@ -10085,10 +10150,10 @@ cache de CPU é outra seara que não pretendo entrar, não por agora.</p>
 <p>Lembrando (mais uma vez), da hierarquia de memória, de forma muito
 simplificada:</p>
 <ul>
-<li>topo: registradores</li>
-<li>depois: cache de CPU</li>
-<li>ainda depois: memória principal (RAM)</li>
-<li>beeem depois: memória secundária (HD, SSD)</li>
+<li><p>topo: registradores</p></li>
+<li><p>depois: cache de CPU</p></li>
+<li><p>ainda depois: memória principal (RAM)</p></li>
+<li><p>beeem depois: memória secundária (HD, SSD)</p></li>
 </ul>
 <p>Quanto mais perto do topo, mais rápido a CPU consegue processar, mas
 em contrapartida é volátil e também tem menor capacidade de
@@ -10280,17 +10345,17 @@ por favor não façam isso eu imploro</p>
 computação, sendo alguns de forma superficial e outros com um pouco mais
 de profundidade, podendo mencionar alguns:</p>
 <ul>
-<li>Arquitetura de computadores</li>
-<li>Tipos de arquiteturas</li>
-<li>Padrões, sistema binário e hexadecimal</li>
-<li>Básicos de Assembly x86-64</li>
-<li>Debugging com GDB</li>
-<li>Filesystem, Sockets</li>
-<li>Threads, pool e alocação de memória</li>
-<li>Arrays, filas, ponteiros</li>
-<li>Concorrência e primitivos de sincronização como spinlocks e
-futex</li>
-<li>Tag <code>h1</code> do HTML (LOL)</li>
+<li><p>Arquitetura de computadores</p></li>
+<li><p>Tipos de arquiteturas</p></li>
+<li><p>Padrões, sistema binário e hexadecimal</p></li>
+<li><p>Básicos de Assembly x86-64</p></li>
+<li><p>Debugging com GDB</p></li>
+<li><p>Filesystem, Sockets</p></li>
+<li><p>Threads, pool e alocação de memória</p></li>
+<li><p>Arrays, filas, ponteiros</p></li>
+<li><p>Concorrência e primitivos de sincronização como spinlocks e
+futex</p></li>
+<li><p>Tag <code>h1</code> do HTML (LOL)</p></li>
 </ul>
 <p>Poderá haver mais conceitos a serem abordados, mas que serão mapeados
 e detalhados conforme necessidade.</p>
@@ -10321,13 +10386,17 @@ conteúdo pt-BR e já cortou muito mato neste assunto.</p>
 preferencialmente GNU/Linux x86_64 que é onde testamos o código
 proposto.</p>
 <ul>
-<li>Sistema Operacional Ubuntu 22.04.4 LTS (GNU/Linux 6.5.0-17-generic
-x86_64)</li>
-<li>NASM 2.16.01</li>
-<li>GNU ld 2.38 (binutils)</li>
+<li><p>Sistema Operacional Ubuntu 22.04.4 LTS (GNU/Linux
+6.5.0-17-generic x86_64)</p></li>
+<li><p>NASM 2.16.01</p></li>
+<li><p>GNU ld 2.38 (binutils)</p></li>
 </ul>
 <p>E para debugging (claro, nesta casa fazemos debugging, não somos
-brincalhões): * GNU gdb 12.1 * strace 5.16</p>
+brincalhões):</p>
+<ul>
+<li><p>GNU gdb 12.1</p></li>
+<li><p>strace 5.16</p></li>
+</ul>
 <p>Para outros ambientes, pode-se optar por rodar o código dentro de um
 container Docker, seguindo as versões acima apresentadas.</p>
 <p>Exemplo de <strong>Dockerfile</strong> (validar isto plmdds):</p>
@@ -10429,8 +10498,8 @@ básico</h2>
 <p>Okay, mas como dominar o conhecimento básico? Aqui entra uma técnica
 muito sofisticada que consiste em:</p>
 <ul>
-<li>fazer tutoriais</li>
-<li>praticar</li>
+<li><p>fazer tutoriais</p></li>
+<li><p>praticar</p></li>
 </ul>
 <blockquote>
 <p>Ah, Leandro. Você tá de BRINCADEIRA COM A MINHA CARA??</p>
@@ -10628,10 +10697,11 @@ emitter.signal</code></pre>
 <p>The transmitter (tx) will have a method called <strong>send</strong>,
 which basically:</p>
 <ul>
-<li>locks the shared queue (<code>store.lock().unwrap()</code>)</li>
-<li>pushes data to the queue (<code>push_back(data)</code>)</li>
-<li>emits a signal (<code>emitter.notify_one</code>) to notify some
-suspended thread that is waiting for data in the queue</li>
+<li><p>locks the shared queue
+(<code>store.lock().unwrap()</code>)</p></li>
+<li><p>pushes data to the queue (<code>push_back(data)</code>)</p></li>
+<li><p>emits a signal (<code>emitter.notify_one</code>) to notify some
+suspended thread that is waiting for data in the queue</p></li>
 </ul>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span><span class="op">&lt;</span>T<span class="op">&gt;</span> Transmitter<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
@@ -10644,14 +10714,14 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="
 <p>The receiver (rx) has a method called <strong>recv</strong> (short
 for <em>receive</em>) which:</p>
 <ul>
-<li>creates a lock in the shared queue
-(<code>store.lock().unwrap()</code>)</li>
-<li>suspends the current thread until the condition is met, in other
+<li><p>creates a lock in the shared queue
+(<code>store.lock().unwrap()</code>)</p></li>
+<li><p>suspends the current thread until the condition is met, in other
 words, <strong>while the queue is empty</strong>, the thread is
 suspended in the operating system, thus not consuming CPU
-(<code>emitter.wait</code>)</li>
-<li>once the thread is awaken, it can pops the data from the queue
-(<code>store.pop_front()</code>)</li>
+(<code>emitter.wait</code>)</p></li>
+<li><p>once the thread is awaken, it can pops the data from the queue
+(<code>store.pop_front()</code>)</p></li>
 </ul>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span><span class="op">&lt;</span>T<span class="op">&gt;</span> Receiver<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="op">{</span></span>
@@ -10693,12 +10763,12 @@ the same time.</p>
 <h3 id="main">Main</h3>
 <p>The <strong>main</strong> function can me implemented as follows:</p>
 <ul>
-<li>create a channel and binds the <strong>tx</strong> and
-<strong>rx</strong> respectively</li>
-<li>the channel holds a shared Mutex/VecDeque and a Condvar</li>
-<li>tx is used to send data to the channel</li>
-<li>rx is used from the inner thread to receive data from the
-channel</li>
+<li><p>create a channel and binds the <strong>tx</strong> and
+<strong>rx</strong> respectively</p></li>
+<li><p>the channel holds a shared Mutex/VecDeque and a Condvar</p></li>
+<li><p>tx is used to send data to the channel</p></li>
+<li><p>rx is used from the inner thread to receive data from the
+channel</p></li>
 </ul>
 <div class="sourceCode" id="cb8"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
@@ -10773,13 +10843,13 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href=
 <span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    worker<span class="op">.</span>join()<span class="op">.</span>unwrap()<span class="op">;</span></span>
 <span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
-<li><code>mpsc</code> stands for <strong>multiple producers, single
-consumer</strong></li>
-<li><code>mpsc::channel</code> creates a channel with a internal shared
-queue and returns a transmitter (tx) and a receiver (rx)</li>
-<li>pretty much like our custom implementation, <code>tx.send</code>
+<li><p><code>mpsc</code> stands for <strong>multiple producers, single
+consumer</strong></p></li>
+<li><p><code>mpsc::channel</code> creates a channel with a internal
+shared queue and returns a transmitter (tx) and a receiver (rx)</p></li>
+<li><p>pretty much like our custom implementation, <code>tx.send</code>
 sends data to the channel, whereas <code>tx.recv</code> reads/pops data
-from the channel</li>
+from the channel</p></li>
 </ul>
 <p><em>How cool is that</em>?</p>
 <hr />
@@ -10837,14 +10907,14 @@ Pointers in Rust</strong>.</p>
 <hr />
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
-<li><a href="#first-things-first">First things first</a></li>
-<li><a href="#a-linked-list-using-rust">A linked list using
-Rust</a></li>
-<li><a href="#box">Meet the Box smart pointer</a></li>
-<li><a href="#rc">Shared ownership using Rc</a></li>
-<li><a href="#refcell">Interior mutability with RefCell</a></li>
-<li><a href="#thinking-about-a-circular-linked-list">Weak references on
-a circular linked list</a></li>
+<li><p><a href="#first-things-first">First things first</a></p></li>
+<li><p><a href="#a-linked-list-using-rust">A linked list using
+Rust</a></p></li>
+<li><p><a href="#box">Meet the Box smart pointer</a></p></li>
+<li><p><a href="#rc">Shared ownership using Rc</a></p></li>
+<li><p><a href="#refcell">Interior mutability with RefCell</a></p></li>
+<li><p><a href="#thinking-about-a-circular-linked-list">Weak references
+on a circular linked list</a></p></li>
 </ul>
 <hr />
 <h2 id="first-things-first">👉 First things first</h2>
@@ -10856,10 +10926,10 @@ href="https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization">RAII
 (Resource Acquisition Is Initialization), it follows three basic
 rules:</p>
 <ul>
-<li>Each value in Rust has a single owner</li>
-<li>There are only <em>one</em> owner at a time</li>
-<li>When the owner’s scope is finished, its associated value is dropped
-and invalidated</li>
+<li><p>Each value in Rust has a single owner</p></li>
+<li><p>There are only <em>one</em> owner at a time</p></li>
+<li><p>When the owner’s scope is finished, its associated value is
+dropped and invalidated</p></li>
 </ul>
 <p>When we need to transfer ownership, in case the value is in the stack
 (fixed-sized types), Rust performs a <em>Copy</em>:</p>
@@ -10927,8 +10997,8 @@ represent the <code>next</code> pointer by using the enum
 <strong>Option</strong>, which in Rust gives us two possibilities of
 types:</p>
 <ul>
-<li>None (the end of the list)</li>
-<li>Some(node)</li>
+<li><p>None (the end of the list)</p></li>
+<li><p>Some(node)</p></li>
 </ul>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Node <span class="op">{</span></span>
@@ -11000,10 +11070,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(<span class="dv">1</span><span class="op">,</span> head<span class="op">.</span>value)<span class="op">;</span></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(<span class="dv">2</span><span class="op">,</span> head<span class="op">.</span>next<span class="op">.</span>unwrap()<span class="op">.</span>value)<span class="op">;</span></span></code></pre></div>
 <ul>
-<li>We wrap the tail box in an Option (Some)</li>
-<li>The <em>head.next</em> points to an <strong>Option</strong>. Because
-it’s the enum Option, we have to call <code>unwrap</code> to fetch the
-underlying value</li>
+<li><p>We wrap the tail box in an Option (Some)</p></li>
+<li><p>The <em>head.next</em> points to an <strong>Option</strong>.
+Because it’s the enum Option, we have to call <code>unwrap</code> to
+fetch the underlying value</p></li>
 </ul>
 <p>Let’s go further in the example and implement a <strong>doubly linked
 list</strong>, by specifying the <em>prev</em> attribute on the Node
@@ -11019,9 +11089,9 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href=
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> tail <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(Node <span class="op">{</span> value<span class="op">:</span> <span class="dv">2</span><span class="op">,</span> prev<span class="op">:</span> <span class="cn">None</span><span class="op">,</span> next<span class="op">:</span> <span class="cn">None</span> <span class="op">}</span>)<span class="op">;</span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> head <span class="op">=</span> Node <span class="op">{</span> value<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> prev<span class="op">:</span> <span class="cn">None</span><span class="op">,</span> next<span class="op">:</span> <span class="cn">Some</span>(tail) <span class="op">};</span></span></code></pre></div>
 <ul>
-<li>the <code>head.prev</code> points to <code>None</code></li>
-<li>the <code>tail.prev</code> points to <code>None</code> (at this
-moment…)</li>
+<li><p>the <code>head.prev</code> points to <code>None</code></p></li>
+<li><p>the <code>tail.prev</code> points to <code>None</code> (at this
+moment…)</p></li>
 </ul>
 <p>In order to change the <code>tail.prev</code>, we have to mutate its
 underlying value, from <code>None</code> to <code>Some(head)</code>. May
@@ -11136,11 +11206,11 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb19-1"><a href=
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> tail <span class="op">=</span> Node <span class="op">{</span> value<span class="op">:</span> <span class="dv">2</span><span class="op">,</span> next<span class="op">:</span> <span class="cn">None</span> <span class="op">};</span></span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> head <span class="op">=</span> Node <span class="op">{</span> value<span class="op">:</span> <span class="dv">1</span><span class="op">,</span> next<span class="op">:</span> <span class="cn">Some</span>(<span class="op">&amp;</span>tail) <span class="op">};</span></span></code></pre></div>
 <ul>
-<li>The <code>next</code> is an enum Option which wraps a <em>reference
-to another Node</em></li>
-<li>The <code>head.next</code> is now using <code>Some(&amp;tail)</code>
-which is a reference to the tail (other node), instead of a Box which
-takes ownership</li>
+<li><p>The <code>next</code> is an enum Option which wraps a
+<em>reference to another Node</em></p></li>
+<li><p>The <code>head.next</code> is now using
+<code>Some(&amp;tail)</code> which is a reference to the tail (other
+node), instead of a Box which takes ownership</p></li>
 </ul>
 <p>But this code won’t compile yet:</p>
 <pre><code>error[E0106]: missing lifetime specifier
@@ -11189,10 +11259,10 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb22-1"><a href=
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(<span class="dv">2</span><span class="op">,</span> head<span class="op">.</span>next<span class="op">.</span>unwrap()<span class="op">.</span>value)<span class="op">;</span></span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(<span class="cn">None</span><span class="op">,</span> tail<span class="op">.</span>next)<span class="op">;</span></span></code></pre></div>
 <ul>
-<li>The <code>Node</code> and its <code>next</code> (reference) node has
-a lifetime <code>'a</code></li>
-<li>we can use tail/head even after they been applied to the repective
-nodes, because we took no ownership</li>
+<li><p>The <code>Node</code> and its <code>next</code> (reference) node
+has a lifetime <code>'a</code></p></li>
+<li><p>we can use tail/head even after they been applied to the
+repective nodes, because we took no ownership</p></li>
 </ul>
 <p>But a singly linked list is not enough. We want a doubly one:</p>
 <div class="sourceCode" id="cb23"><pre
@@ -11348,12 +11418,12 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb30-1"><a href=
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="pp">assert_eq!</span>(<span class="st">&quot;John Doe&quot;</span><span class="op">,</span> <span class="op">*</span>name<span class="op">.</span>borrow())<span class="op">;</span></span></code></pre></div>
 <ul>
-<li>RefCell wraps a String in the heap</li>
-<li>The reference is immutable</li>
-<li>Through <code>borrow_mut</code>, we get <code>RefMut&lt;T&gt;</code>
-to mutate the underlying data</li>
-<li>Through <code>borrow</code>, we get a <code>Ref&lt;T&gt;</code> to
-read the underlying data</li>
+<li><p>RefCell wraps a String in the heap</p></li>
+<li><p>The reference is immutable</p></li>
+<li><p>Through <code>borrow_mut</code>, we get
+<code>RefMut&lt;T&gt;</code> to mutate the underlying data</p></li>
+<li><p>Through <code>borrow</code>, we get a <code>Ref&lt;T&gt;</code>
+to read the underlying data</p></li>
 </ul>
 <p>In a RefCell, we can have multiple borrows for reading or
 <strong>only one borrow mutable</strong> for writing.</p>
@@ -11380,11 +11450,11 @@ class="sourceCode rust"><code class="sourceCode rust"><span id="cb31-1"><a href=
 <p>Our Node model now is composed of a value and a <code>next</code>
 pointer which basically is:</p>
 <ul>
-<li>an enum Option</li>
-<li>which wraps an Rc (shared ownership)</li>
-<li>which wraps an RefCell (for interior mutability)</li>
-<li>which points to other Node</li>
-<li>and so on and on and on…</li>
+<li><p>an enum Option</p></li>
+<li><p>which wraps an Rc (shared ownership)</p></li>
+<li><p>which wraps an RefCell (for interior mutability)</p></li>
+<li><p>which points to other Node</p></li>
+<li><p>and so on and on and on…</p></li>
 </ul>
 <p>With RefCell, every time we have to write, we use
 <code>borrow_mut</code>, and every time we have to read, we use
@@ -11712,24 +11782,24 @@ máquina.</p>
 <li>Assemblers</li>
 </ol>
 <ul>
-<li>NASM</li>
-<li>GNU as</li>
+<li><p>NASM</p></li>
+<li><p>GNU as</p></li>
 </ul>
 <ol start="2" type="1">
 <li>Frontend</li>
 </ol>
 <ul>
-<li>Clang (para LLVM)</li>
-<li>GCC</li>
-<li>javac</li>
+<li><p>Clang (para LLVM)</p></li>
+<li><p>GCC</p></li>
+<li><p>javac</p></li>
 </ul>
 <ol start="3" type="1">
 <li>Backend</li>
 </ol>
 <ul>
-<li>LLC/LLI (para LLVM)</li>
-<li>GCC</li>
-<li>JVM</li>
+<li><p>LLC/LLI (para LLVM)</p></li>
+<li><p>GCC</p></li>
+<li><p>JVM</p></li>
 </ul>
 <h3 id="okay-mas-e-a-rinha">👉🏽 Okay mas e a rinha</h3>
 <p>Na rinha, foi disponibilizado um frontend para a especificação da
@@ -11899,9 +11969,10 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb10-1"><a href="#cb
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">&amp;</span>element</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
-<li>RPush: utiliza o built-in <code>append</code> no lado direito, que é
-uma operação constante</li>
-<li>RPop: manipula o slice, trabalhando apenas com os índices</li>
+<li><p>RPush: utiliza o built-in <code>append</code> no lado direito,
+que é uma operação constante</p></li>
+<li><p>RPop: manipula o slice, trabalhando apenas com os
+índices</p></li>
 </ul>
 <p>Para terminar, fazer o mesmo do lado esquerdo:</p>
 <div class="sourceCode" id="cb11"><pre
@@ -12113,20 +12184,20 @@ href="https://github.com/socketry/falcon">Falcon</a>.</p>
 </blockquote>
 <p>Portanto, minha submissão ficou assim:</p>
 <ul>
-<li>Multi-threading com Puma, com uma modesta pool de threads 0:5, que é
-o default no Puma, e sem CPU workers</li>
-<li><a href="https://github.com/mperham/connection_pool">Pool</a> de 5
-conexões com o PostgreSQL</li>
-<li>PostgreSQL nos defaults (100 max_connections)</li>
-<li>NGINX nos defaults com um ligeiro aumento para 1024
-worker_connections</li>
+<li><p>Multi-threading com Puma, com uma modesta pool de threads 0:5,
+que é o default no Puma, e sem CPU workers</p></li>
+<li><p><a href="https://github.com/mperham/connection_pool">Pool</a> de
+5 conexões com o PostgreSQL</p></li>
+<li><p>PostgreSQL nos defaults (100 max_connections)</p></li>
+<li><p>NGINX nos defaults com um ligeiro aumento para 1024
+worker_connections</p></li>
 </ul>
 <p>No docker-compose submetido, dividi os recursos da seguinte
 forma:</p>
 <ul>
-<li>0.4 CPU | 1GB mem para as API’s (x2)</li>
-<li>0.6 CPU | 0.8GB mem para o PostgreSQL</li>
-<li>0.1 CPU | 0.2GB mem para o NGINX</li>
+<li><p>0.4 CPU | 1GB mem para as API’s (x2)</p></li>
+<li><p>0.6 CPU | 0.8GB mem para o PostgreSQL</p></li>
+<li><p>0.1 CPU | 0.2GB mem para o NGINX</p></li>
 </ul>
 <p>Depois vou explicar como que distribuindo melhor os recursos e <a
 href="https://twitter.com/leandronsp/status/1699568664859603184">diminuindo
@@ -12170,10 +12241,10 @@ de CPU e memória dos containers no Docker.</p>
 ficando assim, delegando mais recursos para o PostgreSQL que, tadinho,
 era o que mais apanhava (parabéns guerreiro, tmj):</p>
 <ul>
-<li>0.2 CPU | 0.3GB para API’s (x2)</li>
-<li>1 CPU | 1.7GB para PostgreSQL (sim, nessa arquitetura, db sempre
-gasta mais CPU e memória)</li>
-<li>0.1 CPU | 0.1GB para o NGINX</li>
+<li><p>0.2 CPU | 0.3GB para API’s (x2)</p></li>
+<li><p>1 CPU | 1.7GB para PostgreSQL (sim, nessa arquitetura, db sempre
+gasta mais CPU e memória)</p></li>
+<li><p>0.1 CPU | 0.1GB para o NGINX</p></li>
 </ul>
 <p>Diferente de muitas submissões na rinha, fiquei entre poucos que
 optaram por não utilizar qualquer estratégia de cache ou batch insert de
@@ -12191,11 +12262,11 @@ possível e que causa menos entropia possível, <em>até que se prove o
 contrário</em>.</p>
 <p>Cenário então fica assim:</p>
 <ul>
-<li>I/O não-bloqueante com Falcon, atendendo requests com multitasking
-cooperativo (Fibers)</li>
-<li>Chespirito, que não faz grande coisa a não ser rotear mensagens do
-Rack para a lógica devida, mas com código muito mais explícito e sem
-aquela DSL ̶h̶o̶r̶r̶o̶r̶o̶s̶a̶ estranha do Roda</li>
+<li><p>I/O não-bloqueante com Falcon, atendendo requests com
+multitasking cooperativo (Fibers)</p></li>
+<li><p>Chespirito, que não faz grande coisa a não ser rotear mensagens
+do Rack para a lógica devida, mas com código muito mais explícito e sem
+aquela DSL ̶h̶o̶r̶r̶o̶r̶o̶s̶a̶ estranha do Roda</p></li>
 </ul>
 <p>Os números melhoraram, indo pra 35k. Not bad. Mas eu tinha uma leve
 suspeita de que algo errado ainda estava com minha solução. Por ser um
@@ -12281,11 +12352,11 @@ pode ser que eu misture inglês com português e a massarocada toda.</p>
 <guid>https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4.html</guid>
 <description><![CDATA[<p>Se pra você:</p>
 <ul>
-<li><strong>Recursão</strong> é um tema obscuro ou quer entender mais um
-pouco sobre;</li>
-<li><strong>Tail call e TCO</strong> são meios de comunicação alienígena
-e;</li>
-<li><strong>Trampoline</strong> é nome de remédio</li>
+<li><p><strong>Recursão</strong> é um tema obscuro ou quer entender mais
+um pouco sobre;</p></li>
+<li><p><strong>Tail call e TCO</strong> são meios de comunicação
+alienígena e;</p></li>
+<li><p><strong>Trampoline</strong> é nome de remédio</p></li>
 </ul>
 <p><em>Então este artigo é pra você.</em></p>
 <p>Aqui, vou explicar o que são estes termos de forma didática e os
@@ -12300,14 +12371,16 @@ os conceitos aqui mostrados são <em>agnósticos a linguagem</em>.</p>
 <hr />
 <h2 id="agenda">Agenda</h2>
 <ul>
-<li><a href="#o-que-é-recursão">O que é recursão</a></li>
-<li><a href="#fibo-para-os-íntimos">Fibo para os íntimos</a></li>
-<li><a href="#tail-call">Tail call</a></li>
-<li><a href="#stack-e-stack-overflow">Stack e stack overflow</a></li>
-<li><a href="#tail-call-optimization">Tail call optimization</a></li>
-<li><a href="#trampoline">Trampoline</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#o-que-é-recursão">O que é recursão</a></p></li>
+<li><p><a href="#fibo-para-os-íntimos">Fibo para os íntimos</a></p></li>
+<li><p><a href="#tail-call">Tail call</a></p></li>
+<li><p><a href="#stack-e-stack-overflow">Stack e stack
+overflow</a></p></li>
+<li><p><a href="#tail-call-optimization">Tail call
+optimization</a></p></li>
+<li><p><a href="#trampoline">Trampoline</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="o-que-é-recursão">O que é recursão</h2>
@@ -12638,29 +12711,29 @@ sugiro continuar nesta viagem aos números de ponto flutuante</em>.</p>
 <hr />
 <h2 id="sumário">Sumário</h2>
 <ul>
-<li><a href="#prólogo">Prólogo</a></li>
-<li><a href="#first-things-first">First things first</a></li>
-<li><a href="#bits-não-são-suficientes">Bits não são
-suficientes</a></li>
-<li><a href="#bits-e-inteiros">Bits e inteiros</a></li>
-<li><a href="#bits-e-outros-números-reais">Bits e outros números
-reais</a></li>
-<li><a href="#representação-de-ponto-fixo">Representação de ponto
-fixo</a></li>
-<li><a href="#representação-de-ponto-flutuante">Representação de ponto
-flutuante</a></li>
-<li><a href="#problemas-e-padrões">Problemas e padrões</a></li>
-<li><a href="#tipos-de-dados-de-ponto-flutuante">Tipos de dados de ponto
-flutuante</a></li>
-<li><a href="#problemas-de-ponto-flutuante-na-prática">Problemas de
-ponto flutuante na prática</a></li>
-<li><a href="#decimais-ao-resgate">Decimais ao resgate</a></li>
-<li><a href="#cuidado-com-o-arredondamento">Cuidado com o
-arredondamento</a></li>
-<li><a href="#decimais-em-outras-tecnologias">Decimais em outras
-tecnologias</a></li>
-<li><a href="#conclusão">Conclusão</a></li>
-<li><a href="#referências">Referências</a></li>
+<li><p><a href="#prólogo">Prólogo</a></p></li>
+<li><p><a href="#first-things-first">First things first</a></p></li>
+<li><p><a href="#bits-não-são-suficientes">Bits não são
+suficientes</a></p></li>
+<li><p><a href="#bits-e-inteiros">Bits e inteiros</a></p></li>
+<li><p><a href="#bits-e-outros-números-reais">Bits e outros números
+reais</a></p></li>
+<li><p><a href="#representação-de-ponto-fixo">Representação de ponto
+fixo</a></p></li>
+<li><p><a href="#representação-de-ponto-flutuante">Representação de
+ponto flutuante</a></p></li>
+<li><p><a href="#problemas-e-padrões">Problemas e padrões</a></p></li>
+<li><p><a href="#tipos-de-dados-de-ponto-flutuante">Tipos de dados de
+ponto flutuante</a></p></li>
+<li><p><a href="#problemas-de-ponto-flutuante-na-prática">Problemas de
+ponto flutuante na prática</a></p></li>
+<li><p><a href="#decimais-ao-resgate">Decimais ao resgate</a></p></li>
+<li><p><a href="#cuidado-com-o-arredondamento">Cuidado com o
+arredondamento</a></p></li>
+<li><p><a href="#decimais-em-outras-tecnologias">Decimais em outras
+tecnologias</a></p></li>
+<li><p><a href="#conclusão">Conclusão</a></p></li>
+<li><p><a href="#referências">Referências</a></p></li>
 </ul>
 <hr />
 <h2 id="prólogo">📜 Prólogo</h2>
@@ -12788,11 +12861,12 @@ dois</strong>.</p>
 fracionários dentro de 8 bits, podemos usar uma técnica chamada
 <strong>complemento de dois</strong>. Nesta técnica:</p>
 <ul>
-<li>o bit mais à esquerda serve como o <strong>bit de sinal</strong>,
-indicando se o número é positivo ou negativo</li>
-<li>todos os bits são <em>invertidos</em> ou
-<em>complementados</em></li>
-<li>em seguida, <strong>adicionamos 1</strong> ao valor resultante</li>
+<li><p>o bit mais à esquerda serve como o <strong>bit de sinal</strong>,
+indicando se o número é positivo ou negativo</p></li>
+<li><p>todos os bits são <em>invertidos</em> ou
+<em>complementados</em></p></li>
+<li><p>em seguida, <strong>adicionamos 1</strong> ao valor
+resultante</p></li>
 </ul>
 <p>Desta forma, um único byte representa inteiros que variam de -128 a
 127.</p>
@@ -13007,9 +13081,9 @@ operações aritméticas</em> e como lidar com casos excepcionais.</p>
 usando 32 bits de memória.</p>
 <p>Eles incluem:</p>
 <ul>
-<li>1 bit para o sinal do número</li>
-<li>8 bits para o expoente</li>
-<li>23 bits para a mantissa</li>
+<li><p>1 bit para o sinal do número</p></li>
+<li><p>8 bits para o expoente</p></li>
+<li><p>23 bits para a mantissa</p></li>
 </ul>
 <p>De acordo com os padrões do IEEE, a precisão simples normalmente
 <strong>manipula de 6 a 9 casas decimais de precisão</strong>.</p>
@@ -13018,9 +13092,9 @@ usando 32 bits de memória.</p>
 usando 64 bits de memória.</p>
 <p>Eles incluem:</p>
 <ul>
-<li>1 bit para o sinal do número</li>
-<li>11 bits para o expoente</li>
-<li>52 bits para a mantissa</li>
+<li><p>1 bit para o sinal do número</p></li>
+<li><p>11 bits para o expoente</p></li>
+<li><p>52 bits para a mantissa</p></li>
 </ul>
 <p>De acordo com os padrões do IEEE, a dupla precisão pode
 <strong>manipular de 15 a 17 casas decimais de precisão</strong>.</p>
