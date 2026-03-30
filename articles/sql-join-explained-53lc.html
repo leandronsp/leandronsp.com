@@ -1,86 +1,87 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SQL JOIN explained - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="In this post we’re going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you’re not familiar"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/sql-join-explained-53lc.html"><meta property="og:type" content="article"><meta property="og:title" content="SQL JOIN explained"><meta property="og:description" content="In this post we’re going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you’re not familiar"><meta property="og:url" content="https://leandronsp.com/articles/sql-join-explained-53lc.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2023-03-17"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="SQL JOIN explained"><meta name="twitter:description" content="In this post we’re going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you’re not familiar"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#8a8078;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#7a7068;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}
-</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SQL JOIN explained - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="In this post we're going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you're not familiar"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/sql-join-explained-53lc.html"><meta property="og:type" content="article"><meta property="og:title" content="SQL JOIN explained"><meta property="og:description" content="In this post we're going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you're not familiar"><meta property="og:url" content="https://leandronsp.com/articles/sql-join-explained-53lc.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2023-03-17"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="SQL JOIN explained"><meta name="twitter:description" content="In this post we're going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you're not familiar"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#8a8078;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#7a7068;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": "SQL JOIN explained",
-    "description": "In this post we’re going to see how the SQL JOIN
-works, guided by a practical example while covering SQL and Set theory
-basics. Even though you’re not familiar",
+    "description": "In this post we're going to see how the SQL JOIN works, guided by a practical example while covering SQL and Set theory basics. Even though you're not familiar",
     "datePublished": "2023-03-17",
     "author": { "@type": "Person", "name": "Leandro Proença" },
     "publisher": { "@type": "Person", "name": "Leandro Proença" },
     "url": "https://leandronsp.com/articles/sql-join-explained-53lc.html"
   }
-  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>SQL JOIN explained</h1><time datetime="2023-03-17">2023-03-17</time></div><p>In this post we’re going to see how the <strong>SQL JOIN</strong> works, guided by a practical example while covering SQL and <a href="https://en.wikipedia.org/wiki/Set_theory">Set theory</a> basics.</p><p>Even though you’re not familiar with SQL, you can follow along as this post covers the very basics.</p><hr /><h2 id="a-little-disclaimer">A little disclaimer</h2><p>As you may already know, every time I want to explain something, it’s my <em>modus operandi</em> to take a step back and deep dive into the fundamentals.</p><p>But if you are comfortable with set theory and SQL basics such as CREATE TABLE, INSERT INTO, <em>generate_series</em>, SELECT and FROM, you may want to jump to the “JOIN to the world” section.</p><p>So fasten your seat belts and let’s go into the journey of <strong>understanding SQL JOIN</strong>.</p><hr /><h2 id="first-things-first">First things first</h2><p>The examples described here were tested using PostgreSQL 15.</p><p>Despite <a href="https://en.wikipedia.org/wiki/SQL">SQL</a> being a standard DSL that should work on any RDBMS, please review the examples before running on other RDBMS but PostgreSQL.</p><p>Without further ado, let’s start the journey to <strong>understanding SQL JOINs</strong>.</p><hr /><h2 id="back-to-the-basics">🗝️ Back to the basics</h2><p>In SQL, tables are related to <a href="https://en.wikipedia.org/wiki/Set_theory">set theory</a> in mathematics. Usually, a <strong>set</strong> is a collection of different things, for instance:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7qf1g4n1tjrx2eqnir93.png" alt="a set of different things" /><figcaption aria-hidden="true">a set of different things</figcaption></figure><p>Expressing the set above as a <a href="https://en.wikipedia.org/wiki/Tuple">tuple</a>:</p> <pre class="text"><code>(Ana, Star Wars, Star Trek, Kate, John)</code></pre> <p>However, we can also represent users and movies as two distinct sets:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mfwgkyw2t82696clvkzl.png" alt="two distinct sets" /><figcaption aria-hidden="true">two distinct sets</figcaption></figure><p>Which can be expressed as tuples as well:</p> <pre class="text"><code>users = (Ana, Kate, John)
-movies = (Star Wars, Star Trek)</code></pre> <p>Using sets, we can perform some mathematical operations such as:</p><ul><li><p><strong>UNION</strong>: users ∪ movies</p></li><li><p><strong>INTERSECTION</strong>: users ∩ movies</p></li><li><p><strong>DIFFERENCE</strong>: users - movies</p></li><li><p><strong>CARTESIAN PRODUCT</strong>: users × movies</p></li></ul><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2cltv1x43z7hhm2et20r.png" alt="set operations" /><figcaption aria-hidden="true">set operations</figcaption></figure><p>We’ll take a closer look at set operations in the upcoming sections as we <em>relate them to SQL</em>.</p><hr /><h2 id="sql-basics">👉 SQL basics</h2><p>In SQL, tables are relations that are physically persisted. An SQL table can be seen as a <a href="https://en.wikipedia.org/wiki/Set_(mathematics)">set</a> in set theory.</p><p>But how do structure a set in SQL <em>without persisting</em> physical tables?</p><h3 id="select">🔵 SELECT</h3><p>With the <a href="https://www.w3schools.com/sql/sql_select.asp">SELECT</a> keyword, we can structure a set as follows:</p><div class="sourceCode" id="cb3"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>postgres<span class="op">=</span>#  <span class="kw">SELECT</span> <span class="st">&#39;John&#39;</span>;</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>?<span class="kw">column</span>?</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">----------</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a> John</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>(<span class="dv">1</span> <span class="kw">row</span>)</span></code></pre></div><blockquote><p>💡 <strong>Note</strong></p></blockquote><blockquote><p>In PostgreSQL, we can <a href="https://www.postgresql.org/docs/current/sql-select.html#id-1.9.3.172.10">omit the FROM clause</a> from the SELECT keyword</p></blockquote><p>But that’s a one-element set. We should add more items to the collection.</p><p>PostgreSQL provides a <a href="https://www.postgresql.org/docs/current/functions-srf.html">set-returning function</a> called <strong>generate_series</strong>:</p><div class="sourceCode" id="cb4"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>postgres<span class="op">=</span># <span class="kw">SELECT</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>);</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a> generate_series</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">-----------------</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>               <span class="dv">1</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>               <span class="dv">2</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>               <span class="dv">3</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>(<span class="dv">3</span> <span class="kw">rows</span>)</span></code></pre></div><p>We could add more and more information to the SELECT:</p><div class="sourceCode" id="cb5"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    generate_series(<span class="dv">1</span>, <span class="dv">3</span>),</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    generate_series(<span class="dv">1</span>, <span class="dv">3</span>);</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a> generate_series | generate_series</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">-----------------+-----------------</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>               <span class="dv">1</span> |               <span class="dv">1</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>               <span class="dv">2</span> |               <span class="dv">2</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>               <span class="dv">3</span> |               <span class="dv">3</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>(<span class="dv">3</span> <span class="kw">rows</span>)</span></code></pre></div><p>However we’re not yet satisfied. The SELECT should be capable of “projecting fields” coming <em>from</em> a structure that is already a set.</p><p>Meet SQL <a href="https://www.w3schools.com/sql/sql_ref_from.asp">FROM</a>.</p><h3 id="from">🔵 FROM</h3><p>SQL <strong>FROM</strong> is a keyword used to specify a set of elements and, combined with the <strong>SELECT</strong>, we could define our first set:</p><div class="sourceCode" id="cb6"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a> <span class="kw">id</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">----</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>(<span class="dv">3</span> <span class="kw">rows</span>)</span></code></pre></div><p>Using a single FROM we can project multiple columns with SELECT:</p><div class="sourceCode" id="cb7"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span>,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Which should print the output:</p> <pre><code> id | name
+  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>SQL JOIN explained</h1><time datetime="2023-03-17">2023-03-17</time></div><p>In this post we're going to see how the <strong>SQL JOIN</strong> works, guided by a practical example while covering SQL and <a href="https://en.wikipedia.org/wiki/Set_theory">Set theory</a> basics.</p><p>Even though you're not familiar with SQL, you can follow along as this post covers the very basics.</p><hr /><h2>A little disclaimer</h2><p>As you may already know, every time I want to explain something, it's my <em>modus operandi</em> to take a step back and deep dive into the fundamentals.</p><p>But if you are comfortable with set theory and SQL basics such as CREATE TABLE, INSERT INTO, <em>generate_series</em>, SELECT and FROM, you may want to jump to the "JOIN to the world" section.</p><p>So fasten your seat belts and let's go into the journey of <strong>understanding SQL JOIN</strong>.</p><hr /><h2>First things first</h2><p>The examples described here were tested using PostgreSQL 15.</p><p>Despite <a href="https://en.wikipedia.org/wiki/SQL">SQL</a> being a standard DSL that should work on any RDBMS, please review the examples before running on other RDBMS but PostgreSQL.</p><p>Without further ado, let's start the journey to <strong>understanding SQL JOINs</strong>.</p><hr /><h2>🗝️ Back to the basics</h2><p>In SQL, tables are related to <a href="https://en.wikipedia.org/wiki/Set_theory">set theory</a> in mathematics. Usually, a <strong>set</strong> is a collection of different things, for instance:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7qf1g4n1tjrx2eqnir93.png" alt="a set of different things" /></p><p>Expressing the set above as a <a href="https://en.wikipedia.org/wiki/Tuple">tuple</a>:</p> <pre><code class="language-text">(Ana, Star Wars, Star Trek, Kate, John)
+</code></pre> <p>However, we can also represent users and movies as two distinct sets:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mfwgkyw2t82696clvkzl.png" alt="two distinct sets" /></p><p>Which can be expressed as tuples as well:</p> <pre><code class="language-text">users = (Ana, Kate, John)
+movies = (Star Wars, Star Trek)
+</code></pre> <p>Using sets, we can perform some mathematical operations such as:</p><ul><li><p><strong>UNION</strong>: users ∪ movies</p></li><li><p><strong>INTERSECTION</strong>: users ∩ movies</p></li><li><p><strong>DIFFERENCE</strong>: users - movies</p></li><li><p><strong>CARTESIAN PRODUCT</strong>: users × movies</p></li></ul><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/2cltv1x43z7hhm2et20r.png" alt="set operations" /></p><p>We'll take a closer look at set operations in the upcoming sections as we <em>relate them to SQL</em>.</p><hr /><h2>👉 SQL basics</h2><p>In SQL, tables are relations that are physically persisted. An SQL table can be seen as a <a href="https://en.wikipedia.org/wiki/Set_(mathematics)">set</a> in set theory.</p><p>But how do structure a set in SQL <em>without persisting</em> physical tables?</p><h3>🔵 SELECT</h3><p>With the <a href="https://www.w3schools.com/sql/sql_select.asp">SELECT</a> keyword, we can structure a set as follows:</p> <pre><code class="language-sql">postgres=#  SELECT 'John';
+
+?column?
+----------
+ John
+(1 row)
+</code></pre> <blockquote><p>💡 <strong>Note</strong></p></blockquote><blockquote><p>In PostgreSQL, we can <a href="https://www.postgresql.org/docs/current/sql-select.html#id-1.9.3.172.10">omit the FROM clause</a> from the SELECT keyword</p></blockquote><p>But that's a one-element set. We should add more items to the collection.</p><p>PostgreSQL provides a <a href="https://www.postgresql.org/docs/current/functions-srf.html">set-returning function</a> called <strong>generate_series</strong>:</p> <pre><code class="language-sql">postgres=# SELECT generate_series(1, 3);
+
+ generate_series
+-----------------
+               1
+               2
+               3
+(3 rows)
+</code></pre> <p>We could add more and more information to the SELECT:</p> <pre><code class="language-sql">SELECT 
+    generate_series(1, 3),
+    generate_series(1, 3);
+
+ generate_series | generate_series
+-----------------+-----------------
+               1 |               1
+               2 |               2
+               3 |               3
+
+(3 rows)
+</code></pre> <p>However we're not yet satisfied. The SELECT should be capable of "projecting fields" coming <em>from</em> a structure that is already a set.</p><p>Meet SQL <a href="https://www.w3schools.com/sql/sql_ref_from.asp">FROM</a>.</p><h3>🔵 FROM</h3><p>SQL <strong>FROM</strong> is a keyword used to specify a set of elements and, combined with the <strong>SELECT</strong>, we could define our first set:</p> <pre><code class="language-sql">SELECT 
+    *
+FROM 
+    generate_series(1, 3) AS id;
+
+ id
+----
+  1
+  2
+  3
+(3 rows)
+</code></pre> <p>Using a single FROM we can project multiple columns with SELECT:</p> <pre><code class="language-sql">SELECT 
+    id,
+    'User-' || id AS name
+FROM 
+    generate_series(1, 3) AS id;
+</code></pre> <p>Which should print the output:</p> <pre><code> id | name
 ----+-------
   1 | User-1
   2 | User-2
   3 | User-3
-(3 rows)</code></pre> <p>Take for instance that we have two sets:</p><ul><li><p>the first set containing <code>(User-1, User-2, User-3)</code></p></li><li><p>and a second set containing <code>(User-2, User-3, User-4, User-5)</code></p></li></ul><p>Now, time to explore some <strong>operations</strong> using the two sets.</p><h3 id="union-and-union-all">🔵 UNION and UNION ALL</h3><p>The SQL <a href="https://www.w3schools.com/sql/sql_union.asp">UNION</a> operator <strong>combines the result of two or more sets</strong>, i.e <em>SELECT</em> statements:</p><div class="sourceCode" id="cb9"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">UNION</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">2</span>, <span class="dv">5</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Which outputs:</p> <pre><code> id | name
+(3 rows)
+</code></pre> <p>Take for instance that we have two sets:</p><ul><li><p>the first set containing <code>(User-1, User-2, User-3)</code></p></li><li><p>and a second set containing <code>(User-2, User-3, User-4, User-5)</code></p></li></ul><p>Now, time to explore some <strong>operations</strong> using the two sets.</p><h3>🔵 UNION and UNION ALL</h3><p>The SQL <a href="https://www.w3schools.com/sql/sql_union.asp">UNION</a> operator <strong>combines the result of two or more sets</strong>, i.e <em>SELECT</em> statements:</p> <pre><code class="language-sql">SELECT id, 'User-' || id AS name
+FROM generate_series(1, 3) AS id
+
+UNION
+
+SELECT id, 'User-' || id AS name
+FROM generate_series(2, 5) AS id;
+</code></pre> <p>Which outputs:</p> <pre><code> id | name
 ----+-------
   2 | User-2
   3 | User-3
   1 | User-1
   5 | User-5
   4 | User-4
-(5 rows)</code></pre> <p>The UNION operator removes all duplicates in the result. But in case we want to also return duplicates, we can use <strong>UNION ALL</strong>:</p><div class="sourceCode" id="cb11"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">UNION</span> <span class="kw">ALL</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">2</span>, <span class="dv">5</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Output:</p> <pre><code> id | name
+(5 rows)
+</code></pre> <p>The UNION operator removes all duplicates in the result. But in case we want to also return duplicates, we can use <strong>UNION ALL</strong>:</p> <pre><code class="language-sql">SELECT id, 'User-' || id AS name
+FROM generate_series(1, 3) AS id
+
+UNION ALL
+
+SELECT id, 'User-' || id AS name
+FROM generate_series(2, 5) AS id;
+</code></pre> <p>Output:</p> <pre><code> id | name
 ----+-------
   1 | User-1
   2 | User-2
@@ -89,64 +90,70 @@ movies = (Star Wars, Star Trek)</code></pre> <p>Using sets, we can perform some 
   3 | User-3
   4 | User-4
   5 | User-5
-(7 rows)</code></pre> <p>The result outputs 7 rows: 3 from the first SELECT and 4 from the second SELECT, including the <strong>duplicates</strong><em>User-2 and User-3</em>.</p><p>Also, keep in mind some rules about <strong>SQL UNION</strong>:</p><ul><li><p>every set <strong>must have the same number</strong> of columns</p></li><li><p>the columns in both sets must be in the same order</p></li></ul><p>An illustrated example:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oekbrkrjcu7ewrq06csq.png" alt="union" /><figcaption aria-hidden="true">union</figcaption></figure><h3 id="intersect">🔵 INTERSECT</h3><p>The SQL <a href="https://www.tutorialspoint.com/sql/sql-intersect-clause.htm#:~:text=The%20SQL%20INTERSECT%20clause%2Foperator,by%20the%20two%20SELECT%20statements.">INTERSECT</a> operator also combines the result of two or more sets, but only return rows from the first set (first SELECT) <strong>that are identical</strong> to a row in the second set (second SELECT).</p><div class="sourceCode" id="cb13"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">INTERSECT</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">2</span>, <span class="dv">5</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Output:</p> <pre><code> id |  name
+(7 rows)
+</code></pre> <p>The result outputs 7 rows: 3 from the first SELECT and 4 from the second SELECT, including the <strong>duplicates</strong><em>User-2 and User-3</em>.</p><p>Also, keep in mind some rules about <strong>SQL UNION</strong>:</p><ul><li><p>every set <strong>must have the same number</strong> of columns</p></li><li><p>the columns in both sets must be in the same order</p></li></ul><p>An illustrated example:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/oekbrkrjcu7ewrq06csq.png" alt="union" /></p><h3>🔵 INTERSECT</h3><p>The SQL <a href="https://www.tutorialspoint.com/sql/sql-intersect-clause.htm#:~:text=The%20SQL%20INTERSECT%20clause%2Foperator,by%20the%20two%20SELECT%20statements.">INTERSECT</a> operator also combines the result of two or more sets, but only return rows from the first set (first SELECT) <strong>that are identical</strong> to a row in the second set (second SELECT).</p> <pre><code class="language-sql">SELECT id, 'User-' || id AS name
+FROM generate_series(1, 3) AS id
+
+INTERSECT
+
+SELECT id, 'User-' || id AS name
+FROM generate_series(2, 5) AS id;
+</code></pre> <p>Output:</p> <pre><code> id |  name
 ----+--------
   3 | User-3
   2 | User-2
-(2 rows)</code></pre> <p>Here, the query returned only the identical rows found in both sets. That’s exactly the “intersection” between the two sets.</p><p>An illustrated example:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u4212qqe8h1bxfn427a6.png" alt="intersection" /><figcaption aria-hidden="true">intersection</figcaption></figure><h3 id="except">🔵 EXCEPT</h3><p>Another important operator is the SQL <a href="https://www.tutorialspoint.com/sql/sql-except-clause.htm">EXCEPT</a>, which in the set theory is the <em>DIFFERENCE</em> (A - B).</p><p>This operator also combines the result of two or more sets, but only return rows of the first set (first SELECT) <strong>that are not present</strong> in the second set (second SELECT).</p><div class="sourceCode" id="cb15"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">EXCEPT</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">2</span>, <span class="dv">5</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Output:</p> <pre><code> id |  name
+(2 rows)
+</code></pre> <p>Here, the query returned only the identical rows found in both sets. That's exactly the "intersection" between the two sets.</p><p>An illustrated example:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u4212qqe8h1bxfn427a6.png" alt="intersection" /></p><h3>🔵 EXCEPT</h3><p>Another important operator is the SQL <a href="https://www.tutorialspoint.com/sql/sql-except-clause.htm">EXCEPT</a>, which in the set theory is the <em>DIFFERENCE</em> (A - B).</p><p>This operator also combines the result of two or more sets, but only return rows of the first set (first SELECT) <strong>that are not present</strong> in the second set (second SELECT).</p> <pre><code class="language-sql">SELECT id, 'User-' || id AS name
+FROM generate_series(1, 3) AS id
+
+EXCEPT
+
+SELECT id, 'User-' || id AS name
+FROM generate_series(2, 5) AS id;
+</code></pre> <p>Output:</p> <pre><code> id |  name
 ----+--------
   1 | User-1
-(1 row)</code></pre> <p>Just 1 row. The only one that is present in the first set (left) but not in the second (right). We can also invert the sets and get the differences in reverse:</p><div class="sourceCode" id="cb17"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">2</span>, <span class="dv">5</span>) <span class="kw">AS</span> <span class="kw">id</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">EXCEPT</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, <span class="st">&#39;User-&#39;</span> <span class="op">||</span> <span class="kw">id</span> <span class="kw">AS</span> name</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> generate_series(<span class="dv">1</span>, <span class="dv">3</span>) <span class="kw">AS</span> <span class="kw">id</span>;</span></code></pre></div><p>Which are the <strong>User-5 and User-4</strong> respectively:</p> <pre><code> id |  name
+(1 row)
+</code></pre> <p>Just 1 row. The only one that is present in the first set (left) but not in the second (right). We can also invert the sets and get the differences in reverse:</p> <pre><code class="language-sql">SELECT id, 'User-' || id AS name
+FROM generate_series(2, 5) AS id
+
+EXCEPT
+
+SELECT id, 'User-' || id AS name
+FROM generate_series(1, 3) AS id;
+</code></pre> <p>Which are the <strong>User-5 and User-4</strong> respectively:</p> <pre><code> id |  name
 ----+--------
   5 | User-5
   4 | User-4
-(2 rows)</code></pre> <p>An illustrated example:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ijac3114j1k0ot2ishrj.png" alt="except" /><figcaption aria-hidden="true">except</figcaption></figure><p>Once we understand <em>some SQL basics and how those relate to set theory in mathematics</em>, it’s time to go beyond and explore a more sophisticated example.</p><hr /><h2 id="a-more-sophisticated-example">💡 A more sophisticated example</h2><p>So far, we’ve been experimenting SQL operators with sets on the fly by using the <code>generate_series</code> PostgreSQL function.</p><p>Did you notice that <em>we haven’t create any table</em>? That’s a good alternative to experiment and learn ad hoc.</p><p>But for a more sophisticated example we’ll start persisting data into pyshical tables.</p><h3 id="create-table">🔵 CREATE TABLE</h3><p>Using <code>CREATE TABLE</code>, we can define a structure for a particular set of elements.</p><p>Such table structure is represented by a matrix of <strong>rows and columns</strong>, where rows are essentially a <strong>collection of values</strong> whereas columns define the <strong>type of values</strong>.</p><p>Let’s create a table called <em>users</em>:</p><div class="sourceCode" id="cb19"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> users (<span class="kw">id</span> <span class="dt">INTEGER</span>, name <span class="dt">VARCHAR</span>(<span class="dv">250</span>));</span></code></pre></div><ul><li><p><strong>id</strong> is the name of the first column. It only allows values of type <em>integer</em></p></li><li><p><strong>name</strong> is the name of the second column. It only allows values of type “character varying up to 250 bytes” <code>(VARCHAR(250))</code></p></li></ul><p>Now, we can query the table using FROM and SELECT:</p><div class="sourceCode" id="cb20"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span>,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    name</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    users;</span></code></pre></div><p>Output:</p> <pre><code> id | name
+(2 rows)
+</code></pre> <p>An illustrated example:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ijac3114j1k0ot2ishrj.png" alt="except" /></p><p>Once we understand <em>some SQL basics and how those relate to set theory in mathematics</em>, it's time to go beyond and explore a more sophisticated example.</p><hr /><h2>💡 A more sophisticated example</h2><p>So far, we've been experimenting SQL operators with sets on the fly by using the <code>generate_series</code> PostgreSQL function.</p><p>Did you notice that <em>we haven't create any table</em>? That's a good alternative to experiment and learn ad hoc.</p><p>But for a more sophisticated example we'll start persisting data into pyshical tables.</p><h3>🔵 CREATE TABLE</h3><p>Using <code>CREATE TABLE</code>, we can define a structure for a particular set of elements.</p><p>Such table structure is represented by a matrix of <strong>rows and columns</strong>, where rows are essentially a <strong>collection of values</strong> whereas columns define the <strong>type of values</strong>.</p><p>Let's create a table called <em>users</em>:</p> <pre><code class="language-sql">CREATE TABLE users (id INTEGER, name VARCHAR(250));
+</code></pre> <ul><li><p><strong>id</strong> is the name of the first column. It only allows values of type <em>integer</em></p></li><li><p><strong>name</strong> is the name of the second column. It only allows values of type "character varying up to 250 bytes" <code>(VARCHAR(250))</code></p></li></ul><p>Now, we can query the table using FROM and SELECT:</p> <pre><code class="language-sql">SELECT
+    id,
+    name
+FROM 
+    users;
+</code></pre> <p>Output:</p> <pre><code> id | name
 ----+------
-(0 rows)</code></pre> <p>Of course, there’s no <em>data inserted</em> into the table. <strong>Let’s insert some data</strong>.</p><h3 id="insert-into">🔵 INSERT INTO</h3><p>The command <code>INSERT INTO</code> allows to insert a collection of values into an existing table.</p><div class="sourceCode" id="cb22"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> users (<span class="kw">id</span>, name) </span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">1</span>, <span class="st">&#39;John&#39;</span>), (<span class="dv">2</span>, <span class="st">&#39;Ana&#39;</span>), (<span class="dv">3</span>, <span class="st">&#39;Kate&#39;</span>);</span></code></pre></div><p><em>Note that</em> the <code>VALUES</code> clause accepts a collection of tuples. Each tuple matches the columns <code>(id, name)</code> respectively.</p><p>Now, if we execute the query again, we get the output:</p> <pre><code> id | name
+(0 rows)
+</code></pre> <p>Of course, there's no <em>data inserted</em> into the table. <strong>Let's insert some data</strong>.</p><h3>🔵 INSERT INTO</h3><p>The command <code>INSERT INTO</code> allows to insert a collection of values into an existing table.</p> <pre><code class="language-sql">INSERT INTO users (id, name) 
+VALUES (1, 'John'), (2, 'Ana'), (3, 'Kate');
+</code></pre> <p><em>Note that</em> the <code>VALUES</code> clause accepts a collection of tuples. Each tuple matches the columns <code>(id, name)</code> respectively.</p><p>Now, if we execute the query again, we get the output:</p> <pre><code> id | name
 ----+------
   1 | John
   2 | Ana
-  3 | Kate</code></pre> <p><strong>Yay!</strong> Our first table was created!</p><p>Now let’s create another table called <strong>movies</strong>, which will contain <em>the same number of columns</em> as users, id and name respectively.</p><p>Afterwards, we follow inserting some data into the movies table.</p><div class="sourceCode" id="cb24"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> movies (<span class="kw">id</span> <span class="dt">INTEGER</span>, name <span class="dt">VARCHAR</span>(<span class="dv">250</span>));</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> movies (<span class="kw">id</span>, name) </span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span> (<span class="dv">1</span>, <span class="st">&#39;Star Wars&#39;</span>), (<span class="dv">2</span>, <span class="st">&#39;Star Trek&#39;</span>);</span></code></pre></div><blockquote><p>💡 Tip</p></blockquote><blockquote><p>If we want to SELECT <strong>all the columns</strong> from a table, we can use the symbol *</p></blockquote><div class="sourceCode" id="cb25"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> movies;</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a> <span class="kw">id</span> |   name</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">----+-----------</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> | Star Wars</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> | Star Trek</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>(<span class="dv">2</span> <span class="kw">rows</span>)</span></code></pre></div><p>Until now, we learned some <strong>basic operations</strong> that are used to <em>combine data</em> between two simple sets:</p><ul><li><p>UNION</p></li><li><p>INTERSECT</p></li><li><p>EXCEPT</p></li></ul><p>Next, it’s time to explore some <strong>other operations</strong> between <em>users and movies</em>.</p><hr /><h2 id="a-cartesian-product">👉 A Cartesian Product</h2><p>In <em>set theory</em>, a <a href="https://en.wikipedia.org/wiki/Cartesian_product">cartesian product</a> is a combination of every element from one set to every element of another set.</p><p>As for our example, it’s like combining every pair <strong>user-movie</strong>:</p> <pre><code>users = (John, Ana, Kate)
+  3 | Kate
+</code></pre> <p><strong>Yay!</strong> Our first table was created!</p><p>Now let's create another table called <strong>movies</strong>, which will contain <em>the same number of columns</em> as users, id and name respectively.</p><p>Afterwards, we follow inserting some data into the movies table.</p> <pre><code class="language-sql">CREATE TABLE movies (id INTEGER, name VARCHAR(250));
+
+INSERT INTO movies (id, name) 
+VALUES (1, 'Star Wars'), (2, 'Star Trek');
+</code></pre> <blockquote><p>💡 Tip</p></blockquote><blockquote><p>If we want to SELECT <strong>all the columns</strong> from a table, we can use the symbol *</p></blockquote> <pre><code class="language-sql">SELECT * FROM movies;
+
+ id |   name
+----+-----------
+  1 | Star Wars
+  2 | Star Trek
+(2 rows)
+</code></pre> <p>Until now, we learned some <strong>basic operations</strong> that are used to <em>combine data</em> between two simple sets:</p><ul><li><p>UNION</p></li><li><p>INTERSECT</p></li><li><p>EXCEPT</p></li></ul><p>Next, it's time to explore some <strong>other operations</strong> between <em>users and movies</em>.</p><hr /><h2>👉 A Cartesian Product</h2><p>In <em>set theory</em>, a <a href="https://en.wikipedia.org/wiki/Cartesian_product">cartesian product</a> is a combination of every element from one set to every element of another set.</p><p>As for our example, it's like combining every pair <strong>user-movie</strong>:</p> <pre><code>users = (John, Ana, Kate)
 movies = (Star Wars, Star Trek)
 
 ### The cartesian product
@@ -155,9 +162,10 @@ movies = (Star Wars, Star Trek)
 (Ana, Star Wars)
 (Ana, Star Trek)
 (Kate, Star Wars)
-(Kate, Star Trek)</code></pre> <p>In SQL, it’s the operator <a href="https://www.sqlshack.com/sql-cross-join-with-examples/">CROSS JOIN</a>.</p><h3 id="cross-join">🔵 CROSS JOIN</h3><p>The SQL <strong>CROSS JOIN</strong> keyword is used to build a cartesian product, a.k.a the cartesian join.</p><div class="sourceCode" id="cb27"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> users</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CROSS</span> <span class="kw">JOIN</span> movies;</span></code></pre></div><p>It outputs every combination between the two tables:</p> <pre><code> id | name | id |   name
+(Kate, Star Trek)
+</code></pre> <p>In SQL, it's the operator <a href="https://www.sqlshack.com/sql-cross-join-with-examples/">CROSS JOIN</a>.</p><h3>🔵 CROSS JOIN</h3><p>The SQL <strong>CROSS JOIN</strong> keyword is used to build a cartesian product, a.k.a the cartesian join.</p> <pre><code class="language-sql">SELECT * FROM users
+CROSS JOIN movies;
+</code></pre> <p>It outputs every combination between the two tables:</p> <pre><code> id | name | id |   name
 ----+------+----+-----------
   1 | John |  1 | Star Wars
   1 | John |  2 | Star Trek
@@ -165,145 +173,155 @@ movies = (Star Wars, Star Trek)
   2 | Ana  |  2 | Star Trek
   3 | Kate |  1 | Star Wars
   3 | Kate |  2 | Star Trek
-(6 rows)</code></pre> <figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w2y2ht6ikcglc2skzdw2.png" alt="cartesian product" /><figcaption aria-hidden="true">cartesian product</figcaption></figure><p>🥁 <em>It’s all good, man!</em> 🥁</p><hr /><h2 id="an-even-more-sophisticated-example">💡 An even more sophisticated example</h2><p>Suppose that users can give a rating (not mandatory) for every movie they watch.</p><p>Let’s create another table called <code>movies_ratings</code> that associates:</p><ul><li><p>a user</p></li><li><p>a movie</p></li><li><p>a rating</p></li></ul><p>In SQL, it’s a good practice <strong>using relationships</strong>, thus avoiding redundancy and stale data.</p><p>Such relationships are defined using ID’s as “foreign keys”. So, in the <code>movies_rating</code> table, a <strong>user is represented by its ID</strong> and a <strong>movie is represented by its ID</strong>.</p><div class="sourceCode" id="cb29"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> movies_ratings </span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>(user_id <span class="dt">INTEGER</span>, movie_id <span class="dt">INTEGER</span>, rating <span class="dt">INTEGER</span>);</span></code></pre></div><p>And insert some data into it:</p><div class="sourceCode" id="cb30"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    movies_ratings (user_id, movie_id, rating)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">VALUES</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">7</span>),</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">8</span>),</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">6</span>),</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">10</span>);</span></code></pre></div><p>When we query this table, we get the following output:</p> <pre><code> user_id | movie_id | rating
+(6 rows)
+</code></pre> <p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/w2y2ht6ikcglc2skzdw2.png" alt="cartesian product" /></p><p>🥁 <em>It's all good, man!</em> 🥁</p><hr /><h2>💡 An even more sophisticated example</h2><p>Suppose that users can give a rating (not mandatory) for every movie they watch.</p><p>Let's create another table called <code>movies_ratings</code> that associates:</p><ul><li><p>a user</p></li><li><p>a movie</p></li><li><p>a rating</p></li></ul><p>In SQL, it's a good practice <strong>using relationships</strong>, thus avoiding redundancy and stale data.</p><p>Such relationships are defined using ID's as "foreign keys". So, in the <code>movies_rating</code> table, a <strong>user is represented by its ID</strong> and a <strong>movie is represented by its ID</strong>.</p> <pre><code class="language-sql">CREATE TABLE movies_ratings 
+(user_id INTEGER, movie_id INTEGER, rating INTEGER);
+</code></pre> <p>And insert some data into it:</p> <pre><code class="language-sql">INSERT INTO
+	movies_ratings (user_id, movie_id, rating)
+VALUES
+	(1, 1, 7),
+	(1, 2, 8),
+	(2, 1, 6),
+	(2, 2, 10);
+</code></pre> <p>When we query this table, we get the following output:</p> <pre><code> user_id | movie_id | rating
 ---------+----------+--------
        1 |        1 |      7
        1 |        2 |      8
        2 |        1 |      6
        2 |        2 |     10
-(4 rows)</code></pre> <p>The schema should look like the following:</p><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ypewkj49z9bsf5xpdwha.png" alt="schema" /><figcaption aria-hidden="true">schema</figcaption></figure><p>For reporting, we’d like to combine the data of <code>movies_ratings</code> with users and movies so we can display their names, something like that:</p> <pre><code> name |   movie    | rating
+(4 rows)
+</code></pre> <p>The schema should look like the following:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ypewkj49z9bsf5xpdwha.png" alt="schema" /></p><p>For reporting, we'd like to combine the data of <code>movies_ratings</code> with users and movies so we can display their names, something like that:</p> <pre><code> name |   movie    | rating
 ------+-----------+--------
  Ana  | Star Trek |     10
  John | Star Trek |      8
  John | Star Wars |      7
  Ana  | Star Wars |      6
-(4 rows)</code></pre> <p>Once we got a third table into the game - the <code>movies_ratings</code> table -, and because its structure differs form the other two tables, we can no longer use basic set operators such as <em>UNION, INTERSECT or EXCEPT</em> to combine data between different tables.</p><p>We need something like a <em>cartesian product</em>, but not doing every combination, only under certain conditions, <strong>based on a related column</strong>.</p><p>That’s what we’re going to explore in the next section: a <strong>world of JOINs</strong>.</p><hr /><h2 id="join-to-the-world">🥁 JOIN to the world</h2><p>With SQL <a href="https://www.w3schools.com/sql/sql_join.asp">JOIN</a>, we can combine rows across different tables but applying a specific condition.</p><p>The clause may have <strong>different types of JOIN</strong> depending on the situation.</p><p>In case we want to combine all data from the first table (left) with the second table (right), <strong>but discarding the rows that do not appear in both tables</strong>, we use <strong>INNER JOIN</strong>.</p><h3 id="inner-join">🔵 INNER JOIN</h3><p>Should we combine all the values from <code>users</code> with <code>movies_ratings</code>, discarding rows that don’t appear in both tables:</p><div class="sourceCode" id="cb33"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> users</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="kw">INNER</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> movies_ratings.user_id <span class="op">=</span> users.<span class="kw">id</span>;</span></code></pre></div><p>Output:</p> <pre><code> id | name | user_id | movie_id | rating
+(4 rows)
+</code></pre> <p>Once we got a third table into the game - the <code>movies_ratings</code> table -, and because its structure differs form the other two tables, we can no longer use basic set operators such as <em>UNION, INTERSECT or EXCEPT</em> to combine data between different tables.</p><p>We need something like a <em>cartesian product</em>, but not doing every combination, only under certain conditions, <strong>based on a related column</strong>.</p><p>That's what we're going to explore in the next section: a <strong>world of JOINs</strong>.</p><hr /><h2>🥁 JOIN to the world</h2><p>With SQL <a href="https://www.w3schools.com/sql/sql_join.asp">JOIN</a>, we can combine rows across different tables but applying a specific condition.</p><p>The clause may have <strong>different types of JOIN</strong> depending on the situation.</p><p>In case we want to combine all data from the first table (left) with the second table (right), <strong>but discarding the rows that do not appear in both tables</strong>, we use <strong>INNER JOIN</strong>.</p><h3>🔵 INNER JOIN</h3><p>Should we combine all the values from <code>users</code> with <code>movies_ratings</code>, discarding rows that don't appear in both tables:</p> <pre><code class="language-sql">SELECT * FROM users
+INNER JOIN movies_ratings ON movies_ratings.user_id = users.id;
+</code></pre> <p>Output:</p> <pre><code> id | name | user_id | movie_id | rating
 ----+------+---------+----------+--------
   1 | John |       1 |        1 |      7
   1 | John |       1 |        2 |      8
   2 | Ana  |       2 |        1 |      6
   2 | Ana  |       2 |        2 |     10
-(4 rows)</code></pre> <p>Note that:</p><ul><li><p>John voted two times</p></li><li><p>Ana too</p></li><li><p>Kate haven’t registered any vote, so Kate was discarded in the <em>INNER JOIN</em></p></li></ul><figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/0qhye55p7pdas7v1z2ui.png" alt="inner join" /><figcaption aria-hidden="true">inner join</figcaption></figure><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>INNER JOIN</code> or simply <code>JOIN</code>. By default, without specifying the JOIN type, PostgreSQL will perform an <strong>INNER JOIN</strong></p></blockquote><p>But what if we wanted to display even Kate in the JOIN but with <em>null values</em>? In other words, how to <strong>keep every row in both tables</strong> even if the condition wasn’t satisfied?</p><h3 id="full-outer-join">🔵 FULL OUTER JOIN</h3><p>The SQL <strong>FULL OUTER JOIN</strong> will keep every row from both tables even if the condition wasn’t satisfied.</p><div class="sourceCode" id="cb35"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> users</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FULL</span> <span class="kw">OUTER</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> movies_ratings.user_id <span class="op">=</span> users.<span class="kw">id</span>;</span></code></pre></div><p>Which produces the output:</p> <pre><code> id | name | user_id | movie_id | rating
-----+------+---------+----------+--------
-  1 | John |       1 |        1 |      7
-  1 | John |       1 |        2 |      8
-  2 | Ana  |       2 |        1 |      6
-  2 | Ana  |       2 |        2 |     10
-  3 | Kate |         |          |
-(5 rows)</code></pre> <figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ogwig30ggqg9u8xt413i.png" alt="full join" /><figcaption aria-hidden="true">full join</figcaption></figure><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>FULL OUTER JOIN</code> or simply <code>FULL JOIN</code></p></blockquote><p>Also, SQL provides another type of JOIN, which combines two tables (left and right) but <strong>keeps all rows from the left table only</strong>, even if they do not appear in the right table.</p><p>Yes, we are talking about the <strong>LEFT OUTER JOIN</strong>.</p><h3 id="left-outer-join">🔵 LEFT OUTER JOIN</h3><p>The SQL <strong>LEFT OUTER JOIN</strong> will <strong>keep every row from the left table</strong> even if they do not appear in the right table.</p><div class="sourceCode" id="cb37"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> users</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">OUTER</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> movies_ratings.user_id <span class="op">=</span> users.<span class="kw">id</span>;</span></code></pre></div><p>Which produces the output:</p> <pre><code> id | name | user_id | movie_id | rating
+(4 rows)
+</code></pre> <p>Note that:</p><ul><li><p>John voted two times</p></li><li><p>Ana too</p></li><li><p>Kate haven't registered any vote, so Kate was discarded in the <em>INNER JOIN</em></p></li></ul><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/0qhye55p7pdas7v1z2ui.png" alt="inner join" /></p><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>INNER JOIN</code> or simply <code>JOIN</code>. By default, without specifying the JOIN type, PostgreSQL will perform an <strong>INNER JOIN</strong></p></blockquote><p>But what if we wanted to display even Kate in the JOIN but with <em>null values</em>? In other words, how to <strong>keep every row in both tables</strong> even if the condition wasn't satisfied?</p><h3>🔵 FULL OUTER JOIN</h3><p>The SQL <strong>FULL OUTER JOIN</strong> will keep every row from both tables even if the condition wasn't satisfied.</p> <pre><code class="language-sql">SELECT * FROM users
+FULL OUTER JOIN movies_ratings ON movies_ratings.user_id = users.id;
+</code></pre> <p>Which produces the output:</p> <pre><code> id | name | user_id | movie_id | rating
 ----+------+---------+----------+--------
   1 | John |       1 |        1 |      7
   1 | John |       1 |        2 |      8
   2 | Ana  |       2 |        1 |      6
   2 | Ana  |       2 |        2 |     10
   3 | Kate |         |          |
-(5 rows)</code></pre> <figure><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s4mt6we9y4w6t4u85tyc.png" alt="left join" /><figcaption aria-hidden="true">left join</figcaption></figure><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>LEFT OUTER JOIN</code> or simply <code>LEFT JOIN</code></p></blockquote><p>On the other hand, there’s also the opposite direction: <strong>RIGHT OUTER JOIN</strong>.</p><h3 id="right-outer-join">🔵 RIGHT OUTER JOIN</h3><p>The SQL <strong>RIGHT OUTER JOIN</strong> will <strong>keep every row from the right table</strong> even if they do not appear in the left table.</p><p>Please note that we’ll invert the tables, <code>movies_ratings</code> will be the <strong>left table</strong> whereas <code>users</code> will be the <strong>right table</strong>:</p><div class="sourceCode" id="cb39"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> movies_ratings</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">RIGHT</span> <span class="kw">OUTER</span> <span class="kw">JOIN</span> users <span class="kw">ON</span> movies_ratings.user_id <span class="op">=</span> users.<span class="kw">id</span>;</span></code></pre></div><p>Which produces the output:</p> <pre><code> user_id | movie_id | rating | id | name
+(5 rows)
+</code></pre> <p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ogwig30ggqg9u8xt413i.png" alt="full join" /></p><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>FULL OUTER JOIN</code> or simply <code>FULL JOIN</code></p></blockquote><p>Also, SQL provides another type of JOIN, which combines two tables (left and right) but <strong>keeps all rows from the left table only</strong>, even if they do not appear in the right table.</p><p>Yes, we are talking about the <strong>LEFT OUTER JOIN</strong>.</p><h3>🔵 LEFT OUTER JOIN</h3><p>The SQL <strong>LEFT OUTER JOIN</strong> will <strong>keep every row from the left table</strong> even if they do not appear in the right table.</p> <pre><code class="language-sql">SELECT * FROM users
+LEFT OUTER JOIN movies_ratings ON movies_ratings.user_id = users.id;
+</code></pre> <p>Which produces the output:</p> <pre><code> id | name | user_id | movie_id | rating
+----+------+---------+----------+--------
+  1 | John |       1 |        1 |      7
+  1 | John |       1 |        2 |      8
+  2 | Ana  |       2 |        1 |      6
+  2 | Ana  |       2 |        2 |     10
+  3 | Kate |         |          |
+(5 rows)
+</code></pre> <p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s4mt6we9y4w6t4u85tyc.png" alt="left join" /></p><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>LEFT OUTER JOIN</code> or simply <code>LEFT JOIN</code></p></blockquote><p>On the other hand, there's also the opposite direction: <strong>RIGHT OUTER JOIN</strong>.</p><h3>🔵 RIGHT OUTER JOIN</h3><p>The SQL <strong>RIGHT OUTER JOIN</strong> will <strong>keep every row from the right table</strong> even if they do not appear in the left table.</p><p>Please note that we'll invert the tables, <code>movies_ratings</code> will be the <strong>left table</strong> whereas <code>users</code> will be the <strong>right table</strong>:</p> <pre><code class="language-sql">SELECT * FROM movies_ratings
+RIGHT OUTER JOIN users ON movies_ratings.user_id = users.id;
+</code></pre> <p>Which produces the output:</p> <pre><code> user_id | movie_id | rating | id | name
 ---------+----------+--------+----+------
        1 |        1 |      7 |  1 | John
        1 |        2 |      8 |  1 | John
        2 |        1 |      6 |  2 | Ana
        2 |        2 |     10 |  2 | Ana
          |          |        |  3 | Kate
-(5 rows)</code></pre> <p>With the tables inverted, in case we applied <code>LEFT JOIN</code>, Kate would be discarded.</p><p>But as we applied <code>RIGHT JOIN</code> (<em>users</em> are in the right-side), <strong>Kate was kept</strong> in the JOIN even not appearing in the left table <em>movies_ratings</em>.</p><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>RIGHT OUTER JOIN</code> or simply <code>RIGHT JOIN</code></p></blockquote><hr /><h2 id="putting-all-together">Putting all together</h2><p>Now that we understand about different JOIN strategies in SQL, let’s build a query where we display:</p><ul><li><p>the user name</p></li><li><p>the movie title</p></li><li><p>the rating</p></li></ul><p>…<strong>keeping users who didn’t vote</strong>.</p><p><em>Let’s write the query in baby steps</em>.</p><p>First, we project the fields in SELECT:</p><div class="sourceCode" id="cb41"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    users.name,</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    movies.name,</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    movies_ratings.rating</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span></code></pre></div><p>As such, we should JOIN <strong>movies</strong> and <strong>movies_ratings</strong> tables.</p><p>Next, we’ll perform a <code>LEFT JOIN</code> with the movies_ratings, because we want to <strong>keep all users</strong> even those who didn’t vote.</p><div class="sourceCode" id="cb42"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    users.name,</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    movies.name,</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    movies_ratings.rating</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span></code></pre></div><p>The following step consists of joining the <strong>movies table</strong> as well.</p><p>But keep in mind that at this moment, the <strong>left table is the result of the first join</strong> and the <strong>right table will be the movies table</strong>.</p><p>So if we apply <code>JOIN</code>, Kate will be discarded as she doesn’t appear in the movies table. We then should use <code>LEFT JOIN</code> as well:</p><div class="sourceCode" id="cb43"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    users.name,</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    movies.name,</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    movies_ratings.rating</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies <span class="kw">ON</span> movies.<span class="kw">id</span> <span class="op">=</span> movies_ratings.movie_id</span></code></pre></div><p>Lastly, let’s order the results by <em>rating</em> in <strong>descending order</strong>.</p><p>Also, in the <code>ORDER</code> clause, we’ll perform the <code>NULLS LAST</code>, so Kate will appear at the bottom of the results, and not at the top:</p><div class="sourceCode" id="cb44"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    users.name <span class="kw">AS</span> <span class="fu">user</span>,</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    movies.name <span class="kw">AS</span> movie,</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    movies_ratings.rating</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies <span class="kw">ON</span> movies.<span class="kw">id</span> <span class="op">=</span> movies_ratings.movie_id</span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> movies_ratings.rating <span class="kw">DESC</span> <span class="kw">NULLS</span> <span class="fu">LAST</span>;</span></code></pre></div><p>Which outputs:</p> <pre><code> user |   movie   | rating
+(5 rows)
+</code></pre> <p>With the tables inverted, in case we applied <code>LEFT JOIN</code>, Kate would be discarded.</p><p>But as we applied <code>RIGHT JOIN</code> (<em>users</em> are in the right-side), <strong>Kate was kept</strong> in the JOIN even not appearing in the left table <em>movies_ratings</em>.</p><blockquote><p>💡 Note</p></blockquote><blockquote><p>In PostgreSQL, we can use <code>RIGHT OUTER JOIN</code> or simply <code>RIGHT JOIN</code></p></blockquote><hr /><h2>Putting all together</h2><p>Now that we understand about different JOIN strategies in SQL, let's build a query where we display:</p><ul><li><p>the user name</p></li><li><p>the movie title</p></li><li><p>the rating</p></li></ul><p>...<strong>keeping users who didn't vote</strong>.</p><p><em>Let's write the query in baby steps</em>.</p><p>First, we project the fields in SELECT:</p> <pre><code class="language-sql">SELECT
+	users.name,
+	movies.name,
+	movies_ratings.rating
+FROM users
+</code></pre> <p>As such, we should JOIN <strong>movies</strong> and <strong>movies_ratings</strong> tables.</p><p>Next, we'll perform a <code>LEFT JOIN</code> with the movies_ratings, because we want to <strong>keep all users</strong> even those who didn’t vote.</p> <pre><code class="language-sql">SELECT
+	users.name,
+	movies.name,
+	movies_ratings.rating
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+</code></pre> <p>The following step consists of joining the <strong>movies table</strong> as well.</p><p>But keep in mind that at this moment, the <strong>left table is the result of the first join</strong> and the <strong>right table will be the movies table</strong>.</p><p>So if we apply <code>JOIN</code>, Kate will be discarded as she doesn't appear in the movies table. We then should use <code>LEFT JOIN</code> as well:</p> <pre><code class="language-sql">SELECT
+	users.name,
+	movies.name,
+	movies_ratings.rating
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+LEFT JOIN movies ON movies.id = movies_ratings.movie_id
+</code></pre> <p>Lastly, let's order the results by <em>rating</em> in <strong>descending order</strong>.</p><p>Also, in the <code>ORDER</code> clause, we'll perform the <code>NULLS LAST</code>, so Kate will appear at the bottom of the results, and not at the top:</p> <pre><code class="language-sql">SELECT
+	users.name AS user,
+	movies.name AS movie,
+	movies_ratings.rating
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+LEFT JOIN movies ON movies.id = movies_ratings.movie_id
+ORDER BY movies_ratings.rating DESC NULLS LAST;
+</code></pre> <p>Which outputs:</p> <pre><code> user |   movie   | rating
 ------+-----------+--------
  Ana  | Star Trek |     10
  John | Star Trek |      8
  John | Star Wars |      7
  Ana  | Star Wars |      6
  Kate |           |
-(5 rows)</code></pre> <p>Such a <strong>big Yay!</strong></p><blockquote><p>☢️ <em>Wait!</em></p></blockquote><blockquote><p>What if I wanted to discard users who didn’t vote in the results?</p></blockquote><p>No problem, you just need to perform an <strong>INNER JOIN</strong>, remember?</p><div class="sourceCode" id="cb46"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="op">..</span>.</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="kw">JOIN</span> movies <span class="kw">ON</span> movies.<span class="kw">id</span> <span class="op">=</span> movies_ratings.movie_id</span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="op">..</span>.</span></code></pre></div><h3 id="more">➕ More</h3><p>Moreover, we want to display a query which only brings the number of votes for each user. Then it should display as follows:</p> <pre><code> user | votes
+(5 rows)
+</code></pre> <p>Such a <strong>big Yay!</strong></p><blockquote><p>☢️ <em>Wait!</em></p></blockquote><blockquote><p>What if I wanted to discard users who didn't vote in the results?</p></blockquote><p>No problem, you just need to perform an <strong>INNER JOIN</strong>, remember?</p> <pre><code class="language-sql">...
+JOIN movies_ratings ON users.id = movies_ratings.user_id
+JOIN movies ON movies.id = movies_ratings.movie_id
+...
+</code></pre> <h3>➕ More</h3><p>Moreover, we want to display a query which only brings the number of votes for each user. Then it should display as follows:</p> <pre><code> user | votes
 ------+-------
  Ana  |     2
  John |     2
  Kate |     0
-(3 rows)</code></pre> <p>First, we return all <strong>users</strong><em>JOINed</em> with <strong>movies_ratings</strong>, projecting the <code>users.name</code> field:</p><div class="sourceCode" id="cb48"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    users.name</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a> name</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="co">------</span></span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a> John</span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a> John</span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a> Ana</span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a> Ana</span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a> Kate</span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>(<span class="dv">5</span> <span class="kw">rows</span>)</span></code></pre></div><p>Now, we want to group users by their names. In SQL, we can use the clause <strong>GROUP BY</strong>.</p><div class="sourceCode" id="cb49"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    users.name</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> users.name</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a> name</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="co">------</span></span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a> Kate</span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a> Ana</span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a> John</span>
-<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>(<span class="dv">3</span> <span class="kw">rows</span>)</span></code></pre></div><p>Next, we want to project another field in the SELECT, which are the <strong>count of votes of each user</strong>.</p><p>PostgreSQL provides a function called <strong>COUNT</strong>, which does the job: you can <em>count on an arbitrary field</em> that belongs to a selected projection.</p><div class="sourceCode" id="cb50"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    users.name,</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(movies_ratings.rating) <span class="kw">AS</span> votes</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> users.name</span></code></pre></div><p>Last but not least, let’s order by the counter of votes, so Kate with 0 votes will appear at the bottom:</p><div class="sourceCode" id="cb51"><pre
-      class="sourceCode sql"><code class="sourceCode sql"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    users.name,</span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">COUNT</span>(movies_ratings.rating) <span class="kw">AS</span> votes</span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> users</span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="kw">LEFT</span> <span class="kw">JOIN</span> movies_ratings <span class="kw">ON</span> users.<span class="kw">id</span> <span class="op">=</span> movies_ratings.user_id</span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> users.name</span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">COUNT</span>(movies_ratings.rating) <span class="kw">DESC</span>;</span></code></pre></div><p>And, <em>voilà</em>:</p> <pre><code> name | votes
+(3 rows)
+</code></pre> <p>First, we return all <strong>users</strong><em>JOINed</em> with <strong>movies_ratings</strong>, projecting the <code>users.name</code> field:</p> <pre><code class="language-sql">SELECT
+	users.name
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+
+ name
+------
+ John
+ John
+ Ana
+ Ana
+ Kate
+(5 rows)
+</code></pre> <p>Now, we want to group users by their names. In SQL, we can use the clause <strong>GROUP BY</strong>.</p> <pre><code class="language-sql">SELECT
+	users.name
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+GROUP BY users.name
+
+ name
+------
+ Kate
+ Ana
+ John
+(3 rows)
+</code></pre> <p>Next, we want to project another field in the SELECT, which are the <strong>count of votes of each user</strong>.</p><p>PostgreSQL provides a function called <strong>COUNT</strong>, which does the job: you can <em>count on an arbitrary field</em> that belongs to a selected projection.</p> <pre><code class="language-sql">SELECT
+	users.name,
+	COUNT(movies_ratings.rating) AS votes
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+GROUP BY users.name
+</code></pre> <p>Last but not least, let's order by the counter of votes, so Kate with 0 votes will appear at the bottom:</p> <pre><code class="language-sql">SELECT
+	users.name,
+	COUNT(movies_ratings.rating) AS votes
+FROM users
+LEFT JOIN movies_ratings ON users.id = movies_ratings.user_id
+GROUP BY users.name
+ORDER BY COUNT(movies_ratings.rating) DESC;
+</code></pre> <p>And, <em>voilà</em>:</p> <pre><code> name | votes
 ------+-------
  Ana  |     2
  John |     2
  Kate |     0
-(3 rows)</code></pre> <hr /><h2 id="wrapping-up">Wrapping Up</h2><p>This post was a try to explain the basics of SQL and set theory, along with a practical example towards an explanation of different JOIN strategies.</p><p>I hope you could learn a bit more about SQL JOIN and SQL in general.</p><p>Cheers!</p></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')};},2000)})</script></body></html> 
+(3 rows)
+</code></pre> <hr /><h2>Wrapping Up</h2><p>This post was a try to explain the basics of SQL and set theory, along with a practical example towards an explanation of different JOIN strategies.</p><p>I hope you could learn a bit more about SQL JOIN and SQL in general.</p><p>Cheers!</p></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')}},2000)})</script></body></html> 

@@ -1,133 +1,136 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>You don't need Kafka: Building a message queue with only two UNIX signals - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I’m not surprised if you"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"><meta property="og:type" content="article"><meta property="og:title" content="You don't need Kafka: Building a message queue with only two UNIX signals"><meta property="og:description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I’m not surprised if you"><meta property="og:url" content="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2025-10-21"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="You don't need Kafka: Building a message queue with only two UNIX signals"><meta name="twitter:description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I’m not surprised if you"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#8a8078;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#7a7068;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}
-</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>You don't need Kafka: Building a message queue with only two UNIX signals - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"><meta property="og:type" content="article"><meta property="og:title" content="You don't need Kafka: Building a message queue with only two UNIX signals"><meta property="og:description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you"><meta property="og:url" content="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2025-10-21"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="You don't need Kafka: Building a message queue with only two UNIX signals"><meta name="twitter:description" content="Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#8a8078;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#7a7068;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "You don't need Kafka: Building a message queue with
-only two UNIX signals",
-    "description": "Have you ever asked yourself what if we could
-replace any message broker with a very simple one using only two UNIX
-signals? Well, I’m not surprised if you",
+    "headline": "You don't need Kafka: Building a message queue with only two UNIX signals",
+    "description": "Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you",
     "datePublished": "2025-10-21",
     "author": { "@type": "Person", "name": "Leandro Proença" },
     "publisher": { "@type": "Person", "name": "Leandro Proença" },
     "url": "https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals.html"
   }
-  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>You don't need Kafka: Building a message queue with only two UNIX signals</h1><time datetime="2025-10-21">2025-10-21</time></div><p>Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I’m not surprised if you didn’t. But I did. And I want to share my journey of how I achieved it.</p><p>If you want to learn about UNIX signals, binary operations the easy way, how a message broker works under the hood, and a bit of Ruby, this post is for you.</p><p>And if you came here just because of the clickbait title, I apologize and invite you to keep reading. It’ll be fun, I promise.</p><figure><img src="/uploads/3491.png" alt="image" /><figcaption aria-hidden="true">image</figcaption></figure><h2 id="its-all-about-unix">It’s all about UNIX</h2><p>A few days ago, I saw some discussion on the internet about how we could send messages between processes. Many people think of sockets, which are the most common way to send messages, even allowing communication across different machines and networks. Some don’t even realize that pipes are another way to send messages between processes:</p><div class="sourceCode" id="cb1"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> echo <span class="st">&#39;hello&#39;</span> <span class="kw">|</span> <span class="fu">base64</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">aGVsbG8K</span></span></code></pre></div><p>Here’s what’s happening:</p><ul><li><p>The process <code>echo</code> is started with the content “hello”</p></li><li><p><code>echo</code> is a program that prints the message to <em>STDOUT</em></p></li><li><p>Through the pipe, the content in <em>STDOUT</em> is <strong>sent</strong> directly to the <em>STDIN</em> of the <code>base64</code> process</p></li><li><p>The <code>base64</code> process encodes its input to Base64 and then puts the result in <em>STDOUT</em></p></li></ul><p>Note the word “send”. Yes, anonymous pipes are a form of <strong>IPC (Inter-process communication).</strong> Other forms of IPC in UNIX include:</p><ul><li><p>named pipes (mkfifo)</p></li><li><p>sockets</p></li><li><p>regular files</p></li><li><p>or even a simple <strong>signal</strong></p></li></ul><h2 id="unix-signals">UNIX signals</h2><p>According to <a href="url">Wikipedia</a>:</p><blockquote><p>A UNIX signal is a standardized message sent to a program to trigger specific behaviour, such as quitting or error handling</p></blockquote><p>There are many signals we can send to a process, including:</p><ul><li><p>SIGTERM - sends a notification to the process to terminate. It can be “trapped,” which means the process can do some cleanup work before termination, like releasing OS resources and closing file descriptors</p></li><li><p>SIGKILL - sends a termination signal that cannot be trapped or ignored, forcing immediate termination</p></li><li><p>SIGINT - the interrupt signal, typically sent when you press <code>Ctrl+C</code> in the terminal. It can be trapped, allowing the process to perform cleanup before exiting gracefully</p></li><li><p>SIGHUP - the hangup signal, originally sent when a terminal connection was lost. Modern applications often use it to reload configuration files without restarting the process</p></li><li><p>SIGQUIT - similar to SIGINT but also generates a core dump for debugging</p></li><li><p>SIGSTOP - pauses (suspends) a process. Cannot be trapped or ignored</p></li><li><p>SIGCONT - resumes a process that was paused by <em>SIGSTOP</em></p></li><li><p>SIGCHLD - sent to a parent process when a child process terminates or stops</p></li><li><p><strong>SIGUSR1</strong> and <strong>SIGUSR2</strong> - user-defined signals that applications can use for custom purposes</p></li></ul><h2 id="sending-messages-using-signals">Sending messages using signals</h2><p>Okay, we know that signals are a primitive form of IPC. UNIX-like systems provide a syscall called <code>kill</code> that sends signals to processes. Historically, this syscall was created solely to terminate processes. But over time, they needed to accommodate other types of signals, so they reused the same syscall for different purposes.</p><p>For instance, let’s create a simple Ruby script <code>sleeper.rb</code> which sleeps for 60 seconds, nothing more:</p><div class="sourceCode" id="cb2"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Process ID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Sleeping for 60 seconds...&quot;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> <span class="dv">60</span></span></code></pre></div><p>After running we see:</p> <pre class="text"><code>Process ID: 55402
-Sleeping for 60 seconds...</code></pre> <p>In another window, we can <strong>send</strong> the <code>SIGTERM</code> signal to the process <code>55402</code> via syscall <code>kill</code>:</p><div class="sourceCode" id="cb4"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> kill <span class="at">-SIGTERM</span> 55402</span></code></pre></div><p>And then, in the script session:</p> <pre class="text"><code>[1]    55402 terminated  ruby sleeper.rb</code></pre> <h3 id="signal-traps">Signal traps</h3><p>In Ruby, we can also <em>trap</em> a signal using the <code>trap</code> method in Ruby:</p><div class="sourceCode" id="cb6"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Process ID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Sleeping for 60 seconds...&quot;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGTERM&#39;</span>) <span class="cf">do</span> </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">puts</span> <span class="st">&quot;Received SIGTERM, exiting gracefully...&quot;</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exit</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span> <span class="dv">60</span></span></code></pre></div><p>Which in turn, after sending the signal, will gracefully:</p> <pre class="text"><code>Process ID: 55536
+  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>You don't need Kafka: Building a message queue with only two UNIX signals</h1><time datetime="2025-10-21">2025-10-21</time></div><p>Have you ever asked yourself what if we could replace any message broker with a very simple one using only two UNIX signals? Well, I'm not surprised if you didn't. But I did. And I want to share my journey of how I achieved it.</p><p>If you want to learn about UNIX signals, binary operations the easy way, how a message broker works under the hood, and a bit of Ruby, this post is for you.</p><p>And if you came here just because of the clickbait title, I apologize and invite you to keep reading. It'll be fun, I promise.</p><p><img src="/uploads/3491.png" alt="image" /></p><h2>It's all about UNIX</h2><p>A few days ago, I saw some discussion on the internet about how we could send messages between processes. Many people think of sockets, which are the most common way to send messages, even allowing communication across different machines and networks. Some don't even realize that pipes are another way to send messages between processes:</p> <pre><code class="language-bash">$ echo 'hello' | base64
+aGVsbG8K
+</code></pre> <p>Here's what's happening:</p><ul><li><p>The process <code>echo</code> is started with the content "hello"</p></li><li><p><code>echo</code> is a program that prints the message to <em>STDOUT</em></p></li><li><p>Through the pipe, the content in <em>STDOUT</em> is <strong>sent</strong> directly to the <em>STDIN</em> of the <code>base64</code> process</p></li><li><p>The <code>base64</code> process encodes its input to Base64 and then puts the result in <em>STDOUT</em></p></li></ul><p>Note the word "send". Yes, anonymous pipes are a form of <strong>IPC (Inter-process communication).</strong> Other forms of IPC in UNIX include:</p><ul><li><p>named pipes (mkfifo)</p></li><li><p>sockets</p></li><li><p>regular files</p></li><li><p>or even a simple <strong>signal</strong></p></li></ul><h2>UNIX signals</h2><p>According to <a href="url">Wikipedia</a>:</p><blockquote><p>A UNIX signal is a standardized message sent to a program to trigger specific behaviour, such as quitting or error handling</p></blockquote><p>There are many signals we can send to a process, including:</p><ul><li><p>SIGTERM - sends a notification to the process to terminate. It can be "trapped," which means the process can do some cleanup work before termination, like releasing OS resources and closing file descriptors</p></li><li><p>SIGKILL - sends a termination signal that cannot be trapped or ignored, forcing immediate termination</p></li><li><p>SIGINT - the interrupt signal, typically sent when you press <code>Ctrl+C</code> in the terminal. It can be trapped, allowing the process to perform cleanup before exiting gracefully</p></li><li><p>SIGHUP - the hangup signal, originally sent when a terminal connection was lost. Modern applications often use it to reload configuration files without restarting the process</p></li><li><p>SIGQUIT - similar to SIGINT but also generates a core dump for debugging</p></li><li><p>SIGSTOP - pauses (suspends) a process. Cannot be trapped or ignored</p></li><li><p>SIGCONT - resumes a process that was paused by <em>SIGSTOP</em></p></li><li><p>SIGCHLD - sent to a parent process when a child process terminates or stops</p></li><li><p><strong>SIGUSR1</strong> and <strong>SIGUSR2</strong> - user-defined signals that applications can use for custom purposes</p></li></ul><h2>Sending messages using signals</h2><p>Okay, we know that signals are a primitive form of IPC. UNIX-like systems provide a syscall called <code>kill</code> that sends signals to processes. Historically, this syscall was created solely to terminate processes. But over time, they needed to accommodate other types of signals, so they reused the same syscall for different purposes.</p><p>For instance, let's create a simple Ruby script <code>sleeper.rb</code> which sleeps for 60 seconds, nothing more:</p> <pre><code class="language-ruby">puts "Process ID: #{Process.pid}"
+puts "Sleeping for 60 seconds..."
+sleep 60
+</code></pre> <p>After running we see:</p> <pre><code class="language-text">Process ID: 55402
 Sleeping for 60 seconds...
-Received SIGTERM, exiting gracefully...</code></pre> <p>After all, we <em>cannot send messages using signals</em>. They are a primitive way of sending <em>standardized messages</em> which will trigger specific behaviours. At most, we can trap some signals, but nothing more.</p><blockquote><p>Okay Leandro, but what’s the purpose of this article then?</p></blockquote><p><em>Hold on</em>. That’s exactly why I’m here. To prove points by doing useless stuff, like when I <a href="https://leandronsp.com/articles/simulating-oop-in-bash-3mop">simulated OOP in Bash</a> a couple of years ago (it was fun though).</p><p>To understand how we can “hack” UNIX signals and send messages between processes, let’s first talk a bit about <strong>binary operations</strong>. Yes, those “zeros” and “ones” you were scared of when you saw them for the first time. But they don’t bite (🥁 LOL), I promise.</p><h2 id="what-is-a-message">What is a message?</h2><p>If we model a message as a sequence of characters, we could say that at a high-level, messages are simply <em>strings</em>. But in memory, they are stored as <strong>bytes</strong>.</p><p>We know that bytes are made of bits. In computer terms, what’s a bit? It’s simply an abstraction representing <strong>only two states</strong>:</p><ul><li><p>zero</p></li><li><p>one</p></li></ul><p>That’s it. For instance, using <a href="url">ASCII</a>, we know that the letter “h” has the following codes:</p><ul><li><p>104 in decimal</p></li><li><p><code>0x68</code> in hexadecimal</p></li><li><p><code>01101000</code> in binary</p></li></ul><p>Binary-wise, what if we represented each “0” with a specific signal and each “1” with another? We know that some signals such as SIGTERM, SIGINT, and SIGCONT can be trapped, but intercepting them would harm their original purpose.</p><p>But thankfully, UNIX provides two user-defined signals that are perfect for our hacking experiment.</p><h2 id="sending-sigusr1-and-sigusr2">Sending SIGUSR1 and SIGUSR2</h2><p>First things first, let’s trap those signals in the code:</p><div class="sourceCode" id="cb8"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Process ID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Sleeping forever. Send signals to this process to see how it responds.&quot;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR1&#39;</span>) <span class="cf">do</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">puts</span> <span class="st">&quot;Received SIGUSR1 signal&quot;</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR2&#39;</span>) <span class="cf">do</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">puts</span> <span class="st">&quot;Received SIGUSR2 signal&quot;</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span></span></code></pre></div> <pre class="text"><code>Process ID: 56172
-Sleeping forever. Send signals to this process to see how it responds.</code></pre> <p>After sending some <code>kill -SIGUSR1 56172</code> and <code>kill -SIGUSR2 56172</code>, we can see that the process prints the following content:</p> <pre class="text"><code>Process ID: 56172
+</code></pre> <p>In another window, we can <strong>send</strong> the <code>SIGTERM</code> signal to the process <code>55402</code> via syscall <code>kill</code>:</p> <pre><code class="language-bash">$ kill -SIGTERM 55402
+</code></pre> <p>And then, in the script session:</p> <pre><code class="language-text">[1]    55402 terminated  ruby sleeper.rb
+</code></pre> <h3>Signal traps</h3><p>In Ruby, we can also <em>trap</em> a signal using the <code>trap</code> method in Ruby:</p> <pre><code class="language-ruby">puts "Process ID: #{Process.pid}"
+puts "Sleeping for 60 seconds..."
+
+trap('SIGTERM') do 
+  puts "Received SIGTERM, exiting gracefully..."
+  exit
+end
+
+sleep 60
+</code></pre> <p>Which in turn, after sending the signal, will gracefully:</p> <pre><code class="language-text">Process ID: 55536
+Sleeping for 60 seconds...
+Received SIGTERM, exiting gracefully...
+</code></pre> <p>After all, we <em>cannot send messages using signals</em>. They are a primitive way of sending <em>standardized messages</em> which will trigger specific behaviours. At most, we can trap some signals, but nothing more.</p><blockquote><p>Okay Leandro, but what's the purpose of this article then?</p></blockquote><p><em>Hold on</em>. That's exactly why I'm here. To prove points by doing useless stuff, like when I <a href="https://leandronsp.com/articles/simulating-oop-in-bash-3mop">simulated OOP in Bash</a> a couple of years ago (it was fun though).</p><p>To understand how we can "hack" UNIX signals and send messages between processes, let's first talk a bit about <strong>binary operations</strong>. Yes, those "zeros" and "ones" you were scared of when you saw them for the first time. But they don't bite (🥁 LOL), I promise.</p><h2>What is a message?</h2><p>If we model a message as a sequence of characters, we could say that at a high-level, messages are simply <em>strings</em>. But in memory, they are stored as <strong>bytes</strong>.</p><p>We know that bytes are made of bits. In computer terms, what's a bit? It's simply an abstraction representing <strong>only two states</strong>:</p><ul><li><p>zero</p></li><li><p>one</p></li></ul><p>That's it. For instance, using <a href="url">ASCII</a>, we know that the letter "h" has the following codes:</p><ul><li><p>104 in decimal</p></li><li><p><code>0x68</code> in hexadecimal</p></li><li><p><code>01101000</code> in binary</p></li></ul><p>Binary-wise, what if we represented each "0" with a specific signal and each "1" with another? We know that some signals such as SIGTERM, SIGINT, and SIGCONT can be trapped, but intercepting them would harm their original purpose.</p><p>But thankfully, UNIX provides two user-defined signals that are perfect for our hacking experiment.</p><h2>Sending SIGUSR1 and SIGUSR2</h2><p>First things first, let's trap those signals in the code:</p> <pre><code class="language-ruby">puts "Process ID: #{Process.pid}"
+puts "Sleeping forever. Send signals to this process to see how it responds."
+
+trap('SIGUSR1') do 
+  puts "Received SIGUSR1 signal"
+end
+
+trap('SIGUSR2') do
+  puts "Received SIGUSR2 signal"
+end
+
+sleep
+</code></pre> <pre><code class="language-text">Process ID: 56172
+Sleeping forever. Send signals to this process to see how it responds.
+</code></pre> <p>After sending some <code>kill -SIGUSR1 56172</code> and <code>kill -SIGUSR2 56172</code>, we can see that the process prints the following content:</p> <pre><code class="language-text">Process ID: 56172
 Sleeping forever. Send signals to this process to see how it responds.
 Received SIGUSR1 signal
 Received SIGUSR2 signal
 Received SIGUSR2 signal
 Received SIGUSR1 signal
 Received SIGUSR1 signal
-Received SIGUSR2 signal</code></pre> <p><strong>Signals don’t carry data</strong>. But the example we have is perfect for changing to bits, uh?</p> <pre class="text"><code>Received SIGUSR1 signal # 0
+Received SIGUSR2 signal
+</code></pre> <p><strong>Signals don't carry data</strong>. But the example we have is perfect for changing to bits, uh?</p> <pre><code class="language-text">Received SIGUSR1 signal # 0
 Received SIGUSR2 signal # 1
 Received SIGUSR2 signal # 1
 Received SIGUSR1 signal # 0
 Received SIGUSR2 signal # 1
 Received SIGUSR1 signal # 0
 Received SIGUSR1 signal # 0
-Received SIGUSR1 signal # 0</code></pre> <p>That’s exactly <code>01101000</code>, the binary representation of the letter “h”. We’re simply <strong>encoding</strong> the letter as a binary representation and sending it via signals</p><p>Again, we’re <strong>encoding it as a binary</strong> and sending it <strong>via signals</strong>.</p><p><em>How cool is that</em>?</p><figure><img src="/uploads/3299.png" alt="image" /><figcaption aria-hidden="true">image</figcaption></figure><h3 id="decoding-the-binary-data">Decoding the binary data</h3><p>On the other side, the receiver should be capable of decoding the message and converting it back to the letter “h”:</p><ul><li><p>sender <em>encodes</em> the message</p></li><li><p>receiver <em>decodes</em> the message</p></li></ul><p>So, how do we decode <code>01101000</code> (the letter “h” in ASCII)? Let’s break it down into a few steps:</p><ol type="1"><li>First, we need to see the 8 bits as individual digits in their respective positions</li><li>The rightmost bit is at position 0, whereas the leftmost bit is at position 7. This is how we define the most significant bit (<strong>MSB</strong>, the leftmost) and the least significant bit (<strong>LSB</strong>, the rightmost)</li><li>For this example, we perform a <strong>left shift</strong> operation on each bit and then sum all the values, in this case from MSB to LSB (the order doesn’t matter much for now): <code>(0 &lt;&lt; 7) + (1 &lt;&lt; 6) + (1 &lt;&lt; 5) + (0 &lt;&lt; 4) + ... + (0 &lt;&lt; 0)</code>: _left shift on <em>zeros</em> will always produce a _zero__</li></ol><ul><li><p><code>0 &lt;&lt; 7</code> = <code>(2 ** 7) * 0</code> = <code>128 * 0</code> = 0</p></li><li><p><code>1 &lt;&lt; 6</code> = <code>(2 ** 6) * 1</code> = <code>64 * 1</code> = 64</p></li></ul><p>Similarly to the remaining bits:</p><ul><li><p><code>1 &lt;&lt; 5</code> = 32</p></li><li><p><code>0 &lt;&lt; 4</code> = 0</p></li><li><p><code>1 &lt;&lt; 3</code> = 8</p></li><li><p><code>0 &lt;&lt; 2</code> = 0</p></li><li><p><code>0 &lt;&lt; 1</code> = 0</p></li><li><p><code>0 &lt;&lt; 0</code> = 0</p></li></ul><p>So, our sum becomes, from MSB to LSB:</p> <pre class="text"><code>MSB                          LSB
+Received SIGUSR1 signal # 0
+</code></pre> <p>That's exactly <code>01101000</code>, the binary representation of the letter "h". We're simply <strong>encoding</strong> the letter as a binary representation and sending it via signals</p><p>Again, we're <strong>encoding it as a binary</strong> and sending it <strong>via signals</strong>.</p><p><em>How cool is that</em>?</p><p><img src="/uploads/3299.png" alt="image" /></p><h3>Decoding the binary data</h3><p>On the other side, the receiver should be capable of decoding the message and converting it back to the letter "h":</p><ul><li><p>sender <em>encodes</em> the message</p></li><li><p>receiver <em>decodes</em> the message</p></li></ul><p>So, how do we decode <code>01101000</code> (the letter "h" in ASCII)? Let's break it down into a few steps:</p><ol><li>First, we need to see the 8 bits as individual digits in their respective positions</li><li>The rightmost bit is at position 0, whereas the leftmost bit is at position 7. This is how we define the most significant bit (<strong>MSB</strong>, the leftmost) and the least significant bit (<strong>LSB</strong>, the rightmost)</li><li>For this example, we perform a <strong>left shift</strong> operation on each bit and then sum all the values, in this case from MSB to LSB (the order doesn't matter much for now): <code>(0 &lt;&lt; 7) + (1 &lt;&lt; 6) + (1 &lt;&lt; 5) + (0 &lt;&lt; 4) + ... + (0 &lt;&lt; 0)</code>: <em>left shift on <em>zeros</em> will always produce a <em>zero</em></em></li></ol><ul><li><p><code>0 &lt;&lt; 7</code> = <code>(2 ** 7) * 0</code> = <code>128 * 0</code> = 0</p></li><li><p><code>1 &lt;&lt; 6</code> = <code>(2 ** 6) * 1</code> = <code>64 * 1</code> = 64</p></li></ul><p>Similarly to the remaining bits:</p><ul><li><p><code>1 &lt;&lt; 5</code> = 32</p></li><li><p><code>0 &lt;&lt; 4</code> = 0</p></li><li><p><code>1 &lt;&lt; 3</code> = 8</p></li><li><p><code>0 &lt;&lt; 2</code> = 0</p></li><li><p><code>0 &lt;&lt; 1</code> = 0</p></li><li><p><code>0 &lt;&lt; 0</code> = 0</p></li></ul><p>So, our sum becomes, from MSB to LSB:</p> <pre><code class="language-text">MSB                          LSB
 0   1    1    0   1   0   0   0
-0 + 64 + 32 + 0 + 8 + 0 + 0 + 0 = 104</code></pre> <p>104 is exactly the <strong>decimal representation</strong> of the letter “h” in ASCII.</p><p><em>How wonderful is that?</em></p><h3 id="sending-the-letter-h">Sending the letter “h”</h3><p>Now let’s convert these operations to Ruby code. We’ll write a simple program <code>receiver.rb</code> that receives signals in order from LSB to MSB (positions 0 to 7) and then converts them back to ASCII characters, printing to <code>STDOUT</code>.</p><p>Basically, we’ll <strong>accumulate</strong> bits and whenever we form a complete byte, we’ll decode it to its ASCII representation. The very basic implementation of our <code>accumulate_bit(bit)</code> method would look like as follows:</p><div class="sourceCode" id="cb13"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># start with the LSB</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> accumulate_bit(bit)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The left shift operator (&lt;&lt;) is used to </span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># shift the bits of the number to the left.</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This is equivalent of: (2 ** @position) * bit</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">+=</span> (bit <span class="op">&lt;&lt;</span> <span class="ot">@position</span>)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="ot">@accumulator</span> <span class="cf">if</span> <span class="ot">@position</span> <span class="op">==</span> <span class="dv">7</span> <span class="co"># stop accumulating after 8 bits (byte)</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">+=</span> <span class="dv">1</span> <span class="co"># move to the next bit position: 0 becomes 1, 1 becomes 2, etc.</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Letter &quot;h&quot; in binary is 01101000</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co"># But we&#39;ll send from the LSB to the MSB</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 0110 1000 (MSB -&gt; LSB) becomes 0001 0110 (LSB -&gt; MSB)</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># The order doesn&#39;t matter that much, it&#39;ll depend on </span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co"># the receiver&#39;s implementation.</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">0</span>)</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">0</span>)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">0</span>)</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">1</span>)</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">0</span>)</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">1</span>)</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">1</span>)</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>accumulate_bit(<span class="dv">0</span>)</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="ot">@accumulator</span> <span class="co"># should print 104, which is the ASCII code for &quot;h&quot;</span></span></code></pre></div><p><em>Pay attention to this code. It’s very important and builds the foundation for the next steps. If you didn’t get it, go back and read it again. Try it yourself in the terminal or using your preferred programming language.</em></p><p>Now, how to convert the decimal <code>104</code> to the ASCII character representation? Luckily, Ruby provides a method called <code>chr</code> which does the job:</p><div class="sourceCode" id="cb14"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>irb<span class="op">&gt;</span> <span class="fu">puts</span> <span class="dv">104</span><span class="at">.chr</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">=&gt;</span> <span class="st">&quot;h&quot;</span></span></code></pre></div><p>We could do the same job for the rest of the word “hello”, for instance. According to the <a href="https://www.ascii-code.com/">ASCII table</a>, it should be the following:</p><ul><li><p><code>e</code> in decimal is <code>101</code></p></li><li><p><code>l</code> in decimal is <code>108</code></p></li><li><p><code>o</code> in decimal is <code>111</code></p></li></ul><p>Let’s check if Ruby knows that:</p><div class="sourceCode" id="cb15"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dv">104</span><span class="at">.chr</span>    <span class="co"># &quot;h&quot;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dv">101</span><span class="at">.chr</span>    <span class="co"># &quot;e&quot;</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="dv">108</span><span class="at">.chr</span>    <span class="co"># &quot;l&quot;</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dv">111</span><span class="at">.chr</span>    <span class="co"># &quot;o&quot;</span></span></code></pre></div><p>We can even “decode” the word to the decimal representation in ASCII:</p><div class="sourceCode" id="cb16"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>irb<span class="op">&gt;</span> <span class="st">&quot;hello&quot;</span><span class="at">.bytes</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="op">=&gt;</span> <span class="kw">[</span><span class="dv">104</span>, <span class="dv">101</span>, <span class="dv">108</span>, <span class="dv">108</span>, <span class="dv">111</span><span class="kw">]</span></span></code></pre></div><p>Now, time to finish our receiver implementation to properly print the letter “h”:</p><div class="sourceCode" id="cb17"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># start with the LSB</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR1&#39;</span>) <span class="op">{</span> decode_signal(<span class="dv">0</span>) <span class="op">}</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR2&#39;</span>) <span class="op">{</span> decode_signal(<span class="dv">1</span>) <span class="op">}</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> decode_signal(bit)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  accumulate_bit(bit)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="cf">unless</span> <span class="ot">@position</span> <span class="op">==</span> <span class="dv">8</span> <span class="co"># if not yet accumulated a byte, keep accumulating</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="st">&quot;Received byte: </span><span class="sc">#{</span><span class="ot">@accumulator</span><span class="sc">}</span><span class="st"> (</span><span class="sc">#{</span><span class="ot">@accumulator</span><span class="at">.chr</span><span class="sc">}</span><span class="st">)</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset the accumulator</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset position for the next byte</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> accumulate_bit(bit)</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The left shift operator (&lt;&lt;) is used to </span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># shift the bits of the number to the left.</span></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">#</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This is equivalent of: (2 ** @position) * bit</span></span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">+=</span> (bit <span class="op">&lt;&lt;</span> <span class="ot">@position</span>)</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">+=</span> <span class="dv">1</span> <span class="co"># move to the next bit position: 0 becomes 1, 1 becomes 2, etc.</span></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Process ID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span></span></code></pre></div><p><em>Read that code and its comments. It’s very important. Do not continue reading until you really get what’s happening here.</em></p><ul><li><p>Whenever we get <code>SIGUSR1</code>, we accumulate the bit <code>0</code></p></li><li><p>When getting <code>SIGUSR2</code>, accumulate then the bit <code>1</code></p></li><li><p>When accumulator reaches the position<code>8</code>, it means we have a byte. At this moment we should print the ASCII representation using the <code>.chr</code> we seen earlier. Then, reset bit position and accumulator</p></li></ul><p>Let’s see our receiver in action! Start the receiver in one terminal:</p><div class="sourceCode" id="cb18"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby receiver.rb</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Process</span> ID: 58219</span></code></pre></div><p>Great! Now the receiver is listening for signals. In another terminal, let’s manually send signals to form the letter “h” (which is <code>01101000</code> in binary, remember?):</p> <pre class="text"><code>  # Sending from LSB to MSB: 0, 0, 0, 1, 0, 1, 1, 0
+0 + 64 + 32 + 0 + 8 + 0 + 0 + 0 = 104
+</code></pre> <p>104 is exactly the <strong>decimal representation</strong> of the letter "h" in ASCII.</p><p><em>How wonderful is that?</em></p><h3>Sending the letter "h"</h3><p>Now let's convert these operations to Ruby code. We'll write a simple program <code>receiver.rb</code> that receives signals in order from LSB to MSB (positions 0 to 7) and then converts them back to ASCII characters, printing to <code>STDOUT</code>.</p><p>Basically, we'll <strong>accumulate</strong> bits and whenever we form a complete byte, we'll decode it to its ASCII representation. The very basic implementation of our <code>accumulate_bit(bit)</code> method would look like as follows:</p> <pre><code class="language-ruby">@position = 0 # start with the LSB
+@accumulator = 0
+
+def accumulate_bit(bit)
+  # The left shift operator (&lt;&lt;) is used to 
+  # shift the bits of the number to the left.
+  #
+  # This is equivalent of: (2 ** @position) * bit
+  @accumulator += (bit &lt;&lt; @position)
+  return @accumulator if @position == 7 # stop accumulating after 8 bits (byte)
+
+  @position += 1 # move to the next bit position: 0 becomes 1, 1 becomes 2, etc.
+end
+
+# Letter "h" in binary is 01101000
+# But we'll send from the LSB to the MSB
+#
+# 0110 1000 (MSB -&gt; LSB) becomes 0001 0110 (LSB -&gt; MSB)
+# The order doesn't matter that much, it'll depend on 
+# the receiver's implementation.
+accumulate_bit(0)
+accumulate_bit(0)
+accumulate_bit(0)
+accumulate_bit(1)
+accumulate_bit(0)
+accumulate_bit(1)
+accumulate_bit(1)
+accumulate_bit(0)
+
+puts @accumulator # should print 104, which is the ASCII code for "h"
+</code></pre> <p><em>Pay attention to this code. It's very important and builds the foundation for the next steps. If you didn't get it, go back and read it again. Try it yourself in the terminal or using your preferred programming language.</em></p><p>Now, how to convert the decimal <code>104</code> to the ASCII character representation? Luckily, Ruby provides a method called <code>chr</code> which does the job:</p> <pre><code class="language-ruby">irb&gt; puts 104.chr
+=&gt; "h"
+</code></pre> <p>We could do the same job for the rest of the word "hello", for instance. According to the <a href="https://www.ascii-code.com/">ASCII table</a>, it should be the following:</p><ul><li><p><code>e</code> in decimal is <code>101</code></p></li><li><p><code>l</code> in decimal is <code>108</code></p></li><li><p><code>o</code> in decimal is <code>111</code></p></li></ul><p>Let's check if Ruby knows that:</p> <pre><code class="language-ruby">104.chr    # "h"
+101.chr    # "e"
+108.chr    # "l"
+111.chr    # "o"
+</code></pre> <p>We can even "decode" the word to the decimal representation in ASCII:</p> <pre><code class="language-ruby">irb&gt; "hello".bytes
+=&gt; [104, 101, 108, 108, 111]
+</code></pre> <p>Now, time to finish our receiver implementation to properly print the letter "h":</p> <pre><code class="language-ruby">@position = 0 # start with the LSB
+@accumulator = 0
+
+trap('SIGUSR1') { decode_signal(0) }
+trap('SIGUSR2') { decode_signal(1) }
+
+def decode_signal(bit)
+  accumulate_bit(bit)
+  return unless @position == 8 # if not yet accumulated a byte, keep accumulating
+
+  print "Received byte: #{@accumulator} (#{@accumulator.chr})\n"
+
+  @accumulator = 0 # reset the accumulator
+  @position = 0 # reset position for the next byte
+end
+
+def accumulate_bit(bit)
+  # The left shift operator (&lt;&lt;) is used to 
+  # shift the bits of the number to the left.
+  #
+  # This is equivalent of: (2 ** @position) * bit
+  @accumulator += (bit &lt;&lt; @position)
+  @position += 1 # move to the next bit position: 0 becomes 1, 1 becomes 2, etc.
+end
+
+puts "Process ID: #{Process.pid}"
+sleep
+</code></pre> <p><em>Read that code and its comments. It's very important. Do not continue reading until you really get what's happening here.</em></p><ul><li><p>Whenever we get <code>SIGUSR1</code>, we accumulate the bit <code>0</code></p></li><li><p>When getting <code>SIGUSR2</code>, accumulate then the bit <code>1</code></p></li><li><p>When accumulator reaches the position<code>8</code>, it means we have a byte. At this moment we should print the ASCII representation using the <code>.chr</code> we seen earlier. Then, reset bit position and accumulator</p></li></ul><p>Let's see our receiver in action! Start the receiver in one terminal:</p> <pre><code class="language-bash">$ ruby receiver.rb
+Process ID: 58219
+</code></pre> <p>Great! Now the receiver is listening for signals. In another terminal, let's manually send signals to form the letter "h" (which is <code>01101000</code> in binary, remember?):</p> <pre><code class="language-text">  # Sending from LSB to MSB: 0, 0, 0, 1, 0, 1, 1, 0
   $ kill -SIGUSR1 58219  # 0
   $ kill -SIGUSR1 58219  # 0
   $ kill -SIGUSR1 58219  # 0
@@ -135,306 +138,311 @@ Received SIGUSR1 signal # 0</code></pre> <p>That’s exactly <code>01101000</cod
   $ kill -SIGUSR1 58219  # 0
   $ kill -SIGUSR2 58219  # 1
   $ kill -SIGUSR2 58219  # 1
-  $ kill -SIGUSR1 58219  # 0</code></pre> <p>And in the receiver terminal, we should see:</p> <pre class="text"><code>Received byte: 104 (h)</code></pre> <p><em>How amazing is that?</em> We just sent the letter “h” using only two UNIX signals!</p><p>But wait. Manually sending 8 signals for each character? That’s tedious and error-prone. What if we wanted to send the word “hello”? That’s 5 characters × 8 bits = 40 signals to send manually. No way.</p><p><em>We need a sender.</em></p><h3 id="building-the-sender">Building the sender</h3><p>The sender’s job is the opposite of the receiver: it should encode a message (string) into bits and send them as signals to the receiver process.</p><p>Let’s think about what we need:</p><ol type="1"><li>Take a message as input (like “hello”)</li><li>Convert each character to its byte representation</li><li>Extract the 8 bits from each byte</li><li>Send <code>SIGUSR1</code> for bit 0, <code>SIGUSR2</code> for bit 1</li><li>Repeat for all characters</li></ol><p>The tricky part here is the step 3: <strong>how do we extract individual bits from a byte?</strong> To extract the bit at position <code>i</code>, we can use the following formula:</p> <pre class="text"><code>bit = (byte &gt;&gt; i) &amp; 1</code></pre> <p>Let me break this down:</p><ul><li><p><code>byte &gt;&gt; i</code> performs a <em>right shift</em> by <code>i</code> positions</p></li><li><p><code>&amp; 1</code> is a bitwise <code>AND</code> operation that extracts only the <em>rightmost</em> bit</p></li></ul><p>For the letter “h” (<code>01101000</code> in binary, <code>104</code> in decimal):</p><p><strong>Position 0 (LSB):</strong></p><ul><li><p><code>(104 &gt;&gt; 0)</code> = <code>104 / (2 ** 0)</code> = <code>104 / 1</code> = 104</p></li><li><p><code>01101000</code> &gt;&gt; 0 = <code>01101000</code></p></li><li><p><code>01101000</code> &amp; <code>00000001</code> = 0 (<em>one</em> AND <em>zero</em> is <em>zero</em>)</p></li></ul><p><strong>Position 1:</strong></p><ul><li><p><code>(104 &gt;&gt; 1)</code> = <code>104 / (2 ** 1)</code> = <code>104 / 2</code> = 52</p></li><li><p><code>01101000</code> &gt;&gt; 1 = <code>00110100</code></p></li><li><p><code>00110100</code> &amp; <code>00000001</code> = 0</p></li></ul><p><strong>Position 2:</strong></p><ul><li><p><code>(104 &gt;&gt; 2)</code> = <code>104 / (2 ** 2)</code> = <code>104 / 4</code> = 26</p></li><li><p><code>01101000</code> &gt;&gt; 2 = <code>00011010</code></p></li><li><p><code>00011010</code> &amp; <code>00000001</code> = 0</p></li></ul><p><strong>Position 3:</strong></p><ul><li><p><code>(104 &gt;&gt; 3)</code> = <code>104 / (2 ** 3)</code> = <code>104 / 8</code> = 13</p></li><li><p><code>01101000</code> &gt;&gt; 3 = <code>00001101</code></p></li><li><p><code>00001101</code> &amp; <code>00000001</code> = 1 (<em>one</em> AND <em>one</em> equals <em>one</em>)</p></li></ul><p>And so on for positions 4, 5, 6, and 7. This gives us: <code>0, 0, 0, 1, 0, 1, 1, 0</code> — exactly the bits we need from LSB to MSB!</p><ul><li><p><code>(104 &gt;&gt; 0) &amp; 1</code> = <code>104 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 1) &amp; 1</code> = <code>52 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 2) &amp; 1</code> = <code>26 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 3) &amp; 1</code> = <code>13 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 4) &amp; 1</code> = <code>6 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 5) &amp; 1</code> = <code>3 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 6) &amp; 1</code> = <code>1 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 7) &amp; 1</code> = <code>0 &amp; 1</code> = 0</p></li></ul><blockquote><p>Pay close attention to this technique. It’s a fundamental operation in low-level programming.</p></blockquote><p>So now time to build the <code>sender.rb</code> which is pretty simple:</p><div class="sourceCode" id="cb22"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>receiver_pid <span class="op">=</span> <span class="cn">ARGV</span><span class="kw">[</span><span class="dv">0</span><span class="kw">]</span><span class="at">.to_i</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>message <span class="op">=</span> <span class="cn">ARGV</span><span class="kw">[</span><span class="dv">1</span><span class="op">..-</span><span class="dv">1</span><span class="kw">]</span><span class="at">.join</span>(<span class="ch">&#39; &#39;</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> encode_byte(byte)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">8</span><span class="at">.times.map</span> <span class="cf">do</span> <span class="op">|</span>i<span class="op">|</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract each bit from the byte, starting from the LSB</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    (byte <span class="op">&gt;&gt;</span> i) <span class="op">&amp;</span> <span class="dv">1</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>message<span class="at">.bytes.each</span> <span class="cf">do</span> <span class="op">|</span>byte<span class="op">|</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  encode_byte(byte)<span class="at">.each</span> <span class="cf">do</span> <span class="op">|</span>bit<span class="op">|</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    signal <span class="op">=</span> bit <span class="op">==</span> <span class="dv">0</span> <span class="op">?</span> <span class="vs">&#39;SIGUSR1&#39;</span> <span class="op">:</span> <span class="vs">&#39;SIGUSR2&#39;</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Process</span><span class="at">.kill</span>(signal, receiver_pid)</span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> <span class="fl">0.001</span> <span class="co"># Delay to allow the receiver to process the signal</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><p>For each byte (8-bit structure) we extract the bit performing the <em>right shift</em> + <em>AND</em> oprerations. The result is the extracted bit.</p><p>In the receiver window:</p><div class="sourceCode" id="cb23"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby receiver.rb</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Process</span> ID: 68968</span></code></pre></div><p>And in the sender window:</p><div class="sourceCode" id="cb24"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby sender.rb 68968 h</span></code></pre></div><p>The receiver will print:</p><div class="sourceCode" id="cb25"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby receiver.rb</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Process</span> ID: 68968</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 104 <span class="er">(</span><span class="ex">h</span><span class="kw">)</span></span></code></pre></div><p><em>Processes sending messages with only two signals!</em> How wonderful is that?</p><h3 id="sending-the-hello-message">Sending the “hello” message</h3><p>Now, sending the hello message is super easy. The sender is already able to send not only a letter but any message using signals:</p><div class="sourceCode" id="cb26"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby sender.rb 68968 hello</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># And the receiver:</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 104 <span class="er">(</span><span class="ex">h</span><span class="kw">)</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 101 <span class="er">(</span><span class="ex">e</span><span class="kw">)</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 108 <span class="er">(</span><span class="ex">l</span><span class="kw">)</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 108 <span class="er">(</span><span class="ex">l</span><span class="kw">)</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="ex">Received</span> byte: 111 <span class="er">(</span><span class="ex">o</span><span class="kw">)</span></span></code></pre></div><p>Just change the <code>receiver</code> implementation a little bit:</p><div class="sourceCode" id="cb27"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> decode_signal(bit)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  accumulate_bit(bit)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="cf">unless</span> <span class="ot">@position</span> <span class="op">==</span> <span class="dv">8</span> <span class="co"># if not yet accumulated a byte, keep accumulating</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="ot">@accumulator</span><span class="at">.chr</span> <span class="co"># print the byte as a character</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset the accumulator</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset position for the next byte</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><p>And then:</p><div class="sourceCode" id="cb28"><pre
-      class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ruby sender.rb 96875 Hello</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># In the receiver&#39;s terminal</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Process</span> ID: 96875</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Hello</span></span></code></pre></div><p>However, if we send the message again, the receiver will print everything in the same line:</p><div class="sourceCode" id="cb29"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="er">$</span> ruby sender<span class="at">.rb</span> <span class="dv">96875</span> <span class="dt">Hello</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="er">$</span> ruby sender<span class="at">.rb</span> <span class="dv">96875</span> <span class="dt">Hello</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># In the receiver&#39;s terminal</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="dt">Process</span> <span class="wa">ID:</span> <span class="dv">96875</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="dt">HelloHello</span></span></code></pre></div><p>It’s obvious: the receiver doesn’t know where the sender finished the message, so it’s impossible to know where we should stop one message and print the next one on a new line with <code>\n</code>.</p><p>We should then determine how the sender indicates the end of the message. How about being it all <em>zeroes</em> (<code>0000 0000</code>)?</p><ul><li><p>We send the message: first 5 bytes representing the “hello” message</p></li><li><p>Then we send a “NULL terminator”, just one byte <em>0</em> (<code>0000 0000</code>)</p></li></ul> <pre class="text"><code>0110 1000 # h
+  $ kill -SIGUSR1 58219  # 0
+</code></pre> <p>And in the receiver terminal, we should see:</p> <pre><code class="language-text">Received byte: 104 (h)
+</code></pre> <p><em>How amazing is that?</em> We just sent the letter "h" using only two UNIX signals!</p><p>But wait. Manually sending 8 signals for each character? That's tedious and error-prone. What if we wanted to send the word "hello"? That's 5 characters × 8 bits = 40 signals to send manually. No way.</p><p><em>We need a sender.</em></p><h3>Building the sender</h3><p>The sender's job is the opposite of the receiver: it should encode a message (string) into bits and send them as signals to the receiver process.</p><p>Let's think about what we need:</p><ol><li>Take a message as input (like "hello")</li><li>Convert each character to its byte representation</li><li>Extract the 8 bits from each byte</li><li>Send <code>SIGUSR1</code> for bit 0, <code>SIGUSR2</code> for bit 1</li><li>Repeat for all characters</li></ol><p>The tricky part here is the step 3: <strong>how do we extract individual bits from a byte?</strong> To extract the bit at position <code>i</code>, we can use the following formula:</p> <pre><code class="language-text">bit = (byte &gt;&gt; i) &amp; 1
+</code></pre> <p>Let me break this down:</p><ul><li><p><code>byte &gt;&gt; i</code> performs a <em>right shift</em> by <code>i</code> positions</p></li><li><p><code>&amp; 1</code> is a bitwise <code>AND</code> operation that extracts only the <em>rightmost</em> bit</p></li></ul><p>For the letter "h" (<code>01101000</code> in binary, <code>104</code> in decimal):</p><p><strong>Position 0 (LSB):</strong></p><ul><li><p><code>(104 &gt;&gt; 0)</code> = <code>104 / (2 ** 0)</code> = <code>104 / 1</code> = 104</p></li><li><p><code>01101000</code> &gt;&gt; 0 = <code>01101000</code></p></li><li><p><code>01101000</code> &amp; <code>00000001</code> = 0 (<em>one</em> AND <em>zero</em> is <em>zero</em>)</p></li></ul><p><strong>Position 1:</strong></p><ul><li><p><code>(104 &gt;&gt; 1)</code> = <code>104 / (2 ** 1)</code> = <code>104 / 2</code> = 52</p></li><li><p><code>01101000</code> &gt;&gt; 1 = <code>00110100</code></p></li><li><p><code>00110100</code> &amp; <code>00000001</code> = 0</p></li></ul><p><strong>Position 2:</strong></p><ul><li><p><code>(104 &gt;&gt; 2)</code> = <code>104 / (2 ** 2)</code> = <code>104 / 4</code> = 26</p></li><li><p><code>01101000</code> &gt;&gt; 2 = <code>00011010</code></p></li><li><p><code>00011010</code> &amp; <code>00000001</code> = 0</p></li></ul><p><strong>Position 3:</strong></p><ul><li><p><code>(104 &gt;&gt; 3)</code> = <code>104 / (2 ** 3)</code> = <code>104 / 8</code> = 13</p></li><li><p><code>01101000</code> &gt;&gt; 3 = <code>00001101</code></p></li><li><p><code>00001101</code> &amp; <code>00000001</code> = 1 (<em>one</em> AND <em>one</em> equals <em>one</em>)</p></li></ul><p>And so on for positions 4, 5, 6, and 7. This gives us: <code>0, 0, 0, 1, 0, 1, 1, 0</code> — exactly the bits we need from LSB to MSB!</p><ul><li><p><code>(104 &gt;&gt; 0) &amp; 1</code> = <code>104 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 1) &amp; 1</code> = <code>52 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 2) &amp; 1</code> = <code>26 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 3) &amp; 1</code> = <code>13 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 4) &amp; 1</code> = <code>6 &amp; 1</code> = 0</p></li><li><p><code>(104 &gt;&gt; 5) &amp; 1</code> = <code>3 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 6) &amp; 1</code> = <code>1 &amp; 1</code> = 1</p></li><li><p><code>(104 &gt;&gt; 7) &amp; 1</code> = <code>0 &amp; 1</code> = 0</p></li></ul><blockquote><p>Pay close attention to this technique. It's a fundamental operation in low-level programming.</p></blockquote><p>So now time to build the <code>sender.rb</code> which is pretty simple:</p> <pre><code class="language-ruby">receiver_pid = ARGV[0].to_i
+message = ARGV[1..-1].join(' ')
+
+def encode_byte(byte)
+  8.times.map do |i|
+    # Extract each bit from the byte, starting from the LSB
+    (byte &gt;&gt; i) &amp; 1
+  end
+end
+
+message.bytes.each do |byte|
+  encode_byte(byte).each do |bit|
+    signal = bit == 0 ? 'SIGUSR1' : 'SIGUSR2'
+    Process.kill(signal, receiver_pid)
+    sleep 0.001 # Delay to allow the receiver to process the signal
+  end
+end
+</code></pre> <p>For each byte (8-bit structure) we extract the bit performing the <em>right shift</em> + <em>AND</em> oprerations. The result is the extracted bit.</p><p>In the receiver window:</p> <pre><code class="language-bash">$ ruby receiver.rb
+Process ID: 68968
+</code></pre> <p>And in the sender window:</p> <pre><code class="language-bash">$ ruby sender.rb 68968 h
+</code></pre> <p>The receiver will print:</p> <pre><code class="language-bash">$ ruby receiver.rb
+Process ID: 68968
+Received byte: 104 (h)
+</code></pre> <p><em>Processes sending messages with only two signals!</em> How wonderful is that?</p><h3>Sending the "hello" message</h3><p>Now, sending the hello message is super easy. The sender is already able to send not only a letter but any message using signals:</p> <pre><code class="language-bash">$ ruby sender.rb 68968 hello
+
+# And the receiver:
+Received byte: 104 (h)
+Received byte: 101 (e)
+Received byte: 108 (l)
+Received byte: 108 (l)
+Received byte: 111 (o)
+</code></pre> <p>Just change the <code>receiver</code> implementation a little bit:</p> <pre><code class="language-ruby">def decode_signal(bit)
+  accumulate_bit(bit)
+  return unless @position == 8 # if not yet accumulated a byte, keep accumulating
+
+  print @accumulator.chr # print the byte as a character
+
+  @accumulator = 0 # reset the accumulator
+  @position = 0 # reset position for the next byte
+end
+</code></pre> <p>And then:</p> <pre><code class="language-bash">$ ruby sender.rb 96875 Hello
+
+# In the receiver's terminal
+Process ID: 96875
+Hello
+</code></pre> <p>However, if we send the message again, the receiver will print everything in the same line:</p> <pre><code class="language-ruby">$ ruby sender.rb 96875 Hello
+$ ruby sender.rb 96875 Hello
+
+# In the receiver's terminal
+Process ID: 96875
+HelloHello
+</code></pre> <p>It's obvious: the receiver doesn't know where the sender finished the message, so it's impossible to know where we should stop one message and print the next one on a new line with <code>\n</code>.</p><p>We should then determine how the sender indicates the end of the message. How about being it all <em>zeroes</em> (<code>0000 0000</code>)?</p><ul><li><p>We send the message: first 5 bytes representing the "hello" message</p></li><li><p>Then we send a "NULL terminator", just one byte <em>0</em> (<code>0000 0000</code>)</p></li></ul> <pre><code class="language-text">0110 1000 # h
 0110 0101 # e
 0110 1000 # l
 0110 1000 # l
 0110 1111 # o
-0000 0000 # NULL</code></pre> <p>Hence, when the <em>receiver</em> gets a NULL terminator, it will print a line feed <code>\n</code>. Let’s change the <code>sender.rb</code> first:</p><div class="sourceCode" id="cb31"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>receiver_pid <span class="op">=</span> <span class="cn">ARGV</span><span class="kw">[</span><span class="dv">0</span><span class="kw">]</span><span class="at">.to_i</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>message <span class="op">=</span> <span class="cn">ARGV</span><span class="kw">[</span><span class="dv">1</span><span class="op">..-</span><span class="dv">1</span><span class="kw">]</span><span class="at">.join</span>(<span class="ch">&#39; &#39;</span>)</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> encode_byte(byte)</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="dv">8</span><span class="at">.times.map</span> <span class="cf">do</span> <span class="op">|</span>i<span class="op">|</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract each bit from the byte, starting from the LSB</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    (byte <span class="op">&gt;&gt;</span> i) <span class="op">&amp;</span> <span class="dv">1</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>message<span class="at">.bytes.each</span> <span class="cf">do</span> <span class="op">|</span>byte<span class="op">|</span></span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  encode_byte(byte)<span class="at">.each</span> <span class="cf">do</span> <span class="op">|</span>bit<span class="op">|</span></span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    signal <span class="op">=</span> bit <span class="op">==</span> <span class="dv">0</span> <span class="op">?</span> <span class="vs">&#39;SIGUSR1&#39;</span> <span class="op">:</span> <span class="vs">&#39;SIGUSR2&#39;</span></span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Process</span><span class="at">.kill</span>(signal, receiver_pid)</span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> <span class="fl">0.001</span> <span class="co"># Delay to allow the receiver to process the signal</span></span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Send NULL terminator (0000 0000)</span></span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a><span class="dv">8</span><span class="at">.times</span> <span class="cf">do</span></span>
-<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Process</span><span class="at">.kill</span>(<span class="vs">&#39;SIGUSR1&#39;</span>, receiver_pid)</span>
-<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sleep</span> <span class="fl">0.001</span> <span class="co"># Delay to allow the receiver to process the signal</span></span>
-<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Message sent to receiver (PID: </span><span class="sc">#{</span>receiver_pid<span class="sc">}</span><span class="st">)&quot;</span></span></code></pre></div><p>Then, the <code>receiver.rb</code>:</p><div class="sourceCode" id="cb32"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># start with the LSB</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR1&#39;</span>) <span class="op">{</span> decode_signal(<span class="dv">0</span>) <span class="op">}</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">trap</span>(<span class="vs">&#39;SIGUSR2&#39;</span>) <span class="op">{</span> decode_signal(<span class="dv">1</span>) <span class="op">}</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> decode_signal(bit)</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  accumulate_bit(bit)</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="cf">unless</span> <span class="ot">@position</span> <span class="op">==</span> <span class="dv">8</span> <span class="co"># if not yet accumulated a byte, keep accumulating</span></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="ot">@accumulator</span><span class="at">.zero?</span> <span class="co"># NULL terminator received</span></span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span> <span class="ot">@accumulator</span><span class="at">.chr</span> <span class="co"># print the byte as a character</span></span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset the accumulator</span></span>
-<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span> <span class="co"># reset position for the next byte</span></span>
-<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="cf">def</span> accumulate_bit(bit)</span>
-<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The left shift operator (&lt;&lt;) is used to </span></span>
-<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># shift the bits of the number to the left.</span></span>
-<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">#</span></span>
-<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This is equivalent of: (2 ** @position) * bit</span></span>
-<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@accumulator</span> <span class="op">+=</span> (bit <span class="op">&lt;&lt;</span> <span class="ot">@position</span>)</span>
-<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="ot">@position</span> <span class="op">+=</span> <span class="dv">1</span> <span class="co"># move to the next bit position: 0 becomes 1, 1 becomes 2, etc.</span></span>
-<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Process ID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a><span class="fu">sleep</span></span></code></pre></div><p>Output:</p> <pre class="text"><code>$ ruby sender.rb 96875 Hello, World!
-$ ruby sender.rb 96875 You&#39;re welcome
+0000 0000 # NULL
+</code></pre> <p>Hence, when the <em>receiver</em> gets a NULL terminator, it will print a line feed <code>\n</code>. Let's change the <code>sender.rb</code> first:</p> <pre><code class="language-ruby">receiver_pid = ARGV[0].to_i
+message = ARGV[1..-1].join(' ')
+
+def encode_byte(byte)
+  8.times.map do |i|
+    # Extract each bit from the byte, starting from the LSB
+    (byte &gt;&gt; i) &amp; 1
+  end
+end
+
+message.bytes.each do |byte|
+  encode_byte(byte).each do |bit|
+    signal = bit == 0 ? 'SIGUSR1' : 'SIGUSR2'
+    Process.kill(signal, receiver_pid)
+    sleep 0.001 # Delay to allow the receiver to process the signal
+  end
+end
+
+# Send NULL terminator (0000 0000)
+8.times do
+  Process.kill('SIGUSR1', receiver_pid)
+  sleep 0.001 # Delay to allow the receiver to process the signal
+end
+
+puts "Message sent to receiver (PID: #{receiver_pid})"
+</code></pre> <p>Then, the <code>receiver.rb</code>:</p> <pre><code class="language-ruby">@position = 0 # start with the LSB
+@accumulator = 0
+
+trap('SIGUSR1') { decode_signal(0) }
+trap('SIGUSR2') { decode_signal(1) }
+
+def decode_signal(bit)
+  accumulate_bit(bit)
+  return unless @position == 8 # if not yet accumulated a byte, keep accumulating
+
+  if @accumulator.zero? # NULL terminator received
+    print "\n"
+  else
+    print @accumulator.chr # print the byte as a character
+  end
+
+  @accumulator = 0 # reset the accumulator
+  @position = 0 # reset position for the next byte
+end
+
+def accumulate_bit(bit)
+  # The left shift operator (&lt;&lt;) is used to 
+  # shift the bits of the number to the left.
+  #
+  # This is equivalent of: (2 ** @position) * bit
+  @accumulator += (bit &lt;&lt; @position)
+  @position += 1 # move to the next bit position: 0 becomes 1, 1 becomes 2, etc.
+end
+
+puts "Process ID: #{Process.pid}"
+sleep
+</code></pre> <p>Output:</p> <pre><code class="language-text">$ ruby sender.rb 96875 Hello, World!
+$ ruby sender.rb 96875 You're welcome
 $ ruby sender.rb 96875 How are you?
 
 # Receiver
 Process ID: 97176
 Hello, World!
-You&#39;re welcome
-How are you?</code></pre> <blockquote><p>OMG Leandro! That’s amazing!</p></blockquote><p><em>Amazing, right?</em> We just built an entire communication system between two processes using one of the most primitive methods available: <strong>UNIX signals.</strong></p><p>The sky’s the limit now! Why not build a <em>full-fledged message broker</em> using this crazy technique?</p><h2 id="a-modest-message-broker-using-unix-signals">A modest message broker using UNIX signals</h2><p>We’ll break down the development into three components:</p><ol type="1"><li><strong>Broker</strong>: the intermediary that routes messages</li><li><strong>Consumer</strong>: processes that receive messages</li><li><strong>Producer</strong>: processes that send messages</li></ol><figure><img src="/uploads/3395.png" alt="image" /><figcaption aria-hidden="true">image</figcaption></figure><ol type="1"><li>Let’s start with the Broker. It should register itself with the producer, then trap incoming signals, decode them, and enqueue the messages for delivery to consumers via outgoing signals:</li></ol><div class="sourceCode" id="cb34"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="cf">#!/usr/bin/env ruby</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require_relative</span> <span class="vs">&#39;signal_codec&#39;</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require_relative</span> <span class="vs">&#39;consumer&#39;</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="cf">class</span> <span class="dt">Broker</span> </span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="cn">PID</span> <span class="op">=</span> <span class="vs">&#39;broker.pid&#39;</span><span class="at">.freeze</span></span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> initialize</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@codec</span> <span class="op">=</span> <span class="dt">SignalCodec</span><span class="at">.new</span></span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@queue</span> <span class="op">=</span> <span class="dt">Queue</span><span class="at">.new</span></span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@consumer_index</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> start </span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    register_broker</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">trap</span>(<span class="vs">&#39;SIGUSR1&#39;</span>) <span class="op">{</span> process_bit(<span class="dv">0</span>) <span class="op">}</span></span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">trap</span>(<span class="vs">&#39;SIGUSR2&#39;</span>) <span class="op">{</span> process_bit(<span class="dv">1</span>) <span class="op">}</span></span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">puts</span> <span class="st">&quot;Broker PID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">puts</span> <span class="st">&quot;Waiting for messages...&quot;</span></span>
-<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    distribute_messages</span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> <span class="co"># Keep alive</span></span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span> </span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">private</span></span>
-<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> process_bit(bit)</span>
-<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@codec</span><span class="at">.accumulate_bit</span>(bit) <span class="cf">do</span> <span class="op">|</span>message<span class="op">|</span></span>
-<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>      <span class="ot">@queue</span><span class="at">.push</span>(message) <span class="cf">unless</span> message<span class="at">.empty?</span></span>
-<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> register_broker </span>
-<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">File</span><span class="at">.write</span>(<span class="cn">PID</span>, <span class="dt">Process</span><span class="at">.pid</span>)</span>
-<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">at_exit</span> <span class="op">{</span> <span class="dt">File</span><span class="at">.delete</span>(<span class="cn">PID</span>) <span class="cf">if</span> <span class="dt">File</span><span class="at">.exist?</span>(<span class="cn">PID</span>) <span class="op">}</span></span>
-<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb34-41"><a href="#cb34-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-42"><a href="#cb34-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> distribute_messages</span>
-<span id="cb34-43"><a href="#cb34-43" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Thread</span><span class="at">.new</span> <span class="cf">do</span></span>
-<span id="cb34-44"><a href="#cb34-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">loop</span> <span class="cf">do</span></span>
-<span id="cb34-45"><a href="#cb34-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sleep</span> <span class="fl">0.1</span></span>
-<span id="cb34-46"><a href="#cb34-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-47"><a href="#cb34-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">next</span> <span class="cf">if</span> <span class="ot">@queue</span><span class="at">.empty?</span></span>
-<span id="cb34-48"><a href="#cb34-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-49"><a href="#cb34-49" aria-hidden="true" tabindex="-1"></a>        consumers <span class="op">=</span> <span class="dt">File</span><span class="at">.exist?</span>(<span class="dt">Consumer</span><span class="op">::</span><span class="cn">FILE</span>) <span class="op">?</span> <span class="dt">File</span><span class="at">.readlines</span>(<span class="dt">Consumer</span><span class="op">::</span><span class="cn">FILE</span>)<span class="at">.map</span>(<span class="op">&amp;</span><span class="wa">:to_i</span>) <span class="op">:</span> <span class="kw">[]</span></span>
-<span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">next</span> <span class="cf">if</span> consumers<span class="at">.empty?</span></span>
-<span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-52"><a href="#cb34-52" aria-hidden="true" tabindex="-1"></a>        message <span class="op">=</span> <span class="ot">@queue</span><span class="at">.pop</span>(<span class="dv">true</span>) <span class="cf">rescue</span> <span class="cf">next</span></span>
-<span id="cb34-53"><a href="#cb34-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-54"><a href="#cb34-54" aria-hidden="true" tabindex="-1"></a>        consumer_pid <span class="op">=</span> consumers<span class="kw">[</span><span class="ot">@consumer_index</span> <span class="op">%</span> consumers<span class="at">.size</span><span class="kw">]</span></span>
-<span id="cb34-55"><a href="#cb34-55" aria-hidden="true" tabindex="-1"></a>        <span class="ot">@consumer_index</span> <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb34-56"><a href="#cb34-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-57"><a href="#cb34-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">puts</span> <span class="st">&quot;[SEND] </span><span class="sc">#{</span>message<span class="sc">}</span><span class="st"> → Consumer </span><span class="sc">#{</span>consumer_pid<span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb34-58"><a href="#cb34-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-59"><a href="#cb34-59" aria-hidden="true" tabindex="-1"></a>        <span class="ot">@codec</span><span class="at">.send_message</span>(message, consumer_pid)</span>
-<span id="cb34-60"><a href="#cb34-60" aria-hidden="true" tabindex="-1"></a>      <span class="cf">end</span></span>
-<span id="cb34-61"><a href="#cb34-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb34-62"><a href="#cb34-62" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb34-63"><a href="#cb34-63" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb34-64"><a href="#cb34-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-65"><a href="#cb34-65" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="dv">__FILE__</span> <span class="op">==</span> <span class="va">$0</span> </span>
-<span id="cb34-66"><a href="#cb34-66" aria-hidden="true" tabindex="-1"></a>  broker <span class="op">=</span> <span class="dt">Broker</span><span class="at">.new</span></span>
-<span id="cb34-67"><a href="#cb34-67" aria-hidden="true" tabindex="-1"></a>  broker<span class="at">.start</span></span>
-<span id="cb34-68"><a href="#cb34-68" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><ul><li><p>The broker registers itself</p></li><li><p>Traps incoming signals <code>USR1</code> (bit 0) and <code>USR2</code> (bit 1)</p></li><li><p>Enqueues the messages</p></li><li><p>Send messages to consumers using outgoing signals (<code>USR1</code> and <code>USR2</code> too)</p></li></ul><p><em>Note that we’re using a module called <code>SignalCodec</code> which will be explained soon. Basically this module contains all core components to encode/decode signals and perform bitwise operations.</em></p><ol start="2" type="1"><li>Now the <code>Consumer</code> implementation:</li></ol><div class="sourceCode" id="cb35"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="cf">#!/usr/bin/env ruby</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require_relative</span> <span class="vs">&#39;signal_codec&#39;</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="cf">class</span> <span class="dt">Consumer</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="cn">FILE</span> <span class="op">=</span> <span class="vs">&#39;consumers.txt&#39;</span><span class="at">.freeze</span></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> initialize</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@codec</span> <span class="op">=</span> <span class="dt">SignalCodec</span><span class="at">.new</span></span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> start</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    register_consumer</span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">trap</span>(<span class="vs">&#39;SIGUSR1&#39;</span>) <span class="op">{</span> process_bit(<span class="dv">0</span>) <span class="op">}</span></span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">trap</span>(<span class="vs">&#39;SIGUSR2&#39;</span>) <span class="op">{</span> process_bit(<span class="dv">1</span>) <span class="op">}</span></span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">puts</span> <span class="st">&quot;Consumer PID: </span><span class="sc">#{</span><span class="dt">Process</span><span class="at">.pid</span><span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">puts</span> <span class="st">&quot;Waiting for messages...&quot;</span></span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> <span class="co"># Keep alive</span></span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">private</span></span>
-<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> process_bit(bit)</span>
-<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@codec</span><span class="at">.accumulate_bit</span>(bit) <span class="cf">do</span> <span class="op">|</span>message<span class="op">|</span></span>
-<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">puts</span> <span class="st">&quot;[RECEIVE] </span><span class="sc">#{</span>message<span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> register_consumer</span>
-<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">File</span><span class="at">.open</span>(<span class="cn">FILE</span>, <span class="ch">&#39;a&#39;</span>) <span class="op">{</span> <span class="op">|</span>f<span class="op">|</span> f<span class="at">.puts</span> <span class="dt">Process</span><span class="at">.pid</span> <span class="op">}</span></span>
-<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">at_exit</span> <span class="op">{</span> deregister_consumer <span class="op">}</span></span>
-<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> deregister_consumer</span>
-<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="dt">File</span><span class="at">.exist?</span>(<span class="cn">FILE</span>)</span>
-<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>      consumers <span class="op">=</span> <span class="dt">File</span><span class="at">.readlines</span>(<span class="cn">FILE</span>)<span class="at">.map</span>(<span class="op">&amp;</span><span class="wa">:strip</span>)<span class="at">.reject</span> <span class="op">{</span> <span class="op">|</span>pid<span class="op">|</span> pid<span class="at">.to_i</span> <span class="op">==</span> <span class="dt">Process</span><span class="at">.pid</span> <span class="op">}</span></span>
-<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>      <span class="dt">File</span><span class="at">.write</span>(<span class="cn">FILE</span>, consumers<span class="at">.join</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
-<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="dv">__FILE__</span> <span class="op">==</span> <span class="va">$0</span></span>
-<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>  consumer <span class="op">=</span> <span class="dt">Consumer</span><span class="at">.new</span></span>
-<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>  consumer<span class="at">.start</span></span>
-<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><ul><li><p>The consumer starts and registers itself with the broker</p></li><li><p>Consumer then traps incoming signals (bit 0 and bit 1)</p></li><li><p>Decodes and prints messages</p></li></ul><ol start="3" type="1"><li>Last but not least, the <code>Producer</code> implementation, which is pretty straightforward:</li></ol><div class="sourceCode" id="cb36"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="cf">#!/usr/bin/env ruby</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require_relative</span> <span class="vs">&#39;signal_codec&#39;</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require_relative</span> <span class="vs">&#39;broker&#39;</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="cf">unless</span> <span class="dt">File</span><span class="at">.exist?</span>(<span class="dt">Broker</span><span class="op">:</span><span class="wa">:PID</span>)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abort</span> <span class="st">&quot;Error: Broker not running (</span><span class="sc">#{</span><span class="dt">Broker</span><span class="op">::</span><span class="cn">PID</span><span class="sc">}</span><span class="st"> not found)&quot;</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>broker_pid <span class="op">=</span> <span class="dt">File</span><span class="at">.read</span>(<span class="dt">Broker</span><span class="op">::</span><span class="cn">PID</span>)<span class="at">.strip.to_i</span></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>message <span class="op">=</span> <span class="cn">ARGV</span><span class="at">.join</span>(<span class="ch">&#39; &#39;</span>)</span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> message<span class="at">.empty?</span></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">puts</span> <span class="st">&quot;Usage: ruby producer.rb &lt;message&gt;&quot;</span></span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exit</span> <span class="dv">1</span></span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>codec <span class="op">=</span> <span class="dt">SignalCodec</span><span class="at">.new</span></span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Sending: </span><span class="sc">#{</span>message<span class="sc">}</span><span class="st">&quot;</span></span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>codec<span class="at">.send_message</span>(message, broker_pid)</span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a><span class="fu">puts</span> <span class="st">&quot;Message sent to broker (PID: </span><span class="sc">#{</span>broker_pid<span class="sc">}</span><span class="st">)&quot;</span></span></code></pre></div><ul><li><p>Producer receives a ASCII message from the <em>STDIN</em></p></li><li><p>Encode and sends the message to the broker via outgoing signals</p></li></ul><p>So far, this architecture should look familiar. Many broker implementations follow these basic foundations.</p><blockquote><p>Of course, production-ready implementations are far more robust than this one. Here, we’re just poking around with hacking and experimentation</p></blockquote><p>The coolest part is the <code>SignalCodec</code> though:</p><div class="sourceCode" id="cb37"><pre
-      class="sourceCode ruby"><code class="sourceCode ruby"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="cf">class</span> <span class="dt">SignalCodec</span> </span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="cn">SIGNAL_DELAY</span> <span class="op">=</span> <span class="fl">0.001</span> <span class="co"># Delay between signals to allow processing</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> initialize</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@buffer</span> <span class="op">=</span> <span class="kw">[]</span></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> accumulate_bit(bit)</span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@accumulator</span> <span class="op">+=</span> (bit <span class="op">&lt;&lt;</span> <span class="ot">@position</span>)</span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">@position</span> <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ot">@position</span> <span class="op">==</span> <span class="dv">8</span> <span class="co"># Byte is complete</span></span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="ot">@accumulator</span><span class="at">.zero?</span> <span class="co"># Message complete - NULL terminator</span></span>
-<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>        decoded <span class="op">=</span> <span class="ot">@buffer</span><span class="at">.pack</span>(<span class="st">&quot;C*&quot;</span>)<span class="at">.force_encoding</span>(<span class="vs">&#39;UTF-8&#39;</span>)</span>
-<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span>(decoded) <span class="cf">if</span> <span class="fu">block_given?</span></span>
-<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>        <span class="ot">@buffer</span><span class="at">.clear</span></span>
-<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> </span>
-<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>        <span class="ot">@buffer</span> <span class="op">&lt;&lt;</span> <span class="ot">@accumulator</span></span>
-<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">end</span></span>
-<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>      <span class="ot">@position</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>      <span class="ot">@accumulator</span> <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">def</span> send_message(message, pid)</span>
-<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>    message<span class="at">.each_byte</span> <span class="cf">do</span> <span class="op">|</span>byte<span class="op">|</span></span>
-<span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a>      <span class="dv">8</span><span class="at">.times</span> <span class="cf">do</span> <span class="op">|</span>i<span class="op">|</span></span>
-<span id="cb37-31"><a href="#cb37-31" aria-hidden="true" tabindex="-1"></a>        bit <span class="op">=</span> (byte <span class="op">&gt;&gt;</span> i) <span class="op">&amp;</span> <span class="dv">1</span></span>
-<span id="cb37-32"><a href="#cb37-32" aria-hidden="true" tabindex="-1"></a>        signal <span class="op">=</span> bit <span class="op">==</span> <span class="dv">0</span> <span class="op">?</span> <span class="vs">&#39;SIGUSR1&#39;</span> <span class="op">:</span> <span class="vs">&#39;SIGUSR2&#39;</span></span>
-<span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Process</span><span class="at">.kill</span>(signal, pid)</span>
-<span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">sleep</span> <span class="cn">SIGNAL_DELAY</span></span>
-<span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">end</span></span>
-<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb37-37"><a href="#cb37-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-38"><a href="#cb37-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Send NULL terminator (0000 0000)</span></span>
-<span id="cb37-39"><a href="#cb37-39" aria-hidden="true" tabindex="-1"></a>    <span class="dv">8</span><span class="at">.times</span> <span class="cf">do</span></span>
-<span id="cb37-40"><a href="#cb37-40" aria-hidden="true" tabindex="-1"></a>      <span class="dt">Process</span><span class="at">.kill</span>(<span class="vs">&#39;SIGUSR1&#39;</span>, pid)</span>
-<span id="cb37-41"><a href="#cb37-41" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sleep</span> <span class="cn">SIGNAL_DELAY</span></span>
-<span id="cb37-42"><a href="#cb37-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb37-43"><a href="#cb37-43" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb37-44"><a href="#cb37-44" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><p>If you’ve been following along, this shouldn’t be hard to understand, but I’ll break down how this beautiful piece of code works:</p><ul><li><p>The codec is initialized with the bit position at zero, as well as the accumulator</p></li><li><p>A buffer is also initialized to store accumulated bits until a complete byte is formed</p></li><li><p>The <code>accumulate_bit</code> method should be familiar from our earlier implementation, but it now accepts a closure (block) that lets the caller decide what to do with each decoded byte</p></li><li><p><code>send_message</code> encodes a message into bits and sends them via UNIX signals</p></li></ul><p>Everything in action:</p><figure><img src="/uploads/3170.png" alt="image" /><figcaption aria-hidden="true">image</figcaption></figure><p><em>How cool, amazing, wonderful, impressive, astonishing is that?</em></p><h2 id="conclusion">Conclusion</h2><p>Yes, we built a message broker using nothing but <strong>UNIX signals</strong> and a bit of Ruby magic. Sure, <strong>it’s not production-ready</strong>, and you definitely shouldn’t use this in your next startup (please don’t), but that was never the point.</p><p>The real takeaway here isn’t the broker itself: it’s understanding how the fundamentals work. We explored binary operations, UNIX signals, and IPC in a hands-on way that most people never bother with.</p><p>We took something “useless” and made it work, just for fun. So next time someone asks you about message brokers, you can casually mention that you once built (or saw) one using just two signals. And if they look at you weird, well, that’s their problem. Now go build something equally useless and amazing. The world needs more hackers who experiment just for the fun of it.</p><p><em>Happy hacking!</em></p></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')};},2000)})</script></body></html> 
+You're welcome
+How are you?
+</code></pre> <blockquote><p>OMG Leandro! That's amazing!</p></blockquote><p><em>Amazing, right?</em> We just built an entire communication system between two processes using one of the most primitive methods available: <strong>UNIX signals.</strong></p><p>The sky's the limit now! Why not build a <em>full-fledged message broker</em> using this crazy technique?</p><h2>A modest message broker using UNIX signals</h2><p>We'll break down the development into three components:</p><ol><li><strong>Broker</strong>: the intermediary that routes messages</li><li><strong>Consumer</strong>: processes that receive messages</li><li><strong>Producer</strong>: processes that send messages</li></ol><p><img src="/uploads/3395.png" alt="image" /></p><ol><li>Let's start with the Broker. It should register itself with the producer, then trap incoming signals, decode them, and enqueue the messages for delivery to consumers via outgoing signals:</li></ol> <pre><code class="language-ruby">#!/usr/bin/env ruby
+
+require_relative 'signal_codec'
+require_relative 'consumer'
+
+class Broker 
+  PID = 'broker.pid'.freeze
+
+  def initialize
+    @codec = SignalCodec.new
+    @queue = Queue.new
+    @consumer_index = 0
+  end
+
+  def start 
+    register_broker
+
+    trap('SIGUSR1') { process_bit(0) }
+    trap('SIGUSR2') { process_bit(1) }
+    
+    puts "Broker PID: #{Process.pid}"
+    puts "Waiting for messages..."
+
+    distribute_messages
+
+    sleep # Keep alive
+  end 
+
+  private
+
+  def process_bit(bit)
+    @codec.accumulate_bit(bit) do |message|
+      @queue.push(message) unless message.empty?
+    end
+  end
+
+  def register_broker 
+    File.write(PID, Process.pid)
+    at_exit { File.delete(PID) if File.exist?(PID) }
+  end
+
+  def distribute_messages
+    Thread.new do
+      loop do
+        sleep 0.1
+
+        next if @queue.empty?
+
+        consumers = File.exist?(Consumer::FILE) ? File.readlines(Consumer::FILE).map(&amp;:to_i) : []
+        next if consumers.empty?
+
+        message = @queue.pop(true) rescue next
+
+        consumer_pid = consumers[@consumer_index % consumers.size]
+        @consumer_index += 1
+
+        puts "[SEND] #{message} → Consumer #{consumer_pid}"
+
+        @codec.send_message(message, consumer_pid)
+      end
+    end
+  end
+end
+
+if __FILE__ == $0 
+  broker = Broker.new
+  broker.start
+end
+</code></pre> <ul><li><p>The broker registers itself</p></li><li><p>Traps incoming signals <code>USR1</code> (bit 0) and <code>USR2</code> (bit 1)</p></li><li><p>Enqueues the messages</p></li><li><p>Send messages to consumers using outgoing signals (<code>USR1</code> and <code>USR2</code> too)</p></li></ul><p><em>Note that we're using a module called <code>SignalCodec</code> which will be explained soon. Basically this module contains all core components to encode/decode signals and perform bitwise operations.</em></p><ol start="2"><li>Now the <code>Consumer</code> implementation:</li></ol> <pre><code class="language-ruby">#!/usr/bin/env ruby
+
+require_relative 'signal_codec'
+
+class Consumer
+  FILE = 'consumers.txt'.freeze
+
+  def initialize
+    @codec = SignalCodec.new
+  end
+
+  def start
+    register_consumer
+
+    trap('SIGUSR1') { process_bit(0) }
+    trap('SIGUSR2') { process_bit(1) }
+
+    puts "Consumer PID: #{Process.pid}"
+    puts "Waiting for messages..."
+
+    sleep # Keep alive
+  end
+
+  private
+
+  def process_bit(bit)
+    @codec.accumulate_bit(bit) do |message|
+      puts "[RECEIVE] #{message}"
+    end
+  end
+
+  def register_consumer
+    File.open(FILE, 'a') { |f| f.puts Process.pid }
+    at_exit { deregister_consumer }
+  end
+
+  def deregister_consumer
+    if File.exist?(FILE)
+      consumers = File.readlines(FILE).map(&amp;:strip).reject { |pid| pid.to_i == Process.pid }
+      File.write(FILE, consumers.join("\n"))
+    end
+  end
+end
+
+if __FILE__ == $0
+  consumer = Consumer.new
+  consumer.start
+end
+</code></pre> <ul><li><p>The consumer starts and registers itself with the broker</p></li><li><p>Consumer then traps incoming signals (bit 0 and bit 1)</p></li><li><p>Decodes and prints messages</p></li></ul><ol start="3"><li>Last but not least, the <code>Producer</code> implementation, which is pretty straightforward:</li></ol> <pre><code class="language-ruby">#!/usr/bin/env ruby
+
+require_relative 'signal_codec'
+require_relative 'broker'
+
+unless File.exist?(Broker::PID)
+  abort "Error: Broker not running (#{Broker::PID} not found)"
+end
+
+broker_pid = File.read(Broker::PID).strip.to_i
+message = ARGV.join(' ')
+
+if message.empty?
+  puts "Usage: ruby producer.rb &lt;message&gt;"
+  exit 1
+end
+
+codec = SignalCodec.new
+
+puts "Sending: #{message}"
+codec.send_message(message, broker_pid)
+puts "Message sent to broker (PID: #{broker_pid})"
+</code></pre> <ul><li><p>Producer receives a ASCII message from the <em>STDIN</em></p></li><li><p>Encode and sends the message to the broker via outgoing signals</p></li></ul><p>So far, this architecture should look familiar. Many broker implementations follow these basic foundations.</p><blockquote><p>Of course, production-ready implementations are far more robust than this one. Here, we're just poking around with hacking and experimentation</p></blockquote><p>The coolest part is the <code>SignalCodec</code> though:</p> <pre><code class="language-ruby">class SignalCodec 
+  SIGNAL_DELAY = 0.001 # Delay between signals to allow processing
+
+  def initialize
+    @accumulator = 0
+    @position = 0
+    @buffer = []
+  end
+
+  def accumulate_bit(bit)
+    @accumulator += (bit &lt;&lt; @position)
+    @position += 1
+
+    if @position == 8 # Byte is complete
+      if @accumulator.zero? # Message complete - NULL terminator
+        decoded = @buffer.pack("C*").force_encoding('UTF-8')
+        yield(decoded) if block_given?
+        @buffer.clear
+      else 
+        @buffer &lt;&lt; @accumulator
+      end
+
+      @position = 0
+      @accumulator = 0
+    end
+  end
+
+  def send_message(message, pid)
+    message.each_byte do |byte|
+      8.times do |i|
+        bit = (byte &gt;&gt; i) &amp; 1
+        signal = bit == 0 ? 'SIGUSR1' : 'SIGUSR2'
+        Process.kill(signal, pid)
+        sleep SIGNAL_DELAY
+      end
+    end
+
+    # Send NULL terminator (0000 0000)
+    8.times do
+      Process.kill('SIGUSR1', pid)
+      sleep SIGNAL_DELAY
+    end
+  end
+end
+</code></pre> <p>If you've been following along, this shouldn't be hard to understand, but I'll break down how this beautiful piece of code works:</p><ul><li><p>The codec is initialized with the bit position at zero, as well as the accumulator</p></li><li><p>A buffer is also initialized to store accumulated bits until a complete byte is formed</p></li><li><p>The <code>accumulate_bit</code> method should be familiar from our earlier implementation, but it now accepts a closure (block) that lets the caller decide what to do with each decoded byte</p></li><li><p><code>send_message</code> encodes a message into bits and sends them via UNIX signals</p></li></ul><p>Everything in action:</p><p><img src="/uploads/3170.png" alt="image" /></p><p><em>How cool, amazing, wonderful, impressive, astonishing is that?</em></p><h2>Conclusion</h2><p>Yes, we built a message broker using nothing but <strong>UNIX signals</strong> and a bit of Ruby magic. Sure, <strong>it's not production-ready</strong>, and you definitely shouldn't use this in your next startup (please don't), but that was never the point.</p><p>The real takeaway here isn't the broker itself: it's understanding how the fundamentals work. We explored binary operations, UNIX signals, and IPC in a hands-on way that most people never bother with.</p><p>We took something "useless" and made it work, just for fun. So next time someone asks you about message brokers, you can casually mention that you once built (or saw) one using just two signals. And if they look at you weird, well, that's their problem. Now go build something equally useless and amazing. The world needs more hackers who experiment just for the fun of it.</p><p><em>Happy hacking!</em></p></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')}},2000)})</script></body></html> 
