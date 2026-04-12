@@ -101,7 +101,3 @@ map_numbers([2, 4, 9], method(:square_of).curry[3])
 We learned that procs can be passed as arguments to another methods and, optionally, can use curried arguments, making our code appear more _declarative_.
 
 [In the next and last post of this series](https://leandronsp.com/articles/ruby-blocks-made-easy-part-iii-grand-finale-blocks-and-syntactic-sugar-4d48), we will unblock more fundamentals and introduce _blocks_.
- 
-
-
-
