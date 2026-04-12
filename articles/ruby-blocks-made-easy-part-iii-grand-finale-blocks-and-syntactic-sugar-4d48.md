@@ -186,15 +186,3 @@ In this series of blogposts, we tried to cover the fundamentals behind Ruby bloc
 * bonus point to syntactic sugar and the Ruby standard library
 
 I hope you could enjoy and understand a bit more on how Ruby blocks work and how to make a more effective use of them on a daily basis!
-
-
-
-
-
-
-
-
-
-
-
-
