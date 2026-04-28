@@ -1,0 +1,302 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Palíndromo utilizando dois UNIX signals, uma fila e uma pilha - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html"><meta property="og:type" content="article"><meta property="og:title" content="Palíndromo utilizando dois UNIX signals, uma fila e uma pilha"><meta property="og:description" content="Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente"><meta property="og:url" content="https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2026-04-27"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Palíndromo utilizando dois UNIX signals, uma fila e uma pilha"><meta name="twitter:description" content="Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#706860;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#9a8f85;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Palíndromo utilizando dois UNIX signals, uma fila e uma pilha",
+    "description": "Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente",
+    "datePublished": "2026-04-27",
+    "author": { "@type": "Person", "name": "Leandro Proença" },
+    "publisher": { "@type": "Person", "name": "Leandro Proença" },
+    "url": "https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html"
+  }
+  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>Palíndromo utilizando dois UNIX signals, uma fila e uma pilha</h1><time datetime="2026-04-27">2026-04-27</time></div><p>Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente trend do twitter no último fim de semana que, convenhamos, ultrapassou alguns limites:</p><p><img src="/images/untitled-2-screenshot-2026-04-27-at-17-48-31.png" alt="Print de trending topics do Twitter mostrando &#39;Palíndromo&#39; no topo da Bolha Dev" /></p><p>O assunto subiu para o trending topics global e os gringos ficavam se perguntando:</p><blockquote><p>Why is palindrome such a hot topic in Brazil now?</p></blockquote><p><em>Mal sabem eles que aqui no Brasil TUDO vira meme, até mesmo o "67" deles. Melhoramos o "67" e escalamos para um nível diferenciado. Google pesquisar.</em></p><p>Não vou entrar em detalhes, mas basicamente a "treta" foi criada porque alguém mencionou que não conseguia contratar desenvolvedores pois nenhum candidato passava no teste do palíndromo. O negócio escalou. Teve implementação de palíndromo de todos os tipos e também teve muito meme, que foi a melhor parte pra mim.</p><p>Mas vamos lá, quem acompanha meu blog sabe que não escrevo por escrever. Eu gosto de explorar um assunto técnico e ir fundo (lá ele), captando e compartilhando conhecimento no meio do caminho. É pra isso que estou aqui.</p><hr /><h2>Agenda</h2><ul><li><p><a href="#first-things-first">First things first</a></p></li><li><p><a href="#palindromaniacs">Palindromaniacs</a></p><ul><li><a href="#mas-a-gente-%C3%A9-diferente-unix-signals--queue--stack">Mas a gente é diferente: UNIX signals + queue + stack</a></li></ul></li><li><p><a href="#unix-signals-como-forma-de-comunica%C3%A7%C3%A3o">UNIX signals como forma de comunicação</a></p><ul><li><a href="#enviando-bin%C3%A1rio-com-dois-unix-signals">Enviando binário com dois UNIX signals</a></li><li><a href="#montando-bytes-a-partir-dos-bits">Montando bytes a partir dos bits</a></li><li><a href="#enviando-strings-inteiras">Enviando strings inteiras</a></li></ul></li><li><p><a href="#marcando-o-fim-da-mensagem">Marcando o fim da mensagem</a></p></li><li><p><a href="#fila-e-pilha-o-teorema-central">Fila e pilha: o teorema central</a></p><ul><li><a href="#conectando-tudo">Conectando tudo</a></li></ul></li><li><p><a href="#bonus-points-handshake-ftw">Bonus points: Handshake FTW</a></p></li><li><p><a href="#conclus%C3%A3o-gloriosa">Conclusão gloriosa</a></p></li></ul><hr /><h2>First things first</h2><p>E a pedido de muitos, incluindo o brabíssimo Navarro, vamos fazer uma implementação do <em>palíndromo</em> em Bash:</p><p><img src="/images/untitled-2-screenshot-2026-04-27-at-17-55-06-1.png" alt="Tweet do Rodrigo Navarro (@rdrnavarro) cobrando a versão canônica do palíndromo em Bash" /></p><blockquote><p>Por que Bash, Leandro?</p></blockquote><p>Porque entre todos os que submeteram soluções para a <a href="https://github.com/zanfranceschi/rinha-de-backend-2023-q3">1ª Rinha de Backend</a> e as subsequentes, eu fui o <a href="https://github.com/leandronsp/rinha-backend-bash">primeiro da linhagem</a> com uma submissão funcional porém nada performática.</p><p>O que era pra ser um meme no Twitter, acabou virando o apelido "carinha do Bash". É sobre isso.</p><hr /><h2>Palindromaniacs</h2><p>Uma das implementações mais comuns para <em>palindromania</em> chama-se <strong>two pointers</strong>, onde definimos dois ponteiros na string e vamos comparando o primeiro com o último, o segundo com o penúltimo e assim por diante, mexendo nos ponteiros até chegar na <em>metade da string</em>. Se todas as comparações derem certo, a palavra é palíndromo.</p><p>Em Bash dá pra implementar isso de forma mais legível usando <em>substrings</em>, que é prima do two pointers:</p> <pre><code class="language-sh">is_palindrome() {
+    local input="$1"
+    local length=${#input}
+
+    for ((i=0; i&lt;length/2; i++)) do
+        local leftmost=${input:$i:1}
+        local rightmost=${input:$((length-1-i)):1}
+
+        [ "$leftmost" != "$rightmost" ] &amp;&amp; return 1 # Error status code, IS NOT a palindrome
+    done
+
+    return 0 # Success status code, IS a palindrome
+}
+</code></pre> <p>Sem entrar muito em detalhes, vou explicar pois Bash:</p><ul><li><p><code>local input="$1"</code>: joga o primeiro argumento da linha de comando na variável input</p></li><li><p><code>local length=${#input}</code>: pega o tamanho do input</p></li><li><p><code>for ((i=0; i&lt;length/2; i++))</code>: itera sobre cada caractere da string até a metade</p></li><li><p><code>local leftmost=${input:$i:1}</code>: pega 1 caractere a partir da posição <code>$i</code>, ou seja, o mais a esquerda possível</p></li><li><p><code>local rightmost=${input:$((length-1-i)):1}</code>: pega 1 caractere a partir da posição <code>length-1-i</code>, que vai andando do último pra dentro conforme <code>i</code> cresce, ou seja, o mais a direita possível</p></li><li><p><code>[ "$leftmost" != "$rightmost" ] &amp;&amp; return 1</code>: compara os dois, se forem diferentes, a palavra <strong>não é um</strong> palíndromo</p></li></ul><p>Caso não encontre nenhuma divergência nas comparações, então a palavra <strong>é um</strong> palíndromo, portanto <code>return 0</code> com sucesso.</p><p>Outras implementações que podemos encontrar:</p><ul><li><p>inverte a string e compara: essa é mais naive, geralmente <code>one-liner</code> e não requer muitos neurônios</p></li><li><p>recursão: mais idiomática em linguagens funcionais</p></li><li><p>stack: empilha a primeira metade, depois lê a segunda metade desempilhando e comparando a cada caractere</p></li><li><p><em>e mais</em>: deque (double-ended queue), programação dinâmica, etc tal e coisa</p></li></ul><h3>Mas a gente é diferente: UNIX signals + queue + stack</h3><p>Implementar palíndromo no modo tradicional faria Bash e este post serem mais do mesmo. Não tem graça, Bash precisa ser requintado. Então resolvi <del>ser o diferentão</del> inovar e resolver este problema utilizando apenas <strong>dois sinais UNIX, uma fila e uma pilha</strong>. A ideia, em três passos:</p><ul><li><p>um <code>sender</code> que manda a string bit a bit via signals</p></li><li><p>um <code>receiver</code> que monta cada caractere e empilha em duas estruturas (FIFO e LIFO)</p></li><li><p>no final, drena as duas estruturas. Se todo <code>pop</code> da pilha bater com todo <code>dequeue</code> da fila, é <strong>palíndromo</strong>.</p></li></ul><p><strong>FIFO</strong> significa <em>first-in, first-out</em>. É a nossa fila. E <strong>LIFO</strong> significa <em>last-in, first-out</em>, neste caso nossa pilha. Tudo nosso.</p><p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-27-at-23-02-12.png" alt="Meme do Bugs Bunny soviético no espírito &#39;camarada, é tudo nosso&#39;" /></p><p>Basicamente, estamos explorando duas estruturas de dados primordiais da computação para verificar se uma palavra é palíndromo. E não só, estamos enviando a string <a href="https://leandronsp.com/articles/entendendo-unix-pipes-3k56">utilizando IPC</a> de uma forma bastante primitiva, com o <em>envio de sinais</em>.</p><p>Se quiser saber mais detalhes sobre UNIX signals e como os utilizei para construir um pequeno <em>broker de mensageria</em>, veja meu artigo <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">You don't need Kafka: building a message queue with only two UNIX signals</a>. Lá eu explico o necessário sobre envio de sinais e também como implementei a modulação/demodulação de sinais para bits.</p><hr /><h2>UNIX signals como forma de comunicação</h2><p>O intuito deste artigo não é aprofundar muito nos sinais UNIX, uma vez que já abordei com profundidade no polêmico artigo anterior. Mas a seguir temos um exemplo bastante simples para estarmos na mesma página:</p> <pre><code class="language-sh">#!/usr/bin/env bash
+
+trap 'echo "Received signal SIGUSR1"' SIGUSR1
+
+echo "PID: $$"
+echo "Rodar em outra sessão shell: kill -SIGUSR1 $$"
+
+while true; do
+    sleep 0.5 || true
+done
+</code></pre> <pre><code class="language-sh">$ bash receiver.sh
+PID: 54112
+Rodar em outra sessão shell: kill -SIGUSR1 54112
+</code></pre> <p>Em outra sessão:</p> <pre><code class="language-sh">$ kill -SIGUSR1 54112
+</code></pre> <p>Com isto, <em>receiver</em> imprime <code>Received signal SIGUSR1</code> pra cada vez que enviarmos o sinal!</p><p>O que é um sinal, afinal? Pra quem nunca ouviu falar, signals são a forma mais primitiva de IPC no UNIX. Você pode mandar <code>kill -SIGTERM</code> num processo pra encerrá-lo, <code>kill -SIGINT</code> pro mesmo efeito de <code>Ctrl+C</code>, e por aí vai. A graça é que o processo que recebe pode <em>interceptar</em> esses signals e <em>fazer o que quiser</em>. Esta é a famosa técnica de <strong>signal trap</strong>.</p><blockquote><p>Nossa, Leandro, mas o <code>kill</code> não "mata" o processo?</p></blockquote><p>Não, ele serve para envio de sinais, incluindo os clássicos <code>SIGTERM</code> e <code>SIGKILL</code>. Reforço: veja <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">meu artigo de UNIX signals</a> para entender as nuances.</p><h3>Enviando binário com dois UNIX signals</h3><p>Quando falamos de IPC primitivo tal como UNIX signals, não conseguimos enviar uma "mensagem" no formato que estamos acostumados (string). Nem bytes. Receber <strong>um</strong> signal é como receber um boolean: ligou ou não ligou. É a representação de apenas <em>dois estados possíveis</em>.</p><p>O que UNIX nos entrega são dois sinais <em>user-defined</em>, <strong>SIGUSR1</strong> e <strong>SIGUSR2</strong>, livres para usarmos como quisermos. Não conseguimos enviar bytes, mas temos a primitiva necessária para representar um byte: <em>bits</em>.</p><ul><li><p><code>SIGUSR1</code> = <strong>bit 0</strong></p></li><li><p><code>SIGUSR2</code> = <strong>bit 1</strong></p></li></ul><p>Pronto, acabamos de inventar uma linguagem binária. O <code>receiver</code> agora fica assim:</p> <pre><code class="language-sh">  #!/usr/bin/env bash
+
+  trap 'echo -n "0"' SIGUSR1
+  trap 'echo -n "1"' SIGUSR2
+
+  echo "PID: $$"
+  echo "Rodar: kill -SIGUSR1 $$ (bit 0) ou kill -SIGUSR2 $$ (bit 1)"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre> <pre><code class="language-sh">$ bash ./receiver.sh
+PID: 73251
+Rodar: kill -SIGUSR1 73251 (bit 0) ou kill -SIGUSR2 73251 (bit 1)
+
+# Em outra sessão:
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+</code></pre> <p>O que imprime <code>0001 1100</code>, seja lá o que isso significa :)</p><p>Agora a gente fala binário. Cada <code>kill</code> é um bit chegando no fio. Mas só bit solto não vira muita coisa. <strong>8 bits formam um byte</strong>, e cada byte representa um caractere <a href="https://www.matematica.pt/util/resumos/tabela-ascii.php">ASCII</a>. Por exemplo, a letra <code>A</code> tem código ASCII <strong>65</strong>, que em binário é <code>0100 0001</code>.</p><p>Se conseguirmos receber esses 8 bits e transformar isso em caractere, conseguimos transmitir <em>uma string inteira</em>, um caractere por vez.</p><h3>Montando bytes a partir dos bits</h3><p>Já sabemos que <strong>8 bits formam 1 byte</strong>. E que cada byte representa 1 caractere ASCII. Pra transformar a chuva de SIGUSR1 e SIGUSR2 em texto, o <code>receiver</code> precisa <strong>acumular</strong> os bits e, a cada 8, converter em caractere.</p><p>Vamos usar uma convenção onde o primeiro bit que chega é o de menor peso (bit 0), o segundo é o bit 1, o terceiro é o bit 2, e assim por diante até o bit 7. Ou seja, vamos utilizar LSB, ou <em>least significant bit</em>, que traduzido é "bit menos significativo".</p> <pre><code class="language-sh">  #!/usr/bin/env bash
+
+  POSITION=0
+  ACCUMULATOR=0
+
+  decode_bit() {
+      local bit=$1
+      ACCUMULATOR=$(( ACCUMULATOR + (bit &lt;&lt; POSITION) ))
+      POSITION=$(( POSITION + 1 ))
+
+      if [ "$POSITION" -eq 8 ]; then
+          local char
+          char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+          echo "byte: $ACCUMULATOR | char: $char"
+          POSITION=0
+          ACCUMULATOR=0
+      fi
+  }
+
+  trap 'decode_bit 0' SIGUSR1
+  trap 'decode_bit 1' SIGUSR2
+
+  echo "PID: $$"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre> <p>Explicando as partes que mais importam:</p><ul><li><p><code>(bit &lt;&lt; POSITION)</code>: <em>shift</em> à esquerda. O bit é empurrado pra posição certa dentro do byte. Se POSITION é 6 e o bit é 1, isso vira <code>64</code> (porque <code>1 &lt;&lt; 6 = 64</code>). Se o bit é 0, fica sempre 0.</p></li><li><p>quando POSITION chega em 8, fechamos o byte. Convertemos pro caractere com <code>printf</code>, imprimimos e zeramos tudo pro próximo byte</p></li></ul><p>Vamos ver isto funcionando na prática: A letra <code>A</code> tem código ASCII 65 como já vimos, que em binário é <code>0100 0001</code>. Mandando LSB primeiro, a sequência de bits vira <code>1 0 0 0 0 0 1 0</code>:</p> <pre><code class="language-sh">$ bash receiver.sh
+PID: 80381
+
+# Em outra sessão:
+$ kill -SIGUSR2 80381   # 1
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR2 80381   # 1
+$ kill -SIGUSR1 80381   # 0
+</code></pre> <p>O receiver imprime: <code>byte: 65 | char: A</code>. <em>What a wonderful day, uh?</em></p><p>Signals viraram bits. Bits viraram byte. Byte virou caractere. Agora dá pra mandar palavras inteiras, onde cada caractere é <strong>apenas uma sequência de 8 bits</strong>, e o <code>receiver</code> decodifica um por um conforme chegam.</p><blockquote><p>Manda mais bytes para ver outras letras: B = 66 = <code>0100 0010</code> e assim por diante. Não esquecendo de inverter a ordem dos bits, do LSB pro MSB.</p></blockquote><p><em>Nota: poderíamos utilizar o formato MSB (most-significant bit), para não precisarmos inverter os bits no envio, mas pra deixar o código do <code>receiver</code> mais simples e seguindo a maioria das convenções, decidi utilizar LSB mesmo</em></p><h3>Enviando strings inteiras</h3><p>No momento só conseguimos mandar bits "na mão", utilizando <code>kill -SIGUSR1</code> ou <code>kill -SIGUSR2</code>, um por um. Porém isso não escala. Precisamos do outro lado da história, um <code>sender</code> que recebe uma string e cuida de mandar os bits certos.</p><p>A lógica é o "espelho" do <code>receiver</code> basicamente:</p><ul><li><p>pra cada caractere da string, pega o código ASCII</p></li><li><p>codifica para bits (8 bits), seguindo convenção LSB</p></li><li><p>manda cada bit como SIGUSR1 (0) ou SIGUSR2 (1)</p></li></ul><p><code>sender.sh</code></p> <pre><code class="language-sh">  #!/usr/bin/env bash
+
+  # usage: ./sender.sh &lt;pid&gt; &lt;string&gt;
+  PID=$1
+  INPUT=$2
+
+  send_bit() {
+      if [ "$1" -eq 0 ]; then
+          kill -SIGUSR1 "$PID"
+      else
+          kill -SIGUSR2 "$PID"
+      fi
+      sleep 0.5
+  }
+
+  send_byte() {
+      local byte=$1
+      local k
+      for ((k=0; k&lt;8; k++)); do
+          send_bit $(( (byte &gt;&gt; k) &amp; 1 ))
+      done
+  }
+
+  for ((i=0; i&lt;${#INPUT}; i++)); do
+      char="${INPUT:$i:1}"
+      code=$(printf '%d' "'$char")
+      send_byte "$code"
+  done
+</code></pre> <p>O core está em <code>send_byte</code>:</p><ul><li><p><code>(byte &gt;&gt; k) &amp; 1</code>: pega o k-ésimo bit do byte. Faz shift à direita por <code>k</code> posições e aplica <code>&amp; 1</code> (máscara) para isolar o bit. Em <code>k=0</code>, pega o LSB, em <code>k=7</code>, pega o MSB.</p></li><li><p><code>sleep 0.5</code> entre bits: signals podem ser perdidos se chegarem rápido demais (o sistema operacional colapsa sinais idênticos pendentes, como forma de "debounce"). Esse delay dá tempo do receiver processar cada um antes do próximo chegar</p></li></ul><p>Conseguimos mandar uma string inteira via signals. Cada caractere viajou como 8 bits via IPC, foi remontado byte a byte, e o receiver imprimiu conforme decodificava. Vamos provar isso na próxima seção, onde também resolvemos o fim de mensagem.</p><blockquote><p>Nossa, isso é mágica?</p></blockquote><p>Não, é apenas <strong>trap + bit shift + acumulador</strong>.</p><p>Entretanto, temos um problema. O receiver não sabe quando a mensagem <em>acabou</em>. Ele fica esperando o próximo bit pra sempre, sem poder fazer nada com a string completa.</p><h2>Marcando o fim da mensagem</h2><p>O receiver fica eternamente esperando bits. A gente precisa avisar quando a string acabou. Uma convenção clássica em comunicação binária é o famoso <strong>byte zero</strong> (<code>0x00</code>, conhecido como NUL). Isto marca o fim da mensagem. Strings em C usam essa ideia há décadas, então vamos roubar.</p><p>No <code>sender</code>, basta mandar 8 bits "zeros" logo depois do último caractere:</p> <pre><code class="language-sh">  # ...todo o loop de envio dos caracteres...
+
+  # fim da mensagem
+  send_byte 0
+</code></pre> <p>E no <code>receiver</code>, quando o byte completo for <code>0</code>, em vez de decodificar como caractere, marcamos o fim:</p> <pre><code class="language-sh">  if [ "$POSITION" -eq 8 ]; then
+      if [ "$ACCUMULATOR" -eq 0 ]; then
+          echo ""
+          echo "[end of message]"
+      else
+          local char
+          char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+          echo -n "$char"
+      fi
+      POSITION=0
+      ACCUMULATOR=0
+  fi
+</code></pre> <p>Vamos rodar tudo:</p> <pre><code class="language-sh"># Receiver
+$ bash receiver.sh
+PID: 15300
+
+# Sender
+$ bash sender.sh 15300 ana
+
+# Receiver
+ana
+[end of message]
+</code></pre> <p><em>Cool, uh?</em> Agora temos a base completa de transporte. Bits viram bytes, que viram caracteres, e o NUL fecha a mensagem. Tudo isso com apenas <strong>dois sinais e um trap</strong>.</p><p>Contudo, falta a peça principal do post: <em>a lógica do palíndromo</em>, implementada via <strong>fila e pilha</strong> conforme prometemos.</p><hr /><h2>Fila e pilha: o teorema central</h2><p>Vamos esquecer signals por um momento. Esquece também <strong>substrings, índices, two pointers</strong>. Imagina que os caracteres da string chegam um a um, e que precisamos decidir se formam um palíndromo, <em>sem precisar remontar a string em memória</em>. É aqui que está o sumo deste artigo! Os signals foram apenas uma "armadilha" que montei pra você, caro leitor.</p><blockquote><p>Tô brincando, eu quis fazer um trocadilho com "trap". Espero que a piada tenha servido de alguma coisa</p></blockquote><p>Como todo engenheiro de software, temos que fazer a pergunta certa: <strong>que estruturas de dados, sozinhas, decidem palíndromo por construção?</strong> Resposta: uma fila (FIFO) e uma pilha (LIFO).</p><blockquote><p>Uai, por quê?</p></blockquote><p>Pensa no que cada uma faz:</p><ul><li><p><strong>FIFO</strong>: preserva a ordem. Enfileirei <code>R, A, D, A, R</code>, desenfileiro <code>R, A, D, A, R</code>. Mesma ordem.</p></li><li><p><strong>LIFO</strong>: inverte a ordem. Empilhei <code>R, A, D, A, R</code>, desempilho <code>R, A, D, A, R</code>. Ordem reversa.</p></li></ul><p>E palíndromo é, por definição, uma string que lida na ordem normal <strong>e</strong> na ordem reversa dá a mesma sequência. Que é exatamente o que acontece se a saída da fila bater com a saída da pilha.</p><p><em>Supa hot fireeee</em></p><p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-28-at-01-22-39.png" alt="Meme do Supa Hot Fire reagindo com cara de incrédulo, marcando o clímax da explicação" /></p><p>Em outras palavras, uma string é palíndromo <strong>se e somente se</strong>, ao empilhar e enfileirar cada caractere em paralelo, todo <code>pop</code> da pilha for igual ao <code>dequeue</code> da fila. Sem comparação posicional, nem <code>length / 2</code>, nem indexação adicional. As duas estruturas <em>decidem por construção</em>. Puro suco da computação ao nosso favor.</p><p><code>palindromer.sh</code></p> <pre><code class="language-sh">  #!/usr/bin/env bash
+
+  # usage: ./palindromer.sh &lt;string&gt;
+  INPUT=$1
+
+  stack=()
+  queue=()
+
+  # push and enqueue each char
+  for ((i=0; i&lt;${#INPUT}; i++)); do
+      char="${INPUT:$i:1}"
+      stack+=("$char")
+      queue+=("$char")
+  done
+
+  # flush both and compare
+  while [ "${#stack[@]}" -gt 0 ]; do
+      if [ "${stack[-1]}" != "${queue[0]}" ]; then
+          echo "false"
+          exit 0
+      fi
+      unset 'stack[-1]'
+      queue=("${queue[@]:1}")
+  done
+
+  echo "true"
+</code></pre> <ul><li><p><code>stack+=("$char")</code>: append em array é o <code>push</code> da pilha</p></li><li><p><code>queue+=("$char")</code>: o mesmo append serve como <code>enqueue</code> da fila</p></li><li><p><code>${stack[-1]}</code>: pega o <strong>topo</strong> da pilha (último elemento, <em>last-in</em>)</p></li><li><p><code>${queue[0]}</code>: pega a <strong>frente</strong> da fila (primeiro elemento, <em>first-in</em>)</p></li><li><p><code>unset 'stack[-1]'</code>: remove o topo (<code>pop</code>)</p></li><li><p><code>queue=("${queue[@]:1}")</code>: reatribui a fila a partir do segundo elemento (<code>dequeue</code>)</p></li></ul><p>Rodando tudo:</p> <pre><code class="language-sh">$ bash palindromer.sh ANA
+true
+
+$ bash palindromer.sh ABC
+false
+
+$ bash palindromer.sh RADAR
+true
+</code></pre> <p>Temos então palíndromo com uma fila, uma pilha, e a propriedade matemática que cada uma representa. Agora nos resta plugar tudo isso no <code>receiver</code>. Cada caractere que chegar via signals vai direto pras duas estruturas, e quando o NUL chegar, drenamos e respondemos.</p><h3>Conectando tudo</h3><p>A função do <code>palindromer.sh</code> recebia uma string como argumento. Aqui, a string não existe inteira em lugar nenhum. Os caracteres chegam, um a cada 8 bits, conforme o sender vai mandando. Mas a lógica é exatamente a mesma.</p><p>Em vez de iterar sobre uma string já pronta, a gente empilha e enfileira <strong>conforme cada caractere chega</strong>. Incrível, não? Desta forma o <code>receiver</code> muda um pouco de lógica:</p><ul><li><p>cada vez que um byte completo é decodificado e <strong>não é</strong> o NUL, a gente empilha e enfileira o caractere</p></li><li><p>quando o NUL chega, fazemos a drenagem das duas estruturas e respondemos com <code>true</code> ou <code>false</code></p></li></ul> <pre><code class="language-sh">  #!/usr/bin/env bash
+
+  POSITION=0
+  ACCUMULATOR=0
+  stack=()
+  queue=()
+
+  drain_and_decide() {
+      while [ "${#stack[@]}" -gt 0 ]; do
+          if [ "${stack[-1]}" != "${queue[0]}" ]; then
+              echo "false"
+              stack=()
+              queue=()
+              return
+          fi
+          unset 'stack[-1]'
+          queue=("${queue[@]:1}")
+      done
+      echo "true"
+  }
+
+  decode_bit() {
+      local bit=$1
+      ACCUMULATOR=$(( ACCUMULATOR + (bit &lt;&lt; POSITION) ))
+      POSITION=$(( POSITION + 1 ))
+
+      if [ "$POSITION" -eq 8 ]; then
+          if [ "$ACCUMULATOR" -eq 0 ]; then
+              drain_and_decide
+          else
+              local char
+              char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+              stack+=("$char")
+              queue+=("$char")
+          fi
+          POSITION=0
+          ACCUMULATOR=0
+      fi
+  }
+
+  trap 'decode_bit 0' SIGUSR1
+  trap 'decode_bit 1' SIGUSR2
+
+  echo "PID: $$"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre> <p>Diferença pro receiver da versão anterior:</p><ul><li><p>duas variáveis globais novas: <code>stack=()</code> e <code>queue=()</code></p></li><li><p>quando o byte completa, em vez de só imprimir o caractere, a gente manda pra stack e queue</p></li><li><p>quando o byte é NUL, em vez de só sinalizar o fim, disparamos o <code>drain_and_decide</code> que devolve o veredito</p></li></ul><p>Momento da verdade:</p> <pre><code class="language-sh"># Receiver
+$ bash receiver.sh
+PID: 33485
+
+# Sender
+$ bash sender.sh 33485 ANA
+$ bash sender.sh 33485 ABC
+$ bash sender.sh 33485 RADAR
+$ bash sender.sh 33485 SOCORRAMMESUBINOONIBUSEMMARROCOS
+
+# Receiver
+true
+false
+true
+true
+</code></pre> <p><em>OMFG!</em> Cada string é codificada via signals, e depois a lógica do palíndromo é feita <strong>sem remontar</strong> a string novamente!</p><hr /><h2>Bonus points: Handshake FTW</h2><p>Até aqui o receiver imprime <code>true/false</code> no terminal dele. O sender não fica sabendo de nada. Vamos fechar este ciclo com o receiver devolvendo um signal para o sender imprimir localmente.</p><p>Convenção: <strong>SIGUSR2 = palíndromo (true), SIGUSR1 = não é palíndromo (false)</strong>.</p><p>O receiver precisa saber quem é o sender. Sender escreve o próprio PID em <code>/tmp/sender.pid</code> antes de mandar a string, e configura um trap para receber o veredito:</p> <pre><code class="language-sh"># sender.sh
+echo $$ &gt; /tmp/sender.pid
+
+RESPONSE=""
+trap 'RESPONSE=0' SIGUSR1
+trap 'RESPONSE=1' SIGUSR2
+
+# ... send the string ...
+
+# after EOF, RESPONSE was set from verdict
+[ "$RESPONSE" = "1" ] &amp;&amp; echo "true" || echo "false"
+</code></pre> <p>Do lado do receiver, o <code>drain_and_decide</code> agora termina enviando o signal de volta:</p> <pre><code class="language-sh">  verdict() {
+      local result=$1
+      local pid
+      pid=$(cat /tmp/sender.pid 2&gt;/dev/null)
+
+      if [ "$result" = "true" ]; then
+          kill -SIGUSR2 "$pid" 2&gt;/dev/null
+      else
+          kill -SIGUSR1 "$pid" 2&gt;/dev/null
+      fi
+  }
+</code></pre> <p>Com isso, sender chama, recebe o veredito via signal, e imprime. Ciclo fechado.</p><blockquote><p>Mas isso tá lento demais, o <code>sleep 0.5</code> por bit dá uns 16 segundos só pra ANA. No caso do "SOCORRAMMESUBINOONIBUSEMMARROCOS", demorou bons minutos...inaceitável</p></blockquote><p>Uma forma de contornar o delay é através de um mecanismo de <strong>handshake</strong>. O receiver responde com um <strong>ACK</strong> depois de cada bit, e o sender só manda o próximo quando recebeu. Como o sender só avança após o ACK, nunca há dois sinais enfileirados, portanto a coalescência é eliminada por construção. Sem fila de sinais pendentes, e sem <code>sleep</code> arbitrário.</p> <pre><code class="language-sh"># receiver.sh
+
+  ack() {
+      local pid
+      pid=$(cat /tmp/sender.pid 2&gt;/dev/null)
+      [ -n "$pid" ] &amp;&amp; kill -SIGUSR1 "$pid" 2&gt;/dev/null
+  }
+
+</code></pre> <p>E o sender:</p> <pre><code class="language-sh">  # sender.sh — espera o ACK no lugar do sleep
+  send_bit() {
+      RESPONSE=""
+      if [ "$1" -eq 0 ]; then
+          kill -SIGUSR1 "$RECEIVER_PID"
+      else
+          kill -SIGUSR2 "$RECEIVER_PID"
+      fi
+      while [ -z "$RESPONSE" ]; do
+          sleep 0.001 || true
+      done
+  }
+</code></pre> <p>O <strong>detalhe que muda tudo</strong>: o loop ocioso do receiver também precisa ser tight. Trocamos <code>sleep 0.5</code> por <code>sleep 0.001</code> no <code>while true</code> principal. Sem isso, cada round-trip pagava parte do meio segundo.</p> <pre><code class="language-sh">  # receiver.sh
+  while true; do
+      sleep 0.001 || true
+  done
+</code></pre> <p>Rodando agora:</p> <pre><code class="language-sh">$ time bash sender.sh 19204 ANA
+true
+real    0m0.164s
+</code></pre> <p>De <em>16 segundos para 160 milissegundos</em>. <strong>100x mais rápido!!!!11</strong>. How amazing is that?</p><hr /><h2>Conclusão gloriosa</h2><p>A treta do palíndromo virou desculpa pra brincar com duas coisas que eu gosto: <strong>UNIX signals</strong> e <strong>estruturas de dados clássicas</strong>. O resultado é isso que acabamos de ver, dois processos conversando por sinais primitivos, e duas estruturas primitivas decidindo palíndromo por construção. Lembrando:</p><blockquote><p>Uma string é palíndromo <strong>se e somente se</strong> LIFO == FIFO</p></blockquote><p>Esse é o teorema, o resto é adorno. Eu sei que Bash não foi feito pra isso, mas Bash também não foi feito pra rodar a <a href="https://github.com/leandronsp/rinha-backend-bash/">Rinha de Backend</a> e aqui a gente está, de novo.</p><p>Se gostou dessa aventura, recomendo ler <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">o pai dela</a>, "You don't need Kafka".</p><p>Stay tuned, e bebam água.</p><hr /><h2>Disclosure</h2><p>Este artigo foi escrito usando uma ferramenta TUI que criei em Rust chamada <a href="https://github.com/leandronsp/devtui">leandronsp/devTUI</a>, com o apoio do Claude Opus 4.7 no refinamento, correção ortográfica e contexto.</p><p><em>Toda a identidade do artigo é 100% minha, eu não coloco IA pra escrever por mim. LLM serve apenas como um par que navega e dá feedback em tempo real, feature também incluída no DevTUI</em>.</p><p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-28-at-02-57-58.png" alt="Print do DevTUI no Tmux com o Claude Code ao lado" /></p></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')}},2000)})</script></body></html> 

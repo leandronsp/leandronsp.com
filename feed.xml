@@ -6,12 +6,624 @@
 <description>low-level curiosity, high-level pragmatism</description>
 <atom:link href="https://leandronsp.com/feed.xml" rel="self" type="application/rss+xml"/>
 <item>
+<title>Palíndromo utilizando dois UNIX signals, uma fila e uma pilha</title>
+<link>https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html</link>
+<guid>https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html</guid>
+<description><![CDATA[<p>Palíndromos, palíndromos. Você deve estar se perguntando como veio parar aqui, muito provavelmente já sem paciência pra este assunto por conta da recente trend do twitter no último fim de semana que, convenhamos, ultrapassou alguns limites:</p>
+<p><img src="/images/untitled-2-screenshot-2026-04-27-at-17-48-31.png" alt="Print de trending topics do Twitter mostrando &#39;Palíndromo&#39; no topo da Bolha Dev" /></p>
+<p>O assunto subiu para o trending topics global e os gringos ficavam se perguntando:</p>
+<blockquote>
+<p>Why is palindrome such a hot topic in Brazil now?</p>
+</blockquote>
+<p><em>Mal sabem eles que aqui no Brasil TUDO vira meme, até mesmo o "67" deles. Melhoramos o "67" e escalamos para um nível diferenciado. Google pesquisar.</em></p>
+<p>Não vou entrar em detalhes, mas basicamente a "treta" foi criada porque alguém mencionou que não conseguia contratar desenvolvedores pois nenhum candidato passava no teste do palíndromo. O negócio escalou. Teve implementação de palíndromo de todos os tipos e também teve muito meme, que foi a melhor parte pra mim.</p>
+<p>Mas vamos lá, quem acompanha meu blog sabe que não escrevo por escrever. Eu gosto de explorar um assunto técnico e ir fundo (lá ele), captando e compartilhando conhecimento no meio do caminho. É pra isso que estou aqui.</p>
+<hr />
+<h2>Agenda</h2>
+<ul>
+<li>
+<p><a href="#first-things-first">First things first</a></p>
+</li>
+<li>
+<p><a href="#palindromaniacs">Palindromaniacs</a></p>
+<ul>
+<li><a href="#mas-a-gente-%C3%A9-diferente-unix-signals--queue--stack">Mas a gente é diferente: UNIX signals + queue + stack</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#unix-signals-como-forma-de-comunica%C3%A7%C3%A3o">UNIX signals como forma de comunicação</a></p>
+<ul>
+<li><a href="#enviando-bin%C3%A1rio-com-dois-unix-signals">Enviando binário com dois UNIX signals</a></li>
+<li><a href="#montando-bytes-a-partir-dos-bits">Montando bytes a partir dos bits</a></li>
+<li><a href="#enviando-strings-inteiras">Enviando strings inteiras</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#marcando-o-fim-da-mensagem">Marcando o fim da mensagem</a></p>
+</li>
+<li>
+<p><a href="#fila-e-pilha-o-teorema-central">Fila e pilha: o teorema central</a></p>
+<ul>
+<li><a href="#conectando-tudo">Conectando tudo</a></li>
+</ul>
+</li>
+<li>
+<p><a href="#bonus-points-handshake-ftw">Bonus points: Handshake FTW</a></p>
+</li>
+<li>
+<p><a href="#conclus%C3%A3o-gloriosa">Conclusão gloriosa</a></p>
+</li>
+</ul>
+<hr />
+<h2>First things first</h2>
+<p>E a pedido de muitos, incluindo o brabíssimo Navarro, vamos fazer uma implementação do <em>palíndromo</em> em Bash:</p>
+<p><img src="/images/untitled-2-screenshot-2026-04-27-at-17-55-06-1.png" alt="Tweet do Rodrigo Navarro (@rdrnavarro) cobrando a versão canônica do palíndromo em Bash" /></p>
+<blockquote>
+<p>Por que Bash, Leandro?</p>
+</blockquote>
+<p>Porque entre todos os que submeteram soluções para a <a href="https://github.com/zanfranceschi/rinha-de-backend-2023-q3">1ª Rinha de Backend</a> e as subsequentes, eu fui o <a href="https://github.com/leandronsp/rinha-backend-bash">primeiro da linhagem</a> com uma submissão funcional porém nada performática.</p>
+<p>O que era pra ser um meme no Twitter, acabou virando o apelido "carinha do Bash". É sobre isso.</p>
+<hr />
+<h2>Palindromaniacs</h2>
+<p>Uma das implementações mais comuns para <em>palindromania</em> chama-se <strong>two pointers</strong>, onde definimos dois ponteiros na string e vamos comparando o primeiro com o último, o segundo com o penúltimo e assim por diante, mexendo nos ponteiros até chegar na <em>metade da string</em>. Se todas as comparações derem certo, a palavra é palíndromo.</p>
+<p>Em Bash dá pra implementar isso de forma mais legível usando <em>substrings</em>, que é prima do two pointers:</p>
+<pre><code class="language-sh">is_palindrome() {
+    local input="$1"
+    local length=${#input}
+
+    for ((i=0; i&lt;length/2; i++)) do
+        local leftmost=${input:$i:1}
+        local rightmost=${input:$((length-1-i)):1}
+
+        [ "$leftmost" != "$rightmost" ] &amp;&amp; return 1 # Error status code, IS NOT a palindrome
+    done
+
+    return 0 # Success status code, IS a palindrome
+}
+</code></pre>
+<p>Sem entrar muito em detalhes, vou explicar pois Bash:</p>
+<ul>
+<li>
+<p><code>local input="$1"</code>: joga o primeiro argumento da linha de comando na variável input</p>
+</li>
+<li>
+<p><code>local length=${#input}</code>: pega o tamanho do input</p>
+</li>
+<li>
+<p><code>for ((i=0; i&lt;length/2; i++))</code>: itera sobre cada caractere da string até a metade</p>
+</li>
+<li>
+<p><code>local leftmost=${input:$i:1}</code>: pega 1 caractere a partir da posição <code>$i</code>, ou seja, o mais a esquerda possível</p>
+</li>
+<li>
+<p><code>local rightmost=${input:$((length-1-i)):1}</code>: pega 1 caractere a partir da posição <code>length-1-i</code>, que vai andando do último pra dentro conforme <code>i</code> cresce, ou seja, o mais a direita possível</p>
+</li>
+<li>
+<p><code>[ "$leftmost" != "$rightmost" ] &amp;&amp; return 1</code>: compara os dois, se forem diferentes, a palavra <strong>não é um</strong> palíndromo</p>
+</li>
+</ul>
+<p>Caso não encontre nenhuma divergência nas comparações, então a palavra <strong>é um</strong> palíndromo, portanto <code>return 0</code> com sucesso.</p>
+<p>Outras implementações que podemos encontrar:</p>
+<ul>
+<li>
+<p>inverte a string e compara: essa é mais naive, geralmente <code>one-liner</code> e não requer muitos neurônios</p>
+</li>
+<li>
+<p>recursão: mais idiomática em linguagens funcionais</p>
+</li>
+<li>
+<p>stack: empilha a primeira metade, depois lê a segunda metade desempilhando e comparando a cada caractere</p>
+</li>
+<li>
+<p><em>e mais</em>: deque (double-ended queue), programação dinâmica, etc tal e coisa</p>
+</li>
+</ul>
+<h3>Mas a gente é diferente: UNIX signals + queue + stack</h3>
+<p>Implementar palíndromo no modo tradicional faria Bash e este post serem mais do mesmo. Não tem graça, Bash precisa ser requintado. Então resolvi <del>ser o diferentão</del> inovar e resolver este problema utilizando apenas <strong>dois sinais UNIX, uma fila e uma pilha</strong>. A ideia, em três passos:</p>
+<ul>
+<li>
+<p>um <code>sender</code> que manda a string bit a bit via signals</p>
+</li>
+<li>
+<p>um <code>receiver</code> que monta cada caractere e empilha em duas estruturas (FIFO e LIFO)</p>
+</li>
+<li>
+<p>no final, drena as duas estruturas. Se todo <code>pop</code> da pilha bater com todo <code>dequeue</code> da fila, é <strong>palíndromo</strong>.</p>
+</li>
+</ul>
+<p><strong>FIFO</strong> significa <em>first-in, first-out</em>. É a nossa fila. E <strong>LIFO</strong> significa <em>last-in, first-out</em>, neste caso nossa pilha. Tudo nosso.</p>
+<p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-27-at-23-02-12.png" alt="Meme do Bugs Bunny soviético no espírito &#39;camarada, é tudo nosso&#39;" /></p>
+<p>Basicamente, estamos explorando duas estruturas de dados primordiais da computação para verificar se uma palavra é palíndromo. E não só, estamos enviando a string <a href="https://leandronsp.com/articles/entendendo-unix-pipes-3k56">utilizando IPC</a> de uma forma bastante primitiva, com o <em>envio de sinais</em>.</p>
+<p>Se quiser saber mais detalhes sobre UNIX signals e como os utilizei para construir um pequeno <em>broker de mensageria</em>, veja meu artigo <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">You don't need Kafka: building a message queue with only two UNIX signals</a>. Lá eu explico o necessário sobre envio de sinais e também como implementei a modulação/demodulação de sinais para bits.</p>
+<hr />
+<h2>UNIX signals como forma de comunicação</h2>
+<p>O intuito deste artigo não é aprofundar muito nos sinais UNIX, uma vez que já abordei com profundidade no polêmico artigo anterior. Mas a seguir temos um exemplo bastante simples para estarmos na mesma página:</p>
+<pre><code class="language-sh">#!/usr/bin/env bash
+
+trap 'echo "Received signal SIGUSR1"' SIGUSR1
+
+echo "PID: $$"
+echo "Rodar em outra sessão shell: kill -SIGUSR1 $$"
+
+while true; do
+    sleep 0.5 || true
+done
+</code></pre>
+<pre><code class="language-sh">$ bash receiver.sh
+PID: 54112
+Rodar em outra sessão shell: kill -SIGUSR1 54112
+</code></pre>
+<p>Em outra sessão:</p>
+<pre><code class="language-sh">$ kill -SIGUSR1 54112
+</code></pre>
+<p>Com isto, <em>receiver</em> imprime <code>Received signal SIGUSR1</code> pra cada vez que enviarmos o sinal!</p>
+<p>O que é um sinal, afinal? Pra quem nunca ouviu falar, signals são a forma mais primitiva de IPC no UNIX. Você pode mandar <code>kill -SIGTERM</code> num processo pra encerrá-lo, <code>kill -SIGINT</code> pro mesmo efeito de <code>Ctrl+C</code>, e por aí vai. A graça é que o processo que recebe pode <em>interceptar</em> esses signals e <em>fazer o que quiser</em>. Esta é a famosa técnica de <strong>signal trap</strong>.</p>
+<blockquote>
+<p>Nossa, Leandro, mas o <code>kill</code> não "mata" o processo?</p>
+</blockquote>
+<p>Não, ele serve para envio de sinais, incluindo os clássicos <code>SIGTERM</code> e <code>SIGKILL</code>. Reforço: veja <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">meu artigo de UNIX signals</a> para entender as nuances.</p>
+<h3>Enviando binário com dois UNIX signals</h3>
+<p>Quando falamos de IPC primitivo tal como UNIX signals, não conseguimos enviar uma "mensagem" no formato que estamos acostumados (string). Nem bytes. Receber <strong>um</strong> signal é como receber um boolean: ligou ou não ligou. É a representação de apenas <em>dois estados possíveis</em>.</p>
+<p>O que UNIX nos entrega são dois sinais <em>user-defined</em>, <strong>SIGUSR1</strong> e <strong>SIGUSR2</strong>, livres para usarmos como quisermos. Não conseguimos enviar bytes, mas temos a primitiva necessária para representar um byte: <em>bits</em>.</p>
+<ul>
+<li>
+<p><code>SIGUSR1</code> = <strong>bit 0</strong></p>
+</li>
+<li>
+<p><code>SIGUSR2</code> = <strong>bit 1</strong></p>
+</li>
+</ul>
+<p>Pronto, acabamos de inventar uma linguagem binária. O <code>receiver</code> agora fica assim:</p>
+<pre><code class="language-sh">  #!/usr/bin/env bash
+
+  trap 'echo -n "0"' SIGUSR1
+  trap 'echo -n "1"' SIGUSR2
+
+  echo "PID: $$"
+  echo "Rodar: kill -SIGUSR1 $$ (bit 0) ou kill -SIGUSR2 $$ (bit 1)"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre>
+<pre><code class="language-sh">$ bash ./receiver.sh
+PID: 73251
+Rodar: kill -SIGUSR1 73251 (bit 0) ou kill -SIGUSR2 73251 (bit 1)
+
+# Em outra sessão:
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR2 73251
+$ kill -SIGUSR1 73251
+$ kill -SIGUSR1 73251
+</code></pre>
+<p>O que imprime <code>0001 1100</code>, seja lá o que isso significa :)</p>
+<p>Agora a gente fala binário. Cada <code>kill</code> é um bit chegando no fio. Mas só bit solto não vira muita coisa. <strong>8 bits formam um byte</strong>, e cada byte representa um caractere <a href="https://www.matematica.pt/util/resumos/tabela-ascii.php">ASCII</a>. Por exemplo, a letra <code>A</code> tem código ASCII <strong>65</strong>, que em binário é <code>0100 0001</code>.</p>
+<p>Se conseguirmos receber esses 8 bits e transformar isso em caractere, conseguimos transmitir <em>uma string inteira</em>, um caractere por vez.</p>
+<h3>Montando bytes a partir dos bits</h3>
+<p>Já sabemos que <strong>8 bits formam 1 byte</strong>. E que cada byte representa 1 caractere ASCII. Pra transformar a chuva de SIGUSR1 e SIGUSR2 em texto, o <code>receiver</code> precisa <strong>acumular</strong> os bits e, a cada 8, converter em caractere.</p>
+<p>Vamos usar uma convenção onde o primeiro bit que chega é o de menor peso (bit 0), o segundo é o bit 1, o terceiro é o bit 2, e assim por diante até o bit 7. Ou seja, vamos utilizar LSB, ou <em>least significant bit</em>, que traduzido é "bit menos significativo".</p>
+<pre><code class="language-sh">  #!/usr/bin/env bash
+
+  POSITION=0
+  ACCUMULATOR=0
+
+  decode_bit() {
+      local bit=$1
+      ACCUMULATOR=$(( ACCUMULATOR + (bit &lt;&lt; POSITION) ))
+      POSITION=$(( POSITION + 1 ))
+
+      if [ "$POSITION" -eq 8 ]; then
+          local char
+          char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+          echo "byte: $ACCUMULATOR | char: $char"
+          POSITION=0
+          ACCUMULATOR=0
+      fi
+  }
+
+  trap 'decode_bit 0' SIGUSR1
+  trap 'decode_bit 1' SIGUSR2
+
+  echo "PID: $$"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre>
+<p>Explicando as partes que mais importam:</p>
+<ul>
+<li>
+<p><code>(bit &lt;&lt; POSITION)</code>: <em>shift</em> à esquerda. O bit é empurrado pra posição certa dentro do byte. Se POSITION é 6 e o bit é 1, isso vira <code>64</code> (porque <code>1 &lt;&lt; 6 = 64</code>). Se o bit é 0, fica sempre 0.</p>
+</li>
+<li>
+<p>quando POSITION chega em 8, fechamos o byte. Convertemos pro caractere com <code>printf</code>, imprimimos e zeramos tudo pro próximo byte</p>
+</li>
+</ul>
+<p>Vamos ver isto funcionando na prática: A letra <code>A</code> tem código ASCII 65 como já vimos, que em binário é <code>0100 0001</code>. Mandando LSB primeiro, a sequência de bits vira <code>1 0 0 0 0 0 1 0</code>:</p>
+<pre><code class="language-sh">$ bash receiver.sh
+PID: 80381
+
+# Em outra sessão:
+$ kill -SIGUSR2 80381   # 1
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR1 80381   # 0
+$ kill -SIGUSR2 80381   # 1
+$ kill -SIGUSR1 80381   # 0
+</code></pre>
+<p>O receiver imprime: <code>byte: 65 | char: A</code>. <em>What a wonderful day, uh?</em></p>
+<p>Signals viraram bits. Bits viraram byte. Byte virou caractere. Agora dá pra mandar palavras inteiras, onde cada caractere é <strong>apenas uma sequência de 8 bits</strong>, e o <code>receiver</code> decodifica um por um conforme chegam.</p>
+<blockquote>
+<p>Manda mais bytes para ver outras letras: B = 66 = <code>0100 0010</code> e assim por diante. Não esquecendo de inverter a ordem dos bits, do LSB pro MSB.</p>
+</blockquote>
+<p><em>Nota: poderíamos utilizar o formato MSB (most-significant bit), para não precisarmos inverter os bits no envio, mas pra deixar o código do <code>receiver</code> mais simples e seguindo a maioria das convenções, decidi utilizar LSB mesmo</em></p>
+<h3>Enviando strings inteiras</h3>
+<p>No momento só conseguimos mandar bits "na mão", utilizando <code>kill -SIGUSR1</code> ou <code>kill -SIGUSR2</code>, um por um. Porém isso não escala. Precisamos do outro lado da história, um <code>sender</code> que recebe uma string e cuida de mandar os bits certos.</p>
+<p>A lógica é o "espelho" do <code>receiver</code> basicamente:</p>
+<ul>
+<li>
+<p>pra cada caractere da string, pega o código ASCII</p>
+</li>
+<li>
+<p>codifica para bits (8 bits), seguindo convenção LSB</p>
+</li>
+<li>
+<p>manda cada bit como SIGUSR1 (0) ou SIGUSR2 (1)</p>
+</li>
+</ul>
+<p><code>sender.sh</code></p>
+<pre><code class="language-sh">  #!/usr/bin/env bash
+
+  # usage: ./sender.sh &lt;pid&gt; &lt;string&gt;
+  PID=$1
+  INPUT=$2
+
+  send_bit() {
+      if [ "$1" -eq 0 ]; then
+          kill -SIGUSR1 "$PID"
+      else
+          kill -SIGUSR2 "$PID"
+      fi
+      sleep 0.5
+  }
+
+  send_byte() {
+      local byte=$1
+      local k
+      for ((k=0; k&lt;8; k++)); do
+          send_bit $(( (byte &gt;&gt; k) &amp; 1 ))
+      done
+  }
+
+  for ((i=0; i&lt;${#INPUT}; i++)); do
+      char="${INPUT:$i:1}"
+      code=$(printf '%d' "'$char")
+      send_byte "$code"
+  done
+</code></pre>
+<p>O core está em <code>send_byte</code>:</p>
+<ul>
+<li>
+<p><code>(byte &gt;&gt; k) &amp; 1</code>: pega o k-ésimo bit do byte. Faz shift à direita por <code>k</code> posições e aplica <code>&amp; 1</code> (máscara) para isolar o bit. Em <code>k=0</code>, pega o LSB, em <code>k=7</code>, pega o MSB.</p>
+</li>
+<li>
+<p><code>sleep 0.5</code> entre bits: signals podem ser perdidos se chegarem rápido demais (o sistema operacional colapsa sinais idênticos pendentes, como forma de "debounce"). Esse delay dá tempo do receiver processar cada um antes do próximo chegar</p>
+</li>
+</ul>
+<p>Conseguimos mandar uma string inteira via signals. Cada caractere viajou como 8 bits via IPC, foi remontado byte a byte, e o receiver imprimiu conforme decodificava. Vamos provar isso na próxima seção, onde também resolvemos o fim de mensagem.</p>
+<blockquote>
+<p>Nossa, isso é mágica?</p>
+</blockquote>
+<p>Não, é apenas <strong>trap + bit shift + acumulador</strong>.</p>
+<p>Entretanto, temos um problema. O receiver não sabe quando a mensagem <em>acabou</em>. Ele fica esperando o próximo bit pra sempre, sem poder fazer nada com a string completa.</p>
+<h2>Marcando o fim da mensagem</h2>
+<p>O receiver fica eternamente esperando bits. A gente precisa avisar quando a string acabou. Uma convenção clássica em comunicação binária é o famoso <strong>byte zero</strong> (<code>0x00</code>, conhecido como NUL). Isto marca o fim da mensagem. Strings em C usam essa ideia há décadas, então vamos roubar.</p>
+<p>No <code>sender</code>, basta mandar 8 bits "zeros" logo depois do último caractere:</p>
+<pre><code class="language-sh">  # ...todo o loop de envio dos caracteres...
+
+  # fim da mensagem
+  send_byte 0
+</code></pre>
+<p>E no <code>receiver</code>, quando o byte completo for <code>0</code>, em vez de decodificar como caractere, marcamos o fim:</p>
+<pre><code class="language-sh">  if [ "$POSITION" -eq 8 ]; then
+      if [ "$ACCUMULATOR" -eq 0 ]; then
+          echo ""
+          echo "[end of message]"
+      else
+          local char
+          char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+          echo -n "$char"
+      fi
+      POSITION=0
+      ACCUMULATOR=0
+  fi
+</code></pre>
+<p>Vamos rodar tudo:</p>
+<pre><code class="language-sh"># Receiver
+$ bash receiver.sh
+PID: 15300
+
+# Sender
+$ bash sender.sh 15300 ana
+
+# Receiver
+ana
+[end of message]
+</code></pre>
+<p><em>Cool, uh?</em> Agora temos a base completa de transporte. Bits viram bytes, que viram caracteres, e o NUL fecha a mensagem. Tudo isso com apenas <strong>dois sinais e um trap</strong>.</p>
+<p>Contudo, falta a peça principal do post: <em>a lógica do palíndromo</em>, implementada via <strong>fila e pilha</strong> conforme prometemos.</p>
+<hr />
+<h2>Fila e pilha: o teorema central</h2>
+<p>Vamos esquecer signals por um momento. Esquece também <strong>substrings, índices, two pointers</strong>. Imagina que os caracteres da string chegam um a um, e que precisamos decidir se formam um palíndromo, <em>sem precisar remontar a string em memória</em>. É aqui que está o sumo deste artigo! Os signals foram apenas uma "armadilha" que montei pra você, caro leitor.</p>
+<blockquote>
+<p>Tô brincando, eu quis fazer um trocadilho com "trap". Espero que a piada tenha servido de alguma coisa</p>
+</blockquote>
+<p>Como todo engenheiro de software, temos que fazer a pergunta certa: <strong>que estruturas de dados, sozinhas, decidem palíndromo por construção?</strong> Resposta: uma fila (FIFO) e uma pilha (LIFO).</p>
+<blockquote>
+<p>Uai, por quê?</p>
+</blockquote>
+<p>Pensa no que cada uma faz:</p>
+<ul>
+<li>
+<p><strong>FIFO</strong>: preserva a ordem. Enfileirei <code>R, A, D, A, R</code>, desenfileiro <code>R, A, D, A, R</code>. Mesma ordem.</p>
+</li>
+<li>
+<p><strong>LIFO</strong>: inverte a ordem. Empilhei <code>R, A, D, A, R</code>, desempilho <code>R, A, D, A, R</code>. Ordem reversa.</p>
+</li>
+</ul>
+<p>E palíndromo é, por definição, uma string que lida na ordem normal <strong>e</strong> na ordem reversa dá a mesma sequência. Que é exatamente o que acontece se a saída da fila bater com a saída da pilha.</p>
+<p><em>Supa hot fireeee</em></p>
+<p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-28-at-01-22-39.png" alt="Meme do Supa Hot Fire reagindo com cara de incrédulo, marcando o clímax da explicação" /></p>
+<p>Em outras palavras, uma string é palíndromo <strong>se e somente se</strong>, ao empilhar e enfileirar cada caractere em paralelo, todo <code>pop</code> da pilha for igual ao <code>dequeue</code> da fila. Sem comparação posicional, nem <code>length / 2</code>, nem indexação adicional. As duas estruturas <em>decidem por construção</em>. Puro suco da computação ao nosso favor.</p>
+<p><code>palindromer.sh</code></p>
+<pre><code class="language-sh">  #!/usr/bin/env bash
+
+  # usage: ./palindromer.sh &lt;string&gt;
+  INPUT=$1
+
+  stack=()
+  queue=()
+
+  # push and enqueue each char
+  for ((i=0; i&lt;${#INPUT}; i++)); do
+      char="${INPUT:$i:1}"
+      stack+=("$char")
+      queue+=("$char")
+  done
+
+  # flush both and compare
+  while [ "${#stack[@]}" -gt 0 ]; do
+      if [ "${stack[-1]}" != "${queue[0]}" ]; then
+          echo "false"
+          exit 0
+      fi
+      unset 'stack[-1]'
+      queue=("${queue[@]:1}")
+  done
+
+  echo "true"
+</code></pre>
+<ul>
+<li>
+<p><code>stack+=("$char")</code>: append em array é o <code>push</code> da pilha</p>
+</li>
+<li>
+<p><code>queue+=("$char")</code>: o mesmo append serve como <code>enqueue</code> da fila</p>
+</li>
+<li>
+<p><code>${stack[-1]}</code>: pega o <strong>topo</strong> da pilha (último elemento, <em>last-in</em>)</p>
+</li>
+<li>
+<p><code>${queue[0]}</code>: pega a <strong>frente</strong> da fila (primeiro elemento, <em>first-in</em>)</p>
+</li>
+<li>
+<p><code>unset 'stack[-1]'</code>: remove o topo (<code>pop</code>)</p>
+</li>
+<li>
+<p><code>queue=("${queue[@]:1}")</code>: reatribui a fila a partir do segundo elemento (<code>dequeue</code>)</p>
+</li>
+</ul>
+<p>Rodando tudo:</p>
+<pre><code class="language-sh">$ bash palindromer.sh ANA
+true
+
+$ bash palindromer.sh ABC
+false
+
+$ bash palindromer.sh RADAR
+true
+</code></pre>
+<p>Temos então palíndromo com uma fila, uma pilha, e a propriedade matemática que cada uma representa. Agora nos resta plugar tudo isso no <code>receiver</code>. Cada caractere que chegar via signals vai direto pras duas estruturas, e quando o NUL chegar, drenamos e respondemos.</p>
+<h3>Conectando tudo</h3>
+<p>A função do <code>palindromer.sh</code> recebia uma string como argumento. Aqui, a string não existe inteira em lugar nenhum. Os caracteres chegam, um a cada 8 bits, conforme o sender vai mandando. Mas a lógica é exatamente a mesma.</p>
+<p>Em vez de iterar sobre uma string já pronta, a gente empilha e enfileira <strong>conforme cada caractere chega</strong>. Incrível, não? Desta forma o <code>receiver</code> muda um pouco de lógica:</p>
+<ul>
+<li>
+<p>cada vez que um byte completo é decodificado e <strong>não é</strong> o NUL, a gente empilha e enfileira o caractere</p>
+</li>
+<li>
+<p>quando o NUL chega, fazemos a drenagem das duas estruturas e respondemos com <code>true</code> ou <code>false</code></p>
+</li>
+</ul>
+<pre><code class="language-sh">  #!/usr/bin/env bash
+
+  POSITION=0
+  ACCUMULATOR=0
+  stack=()
+  queue=()
+
+  drain_and_decide() {
+      while [ "${#stack[@]}" -gt 0 ]; do
+          if [ "${stack[-1]}" != "${queue[0]}" ]; then
+              echo "false"
+              stack=()
+              queue=()
+              return
+          fi
+          unset 'stack[-1]'
+          queue=("${queue[@]:1}")
+      done
+      echo "true"
+  }
+
+  decode_bit() {
+      local bit=$1
+      ACCUMULATOR=$(( ACCUMULATOR + (bit &lt;&lt; POSITION) ))
+      POSITION=$(( POSITION + 1 ))
+
+      if [ "$POSITION" -eq 8 ]; then
+          if [ "$ACCUMULATOR" -eq 0 ]; then
+              drain_and_decide
+          else
+              local char
+              char=$(printf "\\$(printf '%03o' "$ACCUMULATOR")")
+              stack+=("$char")
+              queue+=("$char")
+          fi
+          POSITION=0
+          ACCUMULATOR=0
+      fi
+  }
+
+  trap 'decode_bit 0' SIGUSR1
+  trap 'decode_bit 1' SIGUSR2
+
+  echo "PID: $$"
+
+  while true; do
+      sleep 0.5 || true
+  done
+</code></pre>
+<p>Diferença pro receiver da versão anterior:</p>
+<ul>
+<li>
+<p>duas variáveis globais novas: <code>stack=()</code> e <code>queue=()</code></p>
+</li>
+<li>
+<p>quando o byte completa, em vez de só imprimir o caractere, a gente manda pra stack e queue</p>
+</li>
+<li>
+<p>quando o byte é NUL, em vez de só sinalizar o fim, disparamos o <code>drain_and_decide</code> que devolve o veredito</p>
+</li>
+</ul>
+<p>Momento da verdade:</p>
+<pre><code class="language-sh"># Receiver
+$ bash receiver.sh
+PID: 33485
+
+# Sender
+$ bash sender.sh 33485 ANA
+$ bash sender.sh 33485 ABC
+$ bash sender.sh 33485 RADAR
+$ bash sender.sh 33485 SOCORRAMMESUBINOONIBUSEMMARROCOS
+
+# Receiver
+true
+false
+true
+true
+</code></pre>
+<p><em>OMFG!</em> Cada string é codificada via signals, e depois a lógica do palíndromo é feita <strong>sem remontar</strong> a string novamente!</p>
+<hr />
+<h2>Bonus points: Handshake FTW</h2>
+<p>Até aqui o receiver imprime <code>true/false</code> no terminal dele. O sender não fica sabendo de nada. Vamos fechar este ciclo com o receiver devolvendo um signal para o sender imprimir localmente.</p>
+<p>Convenção: <strong>SIGUSR2 = palíndromo (true), SIGUSR1 = não é palíndromo (false)</strong>.</p>
+<p>O receiver precisa saber quem é o sender. Sender escreve o próprio PID em <code>/tmp/sender.pid</code> antes de mandar a string, e configura um trap para receber o veredito:</p>
+<pre><code class="language-sh"># sender.sh
+echo $$ &gt; /tmp/sender.pid
+
+RESPONSE=""
+trap 'RESPONSE=0' SIGUSR1
+trap 'RESPONSE=1' SIGUSR2
+
+# ... send the string ...
+
+# after EOF, RESPONSE was set from verdict
+[ "$RESPONSE" = "1" ] &amp;&amp; echo "true" || echo "false"
+</code></pre>
+<p>Do lado do receiver, o <code>drain_and_decide</code> agora termina enviando o signal de volta:</p>
+<pre><code class="language-sh">  verdict() {
+      local result=$1
+      local pid
+      pid=$(cat /tmp/sender.pid 2&gt;/dev/null)
+
+      if [ "$result" = "true" ]; then
+          kill -SIGUSR2 "$pid" 2&gt;/dev/null
+      else
+          kill -SIGUSR1 "$pid" 2&gt;/dev/null
+      fi
+  }
+</code></pre>
+<p>Com isso, sender chama, recebe o veredito via signal, e imprime. Ciclo fechado.</p>
+<blockquote>
+<p>Mas isso tá lento demais, o <code>sleep 0.5</code> por bit dá uns 16 segundos só pra ANA. No caso do "SOCORRAMMESUBINOONIBUSEMMARROCOS", demorou bons minutos...inaceitável</p>
+</blockquote>
+<p>Uma forma de contornar o delay é através de um mecanismo de <strong>handshake</strong>. O receiver responde com um <strong>ACK</strong> depois de cada bit, e o sender só manda o próximo quando recebeu. Como o sender só avança após o ACK, nunca há dois sinais enfileirados, portanto a coalescência é eliminada por construção. Sem fila de sinais pendentes, e sem <code>sleep</code> arbitrário.</p>
+<pre><code class="language-sh"># receiver.sh
+
+  ack() {
+      local pid
+      pid=$(cat /tmp/sender.pid 2&gt;/dev/null)
+      [ -n "$pid" ] &amp;&amp; kill -SIGUSR1 "$pid" 2&gt;/dev/null
+  }
+
+</code></pre>
+<p>E o sender:</p>
+<pre><code class="language-sh">  # sender.sh — espera o ACK no lugar do sleep
+  send_bit() {
+      RESPONSE=""
+      if [ "$1" -eq 0 ]; then
+          kill -SIGUSR1 "$RECEIVER_PID"
+      else
+          kill -SIGUSR2 "$RECEIVER_PID"
+      fi
+      while [ -z "$RESPONSE" ]; do
+          sleep 0.001 || true
+      done
+  }
+</code></pre>
+<p>O <strong>detalhe que muda tudo</strong>: o loop ocioso do receiver também precisa ser tight. Trocamos <code>sleep 0.5</code> por <code>sleep 0.001</code> no <code>while true</code> principal. Sem isso, cada round-trip pagava parte do meio segundo.</p>
+<pre><code class="language-sh">  # receiver.sh
+  while true; do
+      sleep 0.001 || true
+  done
+</code></pre>
+<p>Rodando agora:</p>
+<pre><code class="language-sh">$ time bash sender.sh 19204 ANA
+true
+real    0m0.164s
+</code></pre>
+<p>De <em>16 segundos para 160 milissegundos</em>. <strong>100x mais rápido!!!!11</strong>. How amazing is that?</p>
+<hr />
+<h2>Conclusão gloriosa</h2>
+<p>A treta do palíndromo virou desculpa pra brincar com duas coisas que eu gosto: <strong>UNIX signals</strong> e <strong>estruturas de dados clássicas</strong>. O resultado é isso que acabamos de ver, dois processos conversando por sinais primitivos, e duas estruturas primitivas decidindo palíndromo por construção. Lembrando:</p>
+<blockquote>
+<p>Uma string é palíndromo <strong>se e somente se</strong> LIFO == FIFO</p>
+</blockquote>
+<p>Esse é o teorema, o resto é adorno. Eu sei que Bash não foi feito pra isso, mas Bash também não foi feito pra rodar a <a href="https://github.com/leandronsp/rinha-backend-bash/">Rinha de Backend</a> e aqui a gente está, de novo.</p>
+<p>Se gostou dessa aventura, recomendo ler <a href="https://leandronsp.com/articles/you-dont-need-kafka-building-a-message-queue-with-only-two-unix-signals">o pai dela</a>, "You don't need Kafka".</p>
+<p>Stay tuned, e bebam água.</p>
+<hr />
+<h2>Disclosure</h2>
+<p>Este artigo foi escrito usando uma ferramenta TUI que criei em Rust chamada <a href="https://github.com/leandronsp/devtui">leandronsp/devTUI</a>, com o apoio do Claude Opus 4.7 no refinamento, correção ortográfica e contexto.</p>
+<p><em>Toda a identidade do artigo é 100% minha, eu não coloco IA pra escrever por mim. LLM serve apenas como um par que navega e dá feedback em tempo real, feature também incluída no DevTUI</em>.</p>
+<p><img src="/images/resolvendo-pal-ndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha-screenshot-2026-04-28-at-02-57-58.png" alt="Print do DevTUI no Tmux com o Claude Code ao lado" /></p>
+]]></description>
+<pubDate>2026-04-27</pubDate>
+</item>
+<item>
 <title>Taming non-determinism: from logic gates to LLMs</title>
 <link>https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms.html</link>
 <guid>https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms.html</guid>
 <description><![CDATA[<p>Or: <em>how engineering keeps turning chaos into reliable computation. And why agentic AI still hasn't solved this.</em></p>
 <p>There's a pattern that repeats across the entire history of computing: we take something fundamentally <strong>non-deterministic</strong> and engineer enough layers on top of it until it behaves deterministically. Logic gates did it. Artificial neural networks (ANNs) replicated it at some level. LLMs are the next frontier, and the hardest one yet.</p>
-<p>In this article, we'll explore how engineering is crucial to facing non-determinism, and analyse the current state of the art for LLMs.</p>
+<p>In this article, we'll explore how engineering is crucial to addressing non-determinism, and analyze the current state of the art for LLMs.</p>
 <hr />
 <h2>Agenda</h2>
 <ul>
@@ -9944,419 +10556,5 @@ https://www.bigocheatsheet.com/
 https://ruby-doc.org/core-3.1.0/RubyVM/InstructionSequence.html#method-c-compile_option</p>
 ]]></description>
 <pubDate>2023-06-23</pubDate>
-</item>
-<item>
-<title>Vencendo os números de ponto flutuante: um guia de sobrevivência</title>
-<link>https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html</link>
-<guid>https://leandronsp.com/articles/vencendo-os-numeros-de-ponto-flutuante-um-guia-de-sobrevivencia-4n7n.html</guid>
-<description><![CDATA[<h2>TL;DR</h2>
-<p>Se quer poupar tempo e ir direto ao assunto, para cálculos precisos, prefira decimais de precisão arbitrária ou equivalentes como BigDecimal em vez de números de ponto flutuante.</p>
-<p>Além disso, evite arredondamentos desnecessários. Quando necessário, limite o arredondamento apenas na etapa final para manter o máximo de precisão possível.</p>
-<blockquote>
-<p>Se você tá sem tempo, pode parar por aqui pois estas dicas já são suficientes para a maioria das pessoas</p>
-</blockquote>
-<p><em>Mas se você tem curiosidade em entender mais sobre este assunto, sugiro continuar nesta viagem aos números de ponto flutuante</em>.</p>
-<hr />
-<h2>Sumário</h2>
-<ul>
-<li>
-<p><a href="#pr%C3%B3logo">Prólogo</a></p>
-</li>
-<li>
-<p><a href="#first-things-first">First things first</a></p>
-</li>
-<li>
-<p><a href="#bits-n%C3%A3o-s%C3%A3o-suficientes">Bits não são suficientes</a></p>
-</li>
-<li>
-<p><a href="#bits-e-inteiros">Bits e inteiros</a></p>
-</li>
-<li>
-<p><a href="#bits-e-outros-n%C3%BAmeros-reais">Bits e outros números reais</a></p>
-</li>
-<li>
-<p><a href="#representa%C3%A7%C3%A3o-de-ponto-fixo">Representação de ponto fixo</a></p>
-</li>
-<li>
-<p><a href="#representa%C3%A7%C3%A3o-de-ponto-flutuante">Representação de ponto flutuante</a></p>
-</li>
-<li>
-<p><a href="#problemas-e-padr%C3%B5es">Problemas e padrões</a></p>
-</li>
-<li>
-<p><a href="#tipos-de-dados-de-ponto-flutuante">Tipos de dados de ponto flutuante</a></p>
-</li>
-<li>
-<p><a href="#problemas-de-ponto-flutuante-na-pr%C3%A1tica">Problemas de ponto flutuante na prática</a></p>
-</li>
-<li>
-<p><a href="#decimais-ao-resgate">Decimais ao resgate</a></p>
-</li>
-<li>
-<p><a href="#cuidado-com-o-arredondamento">Cuidado com o arredondamento</a></p>
-</li>
-<li>
-<p><a href="#decimais-em-outras-tecnologias">Decimais em outras tecnologias</a></p>
-</li>
-<li>
-<p><a href="#conclus%C3%A3o">Conclusão</a></p>
-</li>
-<li>
-<p><a href="#refer%C3%AAncias">Referências</a></p>
-</li>
-</ul>
-<hr />
-<h2>📜 Prólogo</h2>
-<p>Ah, sim, números de <strong>ponto flutuante</strong>.</p>
-<p>Essas coisinhas que frequentemente aparecem em conteúdos técnicos, cheios de notações científicas e explicações complexas.</p>
-<p>É quase certo que toda pessoa que está envolvida com software já tenha se deparado com a noção de que trabalhar com números de ponto flutuante pode ser <strong>perigoso</strong>, resultando em resultados de aritmética <strong>imprecisos</strong>, entre outros problemas.</p>
-<p>No entanto, compreender todas as razões subjacentes por trás desse <em>tópico crucial em ciência da computação</em> pode ser desafiador para muitos.</p>
-<p>No post de hoje, iremos aprofundar nos <strong>problemas que os números de ponto flutuante abordam</strong> e explorar as <strong>armadilhas envolvidas</strong>.</p>
-<p>Então, pegue uma garrafa de água refrescante e embarque nesta jornada rumo à essência dos números de <em>ponto flutuante</em>.</p>
-<hr />
-<h2>👍🏼 First things first</h2>
-<p>Computadores só entendem <strong>linguagem de máquina</strong>.</p>
-<p><em>Linguagem de máquina</em> é uma coleção de "bits" que contém dados e instruções para a CPU. Representamos esses bits como <strong>bits binários</strong> e, como tal, é chamado de <strong>sistema numérico binário</strong> (0 e 1).</p>
-<pre><code class="language-bits">01001001 01001000 11001011 01000001 01001000 10001000
-01011001 01001000 01000001 01101001 01001000 01001001
-11000001 10001000 01001001 11001010 10001000 01001000
-11001001 01001000 11001001 01001000 01001000 01001001
-</code></pre>
-<p>Programar diretamente em linguagem de máquina é altamente propenso a erros e muitas vezes ineficiente em diversos cenários. Para lidar com isso, as <strong>linguagens assembly</strong> foram introduzidas ao longo dos anos, servindo como uma ponte entre as especificidades da arquitetura da CPU e um conjunto de instruções de alto nível.</p>
-<p>Uma <strong>linguagem assembly</strong> (ou simplesmente <strong>Assembly</strong>) é traduzida em código de máquina por meio de um programa dedicado chamado <strong>Assembler</strong>. Cada arquitetura de CPU geralmente tem seu próprio assembler associado a ela.</p>
-<p>Isso permite que programadores trabalhem com um conjunto de instruções mais gerenciável e legível para humanos, que é então traduzido em código de máquina específico para a arquitetura do processador.</p>
-<pre><code class="language-assembly">section .data
-    number1 dd 10      ; Define o primeiro número como um float de 32 bits
-    number2 dd 20      ; Define o segundo número como um float de 32 bits
-
-section .text
-    global _start
-_start:
-    ; Carrega o primeiro número no registro xmm0
-    movss xmm0, dword [number1]
-    
-    ; Carrega o segundo número no registro xmm1
-    movss xmm1, dword [number2]
-.....
-.....
-</code></pre>
-<p>Os avanços no campo da engenharia de computação abriram caminho para o desenvolvimento de linguagens de programação cada vez mais de alto nível que podem ser traduzidas diretamente em instruções de código de máquina.</p>
-<p>Ao longo das décadas seguintes, surgiram linguagens como <strong>C, Java e Python</strong>, entre outras, permitindo que cada vez mais pessoas pudessem escrever programas para computador sem necessariamente saber os detalhes de sua arquitetura de CPU.</p>
-<p>Essa conquista significativa teve um impacto profundo na indústria, à medida que os computadores se tornaram mais compactos e rápidos, capacitando práticas modernas de engenharia de software para oferecer um valor substancial aos negócios em todo o mundo.</p>
-<p>Computadores entendem <strong>bits</strong>, mas seres humanos se comunicam muito além de bits.</p>
-<hr />
-<h2>🔵 Bits não são suficientes</h2>
-<p>Como mencionado anteriormente, os computadores entendem apenas <strong>bits binários</strong>.</p>
-<p>Nada mais neste mundo pode ser interpretado por computadores.</p>
-<p>Bits. Nada mais.</p>
-<blockquote>
-<p>💡 Na verdade, CPUs de computadores eletrônicos entendem apenas a ausência ou presença de tensão, permitindo-nos representar informações usando 0 e 1 (desligado e ligado).</p>
-</blockquote>
-<p>No entanto, a vida real traz desafios em que programas de computador, criados <strong>por pessoas para pessoas</strong>, precisam representar um conjunto mais amplo de caracteres além de apenas 0s e 1s. Isso inclui letras, números decimais, números hexadecimais, caracteres especiais, sinais de pontuação e até mesmo emojis como este 😹.</p>
-<p>Conjuntos de caracteres padrão, como os esquemas <strong>ASCII</strong> e <strong>Unicode</strong>, resolvem o desafio de representar números, letras, caracteres especiais, emojis e muito mais dentro do sistema binário.</p>
-<blockquote>
-<p>⚠️ Explorar as complexidades da codificação de caracteres com ASCII e Unicode está além do escopo deste artigo. Isto será abordado em futuros posts</p>
-</blockquote>
-<p><em>Aqui, nosso foco será especificamente como os computadores trabalham com números na memória</em>, particularmente números <strong>inteiros</strong>.</p>
-<hr />
-<h2>🔵 Bits e inteiros</h2>
-<p>Vamos utilizar o número <em>65</em> como exemplo. Ele é representado no sistema de numeração <strong>decimal</strong> (base 10), tornando-o um <em>número real</em>.</p>
-<p>Além disso, ele é classificado como um <strong>número inteiro</strong>.</p>
-<p>Ao realizar conversões com base em potências de 2, podemos representar o inteiro 65 como <code>01000001</code> em formato binário de 8 bits. Essa representação binária pode ser convertida de volta e para o valor decimal 65.</p>
-<p>De uma <em>perspectiva matemática</em>, como <strong>65 é um número inteiro</strong>, ele cabe em um único byte (8 bits). Além disso, realizando potências de 2, sabemos que um único byte pode acomodar 256 números:</p>
-<pre><code>2^8 = 256
-</code></pre>
-<p>Falando de forma simplificada, alguém pode assumir que um único byte pode representar inteiros de 0 a 255.</p>
-<p>No entanto, inteiros devem representar números <em>negativos e positivos</em>. Com isso, como devemos distribuir igualmente esses inteiros em um único byte?</p>
-<p>Empregando uma técnica chamada <strong>complemento de dois</strong>.</p>
-<h3>👉 Complemento de dois</h3>
-<p>Para distribuir igualmente números inteiros negativos e positivos não fracionários dentro de 8 bits, podemos usar uma técnica chamada <strong>complemento de dois</strong>. Nesta técnica:</p>
-<ul>
-<li>
-<p>o bit mais à esquerda serve como o <strong>bit de sinal</strong>, indicando se o número é positivo ou negativo</p>
-</li>
-<li>
-<p>todos os bits são <em>invertidos</em> ou <em>complementados</em></p>
-</li>
-<li>
-<p>em seguida, <strong>adicionamos 1</strong> ao valor resultante</p>
-</li>
-</ul>
-<p>Desta forma, um único byte representa inteiros que variam de -128 a 127.</p>
-<pre><code>2^8 = 256
-
--127, -126, -125...127, 128
-</code></pre>
-<h3>👉 Utilizando dois bytes para representar inteiros</h3>
-<p>Ao empregar a técnica do complemento de dois, também podemos representar um intervalo de inteiros usando dois bytes (16 bits).</p>
-<p>Utilizando o conceito de potências de 2, podemos observar que <strong>dois bytes podem acomodar um total de 65536 valores</strong> diferentes:</p>
-<pre><code>2^16 = 65536
-</code></pre>
-<p>Considerando números negativos, o intervalo se estende de -32768 a 32767, inclusive.</p>
-<p>Agora, vamos explorar alguns exemplos utilizando o <strong>PostgreSQL</strong>.</p>
-<p>Se você, como eu, é da turma dos <em>containers</em>, ter um PostgreSQL server prontinho pra ser utilizado é mamão com açúcar:</p>
-<pre><code class="language-bash">$ docker run --rm -d \
-  --name postgres \
-  -e POSTGRES_HOST_AUTH_METHOD=trust \
-  postgres 
-</code></pre>
-<p>Em seguida, acesse o terminal <code>psql</code> com o seguinte comando:</p>
-<pre><code class="language-bash">$ docker exec -it postgres psql -U postgres
-</code></pre>
-<blockquote>
-<p>O quê você está esperando para ir logo aprender sobre <a href="https://leandronsp.com/articles/thinking-like-containers-3k24">containers</a>?</p>
-</blockquote>
-<p>No PostgreSQL, o tipo de dado que representa um inteiro de dois bytes é chamado <strong>int2</strong> ou <strong>smallint</strong>:</p>
-<pre><code class="language-sql">SELECT 65::int2;
- int2
-------
-   65
-</code></pre>
-<p>Para verificar o tipo de dado, podemos usar a função <code>pg_typeof</code>:</p>
-<pre><code class="language-sql">SELECT pg_typeof(65::int2);
- pg_typeof
------------
- smallint
-</code></pre>
-<p>Como <strong>smallint</strong> usa dois bytes, ele só pode acomodar o intervalo que mencionamos anteriormente em termos de bits e inteiros:</p>
-<pre><code class="language-sql">SELECT 32767::int2;
- int2
--------
- 32767
-
-SELECT -32767::int2;
- int2
--------
- -32767
-</code></pre>
-<p>No entanto, se tentarmos exceder o intervalo:</p>
-<pre><code class="language-sql">SELECT 32768::int2;
-ERROR:  smallint out of range
-</code></pre>
-<p><em>Incrível, não?</em></p>
-<p>Além do <strong>smallint</strong>, Postgres oferece uma variedade de outros tipos de dados inteiros:</p>
-<table><thead><tr><th>Tipo de Dado</th><th>Descrição</th><th>Intervalo de Inteiros</th></tr></thead><tbody>
-<tr><td>smallint</td><td>Inteiro de dois bytes</td><td>-32.768 a 32.767</td></tr>
-<tr><td>integer</td><td>Inteiro de quatro bytes</td><td>-2.147.483.648 a 2.147.483.647</td></tr>
-<tr><td>bigint</td><td>Inteiro de oito bytes</td><td>-9.223.372.036.854.775.808 a 9.223.372.036.854.775.807</td></tr>
-</tbody></table>
-<p>No entanto, todos nós sabemos que o mundo não é apenas composto por inteiros. Inteiros são um subconjunto de um conjunto mais amplo de números chamados <strong>números reais</strong>.</p>
-<hr />
-<h2>🔵 Bits e outros números reais</h2>
-<p><strong>Números reais</strong> podem incluir inteiros, frações e decimais, tanto racionais quanto irracionais.</p>
-<p>Por exemplo, <em>3.14159</em> representa o número real <strong>π</strong> (pi), que é um número irracional. É um decimal <em>não repetitivo e não terminante</em>. O valor de π se estende infinitamente sem qualquer padrão em sua representação decimal.</p>
-<pre><code>3.14159265358979323846....
-</code></pre>
-<hr />
-<p>Suponha que tenhamos dois bytes (16 bits), que podem representar 65536 inteiros variando de -32768 a 32767.</p>
-<p>Quando se trata de representar outros números reais, como decimais, podemos usar uma técnica chamada <strong>ponto fixo</strong> que, apesar de não ser eficiente, pode ser utilizada para fins didáticos neste post.</p>
-<hr />
-<h2>🔵 Representação de ponto fixo</h2>
-<p>Na representação de ponto fixo, dividimos os 16 bits fornecidos em três partes:</p>
-<h3>👉 Bit de sinal</h3>
-<p>O primeiro bit (mais à esquerda) representa o sinal, sendo 1 para negativo e 0 para positivo.</p>
-<h3>👉 Parte decimal</h3>
-<p>Os próximos 7 bits representam a parte decimal (fracionária), que pode ter uma precisão de até <code>0.992188</code> em nossa simulação:</p>
-<pre><code>2^-7 + 2^-6 + ... + 2^-1 =
-0.992188
-</code></pre>
-<h3>👉 Parte inteira</h3>
-<p>Os 8 bits restantes representam a parte inteira, que podem ir de -128 a 127 usando complemento de dois:</p>
-<pre><code>complemento_de_dois(
-    2^7 + 2^6 + ... + 2^1 = 
-    127
-)
-</code></pre>
-<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/56igr6mlwimkho6vlllk.png" alt="ponto fixo" /></p>
-<p>Considerando que a parte inteira, usando 8 bits com complemento de dois, varia de -128 a 127, podemos concluir que, com a <strong>representação de ponto fixo</strong>, os decimais podem variar de <strong>-128.992188 a 127.992188</strong>.</p>
-<p>No entanto, essa técnica pode nem sempre ser a mais eficiente.</p>
-<p>Portanto, vamos explorar outra técnica para representar decimais. Sim, estamos falando da mundialmente e amplamente utilizada <strong>representação de ponto flutuante</strong>.</p>
-<hr />
-<h2>🔵 Representação de ponto flutuante</h2>
-<p>Tomando como exemplo 16 bits, na representação de ponto flutuante, também dividimos os 16 bits em três grupos:</p>
-<h3>👉 Bit de sinal</h3>
-<p>O primeiro bit (mais à esquerda) é usado para representar se o número é negativo (1) ou positivo (0).</p>
-<h3>👉 Parte do expoente</h3>
-<p>A parte do expoente é atribuída aos próximos X bits. Em nossa simulação, vamos alocar 7 bits para esta parte, enquanto utilizamos o <em>primeiro bit do expoente</em> como sendo o <strong>sinal do expoente</strong>.</p>
-<p>Assim, a faixa para o expoente se estende de -63 a 63, acomodando valores negativos e positivos:</p>
-<pre><code>2^5 + 2^4 + ... 2^1 =
-63
-</code></pre>
-<p><em>Esta parte é crucial para definir a precisão aritmética na representação de ponto flutuante.</em></p>
-<h3>👉 Mantissa</h3>
-<p>A parte da <strong>mantissa</strong>, também conhecida como <em>significante</em>, usa os 8 bits restantes na nossa simulação, permitindo uma faixa de 1 até 255.</p>
-<p><em>Como não estamos representando a parte inteira nesta simulação, não é necessário aplicar complemento de dois à mantissa.</em></p>
-<p>🔑 <strong>Agora a parte importante</strong>
-Para calcular o maior número de ponto flutuante positivo, multiplicamos a mantissa pelo expoente. É aqui que entra o tal do "ponto flutuante":</p>
-<pre><code>mantissa X 2^expoente
-</code></pre>
-<p>Neste caso, o valor máximo positivo seria obtido multiplicando-se <strong>255 por 2^6</strong>, resultando em um número extremamente grande como <strong>2351959869397967831040.0</strong>.</p>
-<p>Por outro lado, o número mínimo maior que zero pode ser representado como 1 multiplicado por <strong>2^-63</strong>, ou <strong>0.00000000000000000010842021724855044340074528008699</strong>.</p>
-<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mof63oaed96584ajqvbg.png" alt="ponto flutuante" /></p>
-<p>Observe que esta simulação é uma representação simplificada com precisão limitada e pode não refletir a precisão de formatos de ponto flutuante ideais ou padronizados.</p>
-<hr />
-<h2>🔵 Problemas e padrões</h2>
-<p>De fato, como mencionado anteriormente, <strong>selecionar um número adequado de bits para a parte do expoente</strong> na representação de ponto flutuante é crucial para mitigar problemas de arredondamento e truncamento ao lidar com números fracionários.</p>
-<p>Padrões como o <strong>IEEE 754</strong> foram estabelecidos exatamente para abordar essas preocupações e fornecer um framework consistente para a representação de ponto flutuante. O padrão IEEE 754 define o número de bits alocados para o expoente, mantissa e sinal em formatos de precisão simples (32 bits) e dupla precisão (64 bits).</p>
-<p>Esses padrões determinam a representação precisa dos vários componentes de um número de ponto flutuante, as <em>regras para operações aritméticas</em> e como lidar com casos excepcionais.</p>
-<h3>👉 Precisão simples (4 bytes)</h3>
-<p>Os números de <strong>precisão simples</strong> são representados usando 32 bits de memória.</p>
-<p>Eles incluem:</p>
-<ul>
-<li>
-<p>1 bit para o sinal do número</p>
-</li>
-<li>
-<p>8 bits para o expoente</p>
-</li>
-<li>
-<p>23 bits para a mantissa</p>
-</li>
-</ul>
-<p>De acordo com os padrões do IEEE, a precisão simples normalmente <strong>manipula de 6 a 9 casas decimais de precisão</strong>.</p>
-<h3>👉 Dupla precisão (8 bytes)</h3>
-<p>Os números de <strong>dupla precisão</strong> são representados usando 64 bits de memória.</p>
-<p>Eles incluem:</p>
-<ul>
-<li>
-<p>1 bit para o sinal do número</p>
-</li>
-<li>
-<p>11 bits para o expoente</p>
-</li>
-<li>
-<p>52 bits para a mantissa</p>
-</li>
-</ul>
-<p>De acordo com os padrões do IEEE, a dupla precisão pode <strong>manipular de 15 a 17 casas decimais de precisão</strong>.</p>
-<p><em>Geralmente, a dupla precisão se encaixa melhor quando a alta precisão é necessária, mas esta por sua vez consome mais memória.</em></p>
-<hr />
-<h2>🔵 Tipos de dados de ponto flutuante</h2>
-<p>Muitas linguagens de programação e sistemas de banco de dados aderem aos padrões do IEEE 754, e com o PostgreSQL isto não é exceção.</p>
-<p>Vamos ver como o Postgres implementa os tipos de dados de ponto flutuante na prática.</p>
-<p>O tipo de dado <strong>float4</strong> segue o padrão de precisão simples do IEEE 754, que aloca 1 bit para o sinal, 8 bits para o expoente e 23 bits para a mantissa:</p>
-<pre><code class="language-sql">SELECT 0.3::float4;
- float4
---------
-    0.3
-</code></pre>
-<p>Por outro lado, o tipo de dado <strong>float8</strong> segue o padrão de dupla precisão do IEEE 754, que aloca 1 bit para o sinal, 11 bits para o expoente e 52 bits para a mantissa:</p>
-<pre><code class="language-sql">SELECT 0.3::float8;
- float8
---------
-    0.3
-
-#####################
-
-SELECT 0.3::float;
- float
---------
-    0.3
-</code></pre>
-<p><em>O tipo <code>float</code> padrão é equivalente à dupla precisão (float8).</em></p>
-<hr />
-<h2>☣️ Problemas de ponto flutuante na prática</h2>
-<p>Vamos mergulhar em cálculos com números de ponto flutuante e ver os <strong>possíveis problemas</strong> na prática.</p>
-<p>Considere uma simples soma de <code>0.1 + 0.2</code>:</p>
-<pre><code class="language-sql">SELECT 0.1::float + 0.2::float;
-
- 0.30000000000000004
-</code></pre>
-<p>Este resultado mostra como problemas de precisão podem surgir em números de ponto flutuante de dupla precisão durante operações aritméticas.</p>
-<p>Mesmo seguindo padrões, não estamos imunes a esses desafios de cálculo com ponto flutuante.</p>
-<p>No entanto, há uma estratégia alternativa que envolve um truque maroto utilizando <strong>inteiros</strong>.</p>
-<h3>💡 Um truque com inteiros</h3>
-<p>Em vez do tipo de dado <em>float</em>, podemos trabalhar com <strong>inteiros</strong>. Incorporamos um fator multiplicador com base em uma <em>escala decimal</em> ao armazenar valores e, em seguida, dividimos pelo mesmo fator para restaurar a representação decimal original ao recuperar o valor.</p>
-<p>Esse método permite cálculos decimais precisos usando inteiros e escala. O fator multiplicador deve ser escolhido com base na precisão decimal necessária.</p>
-<p>Para demonstrar, vamos usar esse truque para realizar <code>0.1 + 0.2</code>, com o fator multiplicador <strong>1000</strong>:</p>
-<pre><code class="language-sql">SELECT (0.1 * 1000)::int + (0.2 * 1000)::int;
-
-300
-</code></pre>
-<p>Aqui, cada entrada é multiplicada por <code>1000</code> e convertida para um inteiro. Para recuperar o valor original sem perder a precisão, dividimos por <code>1000</code>:</p>
-<pre><code class="language-sql">SELECT (300 / 1000::float);
-
-0.3
-</code></pre>
-<p><em>Uau, que técnica incrível!</em> 🚀</p>
-<p>No entanto, o uso de um fator multiplicador fixo pode ser ineficiente ao lidar com entradas que possuem diferentes casas decimais.</p>
-<p>Em vez disso, uma <strong>representação de escala variável</strong> pode ser usada convertendo a entrada em uma string e analisando o número de dígitos decimais, fazendo assim com que o fator multiplicador seja dinâmico para cada número real.</p>
-<p>Mas tenha cuidado, representações decimais de escala variável exigem <strong>manipulação cuidadosa de cálculos complexos</strong>, escala decimal precisa e várias outras sutilezas da aritmética decimal, que não é tão trivial.</p>
-<p>É aqui que entram os <strong>decimais</strong>.</p>
-<hr />
-<h2>🔵 Decimais ao resgate</h2>
-<p>Decimais lidam com os desafios associados a cálculos aritméticos complexos envolvendo decimais. Ao passo em que eles <em>reduzem significativamente</em> os problemas de precisão comumente encontrados em números de ponto flutuante.</p>
-<p>Diversas linguagens de programação e sistemas de banco de dados implementam decimais. PostgreSQL oferece o tipo de dado <strong>decimal</strong>, que oferece uma precisão superior em comparação com floats.</p>
-<pre><code class="language-sql">SELECT 0.1::decimal + 0.2::decimal;
-0.3
-</code></pre>
-<p>Os decimais também podem ser configurados para <strong>precisão e escala arbitrárias</strong>:</p>
-<pre><code class="language-sql"># Exemplo: aceita números de até 999.99
-SELECT 0.1::decimal(5, 2);
-0.10
-
-SELECT 999.99::decimal(5, 2);
-999.99
-</code></pre>
-<p>Convenientemente, o tipo de dado padrão para decimais no PostgreSQL é <strong>numeric</strong>, que é idêntico a <em>decimal</em>:</p>
-<pre><code class="language-sql">SELECT pg_typeof(0.1);
-
-numeric
-</code></pre>
-<hr />
-<h2>⚠️ Cuidado com o arredondamento</h2>
-<p>Arredondar números decimais programaticamente pode levar a resultados imprecisos. Por exemplo, a soma <code>25.986 + -0.4125 + -25.5735</code> teoricamente deveria resultar em zero:</p>
-<pre><code class="language-sql">SELECT 25.986 + -0.4125 + -25.5735;
-
-0.0000
-</code></pre>
-<p>Vamos ilustrar como podemos <strong>arredondar apenas a soma final</strong> para duas casas decimais:</p>
-<pre><code class="language-sql">SELECT ROUND(25.986 + -0.4125 + -25.5735, 2);
-
-0.00
-</code></pre>
-<p><em>So far, so good</em>. Tudo funcionando como esperado.</p>
-<p>Com tipos de dados adequados, como decimais, o problema aritmético inerente aos números de ponto flutuante já é resolvido.</p>
-<p>Todavia, o <strong>arredondamento introduz seu próprio conjunto de desafios</strong>. Mesmo que os decimais sejam excelentes para a precisão e aritmética de dados decimais, as operações de arredondamento envolvem <em>algum grau de aproximação</em>.</p>
-<p>Para simular um problema com arredondamentos desnecessários, vamos arredondar cada número decimal antes de somá-los:</p>
-<pre><code class="language-sql">SELECT ROUND(25.986, 2) + ROUND(-0.4125, 2) + ROUND(-25.5735, 2);
-
-0.01
-</code></pre>
-<p><em>OMG e agora?</em> 😭</p>
-<p>Cada vez que arredondamos um número, estamos adicionando um pouco de imprecisão. <em>Bit a bit</em>, o resultado final pode ficar longe do esperado, <strong>pois a memória do computador é finita</strong> e não é possível representar todas as casas decimais possíveis resultantes de uma aritmética arbitrária de números reais.</p>
-<blockquote>
-<p>Lembra do resultado da <code>mantissa X 2^expoente</code>?
-Pois então...</p>
-</blockquote>
-<p>Esses exemplos destacam por que <strong>o arredondamento desnecessário deve ser evitado</strong>. Como o arredondamento é uma aproximação, é melhor adiá-lo até a etapa final, ou seja, apenas quando formos <em>apresentar os dados ao usuário final</em>.</p>
-<hr />
-<h2>Decimais em outras tecnologias</h2>
-<p>Cada linguagem de programação ou ferramenta possui seu próprio tipo de dados para lidar com precisão arbitrária, como os decimais do PostgreSQL.</p>
-<p>Ruby oferece a classe <a href="https://ruby-doc.org/stdlib-2.5.1/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a>, que facilita a aritmética decimal de ponto flutuante de precisão arbitrária.</p>
-<p>Da mesma forma, Java também inclui uma <a href="https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html">classe BigDecimal</a> para este mesmo propósito.</p>
-<p>Golang também não é exceção. Ela possui <a href="https://go.dev/src/math/big/decimal.go">aritmética decimal de precisão arbitrária</a> que resolve os mesmos problemas.</p>
-<p>É crucial verificar se a tecnologia que você está usando oferece suporte a precisão arbitrária como decimais. Se você precisar de uma precisão maior, estas soluções costumam ser mais adequadas do que o uso de números de ponto flutuante brutos.</p>
-<p>Ao limite, se precisão for algo crítico para teu negócio e a tecnologia utilizada <em>não fornece tipos como os big decimals</em> de precisão arbitrária, prefira então utilizar <strong>números inteiros com fator multiplicador (100, 1000, 10000, etc)</strong> que contemple as casas decimais suficientes para a precisão necessária.</p>
-<hr />
-<h2>Conclusão</h2>
-<p>Neste post, exploramos as complexidades dos números de <strong>ponto flutuante</strong>.</p>
-<p>Investigamos também como os computadores compreendem informações por meio do <strong>sistema binário</strong>, desde a representação de inteiros e a ineficiência da representação de ponto fixo para decimais, até chegar aos números de ponto flutuante e suas <em>limitações</em>.</p>
-<p>Além disso, discutimos como os tipos de dados de precisão arbitrária, como os <strong>decimais</strong>, abordam esses problemas de precisão inerentes aos pontos flutuantes.</p>
-<p>Por fim, discutimos e compartilhamos as melhores práticas para lidar com problemas de <em>arredondamento</em> de números decimais.</p>
-<p>Espero que esses tópicos tenham sido apresentados de forma didática, tornando os problemas de ponto flutuante não mais um problema!</p>
-<p><em>Cheers!</em></p>
-<hr />
-<h2>Referências</h2>
-<p>https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html
-https://www.postgresql.org/docs/current/datatype.html
-https://en.wikipedia.org/wiki/IEEE_754
-https://www.doc.ic.ac.uk/~eedwards/compsys/float/
-https://en.wikipedia.org/wiki/Floating-point_error_mitigation
-https://en.wikipedia.org/wiki/Single-precision_floating-point_format
-https://en.wikipedia.org/wiki/Double-precision_floating-point_format
-https://en.wikipedia.org/wiki/Decimal_floating_point</p>
-]]></description>
-<pubDate>2023-06-06</pubDate>
 </item>
 </channel></rss>
