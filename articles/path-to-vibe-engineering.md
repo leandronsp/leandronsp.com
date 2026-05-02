@@ -8,9 +8,24 @@ published_at: "2026-05-02 00:12:42"
 
 2026, what a year to be alive. AI, LLMs, agents, agentic coding. On one side, the hype train. On the other, narratives built to invalidate everything the hype touches.
 
-In this article I'll dig into the limitations and benefits of using LLMs for coding and how to bring **engineering** back to the landscape, which I call _vibe engineering_. I aim to help readers on a path to vibe engineering, from zero to actually engineering with AI.
+In this article I'll dig into the limitations and benefits of using LLMs for coding and how to bring **engineering** back to the landscape, which I call _vibe engineering_. I aim to help readers on a path to vibe engineering, so this is for working engineers, not first-day coders.
+
+In the end you'll realize that **it's not about speed, it's about confidence**.
 
 Purely empirical, unpretentious, and potentially poetic. Reflections from someone who uses AI daily but doesn't sell courses or posts horror stories. Embrace pragmatism, avoid the radicals, grab a coffee and let's go.
+
+---
+
+## Agenda
+
+* First things first: my journey to agentic coding
+* Engineering, Agile & AI
+* Vibe (Coding?) Engineering
+* My showcase in AI
+* Approaching the end, here are my takes
+* My 70/30 model: learning and sharpening fundamentals
+* Final words
+* Disclosure
 
 ---
 
@@ -38,7 +53,7 @@ On the other hand, even with flagship models, an LLM _does not reason_ like huma
 
 That said, this combination of leveraging an LLM to get context and provide information so we can reason about it, reflect and decide is indeed a _game changer_. Hence, I started delivering my tasks with **way more** confidence with AI assistance. 
 
-As a software engineer, I realized I can implementing new features, fixing bugs, refactoring complex codebases and handling more complex tasks that would take me more time. By applying best **software engineering and agile practices**, I can go beyond, delivering with quality.
+As a software engineer, I realized I can implement new features, fix bugs, refactor complex codebases and handle more complex tasks that would take me more time. By applying best **software engineering and agile practices**, I can go beyond, delivering with quality.
 
 But what are those _software engineering and agile practices_ we're talking about?
 
@@ -50,9 +65,9 @@ I'd like to introduce this topic by first talking about **Software Engineering**
 
 Software engineering is about **managing complexity** through practices that give you confidence in what you build. It involves testing, design, refactoring, code review and all that sort of practices many of us do on a daily basis. We should know when to scope something, when to break it down, when to ship and when to _say no_.
 
-> Yes, sometimes just saying "no" is the good call, but respectful, of course
+> Yes, sometimes just saying "no" is the right call, but respectful, of course
 
-As for **agile**, being agile is not about using a tool or some agile framework. Neither about hiring dozens of agile coaches. Truly agile embraces short cycles, working software, responding to change over following a plan (yes SDD'ers I'm talking to you :D). It's a _culture_.
+As for **agile**, being agile is not about using a tool or some agile framework. Neither about hiring dozens of agile coaches. Truly agile embraces short cycles, working software, responding to change over following a plan. It's a _culture_.
 
 Everything under an agile culture leans toward feedback loops. Pair programming and retrospectives provide feedback loops. Talking to designers, refining stories, writing spikes, promoting R&D. The whole point is to _learn fast, fail fast, and correct course_.
 
@@ -78,19 +93,19 @@ Now here's the thing. LLMs don't bring any of that, because they generate code a
 
 All of that is still _on you_.
 
-So the question isn't whether AI replaces engineering practices, because it won't. The question is how to use **these engineering and agile practices to work with AI**, hence increase quality while delivering solutions to real problems.
+So the question isn't whether AI replaces engineering practices, because it won't. The question is how to use **these engineering and agile practices to work with AI**, hence increasing quality while delivering solutions to real problems.
 
 ### A note about SDD and agent orchestration
 
 > "Okay Leandro, so you mean we should do SDD and orchestrate dozens of agents?"
 
-_Hell no_, definitely not. I'm not in this game to overcomplicate things. I think that SDD (or Spec-Driven Development) is fine, but the term is overly inflated and many people are taking SDD like _creating a lot of markdown files upfront then orchestrate with dozens of agents_.
+_Hell no_, definitely not. I'm not in this game to overcomplicate things. I think that SDD (or Spec-Driven Development) is fine, but the term is overly inflated and many people are taking SDD like _creating a lot of markdown files upfront then orchestrating with dozens of agents_.
 
-What documentation enthusiasts are doing with SDD and plenty of agents is actually _waterfall_. I'm not very fond of waterfall for software development, because in the waterfall model we don't have feedback loops and I'm pretty sure that even with all those documentation upfront and multiple agents that dump code in the speed of light, _rework will be needed_. Requirements will be missed. Someone will forget important details and the AI won't catch those missing requirements as if it was something _magical_.
+What documentation enthusiasts are doing with SDD and plenty of agents is actually _waterfall_. I'm not very fond of waterfall for software development, because in the waterfall model we don't have feedback loops and I'm pretty sure that even with all that documentation upfront and multiple agents that dump code at the speed of light, _rework will be needed_. Requirements will be missed. Someone will forget important details and the AI won't catch those missing requirements as if it was something _magical_.
 
 I think our industry evolved for decades to finally **get shit done** with agile practices and all of a sudden we're doing waterfall again? Please, no.
 
-What I'm going to share here is a simple process with ancient engineering & AI practices I believe this may work for most people in tech, working for startups or even enterprises. We'll dig further into these practices in the upcoming sections.
+What I'm going to share here is a simple process with ancient engineering & AI practices that I believe will work for most people in tech, working for startups or even enterprises. We'll dig further into these practices in the upcoming sections.
 
 ---
 
@@ -120,7 +135,7 @@ I use a skill [called "po"](https://github.com/leandronsp/dotfiles/blob/main/cla
 
 **Break work into small deliverables**
 
-If your prompt asks for more than a few hundred lines of output, maybe it's better step back and break down the requirements. I have a personal threshold: above 500 lines of diff and I start questioning whether the scope is right. 
+If your prompt asks for more than a few hundred lines of output, maybe better to step back and break down the requirements. I have a personal threshold: above 500 lines of diff and I start questioning whether the scope is right. 
 
 Small diffs are reviewable diffs, which make them easy to test and validate. The agent handles **small scoped tasks far better** than large ambiguous ones.
 
@@ -164,13 +179,13 @@ TDD is not a methodology debate for me, it's a survival tool. When an LLM writes
 
 This feedback loop, `RED -> GREEN -> REFACTOR` is nothing new, but it's the closest thing to determinism you'll get from a _probabilistic model_.
 
-> I wrote an article this year about [Taming non-determinism: from logic gates to LLMs](https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms), in case you want to have a deeper understanding about non-determinism
+> I wrote an article this year about [Taming non-determinism: from logic gates to LLMs](https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms), in case you want to have a deeper understanding of non-determinism
 
 My [skill "dev"](https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/dev/SKILL.md) relies on TDD from the very start. I invite you to take a look into it.
 
 **Pair with the agent**
 
-I don't mean to sit back and watch it generate 800 lines. I mean **treat the agent like a pair programming partner**. You drive, the agent suggests and review. Or the agent drives, you suggest and review.
+I don't mean to sit back and watch it generate 800 lines. I mean **treat the agent like a pair programming partner**. You drive, the agent suggests and reviews. Or the agent drives, you suggest and review.
 
 Again, my `/dev` skill covers different modes for development: 
 
@@ -184,7 +199,7 @@ At any mode, the skill is ready to work with TDD, no bullshit included. Pick the
 
 **Review the output**
 
-Every. Single. Time. An LLM's output is a suggestion, not a decision. My ["review" skill](https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/review/SKILL.md) spawns three parallel reviewers agents. One for security, one for performance, and one for quality. Then a _red-team auditor_ that checks the reviewers themselves. It sounds excessive until you've shipped a bug that looked perfectly clean in a 400-line diff. If you're not reviewing, you're rubber-stamping.
+Every. Single. Time. An LLM's output is a suggestion, not a decision. My ["review" skill](https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/review/SKILL.md) spawns three parallel reviewer agents. One for security, one for performance, and one for quality. Then a _red-team auditor_ that checks the reviewers themselves. It sounds excessive until you've shipped a bug that looked perfectly clean in a 400-line diff. If you're not reviewing, you're rubber-stamping.
 
 Even so, you must review the auditor's final review. Don't take _any LLM output_ as a source of truth. An LLM's output **should never be the final destination**, but using it with the correct tooling, it'll take you _some steps forward_.
 
@@ -194,7 +209,7 @@ When something breaks, don't just prompt the agent to "fix it". I know, it's tem
 
 _Tip:_ reproduce the bug with a failing test first. Actually, that's a practice I've always tried to apply on my workflow way before agentic AI. If there's some skill I'd pick and say that every good engineer should sharpen, it's the **ability to reproduce anything with a failing test**. Many engineers, including the senior ones, fail at this important step while debugging.
 
-> In a distributed system, debugging is very hard. Sometimes a failing test is not enough, but if you spend some time trying to write as much failing tests as possible, you'll eventually get there. The "test-driven" mindset is winner IMHO. "Follow the data and write a failing test for it" is the best engineering advice I've ever heard.
+> In a distributed system, debugging is very hard. Sometimes a failing test is not enough, but if you spend some time trying to write as many failing tests as possible, you'll eventually get there. The "test-driven" mindset is winner IMHO. "Follow the data and write a failing test for it" is the best engineering advice I've ever heard.
 
 Speaking of AI, I have a ["bugfix" skill](https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/bugfix/SKILL.md) that enforces this: understand the bug, scout the codebase, write a failing test for the _right reason_, then fix. No test, no fix. Of course, agents usually write any poor test just to make it pass, but if you enforce it with a good skill, the agent will go to the right path guarded by good engineering practices **you** provided in the skill or prompt.
 
@@ -206,7 +221,7 @@ Now time to show what all this looks like in practice.
 
 ## My showcase in AI
 
-I want to highlight _three real use cases_ where I applied those engineering practices and could be successful with it. Despite using AI for personal projects, I've been using agentic AI for **delivering value to real customers in production**, critical projects and demanding features. It's not a playground as many may argue: _it's serious work.
+I want to highlight _three real use cases_ where I applied those engineering practices and could be successful with it. Despite using AI for personal projects, I've been using agentic AI for **delivering value to real customers in production**, critical projects and demanding features. It's not a playground as many may argue: _it's serious work_.
 
 ### Case 1: Debugging a PDF rendering bug
 
@@ -216,7 +231,7 @@ Logs pointed that some PDFs were failing to parse, leading the troubleshooting t
 
 I got some broken PDFs and started looking into them, as they were opening normally in my PDF reader. The problem was somewhere in our **merge PDF process**, which is backed by _Ghostscript_, a well-known tool for printing and PDF manipulation.
 
-With this information in place, instead of pasting the bug report into an agent and saying "fix it", I called my `/bugfix` skill. And you'll see how a good skill and a failing test wins.
+With this information in place, instead of pasting the bug report into an agent and saying "fix it", I called my `/bugfix` skill. And you'll see how a good skill and a failing test win.
 
 The skill started by understanding the bug: what's broken, when it happens, what's the expected behaviour. Then it scouted the codebase, reading the PDF parsing code, tracing data flow, checking git history for recent changes. 
 
@@ -224,11 +239,11 @@ It came back with a hypothesis: the _outline builder_ within the PDF content was
 
 The critical step: write a test that fails. The skill produced a minimal test case that created a PDF outline with two levels, asserted that traversing the outline tree terminates, and the test failed, proving the bug existed.
 
-> Once we can prove the bug exists with the _right failing test_, the dopamine levels go skyrocket :P
+> Once we can prove the bug exists with the _right failing test_, the dopamine levels skyrocket :P
 
 **The "senior" moment**
 
-First, I let the AI go for a fix, but as soon as I noticed it got stuck in a loop after two or three failed approaches, I decided to enter the loop and become a **real senior**. My instinct was that something in the _Ghostscript_ process was not recognizing the circular outlines. But Ghostscript is an external tool which I don't have control over. The only thing I could do was to try a variety of different _command line flags_ in a "trial-and-error process". Not good.
+First, I let the AI go for a fix, but as soon as I noticed it got stuck in a loop after two or three failed approaches, I decided to enter the loop and become a **real senior**. My instinct was that something in the _Ghostscript_ process was not recognizing the circular outlines. But Ghostscript is an external tool that I don't have control over. The only thing I could do was to try a variety of different _command line flags_ in a "trial-and-error process". Not good.
 
 The _senior_ moment became when I asked the agent to analyze the **Ghostscript process** using some tooling in my macOS, which is an operating system based on BSD.
 
@@ -242,13 +257,13 @@ Could I hit the same destination without AI? Hell yes, but I would have spent to
 
 [ChessWAV](https://github.com/leandronsp/chesswav) is a Rust project that turns chess games into audio. It's not a simple CRUD. It's chess logic, graph manipulation, sine waves, mathematical stuff and all. The REPL had a working board display, but it was appending a new board after every move, scrolling the terminal endlessly. No move history, no file labels on both sides. I wanted to fix that.
 
-Instead of jumping to code, I started with `/po` in-place board rendering with move list sidebar`. The skill walked me through writing a proper PRD: what the rendering should look like, how ANSI cursor escapes work for in-place updates, how each display strategy (sprite, unicode, ascii) affects layout calculations. Edge cases like switching display modes mid-game and cursor-up calculations across different board heights.
+Instead of jumping to code, I started with `/po in-place board rendering with move list sidebar`. The skill walked me through writing a proper PRD: what the rendering should look like, how ANSI cursor escapes work for in-place updates, how each display strategy (sprite, unicode, ascii) affects layout calculations. Edge cases like switching display modes mid-game and cursor-up calculations across different board heights.
 
 > In case you don't believe me and think I could be making this up, please refer to my [issue in Github](https://github.com/leandronsp/chesswav/issues/9), the [pull request](https://github.com/leandronsp/chesswav/pull/10), all of it done **during a live stream** (pt-BR) in my [Youtube channel](https://www.youtube.com/watch?v=Da4BYe_gV0Y)
 
-The PRD took maybe ten minutes and saved me from _scope creep_ on what could have been a bottomless rendering rabbit hole. Of course I had two or three iterations before I agreed on the PRD, but that's the truly productivity power of using agentic AI IMHO.
+The PRD took maybe ten minutes and saved me from _scope creep_ on what could have been a bottomless rendering rabbit hole. Of course I had two or three iterations before I agreed on the PRD, but that's the true productivity power of using agentic AI IMHO.
 
-After the issue was created, I handed it to `/dev`, no further prompting, just pasted the issue URL, then it scouted the codebase, asked clarifying questions about the existing display strategy pattern, proposed test cases, and only after I approved the plan it started coding.
+After the issue was created, I handed it to `/dev`, no further prompting, just pasted the issue URL, then it scouted the codebase, asked clarifying questions about the existing display strategy pattern, proposed test cases, and only after did it start coding.
 
 Every cycle was RED then GREEN. The whole feature shipped in three incremental diffs: cursor-up logic and layout height calculation first, then the move list sidebar, then the re-rendering flow that ties it together. 
 
@@ -258,11 +273,11 @@ And before someone argues:
 
 > But Leandro, you're doing engineering as usual. Why the need of using AI at all?
 
-Let's be honest here. I'm a seasoned software engineer and I'm **pretty sure** I'm not able to deliver this kind of complexity in a matter of minutes or hours with confidence. That's not AI-slop, go check yourself. This use case is the difference between prompting "add in-place board rendering" and **engineering your way to it**.
+Let's be honest here. I'm a seasoned software engineer and I'm **pretty sure** I couldn't deliver this kind of complexity in a matter of minutes or hours with confidence. That's not AI-slop, go check yourself. This use case is the difference between prompting "add in-place board rendering" and **engineering your way to it**.
 
 I kindly invite you to truly experiment on this flow. Give engineering & AI an honest chance.
 
-> Unless you're a radical that's not keen to learn and evolve. If that's the case, well...you shouldn't be reading my blog at this point. Feel free to close this tab now. Radicals are not welcome here.
+> Unless you're a radical who's not keen to learn and evolve. If that's the case, well...you shouldn't be reading my blog at this point. Feel free to close this tab now. Radicals are not welcome here.
 
 ### Case 3: Review before you ship
 
@@ -292,7 +307,7 @@ Write yours, be opinionated. The more specific, the better.
 
 My `/po`, `/dev`, `/bugfix` and `/review` skills encode processes I actually follow. Not theoretical best practices, but the way I work. A skill is just a markdown file that tells the agent what to do, step by step, with gates and waits. If you find yourself repeating the same process, write it down once and let the skill enforce it. That's how you get TDD from a model that defaults to dumping code.
 
-And that's the main reason I avoid importing other's skills I don't fully understand or control. I avoid using repos with thousands of skills or "following some framework". I think we should pick up skills with caution. Always better to use some reference then craft a few ones using your agent.
+And that's the main reason I avoid importing other's skills I don't fully understand or control. I avoid using repos with thousands of skills or "following some framework". I think we should pick up skills with caution. Always better to start from a reference and then craft a few of your own.
 
 Feel free to [pick up my skills](https://github.com/leandronsp/dotfiles/tree/main/claude/.claude/skills), but use your agent to explain about them, refine and adapt to your own workflow.
 
@@ -314,22 +329,6 @@ I've been using opencode and pi-agent alongside Claude Code, and both harnesses 
 
 The discipline is in the configuration, not in the model. Pick whatever works for your budget and preference, but bring your own process.
 
-### My 70/30 model: learning and sharpening fundamentals
-
-Seventy percent AI-assisted work, shipping, delivering. Thirty percent manual coding, learning, building intuition. **The 30% is what makes the 70% work**. Without fundamentals, you become a prompt engineer who can't debug. With only fundamentals, you ship slower than the field. _Why not both?_
-
-Again, **avoid the radicals**.
-
-> "But how to keep learning and sharpening the fundamentals?"
-
-How do I keep the 30% effective? How do I code, learn, and get intuition from the decisions? Ironically, the answer is in the _LLM itself_. Yes, we can leverage the LLM as a pair programming partner, remember some topics before?
-
-When I'm coding manually, I leave the agent open reading my code, doing TDD with me, where **I'm the driver, the agent is the navigator**. It watches my changes and provides feedback in real-time, which I can reason about, get intuition and iterate until I get a solution that I fully understand. Whenever I feel I'm good with the current development, the rest is only ceremony and boilerplate, then I switch to vibe coding and the agent finishes the boring work.
-
-My skill `/dev` also covers this mode, which I call `pair-with-me`. Every time I want to code and learn something new, I'm using this mode. Otherwise, I'm doing engineering around agents as I already distilled during this whole article.
-
-Here's [another live stream](https://www.youtube.com/watch?v=GWQ1OxnOKcQ) where I'm studying using this technique (pt-BR), which I use daily too.
-
 ### AI only reflects your capability
 
 I'm going to be blunt here. The quality of AI-assisted work is **directly proportional to the quality of the person guiding it**. If you don't know how to write a test, the agent won't write a meaningful test. If you don't know how to review a diff, the agent's output passes your eyes without triggering a single alarm. If you don't understand your system's architecture - and here's the catch -, _you can't tell the agent where to look_, and it will simply **guess**. Sometimes right, often wrong, and you won't know which is which.
@@ -339,6 +338,24 @@ This is not a flaw in AI. It's a mirror. The agent amplifies what you bring. Bri
 That's why I keep my craft projects. Assembly, Rust from scratch, neural networks without frameworks. Not because I'm nostalgic, but because that's where I build synaptic connections that make me deliver better with AI. 
 
 Skip it, and you're not vibe engineering. You're _vibe hoping_.
+
+---
+
+## My 70/30 model: learning and sharpening fundamentals
+
+Seventy percent AI-assisted work, shipping, delivering. Thirty percent manual coding, learning, building intuition. **The 30% is what makes the 70% work**. Without fundamentals, you become a prompt engineer who can't debug. With only fundamentals, you ship slower than the field. _Why not both?_
+
+Again, **avoid the radicals**.
+
+> "But how to keep learning and sharpening the fundamentals?"
+
+How do I keep the 30% effective? How do I code, learn, and get intuition from the decisions? Ironically, the answer is in the _LLM itself_. Yes, we can leverage the LLM as a pair programming partner, remember the topic from earlier?
+
+When I'm coding manually, I leave the agent open reading my code, doing TDD with me, where **I'm the driver, the agent is the navigator**. It watches my changes and provides feedback in real-time, which I can reason about, get intuition and iterate until I get a solution that I fully understand. Whenever I feel I'm good with the current development, the rest is only ceremony and boilerplate, then I switch to vibe coding and the agent finishes the boring work.
+
+My skill `/dev` also covers this mode, which I call `pair-with-me`. Every time I want to code and learn something new, I'm using this mode. Otherwise, I'm doing engineering around agents as I already distilled throughout this whole article.
+
+Here's [another live stream](https://www.youtube.com/watch?v=GWQ1OxnOKcQ) where I'm studying using this technique (pt-BR), which I use daily too.
 
 ---
 
@@ -354,13 +371,13 @@ The message is simple: _vibe coding is real and it's powerful_. But vibe coding 
 
 And for the love of whatever you believe in, **don't skip the fundamentals**. Any content about **software architecture** is always the best option. Look, I'm not saying anything about _SOLID or Design Patterns_, because IMHO those are just _coding design_, not _software architecture_. Safe to skim them.
 
-I suggest you find your path to **master how systems are created and how they communicate to each other**. That's the _sweet spot_ for software engineering, and that's an ongoing ability we're never done.
+I suggest you find your path to **master how systems are created and how they communicate to each other**. That's the _sweet spot_ for software engineering, and that's an ongoing ability we're never done with.
 
 ### Books I recommend
 
 If there's one thing I learned about reading tech books, it's that most of them age like milk. Framework-specific books, language tutorials, "building X with Y", they're outdated before the ink dries. I always avoid those.
 
-What I look for are books that are **timeless**. Books about principles, tradeoffs, and how systems think, not about how to configure a specific tool and just a random opinion from a guy from Arizona. You read timeless books once and they keep paying dividends years later because the problems they address haven't changed. We still distribute systems, communicate between services and deal with complexity and uncertainty.
+What I look for are books that are **timeless**. Books about principles, tradeoffs, and how systems think, not configuration tutorials or one random opinion from a guy from Arizona. You read timeless books once and they keep paying dividends years later because the problems they address haven't changed. We still distribute systems, communicate between services and deal with complexity and uncertainty.
 
 Here are five that I keep coming back to:
 
