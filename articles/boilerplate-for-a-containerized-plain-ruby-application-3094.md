@@ -138,6 +138,7 @@ services:
 volumes:
   rubygems:
 ```
+
 By doing this way, Docker will use this named volume in host for the gems placed at `/usr/local/bundle` from running containers. 
 
 #### Running the test

@@ -1,6 +1,5 @@
 ---
 title: Palíndromo utilizando dois UNIX signals, uma fila e uma pilha
-slug: "palindromo-unix-signals"
 published_at: "2026-04-27 20:23:21Z"
 language: "pt-BR"
 status: published

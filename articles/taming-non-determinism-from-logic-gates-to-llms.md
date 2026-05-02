@@ -11,7 +11,7 @@ Or: _how engineering keeps turning chaos into reliable computation. And why agen
 
 There's a pattern that repeats across the entire history of computing: we take something fundamentally **non-deterministic** and engineer enough layers on top of it until it behaves deterministically. Logic gates did it. Artificial neural networks (ANNs) replicated it at some level. LLMs are the next frontier, and the hardest one yet.
 
-In this article, we'll explore how engineering is crucial to facing non-determinism, and analyse the current state of the art for LLMs.
+In this article, we'll explore how engineering is crucial to addressing non-determinism, and analyze the current state of the art for LLMs.
 
 ---
 

@@ -6,6 +6,254 @@
 <description>low-level curiosity, high-level pragmatism</description>
 <atom:link href="https://leandronsp.com/feed.xml" rel="self" type="application/rss+xml"/>
 <item>
+<title>Path to Vibe Engineering</title>
+<link>https://leandronsp.com/articles/path-to-vibe-engineering.html</link>
+<guid>https://leandronsp.com/articles/path-to-vibe-engineering.html</guid>
+<description><![CDATA[<p>2026, what a year to be alive. AI, LLMs, agents, agentic coding. On one side, the hype train. On the other, narratives built to invalidate everything the hype touches.</p>
+<p>In this article I'll dig into the limitations and benefits of using LLMs for coding and how to bring <strong>engineering</strong> back to the landscape, which I call <em>vibe engineering</em>. I aim to help readers on a path to vibe engineering, from zero to actually engineering with AI.</p>
+<p>Purely empirical, unpretentious, and potentially poetic. Reflections from someone who uses AI daily but doesn't sell courses or posts horror stories. Embrace pragmatism, avoid the radicals, grab a coffee and let's go.</p>
+<hr />
+<h2>First things first: my journey to agentic coding</h2>
+<p>Back in 2022, I was skeptical. ChatGPT 3.5 was peak hype, while most people were testing these new "chat" capabilities. Developers also started looking into it, and I was no different. However, something was off in my mind: asking a probabilistic model to reason about my code was not accurate. Nor right.</p>
+<p>The upcoming years went nuts in terms of AI &amp; coding. I tried my best to get rid of AI from my programming routine. While other developers were struggling with ChatGPT to output a lot of spaghetti code, I was crafting Assembly on live streams. AI outputs were never satisfactory. "They" had no access to my codebase to understand and reason with more confidence.</p>
+<p>Fast forward to 2025.</p>
+<h3>Claude Code</h3>
+<p>In the middle of 2025, I was still coding manually, like an <em>artisan</em>. At every coding task I used to open my <a href="https://github.com/leandronsp/dotfiles">NeoVim</a> and get to work.</p>
+<p>Then, I looked around and realized I was the only one not using AI. I attended a private talk at my current employer and I asked which AI models I could start using since I'm a NeoVim user and I was not keen on using Cursor or another IDE. The answer was: <em>Claude Code</em>.</p>
+<p>It changed everything.</p>
+<p>Within a week, I noticed a slight increase in speed, but not the <strong>speed boost</strong> people talk about. Something was still missing.</p>
+<h3>It's not about speed, it's about confidence</h3>
+<p>Soon I realized that using AI, more specifically Claude Code (Sonnet 3.5, at the time), I could deliver with more <em>confidence</em>. Despite still being capable of writing and reading code, an LLM is orders of magnitude faster at retrieving and processing context from any codebase. For instance, my first steps involved <a href="http://code.claude.com/docs/en/best-practices#explore-first-then-plan-then-code">reading about best practices</a> of using Claude Code. Also, an LLM is way more capable of writing/dumping huge amounts of code - which of course, brings some tradeoffs.</p>
+<p>On the other hand, even with flagship models, an LLM <em>does not reason</em> like humans. I think we have more reasoning capacity, understanding context and requirements more broadly than LLMs.</p>
+<p>That said, this combination of leveraging an LLM to get context and provide information so we can reason about it, reflect and decide is indeed a <em>game changer</em>. Hence, I started delivering my tasks with <strong>way more</strong> confidence with AI assistance.</p>
+<p>As a software engineer, I realized I can implementing new features, fixing bugs, refactoring complex codebases and handling more complex tasks that would take me more time. By applying best <strong>software engineering and agile practices</strong>, I can go beyond, delivering with quality.</p>
+<p>But what are those <em>software engineering and agile practices</em> we're talking about?</p>
+<hr />
+<h2>Engineering, Agile &amp; AI</h2>
+<p>I'd like to introduce this topic by first talking about <strong>Software Engineering</strong>. It's not about <em>writing code</em>, it never was, and I'm pretty sure you're sick of hearing this statement many times on the social networks.</p>
+<p>Software engineering is about <strong>managing complexity</strong> through practices that give you confidence in what you build. It involves testing, design, refactoring, code review and all that sort of practices many of us do on a daily basis. We should know when to scope something, when to break it down, when to ship and when to <em>say no</em>.</p>
+<blockquote>
+<p>Yes, sometimes just saying "no" is the good call, but respectful, of course</p>
+</blockquote>
+<p>As for <strong>agile</strong>, being agile is not about using a tool or some agile framework. Neither about hiring dozens of agile coaches. Truly agile embraces short cycles, working software, responding to change over following a plan (yes SDD'ers I'm talking to you :D). It's a <em>culture</em>.</p>
+<p>Everything under an agile culture leans toward feedback loops. Pair programming and retrospectives provide feedback loops. Talking to designers, refining stories, writing spikes, promoting R&amp;D. The whole point is to <em>learn fast, fail fast, and correct course</em>.</p>
+<h3>Fundamentals matter</h3>
+<p>Almost everyone in tech has already faced that moment where something breaks in production, and you realize the bug wasn't a lack of tooling, or a missing requirement. It was <strong>a gap in fundamentals</strong>. Hard to admit that, I know, but the sooner you realize that, the better you get at the software crafting.</p>
+<p>When you know the fundamentals, you read code and introspect systems differently. You start having a broader and holistic vision of the whole system. You spot the shortcut before it becomes a regression, and you <strong>ask the right question</strong> before the wrong code ships.</p>
+<p>Got it?</p>
+<blockquote>
+<p>You should <strong>ask the right question</strong> before the wrong solution lands in production</p>
+</blockquote>
+<p>That's why fundamentals are so important. Even more now, in the <em>AI agentic era</em>. That gut feeling, the one that comes from years of writing, reading, breaking, and fixing code, that's not something an AI model gives you. That's something you <em>earn</em>.</p>
+<p>And here's where the irony kicks in: the more capable AI gets at generating code, the more you need fundamentals to work with it, not less. If you can't evaluate what the AI produces, if you can't tell whether the test it wrote actually covers the edge case, if you can't spot the subtle bug in a 3-line diff that looks perfectly clean, then you're not engineering, you're rubber-stamping.</p>
+<p>Fundamentals are what turn an LLM's output <strong>from a suggestion into a deliberate decision</strong>.</p>
+<h3>Building the bridge</h3>
+<p>Now here's the thing. LLMs don't bring any of that, because they generate code at scale. They won't tell you if that code is right. Furthermore, they don't validate assumptions, don't catch regressions or question a misleading requirement.</p>
+<p>All of that is still <em>on you</em>.</p>
+<p>So the question isn't whether AI replaces engineering practices, because it won't. The question is how to use <strong>these engineering and agile practices to work with AI</strong>, hence increase quality while delivering solutions to real problems.</p>
+<h3>A note about SDD and agent orchestration</h3>
+<blockquote>
+<p>"Okay Leandro, so you mean we should do SDD and orchestrate dozens of agents?"</p>
+</blockquote>
+<p><em>Hell no</em>, definitely not. I'm not in this game to overcomplicate things. I think that SDD (or Spec-Driven Development) is fine, but the term is overly inflated and many people are taking SDD like <em>creating a lot of markdown files upfront then orchestrate with dozens of agents</em>.</p>
+<p>What documentation enthusiasts are doing with SDD and plenty of agents is actually <em>waterfall</em>. I'm not very fond of waterfall for software development, because in the waterfall model we don't have feedback loops and I'm pretty sure that even with all those documentation upfront and multiple agents that dump code in the speed of light, <em>rework will be needed</em>. Requirements will be missed. Someone will forget important details and the AI won't catch those missing requirements as if it was something <em>magical</em>.</p>
+<p>I think our industry evolved for decades to finally <strong>get shit done</strong> with agile practices and all of a sudden we're doing waterfall again? Please, no.</p>
+<p>What I'm going to share here is a simple process with ancient engineering &amp; AI practices I believe this may work for most people in tech, working for startups or even enterprises. We'll dig further into these practices in the upcoming sections.</p>
+<hr />
+<h2>Vibe (Coding?) Engineering</h2>
+<p><em>Vibe coding</em> has been a hot topic lately. Karpathy coined the term, and suddenly a massive number of tech enthusiasts became <em>coders</em>. I'm not against it. I believe that vibe coding genuinely unlocks potential for people who want to build products, people who think in terms of what they want to create, not what syntax they need to type.</p>
+<blockquote>
+<p>I even consider myself a <strong>vibe coder</strong> despite years of experience writing software for a variety of companies using different programming languages. Not to mention I'm seasoned at different levels of architecture, yet I know I always have a lot of knowledge gaps to fill</p>
+</blockquote>
+<p>But let me bring a new term that I don't see many people talking about: <strong>vibe engineering</strong>. That's not a rejection of vibe coding, but an enhancement instead.</p>
+<p>The practices I'm about to walk through aren't new though, and that's exactly the point. Refine, scope, test, pair, review, debug with <em>discipline</em>. These are the things <em>you should have been doing even before AI</em>, practices that kept software reliable before AI, and they're the stuff that keep AI-generated software reliable now.</p>
+<p>The difference is that skipping them used to mean a bug in production. Skipping them with AI in the loop means <strong>a bug in production that you didn't even write</strong> and worse, <strong>you can't explain and reason about</strong>.</p>
+<p>Let's get into the practices.</p>
+<h3>Engineering practices for the AI era</h3>
+<p>This is where most AI coding discussions fall apart. Either you're told to "just prompt harder" or you're told to "never trust the output". Both miss the point. The practices aren't new, and they don't change because agentic AI is here, they just become more important.</p>
+<p><strong>Refine before you build</strong></p>
+<p>This is non-negotiable. I don't necessarily mean to exaggerate on SDD (Spec driven development) - because I believe people are losing the point about SDD and I can talk about it in another post -, but before touching a keyboard, before opening an agent, <strong>you need to know what you're building and why</strong>.</p>
+<p>I use a skill <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/po/SKILL.md">called "po"</a> (which acts like a <em>Product Owner</em>) that forces me to write a PRD - product requirements document -, before any code. Not because I love documentation, but because the agent will hallucinate scope if <em>I don't carve it myself</em>. A vague prompt gives you vague code, whereas a refined one gives you scoped and testable deliverables. Refine first, then build.</p>
+<p><strong>Break work into small deliverables</strong></p>
+<p>If your prompt asks for more than a few hundred lines of output, maybe it's better step back and break down the requirements. I have a personal threshold: above 500 lines of diff and I start questioning whether the scope is right.</p>
+<p>Small diffs are reviewable diffs, which make them easy to test and validate. The agent handles <strong>small scoped tasks far better</strong> than large ambiguous ones.</p>
+<p>For instance, I usually write a prompt to break down in small pieces <em>before I start using the <code>/po</code> skill</em>:</p>
+<pre><code>I want to add RSS feed generation to the blog engine.
+The feed should produce valid RSS 2.0 XML with:
+
+- channel metadata (title, link, description, whatever else is needed for a RSS)
+
+- items for each published post (title, link, published date, description)
+
+Before writing any code, let's break this into small, independent deliverables.
+Give me a roadmap with clear order, where each step produces something 
+I can refine, test and validate on its own
+</code></pre>
+<p>The key word here is <strong>before</strong>. I'm not asking the agent to build anything yet - because coding agents <em>WILL try to build something</em> -, I'm asking it to plan.</p>
+<p>Look, I'm not saying anything about the famous "plan mode", I'm not even using it anymore. The output is a mini roadmap, something like:</p>
+<ol>
+<li>Define the RSS data model (structs for channel and item)</li>
+<li>Implement XML escaping for special characters</li>
+<li>Build the feed header (channel metadata)</li>
+<li>Build the feed items (post to RSS item mapping)</li>
+<li>Wire it all together and validate against the RSS 2.0 spec</li>
+</ol>
+<p>Of course the <strong>first output is almost always not ready yet</strong>. I refine the ROADMAP. I leave comments before we decide the final version, and iterate over and over until <strong>my requirements are satisfied</strong>.</p>
+<p>Then, once I'm comfortable with the roadmap, I refine one deliverable at a time. I take step 1, run <code>/po</code> to write a proper PRD just for that piece, then <code>/dev</code>, <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/dev/SKILL.md">my skill for coding</a>, to implement it.</p>
+<p>Test, validate, deliver. What I learn from step 1 <em>might change now I approach step 2</em>, or even reshape the roadmap itself.</p>
+<blockquote>
+<p>Yes, that's the truly agile development. Not about SCRUM, not about KANBAN. That's all about <em>embracing changes</em>. If you are in this game and not keen to embrace changes during the whole cycle of software development, well...I have bad news for you</p>
+</blockquote>
+<p>I don't refine everything upfront, and that's why I'm not very fond of the "SDD" people are selling nowadays. All this <em>SDD thing</em> are a huge pile of requirements that <strong>will change</strong>, no matter how many agents I have working for me. Completely wasteful on my workflow.</p>
+<p>I refine the first thing, ship it, learn, adjust if needed, move to the next one. This is agile applied to AI-assisted work, and it works precisely because the agent performs best on small, scoped tasks. Give it a destination, not a <strong>map of the entire country</strong>.</p>
+<p><strong>Test first, always</strong></p>
+<p>TDD is not a methodology debate for me, it's a survival tool. When an LLM writes code, you need a failing test that proves what you expect before the code even exists. Write the test, see it fail, let the agent make it pass, then verify.</p>
+<p>This feedback loop, <code>RED -&gt; GREEN -&gt; REFACTOR</code> is nothing new, but it's the closest thing to determinism you'll get from a <em>probabilistic model</em>.</p>
+<blockquote>
+<p>I wrote an article this year about <a href="https://leandronsp.com/articles/taming-non-determinism-from-logic-gates-to-llms">Taming non-determinism: from logic gates to LLMs</a>, in case you want to have a deeper understanding about non-determinism</p>
+</blockquote>
+<p>My <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/dev/SKILL.md">skill "dev"</a> relies on TDD from the very start. I invite you to take a look into it.</p>
+<p><strong>Pair with the agent</strong></p>
+<p>I don't mean to sit back and watch it generate 800 lines. I mean <strong>treat the agent like a pair programming partner</strong>. You drive, the agent suggests and review. Or the agent drives, you suggest and review.</p>
+<p>Again, my <code>/dev</code> skill covers different modes for development:</p>
+<p>a) <code>agent-pair</code> - two subagents working adversarially, one writes, one gates</p>
+<p>b) <code>solo</code> - the agent does the work but narrates every step</p>
+<p>c) <code>pair-with-me</code> - me and the agent actually pairing, discussing before coding</p>
+<p>At any mode, the skill is ready to work with TDD, no bullshit included. Pick the mode that matches the task, but always stay in the loop.</p>
+<p><strong>Review the output</strong></p>
+<p>Every. Single. Time. An LLM's output is a suggestion, not a decision. My <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/review/SKILL.md">"review" skill</a> spawns three parallel reviewers agents. One for security, one for performance, and one for quality. Then a <em>red-team auditor</em> that checks the reviewers themselves. It sounds excessive until you've shipped a bug that looked perfectly clean in a 400-line diff. If you're not reviewing, you're rubber-stamping.</p>
+<p>Even so, you must review the auditor's final review. Don't take <em>any LLM output</em> as a source of truth. An LLM's output <strong>should never be the final destination</strong>, but using it with the correct tooling, it'll take you <em>some steps forward</em>.</p>
+<p><strong>Debug with discipline</strong></p>
+<p>When something breaks, don't just prompt the agent to "fix it". I know, it's tempting to drop a screenshot and ask the LLM to solve it. With a good LLM model and correct skills, this naive prompting will provide the right output very often, but sometimes it simply won't get out of the loop. Humans get stuck, so do AIs.</p>
+<p><em>Tip:</em> reproduce the bug with a failing test first. Actually, that's a practice I've always tried to apply on my workflow way before agentic AI. If there's some skill I'd pick and say that every good engineer should sharpen, it's the <strong>ability to reproduce anything with a failing test</strong>. Many engineers, including the senior ones, fail at this important step while debugging.</p>
+<blockquote>
+<p>In a distributed system, debugging is very hard. Sometimes a failing test is not enough, but if you spend some time trying to write as much failing tests as possible, you'll eventually get there. The "test-driven" mindset is winner IMHO. "Follow the data and write a failing test for it" is the best engineering advice I've ever heard.</p>
+</blockquote>
+<p>Speaking of AI, I have a <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/skills/bugfix/SKILL.md">"bugfix" skill</a> that enforces this: understand the bug, scout the codebase, write a failing test for the <em>right reason</em>, then fix. No test, no fix. Of course, agents usually write any poor test just to make it pass, but if you enforce it with a good skill, the agent will go to the right path guarded by good engineering practices <strong>you</strong> provided in the skill or prompt.</p>
+<p>The agent will happily patch symptoms all day if you let it. A failing test forces both you and the agent to prove you actually <strong>fixed the root cause</strong>.</p>
+<p>Now time to show what all this looks like in practice.</p>
+<hr />
+<h2>My showcase in AI</h2>
+<p>I want to highlight <em>three real use cases</em> where I applied those engineering practices and could be successful with it. Despite using AI for personal projects, I've been using agentic AI for <strong>delivering value to real customers in production</strong>, critical projects and demanding features. It's not a playground as many may argue: _it's serious work.</p>
+<h3>Case 1: Debugging a PDF rendering bug</h3>
+<p>I was working on a task where customers weren't able to download <em>some PDFs</em> generated by the platform, affecting critical workflows in production. Pay attention to the "some PDFs" part. Not all of them.</p>
+<p>Logs pointed that some PDFs were failing to parse, leading the troubleshooting to go look at <em>broken PDFs</em>. In the "PDF world", everything is messy. Writer and reader tools don't always come to an agreement, despite the PDF itself having a public specification.</p>
+<p>I got some broken PDFs and started looking into them, as they were opening normally in my PDF reader. The problem was somewhere in our <strong>merge PDF process</strong>, which is backed by <em>Ghostscript</em>, a well-known tool for printing and PDF manipulation.</p>
+<p>With this information in place, instead of pasting the bug report into an agent and saying "fix it", I called my <code>/bugfix</code> skill. And you'll see how a good skill and a failing test wins.</p>
+<p>The skill started by understanding the bug: what's broken, when it happens, what's the expected behaviour. Then it scouted the codebase, reading the PDF parsing code, tracing data flow, checking git history for recent changes.</p>
+<p>It came back with a hypothesis: the <em>outline builder</em> within the PDF content was pushing a parent reference into its own children, creating a cycle.</p>
+<p>The critical step: write a test that fails. The skill produced a minimal test case that created a PDF outline with two levels, asserted that traversing the outline tree terminates, and the test failed, proving the bug existed.</p>
+<blockquote>
+<p>Once we can prove the bug exists with the <em>right failing test</em>, the dopamine levels go skyrocket :P</p>
+</blockquote>
+<p><strong>The "senior" moment</strong></p>
+<p>First, I let the AI go for a fix, but as soon as I noticed it got stuck in a loop after two or three failed approaches, I decided to enter the loop and become a <strong>real senior</strong>. My instinct was that something in the <em>Ghostscript</em> process was not recognizing the circular outlines. But Ghostscript is an external tool which I don't have control over. The only thing I could do was to try a variety of different <em>command line flags</em> in a "trial-and-error process". Not good.</p>
+<p>The <em>senior</em> moment became when I asked the agent to analyze the <strong>Ghostscript process</strong> using some tooling in my macOS, which is an operating system based on BSD.</p>
+<p>For freak's sake, the agent pulled out the utility <code>sample</code> against the <code>gs</code> process and then got the process's call stack.</p>
+<p>And <em>boom</em>! My little boy got the exact part of the <em>Ghostscript stacktrace</em> where the circular reference was stuck in an infinite loop. The fix was just using the correct flag to "ignore" circular outlines. Easy peasy.</p>
+<p>Could I hit the same destination without AI? Hell yes, but I would have spent too many hours on it, maybe days. The whole process took me <strong>only 20 minutes</strong>. More importantly, the bug is now captured in a test. If it ever regresses, I'll know immediately.</p>
+<h3>Case 2: Building a feature from scratch, product to code</h3>
+<p><a href="https://github.com/leandronsp/chesswav">ChessWAV</a> is a Rust project that turns chess games into audio. It's not a simple CRUD. It's chess logic, graph manipulation, sine waves, mathematical stuff and all. The REPL had a working board display, but it was appending a new board after every move, scrolling the terminal endlessly. No move history, no file labels on both sides. I wanted to fix that.</p>
+<p>Instead of jumping to code, I started with <code>/po</code> in-place board rendering with move list sidebar`. The skill walked me through writing a proper PRD: what the rendering should look like, how ANSI cursor escapes work for in-place updates, how each display strategy (sprite, unicode, ascii) affects layout calculations. Edge cases like switching display modes mid-game and cursor-up calculations across different board heights.</p>
+<blockquote>
+<p>In case you don't believe me and think I could be making this up, please refer to my <a href="https://github.com/leandronsp/chesswav/issues/9">issue in Github</a>, the <a href="https://github.com/leandronsp/chesswav/pull/10">pull request</a>, all of it done <strong>during a live stream</strong> (pt-BR) in my <a href="https://www.youtube.com/watch?v=Da4BYe_gV0Y">Youtube channel</a></p>
+</blockquote>
+<p>The PRD took maybe ten minutes and saved me from <em>scope creep</em> on what could have been a bottomless rendering rabbit hole. Of course I had two or three iterations before I agreed on the PRD, but that's the truly productivity power of using agentic AI IMHO.</p>
+<p>After the issue was created, I handed it to <code>/dev</code>, no further prompting, just pasted the issue URL, then it scouted the codebase, asked clarifying questions about the existing display strategy pattern, proposed test cases, and only after I approved the plan it started coding.</p>
+<p>Every cycle was RED then GREEN. The whole feature shipped in three incremental diffs: cursor-up logic and layout height calculation first, then the move list sidebar, then the re-rendering flow that ties it together.</p>
+<p>Before opening the PR, I ran the <code>/review</code> skill which gloriously gave me some hints on refactoring. I looked at the code afterwards, though it wasn't too bad, I suggested some refactoring to make the code cleaner. You can see the <a href="https://github.com/leandronsp/chesswav/pull/10">code yourself</a>, as the final PR was only 369 additions across 3 files. Not 2000 lines of "here's the whole thing". Small, reviewable, tested increments. Each one I could understand, validate and <em>ship with confidence</em>.</p>
+<p>And before someone argues:</p>
+<blockquote>
+<p>But Leandro, you're doing engineering as usual. Why the need of using AI at all?</p>
+</blockquote>
+<p>Let's be honest here. I'm a seasoned software engineer and I'm <strong>pretty sure</strong> I'm not able to deliver this kind of complexity in a matter of minutes or hours with confidence. That's not AI-slop, go check yourself. This use case is the difference between prompting "add in-place board rendering" and <strong>engineering your way to it</strong>.</p>
+<p>I kindly invite you to truly experiment on this flow. Give engineering &amp; AI an honest chance.</p>
+<blockquote>
+<p>Unless you're a radical that's not keen to learn and evolve. If that's the case, well...you shouldn't be reading my blog at this point. Feel free to close this tab now. Radicals are not welcome here.</p>
+</blockquote>
+<h3>Case 3: Review before you ship</h3>
+<p>I had just finished a refactor of the markdown rendering pipeline for <a href="https://github.com/leandronsp/devtui">DevTUI</a>, the blog engine I created, using it to write this very blog post. The diff was around 300 lines, which is already pushing my comfort zone. I ran <code>/review</code> on the changes.</p>
+<p>The skill pulled the diff, launched a scout to understand the surrounding code, then spawned three parallel reviewers. Security checked for injection risks in the HTML output. Performance looked for unnecessary allocations in the hot path. Quality examined whether the refactor actually improved the design or just moved code around.</p>
+<p>Then the red-team auditor cross-checked all three reports, <strong>catching a false positive</strong> from the security reviewer and flagging a blind spot the others missed: the refactor had changed the order of markdown preprocessing steps, which would silently break nested blockquotes on certain inputs.</p>
+<p>I would not have caught that by skimming the diff. <strong>The fix was two lines</strong>, but finding it required reading the diff against the full context of how the pipeline processes input.</p>
+<p>That's what review gives you, not just "looks good" - which many developers already do -, but actual evidence that your change does what you think it does.</p>
+<hr />
+<h2>Approaching the end, here are my takes</h2>
+<p>Everything I described above, the skills, the TDD discipline, the review workflow, <strong>it's not magic</strong>. It's configuration and intentionality. Next are a few things from my setup that make this work. Also comes with a few takes, read it with discretion.</p>
+<h3>Write your own CLAUDE.md (or AGENTS.md)</h3>
+<p>This is the most impactful single thing you can do. My personal <code>~/.claude/CLAUDE.md</code> (check the correct configuration and conventions for your harness) is my <a href="https://github.com/leandronsp/dotfiles/blob/main/claude/.claude/CLAUDE.md">development philosophy distilled</a> into a file the agent reads on every session. It should be short. It says things like "deletion beats addition", "TDD for non-trivial work", "search the codebase first", "baby steps". Without it, the agent follows its own defaults, and those defaults are optimized for generating output, not for <em>engineering</em>.</p>
+<p>Write yours, be opinionated. The more specific, the better.</p>
+<h3>Create skills for your recurring workflows</h3>
+<p>My <code>/po</code>, <code>/dev</code>, <code>/bugfix</code> and <code>/review</code> skills encode processes I actually follow. Not theoretical best practices, but the way I work. A skill is just a markdown file that tells the agent what to do, step by step, with gates and waits. If you find yourself repeating the same process, write it down once and let the skill enforce it. That's how you get TDD from a model that defaults to dumping code.</p>
+<p>And that's the main reason I avoid importing other's skills I don't fully understand or control. I avoid using repos with thousands of skills or "following some framework". I think we should pick up skills with caution. Always better to use some reference then craft a few ones using your agent.</p>
+<p>Feel free to <a href="https://github.com/leandronsp/dotfiles/tree/main/claude/.claude/skills">pick up my skills</a>, but use your agent to explain about them, refine and adapt to your own workflow.</p>
+<h3>Set up hooks for flow state</h3>
+<p>I <a href="https://github.com/leandronsp/dotfiles/tree/main/claude/.claude/hooks">have a shell hook</a> that plays a sound and flashes my Tmux window when the agent finishes, so I don't sit staring at a terminal waiting. Another hook loads context from my Obsidian vault at session start, so the agent already knows my project history. Small things that compound.</p>
+<h3>Use adversarial agents</h3>
+<p>My <code>/dev</code> skill runs two subagents in pair mode: a driver that writes code and a navigator that gates every step. The navigator doesn't rubber-stamp. It pushes back on test scope, challenges minimum implementations, flags premature abstractions. This costs a bit more tokens, I know, but saves you from the model's tendency to over build.</p>
+<p>One agent writing unchecked code is vibe coding. Two agents checking each other is closer to pair programming.</p>
+<h3>It's not just Claude</h3>
+<p>I've been running GLM 5.1 and Kimi 2.6 for personal projects and I'm genuinely impressed. Both are strong models that hold their own for coding tasks. The important thing is that my skills, my CLAUDE.md, my memory, they're all model-agnostic configuration files. I can switch models and the process stays the same.</p>
+<p>I've been using opencode and pi-agent alongside Claude Code, and both harnesses read from the same <code>~/.claude</code> configuration. Same skills, same rules, same workflows. Pi-agent works with extensions instead of Claude's hook system, so there are slight differences, but the core setup translates. They are <strong>way cheaper</strong> too.</p>
+<p>The discipline is in the configuration, not in the model. Pick whatever works for your budget and preference, but bring your own process.</p>
+<h3>My 70/30 model: learning and sharpening fundamentals</h3>
+<p>Seventy percent AI-assisted work, shipping, delivering. Thirty percent manual coding, learning, building intuition. <strong>The 30% is what makes the 70% work</strong>. Without fundamentals, you become a prompt engineer who can't debug. With only fundamentals, you ship slower than the field. <em>Why not both?</em></p>
+<p>Again, <strong>avoid the radicals</strong>.</p>
+<blockquote>
+<p>"But how to keep learning and sharpening the fundamentals?"</p>
+</blockquote>
+<p>How do I keep the 30% effective? How do I code, learn, and get intuition from the decisions? Ironically, the answer is in the <em>LLM itself</em>. Yes, we can leverage the LLM as a pair programming partner, remember some topics before?</p>
+<p>When I'm coding manually, I leave the agent open reading my code, doing TDD with me, where <strong>I'm the driver, the agent is the navigator</strong>. It watches my changes and provides feedback in real-time, which I can reason about, get intuition and iterate until I get a solution that I fully understand. Whenever I feel I'm good with the current development, the rest is only ceremony and boilerplate, then I switch to vibe coding and the agent finishes the boring work.</p>
+<p>My skill <code>/dev</code> also covers this mode, which I call <code>pair-with-me</code>. Every time I want to code and learn something new, I'm using this mode. Otherwise, I'm doing engineering around agents as I already distilled during this whole article.</p>
+<p>Here's <a href="https://www.youtube.com/watch?v=GWQ1OxnOKcQ">another live stream</a> where I'm studying using this technique (pt-BR), which I use daily too.</p>
+<h3>AI only reflects your capability</h3>
+<p>I'm going to be blunt here. The quality of AI-assisted work is <strong>directly proportional to the quality of the person guiding it</strong>. If you don't know how to write a test, the agent won't write a meaningful test. If you don't know how to review a diff, the agent's output passes your eyes without triggering a single alarm. If you don't understand your system's architecture - and here's the catch -, <em>you can't tell the agent where to look</em>, and it will simply <strong>guess</strong>. Sometimes right, often wrong, and you won't know which is which.</p>
+<p>This is not a flaw in AI. It's a mirror. The agent amplifies what you bring. Bring fundamentals, and you get leverage. Bring ignorance, and you get confident ignorance at scale.</p>
+<p>That's why I keep my craft projects. Assembly, Rust from scratch, neural networks without frameworks. Not because I'm nostalgic, but because that's where I build synaptic connections that make me deliver better with AI.</p>
+<p>Skip it, and you're not vibe engineering. You're <em>vibe hoping</em>.</p>
+<hr />
+<h2>Final words</h2>
+<p>I started this article saying I'd been procrastinating on writing it. Now I understand why. This isn't a hot take or a framework pitch. It's the distillation of months of trial and error, of shipping real features to real customers, of getting stuck in agent loops and finding my way out.</p>
+<p>The message is simple: <em>vibe coding is real and it's powerful</em>. But vibe coding without engineering is just faster ways to produce code you can't explain, debug or maintain.</p>
+<p><strong>Vibe engineering</strong> is what happens when you take that speed and pair it with discipline. Not the kind of discipline that slows you down, but the kind <strong>that makes speed sustainable</strong>.</p>
+<blockquote>
+<p>Yet I can't understand why so many "seniors" struggle to see this simple conclusion</p>
+</blockquote>
+<p>And for the love of whatever you believe in, <strong>don't skip the fundamentals</strong>. Any content about <strong>software architecture</strong> is always the best option. Look, I'm not saying anything about <em>SOLID or Design Patterns</em>, because IMHO those are just <em>coding design</em>, not <em>software architecture</em>. Safe to skim them.</p>
+<p>I suggest you find your path to <strong>master how systems are created and how they communicate to each other</strong>. That's the <em>sweet spot</em> for software engineering, and that's an ongoing ability we're never done.</p>
+<h3>Books I recommend</h3>
+<p>If there's one thing I learned about reading tech books, it's that most of them age like milk. Framework-specific books, language tutorials, "building X with Y", they're outdated before the ink dries. I always avoid those.</p>
+<p>What I look for are books that are <strong>timeless</strong>. Books about principles, tradeoffs, and how systems think, not about how to configure a specific tool and just a random opinion from a guy from Arizona. You read timeless books once and they keep paying dividends years later because the problems they address haven't changed. We still distribute systems, communicate between services and deal with complexity and uncertainty.</p>
+<p>Here are five that I keep coming back to:</p>
+<ul>
+<li>
+<p>The Mythical Man-Month, Fred Brooks. This book is from 1975 (yup, that old) and it's still right. Adding people to a late project makes it later. Communication overhead grows quadratically. There's no silver bullet.</p>
+</li>
+<li>
+<p>The Pragmatic Programmer, Hunt &amp; Thomas. This book taught me that programming is not about syntax, it's about thinking. DRY, tracing bullets, <strong>debugging by thinking</strong>. It's practical without being tied to a language or framework. Timeless.</p>
+</li>
+<li>
+<p>Fundamentals of Software Architecture, Richards &amp; Ford. This goes straight to the sweet spot I mentioned. Architecture patterns, tradeoffs, modularity, how to make decisions when there's no right answer. The chapter on <em>tradeoff analysis</em> alone is worth the whole book. You read it and you'll never be the same developer.</p>
+</li>
+<li>
+<p>Architecture the Hard Parts, Richards, Ford, Mishra &amp; Sadalage. The sequel in spirit. Where most architecture books show you the happy path, this one shows you the distributed transactions. This is the book that teaches you how systems communicate with each other and why that's where the real complexity lives.</p>
+</li>
+<li>
+<p>Extreme Programming Explained: Embrace Change, Kent Beck. The book that gave agile its heart. Not the agile of frameworks and certifications, the agile of short cycles, continuous feedback, and actually embracing change instead of pretending you can plan it away. Everything I said about <em>feedback loops</em>, small deliverables, test-first, pair programming, Kent Beck was writing about it in 1999. <strong>Embrace change</strong>.</p>
+</li>
+</ul>
+<p>These five books, together, cover exactly what I mean by the sweet spot. How systems are created, how they communicate, how to manage complexity, and how to make decisions under uncertainty. Read them in any order, but read them.</p>
+<h3>And for the best...</h3>
+<p><em>Software engineering is dead. Long live software engineering.</em></p>
+<hr />
+<h2>Disclosure</h2>
+<p>This article was written using a TUI editor I built in Rust called <a href="https://github.com/leandronsp/devtui">DevTUI</a>, with the support of GLM 5.1 via pi-agent for drafting and context.</p>
+<p>Every single paragraph came from my head. The LLM never wrote a sentence for me. It questioned, suggested, challenged, and I decided. Much like I use it <em>daily</em>.</p>
+<p>The identity, opinions, takes and bad jokes in this article are 100% mine. The AI was a pair, not a ghostwriter.</p>
+]]></description>
+<pubDate>2026-05-02</pubDate>
+</item>
+<item>
 <title>Palíndromo utilizando dois UNIX signals, uma fila e uma pilha</title>
 <link>https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html</link>
 <guid>https://leandronsp.com/articles/resolvendo-palíndromo-com-apenas-dois-unix-signals-uma-fila-e-uma-pilha.html</guid>
@@ -10299,262 +10547,5 @@ end
 <p>Fiquem ligades.</p>
 ]]></description>
 <pubDate>2023-09-08</pubDate>
-</item>
-<item>
-<title>Entendendo fundamentos de recursão</title>
-<link>https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4.html</link>
-<guid>https://leandronsp.com/articles/entendendo-fundamentos-de-recursao-2ap4.html</guid>
-<description><![CDATA[<p>Se pra você:</p>
-<ul>
-<li>
-<p><strong>Recursão</strong> é um tema obscuro ou quer entender mais um pouco sobre;</p>
-</li>
-<li>
-<p><strong>Tail call e TCO</strong> são meios de comunicação alienígena e;</p>
-</li>
-<li>
-<p><strong>Trampoline</strong> é nome de remédio</p>
-</li>
-</ul>
-<p><em>Então este artigo é pra você.</em></p>
-<p>Aqui, vou explicar o que são estes termos de forma didática e os problemas que resolvem, com exemplos em <strong>Ruby</strong>. Mas não se preocupe pois os exemplos são bem simples de entender, mesmo porque os conceitos aqui mostrados são <em>agnósticos a linguagem</em>.</p>
-<p>Portanto, venha comigo nesta viagem <strong>interminável</strong>.</p>
-<blockquote>
-<p>✋
-Para continuar, volte ao topo do post</p>
-</blockquote>
-<hr />
-<h2>Agenda</h2>
-<ul>
-<li>
-<p><a href="#o-que-%C3%A9-recurs%C3%A3o">O que é recursão</a></p>
-</li>
-<li>
-<p><a href="#fibo-para-os-%C3%ADntimos">Fibo para os íntimos</a></p>
-</li>
-<li>
-<p><a href="#tail-call">Tail call</a></p>
-</li>
-<li>
-<p><a href="#stack-e-stack-overflow">Stack e stack overflow</a></p>
-</li>
-<li>
-<p><a href="#tail-call-optimization">Tail call optimization</a></p>
-</li>
-<li>
-<p><a href="#trampoline">Trampoline</a></p>
-</li>
-<li>
-<p><a href="#conclus%C3%A3o">Conclusão</a></p>
-</li>
-<li>
-<p><a href="#refer%C3%AAncias">Referências</a></p>
-</li>
-</ul>
-<hr />
-<h2>O que é recursão</h2>
-<p>Em programas de computador, somos habituados a <strong>quebrar problemas grandes em problemas menores</strong> por meio do uso de funções ou métodos.</p>
-<p><strong>Recursão</strong> é, de forma extremamente simplificada, uma técnica na computação onde estes problemas são quebrados de forma que uma <em>determinada função é executada recursivamente</em>.</p>
-<p>Com isto, a função "chama a si mesma" para resolver alguma computação e continuar sua execução.</p>
-<hr />
-<h2>Fibo para os íntimos</h2>
-<p>Um exemplo bastante clássico de recursão é descobrir, dada a <strong>sequência de Fibonacci</strong>, ou Fibo, qual número se encontra em determinada posição.</p>
-<pre><code>0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55.........
-</code></pre>
-<p>Com isto, a função <strong>fib</strong> traria resultados como:</p>
-<pre><code>fib(0) = 0
-fib(1) = 1
-fib(2) = 1
-...
-fib(7) = 13
-fib(10) = 55
-</code></pre>
-<p>Temos então uma possível implementação recursiva em Ruby:</p>
-<pre><code class="language-ruby">def fib(position)
-  return position if position &lt; 2
-
-  fib(position - 1) + fib(position - 2)
-end
-</code></pre>
-<p>Este código, entretanto, não é performático. Ao tentar buscar o número da posição 10000 (dez mil) na sequência, o programa fica muito lento pois faz inúmeras chamadas <strong>recursivas redundantes</strong>.</p>
-<pre><code>                 fib(10)
-             /                \
-     fib(9)                 fib(8)
-        /          \          /   \
-fib(8)     fib(7)     fib(7)    fib(6)
-  /      \       /       \       /   \
-fib(7) fib(6) fib(6) fib(5) fib(6) fib(5)
-   /    \     /     \     /     \     /    \
-fib(6) fib(5) fib(5) fib(4) fib(5) fib(4) fib(5) fib(4)
-  /   \   /   \   /   \   /   \   /   \   /   \   /   \
-...
-</code></pre>
-<p>Consequentemente, quanto maior o input da função, o tempo de execução deste código tende a crescer de forma exponencial, que em notação <strong>Big-O</strong> seria <code>O(2^n)</code>.</p>
-<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/n9udpxmgl34093mpmqvc.png" alt="big O exponencial" /></p>
-<p>É possível reduzir esta complexidade?</p>
-<p>E se tentarmos aplicar uma técnica onde a última chamada da função, ao invés de ser a soma de duas chamadas recursivas, passa a ser apenas <strong>uma chamada recursiva</strong>, sem realizar computações adicionais?</p>
-<p>Esta técnica existe e é chamada de <strong>tail call</strong>, ou <em>tail recursion</em>.</p>
-<hr />
-<h2>Tail call</h2>
-<p><strong>Tail call</strong>, ou <strong>TC</strong>, consiste em uma função recursiva onde a última chamada recursiva é a própria função sem computação adicional.</p>
-<p>Com isto, reduzimos a complexidade de exponencial para linear, como se fosse um simples loop iterando em uma lista de inputs.</p>
-<p>Em notação Big-O isto fica <code>O(n)</code>, ou seja, a complexidade cresce de forma linear acompanhando o crescimento do input.</p>
-<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/z8uj2fzw9090971awu89.png" alt="big O linear" /></p>
-<p>Exemplo em Ruby:</p>
-<pre><code class="language-ruby">def fib(position, _current = 0, _next = 1)
-  return _current if position &lt; 1
-
-  fib(position - 1, _next, _current + _next)
-end
-</code></pre>
-<p>Portanto, o número de chamadas recursivas é reduzido drasticamente para algo do tipo:</p>
-<pre><code>fib(10, 0, 1)
-fib(9, 1, 1)
-fib(8, 1, 2)
-fib(7, 2, 3)
-fib(6, 3, 5)
-fib(5, 5, 8)
-fib(4, 8, 13)
-fib(3, 13, 21)
-fib(2, 21, 34)
-fib(1, 34, 55)
-fib(0, 55, 89)
-</code></pre>
-<p>Repara como que o número de chamadas recursivas diminuiu, ou seja, o código está seguindo um caminho mais <strong>linear</strong> com esta abordagem.</p>
-<p>Assim, ao rodar o programa <strong>fib com TC</strong>, o tempo de execução é exponencialmente menor do que rodar sem TC, ficando <em>dezenas de milhares de vezes mais rápido</em>.</p>
-<blockquote>
-<p>✋
-Claramente um programa que leva tempo exponencial é péssimo em termos de performance, não?</p>
-</blockquote>
-<pre><code class="language-ruby"># Sem TC
-fib(30) # 0.75 segundos
-
-# Com TC
-fib(30) # 0.000075 segundos
-</code></pre>
-<p>Voltando ao exemplo de <code>fib(10000)</code>, ao rodar com TC, vemos que a execução é muito mais rápida, porém:</p>
-<pre><code>recursion/fib.rb:10:in `fib_tc': stack level too deep (SystemStackError)
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-        from recursion/fib.rb:10:in `fib_tc'
-</code></pre>
-<p><em>Uh oh</em>, um <strong>stack overflow!</strong></p>
-<p>Para entender o que está acontecendo, vamos primeiro entender o que raios é uma <strong>stack</strong> e <strong>stack overflow</strong>.</p>
-<hr />
-<h2>Stack e stack overflow</h2>
-<p>Quando um programa é executado, é alocada na memória uma estrutura de dados em formato de <em>pilha</em>, chamada <strong>Stack</strong>, que é utilizada para guardar os dados que estão sendo utilizados em uma função em execução.</p>
-<blockquote>
-<p>✋
-Há também outra estrutura na memória do programa chamada <strong>Heap</strong>, que não é uma pilha e tem outras características que vão além do escopo deste artigo. Para entender recursão, focamos apenas na stack</p>
-</blockquote>
-<p>Quando o programa entra em uma função ou método, cada dado é <em>inserido (push) na stack</em>. Ao terminar a função, é feita a <em>remoção (pop) de cada dado</em>.</p>
-<p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rstqf6yz2yph2d7byeuq.png" alt="stack" /></p>
-<p>A cada chamada de função, é atribuído um novo <em>stack frame</em>. Como uma chamada recursiva nunca termina, o runtime não sabe que é preciso fazer "pop" dos dados e finalizar o frame, então a cada chamada, uma nova stack frame é criada e <strong>mais elementos são adicionados</strong> à stack.</p>
-<p>Adivinha o que acontece quando adicionamos muitos dados na stack a ponto de <strong>ultrapassar seu limite</strong> na memória do computador?</p>
-<p>Sim, acontece o famigerado <strong>Stack overflow</strong> 💥🪲, e isto explica aquele erro no Ruby ao rodar fib de 10000 com tail call.</p>
-<blockquote>
-<p>✋
-Então quer dizer que calcular o fib de 10000 é um problema impossível de resolver com recursividade?</p>
-</blockquote>
-<p>Calma, algumas linguagens empregam uma técnica de otimização que consiste em utilizar a chamada TC com <em>apenas um stack frame</em>, garantindo assim que cada chamada recursiva seja tratada como se fosse <strong>uma iteração num loop primitivo.</strong></p>
-<p>Com isto, é feita a manipulação dos argumentos e dados da função em uma única stack frame, exatamente como se tivéssemos escrito um loop primitivo. E consequentemente, novas chamadas recursivas de cauda não vão provocar estouro na pilha.</p>
-<p>A esta técnica chamamos de <strong>Tail call optimization</strong>, ou <em>TCO</em>.</p>
-<hr />
-<h2>Tail call optimization</h2>
-<p>Devido a sua natureza imperativa, e assim como diversas outras linguagens de propósito geral, <em>Ruby não traz suporte nativo a TCO</em>.</p>
-<p>Geralmente esta funcionalidade é mais encontrada em linguagens com forte inclinação ao paradigma funcional, e não ao imperativo.</p>
-<p>Mas em Ruby é possível <em>habilitar o modo TCO</em> com uma simples configuração na instrução do runtime do Ruby (YARV), e assim conseguimos executar fib de 10000 sem dor.</p>
-<pre><code class="language-ruby">RubyVM::InstructionSequence.compile_option = {
-  tailcall_optimization: true,
-  trace_instruction: false
-}
-
-def fib(position, _current = 0, _next = 1)
-  return _current if position &lt; 1
-
-  fib(position - 1, _next, _current + _next)
-end
-
-# TC com TCO
-fib(10000) # 0.02 segundos
-</code></pre>
-<p><strong>Superb</strong>! Com TCO habilitado, uma fib 10000 com tail call é executada em <em>0.02 segundos</em>!</p>
-<p><em>Vale lembrar que TCO é uma técnica utilizada não apenas em recursão mas também em otimização de geração de instruções em compiladores,
-mas isto foge ao escopo deste artigo.</em></p>
-<blockquote>
-<p>✋
-Okay, mas e quando não for possível habilitar TCO para recursão de cauda ou eu estiver programando em uma linguagem que não tenha suporte a TCO?</p>
-</blockquote>
-<p><strong>Trampoline</strong> para o resgate.</p>
-<hr />
-<h2>Trampoline</h2>
-<p>Para entendermos <em>trampoline</em>, vamos pensar no problema e em uma possível solução.</p>
-<p>Se pensarmos com inteligência, podemos inicialmente concluir que a recursão deve ser evitada, e esta é a <em>premissa número um</em>.</p>
-<pre><code class="language-ruby">def fib(position, _current = 0, _next = 1)
-  return _current if position &lt; 1
-
-  ###################################
-  #### Devemos evitar isso!!!!!! ####
-  ###################################
-  fib(position - 1, _next, _current + _next)
-end
-</code></pre>
-<p>Premissa dois, ao invés de retornar uma chamada recursiva diretamente, e se a retornarmos <strong>encapsulada em uma estrutura de função anônima que guarda contexto</strong> para ser executada em outro contexto?</p>
-<blockquote>
-<p>Sim, tipo uma closure ou lambda para os mais atentos</p>
-</blockquote>
-<p>Em Ruby, podemos utilizar o conceito de <strong>lambdas</strong>.</p>
-<pre><code class="language-ruby">def fib(position, _current = 0, _next = 1)
-  return _current if position &lt; 1
-  
-  lambda do
-    fib(position - 1, _next, _current + _next)
-  end
-end
-</code></pre>
-<p>Se chamarmos <code>result = fib(0)</code>, por causa da primeira linha de short-circuit (<code>position &lt; 1</code>), o retorno do método é <code>0</code>.</p>
-<p>Mas se chamarmos <code>result = fib(10)</code>, o retorno não será uma chamada recursiva, mas sim o <strong>retorno será uma função anônima</strong> (lambda).</p>
-<p>Com isto, o método é então finalizado e a <em>stack é limpa</em>, ou seja, é feito o <strong>pop dos dados</strong> de dentro do método.</p>
-<p>Como lambdas guardam contexto, se chamarmos <code>result.call</code>, a lambda é executada com o contexto anterior, que pode retornar o número final (caso entre no short-circuit) ou outra lambda com o novo contexto.</p>
-<p>E assim, <strong>ficamos em loop até termos o valor final</strong>, enquanto o retorno atual continuar sendo uma lambda. Conseguiu entender o que podemos fazer?</p>
-<p>Sim, um <em>loop!</em></p>
-<pre><code class="language-ruby">result = fib(10000)
-
-while result.is_a?(Proc)
-  result = result.call
-end
-
-puts result
-</code></pre>
-<p>Output (um número mesmo muito grande):</p>
-<pre><code>33644764876431783266621612005107543310302148460680063906564769974680081442166662368155595513633734025582065332680836159373734790483865268263040892463056431887354544369559827491606602099884183933864652731300088830269235673613135117579297437854413752130520504347701602264758318906527890855154366159582987279682987510631200575428783453215515103870818298969791613127856265033195487140214287532698187962046936097879900350962302291026368131493195275630227837628441540360584402572114334961180023091208287046088923962328835461505776583271252546093591128203925285393434620904245248929403901706233888991085841065183173360437470737908552631764325733993712871937587746897479926305837065742830161637408969178426378624212835258112820516370298089332099905707920064367426202389783111470054074998459250360633560933883831923386783056136435351892133279732908133732642652633989763922723407882928177953580570993691049175470808931841056146322338217465637321248226383092103297701648054726243842374862411453093812206564914032751086643394517512161526545361333111314042436854805106765843493523836959653428071768775328348234345557366719731392746273629108210679280784718035329131176778924659089938635459327894523777674406192240337638674004021330343297496902028328145933418826817683893072003634795623117103101291953169794607632737589253530772552375943788434504067715555779056450443016640119462580972216729758615026968443146952034614932291105970676243268515992834709891284706740862008587135016260312071903172086094081298321581077282076353186624611278245537208532365305775956430072517744315051539600905168603220349163222640885248852433158051534849622434848299380905070483482449327453732624567755879089187190803662058009594743150052402532709746995318770724376825907419939632265984147498193609285223945039707165443156421328157688908058783183404917434556270520223564846495196112460268313970975069382648706613264507665074611512677522748621598642530711298441182622661057163515069260029861704945425047491378115154139941550671256271197133252763631939606902895650288268608362241082050562430701794976171121233066073310059947366875
-</code></pre>
-<p>🔑 <strong>Ponto-chave</strong>
-E com isto, amigues, temos a técnica <strong>trampoline</strong>: um <strong>loop</strong> primitivo não-recursivo que fica chamando outra função <em>escrita de forma recursiva</em> mas que retorna uma lambda com contexto, <strong>até chegar ao valor final</strong>.</p>
-<p>Este código, <strong>sem TCO</strong>, para o <strong>fib de 10000</strong>, leva 0.04 segundos, um resultado muito próximo a TCO e sem causar stack overflow.</p>
-<p><em>Incrível, não?</em> Agora não há desculpas para não escrever uma função de modo recursivo em linguagens que não trazem suporte a TCO 😛</p>
-<hr />
-<h2>Conclusão</h2>
-<p>Neste artigo, o intuito foi trazer alguns conceitos que tocam no tema <strong>recursão</strong>. Estes conceitos fazem overlap com temas muito acadêmicos que, por vezes, dificultam o entendimento de pessoas que estão iniciando na área ou que não têm um background muito acadêmico.</p>
-<p>Espero ter esclarecido de forma didática o assunto recursão, se puder deixe nos comentários qualquer correção ou informação relevante.</p>
-<hr />
-<h2>Referências</h2>
-<p>https://twitter.com/leandronsp/status/1672043065001869312
-https://twitter.com/JeffQuesado/status/1671954585987022882
-https://en.wikipedia.org/wiki/Fibonacci_sequence
-https://en.wikipedia.org/wiki/Recursion
-https://www.geeksforgeeks.org/stack-data-structure/
-https://en.wikipedia.org/wiki/Tail_call
-https://en.wikipedia.org/wiki/Trampoline_(computing)
-https://nithinbekal.com/posts/ruby-tco/
-https://www.bigocheatsheet.com/
-https://ruby-doc.org/core-3.1.0/RubyVM/InstructionSequence.html#method-c-compile_option</p>
-]]></description>
-<pubDate>2023-06-23</pubDate>
 </item>
 </channel></rss>
