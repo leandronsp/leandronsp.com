@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Arrays em Assembly x86 - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html"><meta property="og:type" content="article"><meta property="og:title" content="Arrays em Assembly x86"><meta property="og:description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"><meta property="og:url" content="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2024-08-17"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Arrays em Assembly x86"><meta name="twitter:description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"> <style>:root{--bg:#f5f0e8;--bg-surface:#ebe5d9;--text:#3d3832;--text-bright:#1a1714;--text-dim:#706860;--accent:#8b5e3c;--accent-hover:#6d4427;--border:#d5cdbf;--green:#5a7a3a;--mono:'SF Mono','Monaco','Menlo','Courier New',monospace;--serif:'Georgia','Times New Roman',serif}[data-theme="dark"]{--bg:#1c1a17;--bg-surface:#252220;--text:#c4b9a8;--text-bright:#e8dcc8;--text-dim:#9a8f85;--accent:#c49a6c;--accent-hover:#ddb88a;--border:#3a3530;--green:#8aaa5a}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden}body{font-family:var(--serif);background:var(--bg);color:var(--text);line-height:1.7;font-size:17px;-webkit-font-smoothing:antialiased}header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.25rem 0;max-width:780px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none;letter-spacing:0.3px}header nav a:hover{color:var(--accent)}main{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:780px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--accent)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.25em 0.5em;border-radius:3px;cursor:pointer}.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}h1.site-title{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--text-bright);margin-bottom:0.15rem;letter-spacing:-0.3px}.site-subtitle{color:var(--text-dim);font-size:0.9rem;font-style:italic;margin-bottom:1.5rem}.social-links a{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--accent)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:0.15rem 0.45rem;border-radius:3px}.guide-badge:hover{background:var(--bg-surface);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.55rem 2rem 0.55rem 0.8rem;font-family:var(--mono);font-size:0.8rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:3px;outline:none}.search-input:focus{border-color:var(--accent)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:1rem}.tag-filter{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--accent);border-bottom-color:var(--accent)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"·";color:var(--text-dim);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--accent)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:3px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--accent);border-color:var(--accent)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:1rem}.mobile-section{margin-bottom:0.75rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.4rem}.mobile-pills{display:flex;gap:0.35rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.7rem;padding:0.2rem 0.55rem;border-radius:99px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:99px;padding:0.2rem 0.55rem;font-size:0.7rem}.mobile-pills .tag-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:1.1rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--text-bright);text-decoration:none;font-size:1.15rem;font-weight:600;letter-spacing:-0.2px}.post-list a:hover{color:var(--accent)}.post-list time{display:block;font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);margin-bottom:0.3rem}.post-list .post-desc{color:var(--text-dim);font-size:0.9rem;margin-top:0.35rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.6}.article-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}.article-header h1{font-family:var(--serif);font-size:1.65rem;color:var(--text-bright);font-weight:700;line-height:1.3;margin-bottom:0.5rem;letter-spacing:-0.3px}.article-header time{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)}article{font-size:1rem;line-height:1.8}article p{margin-bottom:1.1rem}article h2{font-family:var(--serif);font-size:1.3rem;color:var(--text-bright);margin:2.5rem 0 0.75rem;font-weight:700;letter-spacing:-0.2px}article h3{font-family:var(--serif);font-size:1.1rem;color:var(--text-bright);margin:2rem 0 0.5rem;font-weight:700}article a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;font-family:var(--mono);line-height:1.8}article a:hover{text-decoration-color:var(--accent)}article img{max-width:100%;height:auto;border-radius:4px;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1.1rem 1.5rem}article li{margin-bottom:0.3rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.3rem 0 0 1.5rem}article blockquote{border-left:3px solid var(--accent);padding:0.5rem 1rem;margin:1rem 0;color:var(--text-dim);font-style:italic}article blockquote p{margin-bottom:0.5rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;border-top:1px solid var(--border);margin:2rem 0}article code{font-family:var(--mono);font-size:0.85em;background:var(--bg-surface);padding:0.15em 0.35em;border-radius:3px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:1.1rem;margin:1rem 0;overflow-x:auto;line-height:1.55}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.82rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}code span.al{color:#a03030;font-weight:bold}code span.an{color:#8a8078}code span.at{color:#8b5e3c}code span.bn{color:#986801}code span.bu{color:#3d3832}code span.ch{color:#50a14f}code span.co{color:#8a8078}code span.cv{color:#8a8078}code span.cn{color:#986801;font-weight:bold}code span.cf{color:#a626a4;font-weight:bold}code span.dt{color:#8b5e3c}code span.dv{color:#986801}code span.do{color:#8a8078}code span.er{color:#e45649}code span.ex{color:#5a7a3a;font-weight:bold}code span.fl{color:#986801}code span.fu{color:#4078f2}code span.im{color:#50a14f}code span.in{color:#986801}code span.kw{color:#a626a4;font-weight:bold}code span.op{color:#3d3832}code span.ot{color:#50a14f}code span.pp{color:#50a14f}code span.re{color:#8b5e3c}code span.sc{color:#50a14f}code span.ss{color:#e45649}code span.st{color:#50a14f}code span.va{color:#8b5e3c}code span.vs{color:#50a14f}code span.wa{color:#e45649}[data-theme="dark"] code span.kw{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.dt{color:#c49a6c}[data-theme="dark"] code span.dv{color:#d19a66}[data-theme="dark"] code span.bn{color:#d19a66}[data-theme="dark"] code span.fl{color:#d19a66}[data-theme="dark"] code span.ch{color:#98c379}[data-theme="dark"] code span.st{color:#98c379}[data-theme="dark"] code span.co{color:#7a7068}[data-theme="dark"] code span.ot{color:#e5c07b}[data-theme="dark"] code span.fu{color:#61afef}[data-theme="dark"] code span.cf{color:#c678dd;font-weight:bold}[data-theme="dark"] code span.op{color:#c4b9a8}[data-theme="dark"] code span.va{color:#e06c75}[data-theme="dark"] code span.er{color:#e06c75}[data-theme="dark"] code span.al{color:#e06c75;font-weight:bold}@media (max-width:600px){header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:1rem}.post-list .post-desc{-webkit-line-clamp:2}body{font-size:16px}.article-header h1{font-size:1.3rem}article h2{font-size:1.15rem}}</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Arrays em Assembly x86 - Leandro Proença</title><link rel="icon" type="image/svg+xml" href="../images/favicon.svg"><meta name="description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"><meta name="author" content="Leandro Proença"><link rel="canonical" href="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html"><meta property="og:type" content="article"><meta property="og:title" content="Arrays em Assembly x86"><meta property="og:description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"><meta property="og:url" content="https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html"><meta property="og:site_name" content="Leandro Proença"><meta property="article:published_time" content="2024-08-17"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Arrays em Assembly x86"><meta name="twitter:description" content="Recentemente escrevi uma saga de 6 artigos sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level"> <style>:root{--bg:#0a0e14;--bg-surface:#0f1419;--text:#b3b1ad;--text-bright:#e6e1cf;--text-dim:#5c6773;--accent:#39bae6;--accent-hover:#59c2ff;--border:#1e242c;--green:#7fd962;--prompt:#7fd962;--mono:'SF Mono','Monaco','Menlo','Ubuntu Mono','Courier New',monospace}[data-theme="light"]{--bg:#f0f0f0;--bg-surface:#e0e0e0;--text:#333;--text-bright:#111;--text-dim:#777;--accent:#0070c0;--accent-hover:#005a9e;--border:#ccc;--green:#2a7e19;--prompt:#2a7e19}*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:hidden;font-size:18px}body{font-family:var(--mono);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}body::after{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient( 0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px );pointer-events:none;z-index:9999}::selection{background:rgba(57,186,230,0.25);color:inherit}header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem 0;max-width:860px;margin:0 auto}header nav{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}header nav a{font-size:0.85rem;color:var(--text-dim);text-decoration:none}header nav a:hover{color:var(--green)}main{max-width:860px;margin:0 auto;padding:1rem 1.25rem;overflow-wrap:break-word;word-break:break-word}footer{max-width:860px;margin:0 auto;padding:2rem 1.25rem 4rem;text-align:center}footer a{font-size:0.8rem;color:var(--text-dim);text-decoration:none}footer a:hover{color:var(--green)}.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.2em 0.5em;border-radius:2px;cursor:pointer}.theme-toggle:hover{color:var(--green);border-color:var(--green)}@keyframes cursor-blink{0%,49%{opacity:1}50%,100%{opacity:0}}h1.site-title{font-size:1rem;font-weight:400;color:var(--green);margin-bottom:0.15rem}h1.site-title::after{content:"";display:inline-block;width:0.55em;height:1.1em;background:var(--green);margin-left:0.2em;vertical-align:text-bottom;animation:cursor-blink 1s steps(2) infinite}.site-subtitle{color:var(--text-dim);font-size:0.8rem;margin-bottom:1.25rem}.social-links a{font-size:0.8rem;color:var(--text-dim);text-decoration:none}.social-links a:hover{color:var(--green)}.guides{display:inline-flex;gap:0.4rem;align-items:center}.guides::before{content:"|";color:var(--border);font-size:0.8rem;margin-right:0.15rem}.guide-badge{font-size:0.75rem;color:var(--accent);text-decoration:none;padding:0.1rem 0.4rem;border:1px solid var(--border);border-radius:2px}.guide-badge:hover{color:var(--accent-hover);border-color:var(--accent)}.search-bar{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem}.search-wrap{position:relative;flex:1}.search-wrap::before{content:"$";position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);color:var(--prompt);font-size:0.85rem;font-weight:bold;pointer-events:none}.search-clear{position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:1rem;cursor:pointer;padding:0 0.3rem;line-height:1}.search-clear:hover{color:var(--text-bright)}.search-input{width:100%;padding:0.5rem 2rem 0.5rem 1.75rem;font-family:var(--mono);font-size:0.85rem;background:var(--bg-surface);color:var(--text);border:1px solid var(--border);border-radius:2px;outline:none}.search-input:focus{border-color:var(--green)}.search-input::placeholder{color:var(--text-dim)}.filter-bar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:0.75rem}.tag-filter{display:flex;gap:0.15rem;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem}.tag-btn{background:none;border:none;border-bottom:1px solid transparent;color:var(--text-dim);font-family:var(--mono);font-size:0.8rem;padding:0.15rem 0.35rem;cursor:pointer}.tag-btn:hover{color:var(--text-bright)}.tag-btn.active{color:var(--green);border-bottom-color:var(--green)}.tag-filter .sep{display:none}.guides .sep{display:none}.lang-filter{display:flex;gap:0.5rem;align-items:center}.lang-filter .lang-btn+.lang-btn::before{content:"|";color:var(--border);margin-right:0.5rem;pointer-events:none}.lang-btn{background:none;border:none;color:var(--text-dim);font-family:var(--mono);font-size:0.8rem;padding:0;cursor:pointer}.lang-btn:hover{color:var(--text-bright)}.lang-btn.active{color:var(--green)}.menu-toggle{display:none;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-dim);font-size:1rem;padding:0 0.6em;border-radius:2px;cursor:pointer;align-self:stretch}.menu-toggle:hover{color:var(--green);border-color:var(--green)}.mobile-menu{display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:2px;padding:0.75rem;margin-bottom:0.75rem}.mobile-section{margin-bottom:0.6rem}.mobile-section:last-child{margin-bottom:0}.mobile-label{display:block;font-size:0.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem}.mobile-pills{display:flex;gap:0.3rem;flex-wrap:wrap}.pill{background:var(--bg);border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:2px;cursor:pointer}.pill:hover{color:var(--text-bright);border-color:var(--text-dim)}.pill.active{background:var(--green);color:var(--bg);border-color:var(--green)}.mobile-menu .guides::before{display:none}.mobile-menu .guides{display:contents}.mobile-menu .guide-badge{background:var(--bg);border:1px solid var(--border);font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:2px}.mobile-menu .guide-badge:hover{border-color:var(--accent)}.mobile-menu .sep{display:none}.mobile-pills .tag-btn{background:var(--bg);border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:2px;padding:0.2rem 0.5rem;font-size:0.75rem}.mobile-pills .tag-btn.active{background:var(--green);color:var(--bg);border-color:var(--green)}.post-list{list-style:none;min-height:100vh}.post-list li{padding:0.75rem 0;border-bottom:1px solid var(--border)}.post-list li:first-child{border-top:none}.post-list a{color:var(--accent);text-decoration:none;font-size:0.95rem}.post-list a:hover{color:var(--accent-hover);text-decoration:underline}.post-list time{display:block;font-size:0.8rem;color:var(--text-dim);margin-bottom:0.2rem}.post-list time::before{content:"["}.post-list time::after{content:"]"}.post-list .post-desc{color:var(--text-dim);font-size:0.8rem;margin-top:0.2rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}.article-header{margin-bottom:2rem}.article-header h1{font-size:1.15rem;color:var(--text-bright);font-weight:600;line-height:1.4;margin-bottom:0.4rem}.article-header time{font-size:0.8rem;color:var(--text-dim)}.article-header time::before{content:"["}.article-header time::after{content:"]"}article{font-size:0.9rem}article p{margin-bottom:1rem}article h2{font-size:1rem;color:var(--green);margin:2rem 0 0.75rem;font-weight:600}article h2::before{content:"## ";color:var(--text-dim)}article h3{font-size:0.95rem;color:var(--text-bright);margin:1.5rem 0 0.5rem;font-weight:600}article h3::before{content:"### ";color:var(--text-dim)}article a{color:var(--accent);text-decoration:none;overflow-wrap:break-word;word-break:break-word}article .uri{display:block;font-size:0.8rem;line-height:1.8}article a:hover{text-decoration:underline}article img{max-width:100%;height:auto;margin:0.75rem 0;border:1px solid var(--border)}article strong{color:var(--text-bright)}article em{font-style:italic}article del{color:var(--text-dim)}article ul,article ol{margin:0 0 1rem 1.5rem}article li{margin-bottom:0.25rem}article li p{margin-bottom:0.25rem}article li p:last-child{margin-bottom:0}article li ul,article li ol{margin:0.25rem 0 0 1.5rem}article blockquote{border-left:2px solid var(--green);padding:0.4rem 0.75rem;margin:0.75rem 0;color:var(--text-dim);background:var(--bg-surface)}article blockquote p{margin-bottom:0.4rem}article blockquote p:last-child{margin-bottom:0}article hr{border:none;color:var(--border);text-align:center;margin:1.5rem 0}article hr::before{content:"────────────────────────────────────────";color:var(--border);letter-spacing:-1px}article code{font-family:var(--mono);font-size:0.88em;background:var(--bg-surface);padding:0.1em 0.35em;border-radius:2px;color:var(--accent)}article pre{background:var(--bg-surface);border:1px solid var(--border);border-radius:2px;padding:1rem;margin:0.75rem 0;overflow-x:auto;line-height:1.5}article pre code{background:none;padding:0;border-radius:0;color:var(--text);font-size:0.85rem}pre>code.sourceCode{white-space:pre;position:relative}div.sourceCode{overflow-x:auto;max-width:100%}a.sourceLine{display:inline-block}article pre code .comment{color:#5c6773;font-style:italic}article pre code .string{color:#aad94c}article pre code .keyword{color:#ff8f40;font-weight:600}article pre code .keyword.operator{color:#f29668;font-weight:normal}article pre code .storage{color:#ff8f40;font-weight:600}article pre code .constant.numeric{color:#e6b450}article pre code .constant.language{color:#e6b450;font-weight:600}article pre code .constant.character{color:#aad94c}article pre code .constant.other{color:#e6b450}article pre code .entity.name.function{color:#ffb454}article pre code .entity.name.type{color:#39bae6}article pre code .entity.name.class{color:#39bae6}article pre code .entity.name.tag{color:#ffb454}article pre code .entity.other.attribute-name{color:#e6b450}article pre code .support.function{color:#ffb454}article pre code .support.macro{color:#ff8f40}article pre code .support.constant{color:#e6b450}article pre code .support.type{color:#39bae6}article pre code .support.class{color:#39bae6}article pre code .variable.parameter{color:#39bae6}article pre code .variable.language{color:#ff8f40;font-weight:600}article pre code .invalid{color:#f07178}[data-theme="light"] article pre code .comment{color:#6a737d}[data-theme="light"] article pre code .string{color:#032f62}[data-theme="light"] article pre code .keyword{color:#d73a49}[data-theme="light"] article pre code .keyword.operator{color:#24292e}[data-theme="light"] article pre code .storage{color:#d73a49}[data-theme="light"] article pre code .constant.numeric{color:#005cc5}[data-theme="light"] article pre code .constant.language{color:#005cc5}[data-theme="light"] article pre code .constant.character{color:#032f62}[data-theme="light"] article pre code .constant.other{color:#005cc5}[data-theme="light"] article pre code .entity.name.function{color:#6f42c1}[data-theme="light"] article pre code .entity.name.type{color:#005cc5}[data-theme="light"] article pre code .entity.name.class{color:#005cc5}[data-theme="light"] article pre code .entity.name.tag{color:#22863a}[data-theme="light"] article pre code .entity.other.attribute-name{color:#005cc5}[data-theme="light"] article pre code .support.function{color:#6f42c1}[data-theme="light"] article pre code .support.macro{color:#d73a49}[data-theme="light"] article pre code .support.constant{color:#005cc5}[data-theme="light"] article pre code .support.type{color:#005cc5}[data-theme="light"] article pre code .support.class{color:#005cc5}[data-theme="light"] article pre code .variable.parameter{color:#005cc5}[data-theme="light"] article pre code .variable.language{color:#d73a49}[data-theme="light"] article pre code .invalid{color:#cb2431}@media (max-width:600px){html{font-size:15px}header .guides{display:none}.tag-filter{display:none}.menu-toggle{display:inline-block}.mobile-menu.open{display:block}.filter-bar{justify-content:flex-end}.lang-filter{display:none}.post-list a{font-size:0.9rem}.post-list .post-desc{-webkit-line-clamp:2}.article-header h1{font-size:1rem}article h2{font-size:0.95rem}}</style> <link rel="alternate" type="application/rss+xml" title="Leandro Proença" href="https://leandronsp.com/feed.xml"> <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -9,605 +9,605 @@
     "publisher": { "@type": "Person", "name": "Leandro Proença" },
     "url": "https://leandronsp.com/articles/arrays-em-assembly-x86-55hb.html"
   }
-  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>Arrays em Assembly x86</h1><time datetime="2024-08-17">2024-08-17</time></div><p>Recentemente escrevi <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5">uma saga de 6 artigos</a> sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level enquanto ia desenvolvendo um web server minimalista multi-threaded.</p><p>Durante o processo, acabei deixando de lado alguns conceitos importantes para artigos posteriores, pois se fosse abordar durante a saga, iria ficar maior do que já foi. Entretanto são conceitos que podem ser tratados à parte, como no caso das filas implementadas na thread pool.</p><p>E quando falamos de filas, <strong>fica inevitável abordar arrays</strong> e como estes são organizados na memória do computador.</p><p>Neste artigo, vamos abordar conceitos fundamentais como manipulação de memória, registradores e memória heap ao longo da implementação de arrays.</p><blockquote><p>Vou assumir que você já tem familiaridade com Assembly x86 e a ferramenta GDB. Caso não tenha, recomendo fortemente a leitura da minha saga.</p></blockquote><hr /><h2>Agenda</h2><ul><li><p><a href="#arrays-n%C3%A3o-existem">Arrays não existem</a></p></li><li><p><a href="#strings-tamb%C3%A9m-n%C3%A3o-existem">Strings também não existem</a></p></li><li><p><a href="#o-array-mais-simples-do-universo">O array mais simples do universo</a></p></li><li><p><a href="#utilizando-um-array-com-dados-n%C3%A3o-inicializados">Utilizando um array com dados não inicializados</a></p><ul><li><a href="#%C3%ADndice-para-o-resgate">Índice para o resgate</a></li><li><a href="#atingindo-o-limite-do-array">Atingindo o limite do array</a></li></ul></li><li><p><a href="#heap-heap-horray">Heap, heap, hooray!</a></p><ul><li><a href="#aloca%C3%A7%C3%A3o-din%C3%A2mica-de-mem%C3%B3ria-com-brk">Alocação dinâmica de memória com brk</a></li><li><a href="#ponteiros-ponteiros-everywhere">Ponteiros, ponteiros everywhere</a></li><li><a href="#resize-com-brk">Resize com brk</a></li></ul></li><li><p><a href="#o-programa-final">O programa final</a></p></li><li><p><a href="#conclus%C3%A3o">Conclusão</a></p></li><li><p><a href="#refer%C3%AAncias">Referências</a></p></li></ul><hr /><h2>Arrays não existem</h2><p><em>Arrays não existem.</em> Simples assim.</p><p>Como vimos <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">na parte IV</a> da saga, a memória é organizada de forma contígua, onde as informações são alocadas uma após a outra.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u90q0z4ka96nccs1syef.png" alt="memoria é contígua" /></p><p>Supondo que queremos declarar a seguinte sequência de informações:</p> <pre><code>1, 2, 'H', 0
-</code></pre> <blockquote><p>Eu sei, eu sei, os tipos estão misturados, mas isto não importa para este momento. Todos eles cabem em 1 byte</p></blockquote><p>Em assembly x86 (vamos chamar de asm no restante do artigo), podemos declarar estas informações da seguinte forma na seção de dados:</p> <pre><code class="language-as">section .data
-stuff: db 0x1, 0x2, 0x48, 0x0
-</code></pre> <blockquote><p>Lembrando que o caracter 'H' na tabela ASCII representa 0x48 em hexadecimal</p></blockquote><p>Ao utilizarmos o <code>gdb</code> para fazer debugging, podemos confirmar que esta sequência de hexadecimal no rótulo <code>stuff</code> está armazenada da seguinte forma:</p> <pre><code class="language-bash"># Leitura do primeiro hexabyte em stuff
-(gdb) x/1xb (void*) &amp;stuff
-0x402000 &lt;stuff&gt;:       0x01
+  </script> </head><body> <script>document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'</script> <header><nav><a href="../index.html">Leandro Proença</a></nav><button class="theme-toggle" onclick="let t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t);this.textContent=t==='dark'?'light':'dark'"> <script>document.write((localStorage.getItem('theme')||'dark')==='dark'?'light':'dark')</script> </button></header><main><article><div class="article-header"><h1>Arrays em Assembly x86</h1><time datetime="2024-08-17">2024-08-17</time></div><p>Recentemente escrevi <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-i-introducao-14p5">uma saga de 6 artigos</a> sobre Assembly x86, abordando conceitos fundamentais de arquitetura de computadores e programação low-level enquanto ia desenvolvendo um web server minimalista multi-threaded.</p><p>Durante o processo, acabei deixando de lado alguns conceitos importantes para artigos posteriores, pois se fosse abordar durante a saga, iria ficar maior do que já foi. Entretanto são conceitos que podem ser tratados à parte, como no caso das filas implementadas na thread pool.</p><p>E quando falamos de filas, <strong>fica inevitável abordar arrays</strong> e como estes são organizados na memória do computador.</p><p>Neste artigo, vamos abordar conceitos fundamentais como manipulação de memória, registradores e memória heap ao longo da implementação de arrays.</p><blockquote><p>Vou assumir que você já tem familiaridade com Assembly x86 e a ferramenta GDB. Caso não tenha, recomendo fortemente a leitura da minha saga.</p></blockquote><hr /><h2 id="agenda">Agenda</h2><ul><li><p><a href="#arrays-n%C3%A3o-existem">Arrays não existem</a></p></li><li><p><a href="#strings-tamb%C3%A9m-n%C3%A3o-existem">Strings também não existem</a></p></li><li><p><a href="#o-array-mais-simples-do-universo">O array mais simples do universo</a></p></li><li><p><a href="#utilizando-um-array-com-dados-n%C3%A3o-inicializados">Utilizando um array com dados não inicializados</a></p><ul><li><a href="#%C3%ADndice-para-o-resgate">Índice para o resgate</a></li><li><a href="#atingindo-o-limite-do-array">Atingindo o limite do array</a></li></ul></li><li><p><a href="#heap-heap-horray">Heap, heap, hooray!</a></p><ul><li><a href="#aloca%C3%A7%C3%A3o-din%C3%A2mica-de-mem%C3%B3ria-com-brk">Alocação dinâmica de memória com brk</a></li><li><a href="#ponteiros-ponteiros-everywhere">Ponteiros, ponteiros everywhere</a></li><li><a href="#resize-com-brk">Resize com brk</a></li></ul></li><li><p><a href="#o-programa-final">O programa final</a></p></li><li><p><a href="#conclus%C3%A3o">Conclusão</a></p></li><li><p><a href="#refer%C3%AAncias">Referências</a></p></li></ul><hr /><h2 id="arrays-não-existem">Arrays não existem</h2><p><em>Arrays não existem.</em> Simples assim.</p><p>Como vimos <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">na parte IV</a> da saga, a memória é organizada de forma contígua, onde as informações são alocadas uma após a outra.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u90q0z4ka96nccs1syef.png" alt="memoria é contígua" /></p><p>Supondo que queremos declarar a seguinte sequência de informações:</p> <pre><code class="sourceCode"><span class="text plain">1, 2, &#39;H&#39;, 0
+</span></code></pre> <blockquote><p>Eu sei, eu sei, os tipos estão misturados, mas isto não importa para este momento. Todos eles cabem em 1 byte</p></blockquote><p>Em assembly x86 (vamos chamar de asm no restante do artigo), podemos declarar estas informações da seguinte forma na seção de dados:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .<span class="support function actionscript 2">data</span>
+stuff<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0x1</span>, <span class="constant numeric actionscript 2">0x2</span>, <span class="constant numeric actionscript 2">0x48</span>, <span class="constant numeric actionscript 2">0x0</span>
+</span></code></pre> <blockquote><p>Lembrando que o caracter 'H' na tabela ASCII representa 0x48 em hexadecimal</p></blockquote><p>Ao utilizarmos o <code>gdb</code> para fazer debugging, podemos confirmar que esta sequência de hexadecimal no rótulo <code>stuff</code> está armazenada da seguinte forma:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Leitura do primeiro hexabyte em stuff</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/1xb (void<span class="keyword operator regexp quantifier shell">*</span></span><span class="meta function-call shell"></span><span class="meta post-cmd shell">)</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">stuff</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>stuff<span class="keyword operator assignment redirection shell">&gt;</span>:       0x01</span>
 
-# Leitura do segundo hexabyte em stuff
-(gdb) x/1xb (void*) &amp;stuff+1
-0x402001:       0x02
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Leitura do segundo hexabyte em stuff</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/1xb (void<span class="keyword operator regexp quantifier shell">*</span></span><span class="meta function-call shell"></span><span class="meta post-cmd shell">)</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">stuff+1</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402001:</span></span><span class="meta function-call arguments shell">       0x02</span>
 
-# Leitura do terceiro hexabyte em stuff
-(gdb) x/1xb (void*) &amp;stuff+2
-0x402002:       0x48
-</code></pre> <p>Podemos também representar o hexadecimal <code>0x48</code> em formato de string utilizando <code>x/s</code></p> <pre><code class="language-bash">(gdb) x/s (void*) &amp;stuff+2
-0x402002:       "H"
-</code></pre> <p><em>É tudo hexadecimal!</em></p><p>Com isto, caso queiramos representar a string "Hello", de acordo com a tabela ASCII, poderia ficar assim:</p> <pre><code class="language-as">section .data
-msg: db 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x0
-</code></pre> <p>No gdb vamos verificar a representação string do rótulo <code>msg</code>:</p> <pre><code class="language-bash">(gdb) x/s &amp;msg
-0x402000 &lt;msg&gt;: "Hello"
-</code></pre> <p>Em asm, é possível declarar a string já com a representação direta da tabela ASCII:</p> <pre><code class="language-as">section .data
-msg: db "Hello", 0x0
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Leitura do terceiro hexabyte em stuff</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/1xb (void<span class="keyword operator regexp quantifier shell">*</span></span><span class="meta function-call shell"></span><span class="meta post-cmd shell">)</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">stuff+2</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402002:</span></span><span class="meta function-call arguments shell">       0x48</span>
+</span></code></pre> <p>Podemos também representar o hexadecimal <code>0x48</code> em formato de string utilizando <code>x/s</code></p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/s (void<span class="keyword operator regexp quantifier shell">*</span></span><span class="meta function-call shell"></span><span class="meta post-cmd shell">)</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">stuff+2</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402002:</span></span><span class="meta function-call arguments shell">       <span class="string quoted double shell"><span class="punctuation definition string begin shell">&quot;</span>H<span class="punctuation definition string end shell">&quot;</span></span></span>
+</span></code></pre> <p><em>É tudo hexadecimal!</em></p><p>Com isto, caso queiramos representar a string "Hello", de acordo com a tabela ASCII, poderia ficar assim:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .<span class="support function actionscript 2">data</span>
+msg<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0x48</span>, <span class="constant numeric actionscript 2">0x65</span>, <span class="constant numeric actionscript 2">0x6C</span>, <span class="constant numeric actionscript 2">0x6C</span>, <span class="constant numeric actionscript 2">0x6F</span>, <span class="constant numeric actionscript 2">0x0</span>
+</span></code></pre> <p>No gdb vamos verificar a representação string do rótulo <code>msg</code>:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/s</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">msg</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>msg<span class="keyword operator assignment redirection shell">&gt;</span>: <span class="string quoted double shell"><span class="punctuation definition string begin shell">&quot;</span>Hello<span class="punctuation definition string end shell">&quot;</span></span></span>
+</span></code></pre> <p>Em asm, é possível declarar a string já com a representação direta da tabela ASCII:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .<span class="support function actionscript 2">data</span>
+msg<span class="keyword operator symbolic actionscript 2">:</span> db <span class="string quoted double actionscript 2"><span class="punctuation definition string begin actionscript 2">&quot;</span>Hello<span class="punctuation definition string end actionscript 2">&quot;</span></span>, <span class="constant numeric actionscript 2">0x0</span>
 
 ; é o mesmo que
-; msg: db 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x0
-</code></pre> <hr /><h2>Strings também não existem</h2><p>Ou seja, é tudo hexadecimal na memória. Um array, assim como uma string, é simplesmente uma sequência contígua de dados <strong>com mesmo tamanho</strong> na memória.</p><p>A diferença é que a string é um "array especial" que tem dados que representam caracteres da tabela ASCII (note que ambos precisam delimitar um byte "final" para representar o término da string ou array):</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dw5cjo8fvoh7rvp8t2l3.png" alt="string e array" /></p><h2>O array mais simples possível</h2><p>A seguir temos a implementação de um array bastante simples em asm, pelo que iremos explorar cada passo nas seções subsequentes:</p> <pre><code class="language-as">global _start
+; msg<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0x48</span>, <span class="constant numeric actionscript 2">0x65</span>, <span class="constant numeric actionscript 2">0x6C</span>, <span class="constant numeric actionscript 2">0x6C</span>, <span class="constant numeric actionscript 2">0x6F</span>, <span class="constant numeric actionscript 2">0x0</span>
+</span></code></pre> <hr /><h2 id="strings-também-não-existem">Strings também não existem</h2><p>Ou seja, é tudo hexadecimal na memória. Um array, assim como uma string, é simplesmente uma sequência contígua de dados <strong>com mesmo tamanho</strong> na memória.</p><p>A diferença é que a string é um "array especial" que tem dados que representam caracteres da tabela ASCII (note que ambos precisam delimitar um byte "final" para representar o término da string ou array):</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/dw5cjo8fvoh7rvp8t2l3.png" alt="string e array" /></p><h2 id="o-array-mais-simples-possível">O array mais simples possível</h2><p>A seguir temos a implementação de um array bastante simples em asm, pelo que iremos explorar cada passo nas seções subsequentes:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
 
-section .data
-array: db 1, 2, 3, 0
+section .<span class="support function actionscript 2">data</span>
+array<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">1</span>, <span class="constant numeric actionscript 2">2</span>, <span class="constant numeric actionscript 2">3</span>, <span class="constant numeric actionscript 2">0</span>
 
-section .text
-_start:
-	mov al, [array]        ; array[0]
-	mov bl, [array + 1]    ; array[1]
-	mov cl, [array + 2]    ; array[2]
-	mov sil, [array + 3]   ; array[3]
-.exit:
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	mov al, [array]        ; array[<span class="constant numeric actionscript 2">0</span>]
+	mov bl, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>]    ; array[<span class="constant numeric actionscript 2">1</span>]
+	mov cl, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">2</span>]    ; array[<span class="constant numeric actionscript 2">2</span>]
+	mov sil, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">3</span>]   ; array[<span class="constant numeric actionscript 2">3</span>]
+.exit<span class="keyword operator symbolic actionscript 2">:</span>
 	mov rdi, EXIT_SUCCESS
 	mov rax, SYS_exit
 	syscall
-</code></pre> <p>Na seção de dados inicializados <code>.data</code>, declaramos um array com 3 elementos de 1 byte cada (inteiros de 1 a 3), utilizando o número 0 como término do array:</p> <pre><code class="language-as">section .data
-array: db 1, 2, 3, 0
-</code></pre> <p>A seguir, na seção <code>.text</code>, que é onde vai o código fonte do programa, podemos acessar os elementos do array utilizando aritmética de ponteiros, armazenando o resultado em registradores:</p> <pre><code class="language-as">section .text
-_start:
-mov al, [array]        ; array[0]
-</code></pre> <p>No código acima, estamos acessando o valor contido no endereço de memória <code>0x402000</code> e armazenando o resultado em um registrador (AL) que tem o tamanho de 1 byte, ou seja, vai ser armazenado no registrador apenas o primeiro byte do array.</p><p>Vamos conferir com gdb:</p> <pre><code class="language-bash"># O array está armazenado no endereço 0x402000
-# e contém o valor em hexa 0x00 0x03 0x02 0x01,
-# lembrando que esta arquitetura utiliza o formato little-endian
-(gdb) x &amp;array
-0x402000 &lt;array&gt;:       0x00030201
+</span></code></pre> <p>Na seção de dados inicializados <code>.data</code>, declaramos um array com 3 elementos de 1 byte cada (inteiros de 1 a 3), utilizando o número 0 como término do array:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .<span class="support function actionscript 2">data</span>
+array<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">1</span>, <span class="constant numeric actionscript 2">2</span>, <span class="constant numeric actionscript 2">3</span>, <span class="constant numeric actionscript 2">0</span>
+</span></code></pre> <p>A seguir, na seção <code>.text</code>, que é onde vai o código fonte do programa, podemos acessar os elementos do array utilizando aritmética de ponteiros, armazenando o resultado em registradores:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+mov al, [array]        ; array[<span class="constant numeric actionscript 2">0</span>]
+</span></code></pre> <p>No código acima, estamos acessando o valor contido no endereço de memória <code>0x402000</code> e armazenando o resultado em um registrador (AL) que tem o tamanho de 1 byte, ou seja, vai ser armazenado no registrador apenas o primeiro byte do array.</p><p>Vamos conferir com gdb:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O array está armazenado no endereço 0x402000</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> e contém o valor em hexa 0x00 0x03 0x02 0x01,</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> lembrando que esta arquitetura utiliza o formato little-endian</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00030201</span>
 
-(gdb) b 13
-(gdb) run
-(gdb) next
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> b 13</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> run</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> next</span>
 
-# No registrador AL temos o primeiro elemento do array
-(gdb) i r al
-al             0x1                 1
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> No registrador AL temos o primeiro elemento do array</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> i r al</span>
+<span class="meta function-call shell"><span class="variable function shell">al</span></span><span class="meta function-call arguments shell">             0x1                 1</span>
 
-# É o mesmo que acessar o primeiro hexabyte contido no endereço
-# 0x402000
-(gdb) x/1xb 0x402000
-0x402000 &lt;array&gt;:       0x01
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> É o mesmo que acessar o primeiro hexabyte contido no endereço</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 0x402000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/1xb 0x402000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x01</span>
 
-</code></pre> <blockquote><p>Lembrando que o registrador AL representa os 8-bits menores dentro do espectro do registrador RAX que contempla um total de 64-bits na arquitetura x86_64</p></blockquote><p>Para acessar os demais elementos do array, basta fazer aritmética de ponteiros e ir armazenando em outros registradores de 1 byte:</p> <pre><code class="language-as">mov al, [array]        ; array[0] =&gt; 1
-mov bl, [array + 1]    ; array[1] =&gt; 2
-mov cl, [array + 2]    ; array[2] =&gt; 3
-mov sil, [array + 3]   ; array[3] =&gt; 0 (aqui termina o array)
-</code></pre> <hr /><h2>Utilizando um array com dados não inicializados</h2><p>Até agora, estamos declarando o array na seção <code>.data</code> onde os dados são inicializados. Mas podemos deixar o programa mais "dinâmico", declarando o array na seção de dados <strong>não inicializados</strong>, que é a <code>.bss</code>.</p><p>Mantendo a compatibilidade com o exemplo anterior, vamos declarar um array de 4 bytes utilizando a diretiva <code>resb</code> que significa "reserve byte", onde os 3 primeiros bytes são reservados para armazenar elementos do array e o último byte representando 0x0 que é o término do array.</p> <pre><code class="language-as">section .bss
-array: resb 4 ; 3 bytes + 1 byte de término
-</code></pre> <p>No gdb, podemos ver que o array está inicializado com os valores tudo a zero, o que indica que o array está vazio mas com 4 bytes reservados:</p> <pre><code class="language-bash">(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00000000
+</span></code></pre> <blockquote><p>Lembrando que o registrador AL representa os 8-bits menores dentro do espectro do registrador RAX que contempla um total de 64-bits na arquitetura x86_64</p></blockquote><p>Para acessar os demais elementos do array, basta fazer aritmética de ponteiros e ir armazenando em outros registradores de 1 byte:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov al, [array]        ; array[<span class="constant numeric actionscript 2">0</span>] <span class="keyword operator symbolic actionscript 2">=</span>&gt; <span class="constant numeric actionscript 2">1</span>
+mov bl, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>]    ; array[<span class="constant numeric actionscript 2">1</span>] <span class="keyword operator symbolic actionscript 2">=</span>&gt; <span class="constant numeric actionscript 2">2</span>
+mov cl, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">2</span>]    ; array[<span class="constant numeric actionscript 2">2</span>] <span class="keyword operator symbolic actionscript 2">=</span>&gt; <span class="constant numeric actionscript 2">3</span>
+mov sil, [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">3</span>]   ; array[<span class="constant numeric actionscript 2">3</span>] <span class="keyword operator symbolic actionscript 2">=</span>&gt; <span class="constant numeric actionscript 2">0</span> (aqui termina o array)
+</span></code></pre> <hr /><h2 id="utilizando-um-array-com-dados-não-inicializados">Utilizando um array com dados não inicializados</h2><p>Até agora, estamos declarando o array na seção <code>.data</code> onde os dados são inicializados. Mas podemos deixar o programa mais "dinâmico", declarando o array na seção de dados <strong>não inicializados</strong>, que é a <code>.bss</code>.</p><p>Mantendo a compatibilidade com o exemplo anterior, vamos declarar um array de 4 bytes utilizando a diretiva <code>resb</code> que significa "reserve byte", onde os 3 primeiros bytes são reservados para armazenar elementos do array e o último byte representando 0x0 que é o término do array.</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">section .bss
+array<span class="keyword operator symbolic actionscript 2">:</span> resb <span class="constant numeric actionscript 2">4</span> ; <span class="constant numeric actionscript 2">3</span> bytes <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span> byte de término
+</span></code></pre> <p>No gdb, podemos ver que o array está inicializado com os valores tudo a zero, o que indica que o array está vazio mas com 4 bytes reservados:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000000</span>
 
-(gdb) x/4xb &amp;array
-0x402004 &lt;array&gt;:       0x00    0x00    0x00    0x00
-</code></pre> <p>Para adicionar elementos no array, precisamos também utilizar aritmética de ponteiros, tal como fizemos no exemplo anterior para acessar um array com dados pré-inicializados.</p> <pre><code class="language-as">; Move o valor 1 para o primeiro byte do endereço de memória em array
-mov byte [array], 1  ; array[0] = 1
-</code></pre> <p>Com gdb confirmamos que no endereço 0x402000 que é onde está o array, foi adicionado o byte 1:</p> <pre><code class="language-bash">(gdb) x &amp;array
-0x402000 &lt;array&gt;:       0x00000001
-</code></pre> <p>E se quisermos adicionar o valor 2 no próximo byte do array?</p> <pre><code class="language-as">mov byte [array + 1], 2
-</code></pre> <pre><code class="language-bash">(gdb) x &amp;array
-0x402000 &lt;array&gt;:       0x00000201
-</code></pre> <p>Repare que o que modifica é o "índice" do array. Na posição inicial do array, é como se o índice fosse zero, e na posição subsequente, utilizamos o índice 1, podendo incrementar até o término array.</p><p>Seria muito complicado ficar manipulando índice hard-coded. Precisamos de um <em>ponteiro</em> para representar este índice.</p><h3>Índice para o resgate</h3><p>Assumindo que o ponteiro do array começa com <em>zero</em>, que é o endereço de memória onde está o array, podemos declará-lo na seção de dados inicializados <code>.data</code>:</p> <pre><code>section .bss
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/4xb</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00    0x00    0x00    0x00</span>
+</span></code></pre> <p>Para adicionar elementos no array, precisamos também utilizar aritmética de ponteiros, tal como fizemos no exemplo anterior para acessar um array com dados pré-inicializados.</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">; Move o valor <span class="constant numeric actionscript 2">1</span> para o primeiro byte <span class="keyword control actionscript 2">do</span> endereço de memória em array
+mov byte [array], <span class="constant numeric actionscript 2">1</span>  ; array[<span class="constant numeric actionscript 2">0</span>] <span class="keyword operator symbolic actionscript 2">=</span> <span class="constant numeric actionscript 2">1</span>
+</span></code></pre> <p>Com gdb confirmamos que no endereço 0x402000 que é onde está o array, foi adicionado o byte 1:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000001</span>
+</span></code></pre> <p>E se quisermos adicionar o valor 2 no próximo byte do array?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>], <span class="constant numeric actionscript 2">2</span>
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000201</span>
+</span></code></pre> <p>Repare que o que modifica é o "índice" do array. Na posição inicial do array, é como se o índice fosse zero, e na posição subsequente, utilizamos o índice 1, podendo incrementar até o término array.</p><p>Seria muito complicado ficar manipulando índice hard-coded. Precisamos de um <em>ponteiro</em> para representar este índice.</p><h3 id="índice-para-o-resgate">Índice para o resgate</h3><p>Assumindo que o ponteiro do array começa com <em>zero</em>, que é o endereço de memória onde está o array, podemos declará-lo na seção de dados inicializados <code>.data</code>:</p> <pre><code class="sourceCode"><span class="text plain">section .bss
 array: resb 4 ; 3 bytes + 1 byte de término
 
 section .data
 pointer: db 0
-</code></pre> <p>Logo, poderíamos adicionar o primeiro elemento da seguinte forma, certo?</p> <pre><code class="language-as">mov byte [array + pointer], 1   ; array + 0
-</code></pre> <p>Ao rodar o programa, temos o seguinte erro:</p> <pre><code>src/live.asm:14: error: invalid effective address: multiple base segments
-</code></pre> <p><strong>Este erro indica que estamos tentando fazer manipulação de ponteiros a partir de múltiplos segmentos na memória</strong>, no caso o array e pointer.</p><p>Para resolver isto, precisamos fazer manipulação de ponteiros com valores imediatos (que foi o caso anterior com número hard-coded) ou com registradores:</p> <pre><code class="language-as">; append(1)
+</span></code></pre> <p>Logo, poderíamos adicionar o primeiro elemento da seguinte forma, certo?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> pointer], <span class="constant numeric actionscript 2">1</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">0</span>
+</span></code></pre> <p>Ao rodar o programa, temos o seguinte erro:</p> <pre><code class="sourceCode"><span class="text plain">src/live.asm:14: error: invalid effective address: multiple base segments
+</span></code></pre> <p><strong>Este erro indica que estamos tentando fazer manipulação de ponteiros a partir de múltiplos segmentos na memória</strong>, no caso o array e pointer.</p><p>Para resolver isto, precisamos fazer manipulação de ponteiros com valores imediatos (que foi o caso anterior com número hard-coded) ou com registradores:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">; append(<span class="constant numeric actionscript 2">1</span>)
 mov al, byte [pointer]
-mov byte [array + rax], 1   ; array + 0
-</code></pre> <ul><li><p>a primeira instrução move o primeiro byte contido no endereço de <code>pointer</code> e armazena no registrador AL</p></li><li><p>a segunda instrução move o valor imediato 1 (elemento do array) para o endereço de memória do array. Como em RAX (versão 64-bits de AL) temos o valor <code>0x0</code> que representa o ponteiro, então estamos fazendo a inserção no primeiro byte do array</p></li></ul><p>E para armazenar o segundo elemento no array?</p> <pre><code class="language-as">; append(2)
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">1</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">0</span>
+</span></code></pre> <ul><li><p>a primeira instrução move o primeiro byte contido no endereço de <code>pointer</code> e armazena no registrador AL</p></li><li><p>a segunda instrução move o valor imediato 1 (elemento do array) para o endereço de memória do array. Como em RAX (versão 64-bits de AL) temos o valor <code>0x0</code> que representa o ponteiro, então estamos fazendo a inserção no primeiro byte do array</p></li></ul><p>E para armazenar o segundo elemento no array?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">; append(<span class="constant numeric actionscript 2">2</span>)
 mov al, byte [pointer]
-mov byte [array + rax], 2
-</code></pre> <p>No gdb, vamos verificar o que está acontecendo:</p> <pre><code class="language-bash">(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00000002
-</code></pre> <p><em>Uh, oh...</em> Desta forma estamos sobrescrevendo o valor anterior. Queremos na verdade que o ponteiro "ande", ou seja, precisa ser incrementado em um byte para que o <code>append(2)</code> resulte com os 2 elementos no array.</p><p>Com a instrução <code>INC</code> podemos resolver este problema:</p> <pre><code class="language-as">mov al, byte [pointer]      ; pointer -&gt; 0
-mov byte [array + rax], 1   ; array + 0
-inc byte [pointer]          ; pointer -&gt; 1
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">2</span>
+</span></code></pre> <p>No gdb, vamos verificar o que está acontecendo:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000002</span>
+</span></code></pre> <p><em>Uh, oh...</em> Desta forma estamos sobrescrevendo o valor anterior. Queremos na verdade que o ponteiro "ande", ou seja, precisa ser incrementado em um byte para que o <code>append(2)</code> resulte com os 2 elementos no array.</p><p>Com a instrução <code>INC</code> podemos resolver este problema:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov al, byte [pointer]      ; pointer <span class="keyword operator symbolic actionscript 2">-</span>&gt; <span class="constant numeric actionscript 2">0</span>
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">1</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">0</span>
+inc byte [pointer]          ; pointer <span class="keyword operator symbolic actionscript 2">-</span>&gt; <span class="constant numeric actionscript 2">1</span>
 
 mov al, byte [pointer]
-mov byte [array + rax], 2   ; array + 1
-</code></pre> <pre><code class="language-bash">(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00000201
-</code></pre> <p><em>Yay!</em> Que dia maravilhoso!</p><h3>Atingindo o limite do array</h3><p>E se continuarmos incrementando o ponteiro até atingir o limite do array?</p> <pre><code class="language-as">mov al, byte [pointer]
-mov byte [array + rax], 1   ; array + 0
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">2</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000201</span>
+</span></code></pre> <p><em>Yay!</em> Que dia maravilhoso!</p><h3 id="atingindo-o-limite-do-array">Atingindo o limite do array</h3><p>E se continuarmos incrementando o ponteiro até atingir o limite do array?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov al, byte [pointer]
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">1</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">0</span>
 inc byte [pointer]
 
 mov al, byte [pointer]
-mov byte [array + rax], 2   ; array + 1
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">2</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>
 inc byte [pointer]
 
 mov al, byte [pointer]
-mov byte [array + rax], 3   ; array + 2
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">3</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">2</span>
 inc byte [pointer]
-</code></pre> <pre><code class="language-bash"># Lendo os primeiros 4 hexabytes do array, temos a representação
-# do array cheio com todos os espaços ocupados, lembrando que
-# o último byte é o término do array
-(gdb) x /4xb &amp;array
-0x402004 &lt;array&gt;:       0x01    0x02    0x03    0x00
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Lendo os primeiros 4 hexabytes do array, temos a representação</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> do array cheio com todos os espaços ocupados, lembrando que</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> o último byte é o término do array</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x /4xb</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x01    0x02    0x03    0x00</span>
 
-# O ponteiro está no fim do array
-(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x03
-</code></pre> <p>Maravilha, e se adicionar mais um elemento, nosso programa deveria permitir?</p> <pre><code class="language-as">mov al, byte [pointer]
-mov byte [array + rax], 4   ; array + 3
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O ponteiro está no fim do array</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x03</span>
+</span></code></pre> <p>Maravilha, e se adicionar mais um elemento, nosso programa deveria permitir?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov al, byte [pointer]
+mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">4</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">3</span>
 inc byte [pointer]
-</code></pre> <pre><code class="language-bash"># Não deveríamos permitir que mais um elemento fosse adicionado,
-# pois nosso array já estava cheio
-(gdb) x /4xb &amp;array
-0x402004 &lt;array&gt;:       0x01    0x02    0x03    0x04
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Não deveríamos permitir que mais um elemento fosse adicionado,</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> pois nosso array já estava cheio</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x /4xb</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x01    0x02    0x03    0x04</span>
 
-# O ponteiro está para além da capacidade array (not good...)
-(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x04
-</code></pre> <p>Vamos utilizar um jump condicional (explico mais sobre isto na <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">saga</a>) para não permitir que o elemento seja adicionado. Com isto, antes de fazer o append no array, devemos verificar se o ponteiro já não está no fim do array:</p> <pre><code class="language-as">cmp byte [pointer], 3   ; verifica se o array está cheio
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O ponteiro está para além da capacidade array (not good...)</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x04</span>
+</span></code></pre> <p>Vamos utilizar um jump condicional (explico mais sobre isto na <a href="https://leandronsp.com/articles/construindo-um-web-server-em-assembly-x86-parte-iv-um-assembly-modesto-oif">saga</a>) para não permitir que o elemento seja adicionado. Com isto, antes de fazer o append no array, devemos verificar se o ponteiro já não está no fim do array:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">cmp byte [pointer], <span class="constant numeric actionscript 2">3</span>   ; verifica se o array está cheio
 je .exit                ; salta para a rotina .exit caso a flag seja levantada
-</code></pre> <p>Assim fica o programa completo:</p> <pre><code class="language-as">global _start
+</span></code></pre> <p>Assim fica o programa completo:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
 
 section .bss
-array: resb 4 ; 3 bytes + 1 byte de término
+array<span class="keyword operator symbolic actionscript 2">:</span> resb <span class="constant numeric actionscript 2">4</span> ; <span class="constant numeric actionscript 2">3</span> bytes <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span> byte de término
 
-section .data
-pointer: db 0
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
 
-section .text
-_start:
-	cmp byte [pointer], 3   ; verifica se o array está cheio
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	cmp byte [pointer], <span class="constant numeric actionscript 2">3</span>   ; verifica se o array está cheio
 	je .exit
 	
 	mov al, byte [pointer]
-	mov byte [array + rax], 1   ; array + 0
+	mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">1</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">0</span>
 	inc byte [pointer]
 	
-	cmp byte [pointer], 3   ; verifica se o array está cheio
+	cmp byte [pointer], <span class="constant numeric actionscript 2">3</span>   ; verifica se o array está cheio
 	je .exit
 
 	mov al, byte [pointer]
-	mov byte [array + rax], 2   ; array + 1
+	mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">2</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>
 	inc byte [pointer]
 
-	cmp byte [pointer], 3   ; verifica se o array está cheio
+	cmp byte [pointer], <span class="constant numeric actionscript 2">3</span>   ; verifica se o array está cheio
 	je .exit
 
 	mov al, byte [pointer]
-	mov byte [array + rax], 3   ; array + 2
+	mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">3</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">2</span>
 	inc byte [pointer]
 
-	cmp byte [pointer], 3   ; verifica se o array está cheio
+	cmp byte [pointer], <span class="constant numeric actionscript 2">3</span>   ; verifica se o array está cheio
 	je .exit
 
 	; não deveria permitir adicionar o quarto elemento,
-	; pois o array suporta até 3 elementos. desta forma,
+	; pois o array suporta até <span class="constant numeric actionscript 2">3</span> elementos. desta forma,
 	; estaríamos escrevendo no endereço de memória de outros
-	; dados do programa
+	; dados <span class="keyword control actionscript 2">do</span> programa
 	mov al, byte [pointer]
-	mov byte [array + rax], 4   ; array + 3
+	mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], <span class="constant numeric actionscript 2">4</span>   ; array <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">3</span>
 	inc byte [pointer]
-.exit:
+.exit<span class="keyword operator symbolic actionscript 2">:</span>
 	mov rdi, EXIT_SUCCESS
 	mov rax, SYS_exit
 	syscall
-</code></pre> <pre><code class="language-bash">(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x00000003
-(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00030201
-</code></pre> <p>Perfeito, vamos agora fazer um pequeno refactoring no código separando a lógica de append para uma subrotina:</p> <pre><code class="language-as">global _start
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x00000003</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00030201</span>
+</span></code></pre> <p>Perfeito, vamos agora fazer um pequeno refactoring no código separando a lógica de append para uma subrotina:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
-%define CAPACITY 3
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define CAPACITY <span class="constant numeric actionscript 2">3</span>
 
 section .bss
-array: resb CAPACITY + 1
+array<span class="keyword operator symbolic actionscript 2">:</span> resb CAPACITY <span class="keyword operator symbolic actionscript 2">+</span> <span class="constant numeric actionscript 2">1</span>
 
-section .data
-pointer: db 0
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
 
-section .text
-_start:
-	mov rdi, 1
-	call .append
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">1</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov rdi, 2
-	call .append
+	mov rdi, <span class="constant numeric actionscript 2">2</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov rdi, 3
-	call .append
+	mov rdi, <span class="constant numeric actionscript 2">3</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov rdi, 4
-	call .append
-.exit:
+	mov rdi, <span class="constant numeric actionscript 2">4</span>
+	<span class="support function actionscript 2">call</span> .append
+.exit<span class="keyword operator symbolic actionscript 2">:</span>
 	mov rdi, EXIT_SUCCESS
 	mov rax, SYS_exit
 	syscall
-.append:
+.append<span class="keyword operator symbolic actionscript 2">:</span>
 	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
 	je .done
 
 	mov al, byte [pointer]
-	mov byte [array + rax], dil
+	mov byte [array <span class="keyword operator symbolic actionscript 2">+</span> rax], dil
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-</code></pre> <blockquote><p>Se você quer entender mais sobre conditional jump, rotinas, call, ret e flags, sugiro a leitura da minha saga que foi referenciada diversas vezes neste artigo</p></blockquote><p>Executando com gdb e...</p> <pre><code class="language-bash">(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00030201
+</span></code></pre> <blockquote><p>Se você quer entender mais sobre conditional jump, rotinas, call, ret e flags, sugiro a leitura da minha saga que foi referenciada diversas vezes neste artigo</p></blockquote><p>Executando com gdb e...</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00030201</span>
 
-(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x00000003
-</code></pre> <p>Um grande <em>Yay!</em></p><p>Entretanto, podem haver situações onde queremos que nosso array seja <em>redimensionado</em> para suportar mais elementos, ou seja, o tamanho do array seria dinâmico.</p><p>Como adicionar mais elementos além da <em>capacidade inicial</em> de forma que não podemos escrever em outras áreas da memória que pertencem ao array?</p><hr /><h2>Heap, heap, hooray!</h2><p>Antes de falar sobre o heap, vamos relembrar como funciona o layout de memória de um programa de computador:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s81vxvgfylw0wfcf6if7.png" alt="layout de memória" /></p><ul><li><p>o layout é representado como uma área na memória do computador onde temos os endereços de memória mais baixos do programa em direção aos endereços mais altos que ficam no topo</p></li><li><p>nos endereços de memória mais baixos, temos a seção <code>.text</code>, onde já vimos que é referente ao programa em si</p></li><li><p>depois temos a <strong>seção de dados</strong> que contempla os dados inicializados <code>.data</code> e a seção a seguir que representa os dados não-inicializados <code>.bss</code></p></li><li><p>nos endereços mais altos, temos a <em>stack</em> do programa, que armazena metadados tais como o nome do programa, seus argumentos e qualquer informação do programa que tenha um tamanho fixo cabendo dentro da stack, bem como chamadas de funções e seus respectivos argumentos</p></li><li><p>a stack tem um formato de <em>pilha</em> e "cresce pra baixo", ou seja, conforme adicionamos elementos na stack, esta cresce em direção aos endereços mais baixos na memória</p></li></ul><p>No "meio" do layout, entre a seção de dados e a stack, temos uma grande área na memória que muitos acabam associando como <em>heap</em>. No heap, podemos alocar dados de forma dinâmica, diferente da forma estática que fazemos na seção de dados.</p><p>Para acomodar um array de tamanho dinâmico que suporte redimensionamento (resize), temos de alocar memória nesta área.</p><blockquote><p>Neste artigo, vamos chamar esta região no meio da memória que fica entre a seção de dados e a stack de <strong>heap</strong></p></blockquote><h3>Alocação dinâmica de memória com brk</h3><p>Uma das formas de manipular esta área da memória é através da <a href="https://man7.org/linux/man-pages/man2/brk.2.html">syscall brk</a>, que muda o <em>program break</em>, que é <strong>onde termina a seção de dados</strong>.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3c703vs0c7bl1eosh5i8.png" alt="program break" /></p><p>Com <code>brk</code>, podemos modificar esse <em>program break</em> para endereços mais altos, ou seja, permitindo a manipulação de áreas na memória que vão além da seção de programa e dados.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jh2x79f2nb1m1v4dcaxe.png" alt="program break visualizado" /></p><p>A primeira coisa que precisamos fazer é mapear a syscall e fazer a chamada que traz o endereço do break atual:</p> <pre><code class="language-as">%define SYS_brk 12
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x00000003</span>
+</span></code></pre> <p>Um grande <em>Yay!</em></p><p>Entretanto, podem haver situações onde queremos que nosso array seja <em>redimensionado</em> para suportar mais elementos, ou seja, o tamanho do array seria dinâmico.</p><p>Como adicionar mais elementos além da <em>capacidade inicial</em> de forma que não podemos escrever em outras áreas da memória que pertencem ao array?</p><hr /><h2 id="heap-heap-hooray">Heap, heap, hooray!</h2><p>Antes de falar sobre o heap, vamos relembrar como funciona o layout de memória de um programa de computador:</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/s81vxvgfylw0wfcf6if7.png" alt="layout de memória" /></p><ul><li><p>o layout é representado como uma área na memória do computador onde temos os endereços de memória mais baixos do programa em direção aos endereços mais altos que ficam no topo</p></li><li><p>nos endereços de memória mais baixos, temos a seção <code>.text</code>, onde já vimos que é referente ao programa em si</p></li><li><p>depois temos a <strong>seção de dados</strong> que contempla os dados inicializados <code>.data</code> e a seção a seguir que representa os dados não-inicializados <code>.bss</code></p></li><li><p>nos endereços mais altos, temos a <em>stack</em> do programa, que armazena metadados tais como o nome do programa, seus argumentos e qualquer informação do programa que tenha um tamanho fixo cabendo dentro da stack, bem como chamadas de funções e seus respectivos argumentos</p></li><li><p>a stack tem um formato de <em>pilha</em> e "cresce pra baixo", ou seja, conforme adicionamos elementos na stack, esta cresce em direção aos endereços mais baixos na memória</p></li></ul><p>No "meio" do layout, entre a seção de dados e a stack, temos uma grande área na memória que muitos acabam associando como <em>heap</em>. No heap, podemos alocar dados de forma dinâmica, diferente da forma estática que fazemos na seção de dados.</p><p>Para acomodar um array de tamanho dinâmico que suporte redimensionamento (resize), temos de alocar memória nesta área.</p><blockquote><p>Neste artigo, vamos chamar esta região no meio da memória que fica entre a seção de dados e a stack de <strong>heap</strong></p></blockquote><h3 id="alocação-dinâmica-de-memória-com-brk">Alocação dinâmica de memória com brk</h3><p>Uma das formas de manipular esta área da memória é através da <a href="https://man7.org/linux/man-pages/man2/brk.2.html">syscall brk</a>, que muda o <em>program break</em>, que é <strong>onde termina a seção de dados</strong>.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3c703vs0c7bl1eosh5i8.png" alt="program break" /></p><p>Com <code>brk</code>, podemos modificar esse <em>program break</em> para endereços mais altos, ou seja, permitindo a manipulação de áreas na memória que vão além da seção de programa e dados.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jh2x79f2nb1m1v4dcaxe.png" alt="program break visualizado" /></p><p>A primeira coisa que precisamos fazer é mapear a syscall e fazer a chamada que traz o endereço do break atual:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="keyword operator symbolic actionscript 2">%</span>define SYS_brk <span class="constant numeric actionscript 2">12</span>
 ....
 
-section .text
-_start:
-; syscall para acessar o program break (0x403000), que é onde termina 
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+; syscall para acessar o program <span class="keyword control actionscript 2">break</span> (<span class="constant numeric actionscript 2">0x403000</span>), que é onde termina 
 ; a seção de dados e começa o heap
-mov rdi, 0
+mov rdi, <span class="constant numeric actionscript 2">0</span>
 mov rax, SYS_brk
 syscall
 ....
-</code></pre> <p>Com gdb, vamos analisar o estado do programa:</p> <pre><code class="language-bash"># Breakpoint na linha da syscall brk
-(gdb) b 18
-(gdb) run
+</span></code></pre> <p>Com gdb, vamos analisar o estado do programa:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Breakpoint na linha da syscall brk</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> b 18</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> run</span>
 
-# O início do programa fica na seção .text e começa com 
-# 0x401000
-(gdb) x _start
-0x401000 &lt;_start&gt;:      0x000000bf
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O início do programa fica na seção .text e começa com </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 0x401000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x _start</span>
+<span class="meta function-call shell"><span class="variable function shell">0x401000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>_start<span class="keyword operator assignment redirection shell">&gt;</span>:      0x000000bf</span>
 
-# O pointer está na seção .data um pouco mais acima e começa com
-# 0x402000
-(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x00000000
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O pointer está na seção .data um pouco mais acima e começa com</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 0x402000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x00000000</span>
 
-# O array está na seção .bss um pouco mais acima e começa com 
-# 0x402004
-(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00000000
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> O array está na seção .bss um pouco mais acima e começa com </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 0x402004</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000000</span>
 
-# Executa a syscall brk
-(gdb) n
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Executa a syscall brk</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
 
-# A syscall brk armazena em RAX o endereço de memória do program break, 
-# no caso um pouco mais acima em 0x403000
-(gdb) i r rax
-rax            0x403000            4206592
-</code></pre> <ul><li><p><code>0x401000</code>: seção <code>.text</code> que é onde começa o programa</p></li><li><p><code>0x402000</code>: seção <code>.data</code> onde ficam os dados inicializados</p></li><li><p><code>0x402004</code>: seção <code>.bss</code> onde ficam os dados não-inicializados</p></li><li><p><code>0x403000</code>: program break, que é onde termina a seção de dados e começa o nosso "heap"</p></li></ul><p>Com isto, a partir do endereço <code>0x403000</code> é onde vamos colocar os elementos do nosso array, pelo que o endereço do array pode utilizar apenas um byte, que aponta para o endereço onde começa o primeiro elemento no heap.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mkuui4ot8ta2ohpf05bx.png" alt="array no heap" /></p><p>Na syscall que fizemos, se o argumento em RDI tiver zero, significa que brk vai retornar o program break atual, no caso <code>0x403000</code>. Mas podemos fazer mais syscalls brk com o argumento RDI diferente (incrementado), sinalizando que estamos mudando o program break.</p><p>A partir de agora, na seção de dados <code>.bss</code>, não precisamos mais reservar 4 bytes para o array, pelo que é necessário apenas 1 byte que irá representar o endereço de memória do array no heap:</p> <pre><code class="language-as">global _start
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> A syscall brk armazena em RAX o endereço de memória do program break, </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> no caso um pouco mais acima em 0x403000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> i r rax</span>
+<span class="meta function-call shell"><span class="variable function shell">rax</span></span><span class="meta function-call arguments shell">            0x403000            4206592</span>
+</span></code></pre> <ul><li><p><code>0x401000</code>: seção <code>.text</code> que é onde começa o programa</p></li><li><p><code>0x402000</code>: seção <code>.data</code> onde ficam os dados inicializados</p></li><li><p><code>0x402004</code>: seção <code>.bss</code> onde ficam os dados não-inicializados</p></li><li><p><code>0x403000</code>: program break, que é onde termina a seção de dados e começa o nosso "heap"</p></li></ul><p>Com isto, a partir do endereço <code>0x403000</code> é onde vamos colocar os elementos do nosso array, pelo que o endereço do array pode utilizar apenas um byte, que aponta para o endereço onde começa o primeiro elemento no heap.</p><p><img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/mkuui4ot8ta2ohpf05bx.png" alt="array no heap" /></p><p>Na syscall que fizemos, se o argumento em RDI tiver zero, significa que brk vai retornar o program break atual, no caso <code>0x403000</code>. Mas podemos fazer mais syscalls brk com o argumento RDI diferente (incrementado), sinalizando que estamos mudando o program break.</p><p>A partir de agora, na seção de dados <code>.bss</code>, não precisamos mais reservar 4 bytes para o array, pelo que é necessário apenas 1 byte que irá representar o endereço de memória do array no heap:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_brk 12
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
-%define CAPACITY 3
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_brk <span class="constant numeric actionscript 2">12</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define CAPACITY <span class="constant numeric actionscript 2">3</span>
 
-; inicialmente começa com 0x000000, mas depois irá conter 
-; o endereço 0x403000
+; inicialmente começa com <span class="constant numeric actionscript 2">0x000000</span>, mas depois irá conter 
+; o endereço <span class="constant numeric actionscript 2">0x403000</span>
 section .bss
-array: resb 1  
+array<span class="keyword operator symbolic actionscript 2">:</span> resb <span class="constant numeric actionscript 2">1</span>  
 
-section .data
-pointer: db 0
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
 
-section .text
-_start:
-	mov rdi, 0
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 
 	mov rdi, rax
-	add rdi, CAPACITY
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY
 	mov rax, SYS_brk
 	syscall
 
 ...
 ...
-</code></pre> <p>Ao analisarmos com gdb:</p> <pre><code class="language-bash"># Breakpoint na primeira syscall
-(gdb) b 18
+</span></code></pre> <p>Ao analisarmos com gdb:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Breakpoint na primeira syscall</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> b 18</span>
 
-(gdb) run
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> run</span>
 
-# Executa a linha da syscall
-(gdb) n
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Executa a linha da syscall</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
 
-# Em RAX a syscall armazena o endereço do program break, no caso
-# 0x403000
-(gdb) i r rax
-rax            0x403000            4206592
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Em RAX a syscall armazena o endereço do program break, no caso</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 0x403000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> i r rax</span>
+<span class="meta function-call shell"><span class="variable function shell">rax</span></span><span class="meta function-call arguments shell">            0x403000            4206592</span>
 
-(gdb) x 0x403000
-0x403000:       Cannot access memory at address 0x403000
-</code></pre> <p>Neste momento, este endereço ainda não é acessível pois não reservamos novos bytes no heap. Vamos andar com a próxima syscall:</p> <pre><code class="language-bash">(gdb) n
-(gdb) n
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403000:</span></span><span class="meta function-call arguments shell">       Cannot access memory at address 0x403000</span>
+</span></code></pre> <p>Neste momento, este endereço ainda não é acessível pois não reservamos novos bytes no heap. Vamos andar com a próxima syscall:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
 
-# Antes de executar a syscall, verificamos que o argumento RDI vai 
-# conter o endereço desejado para o novo program break, no caso com
-# 3 bytes adicionados, 0x403003
-(gdb) i r rdi
-rdi            0x403003            4206595
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Antes de executar a syscall, verificamos que o argumento RDI vai </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> conter o endereço desejado para o novo program break, no caso com</span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 3 bytes adicionados, 0x403003</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> i r rdi</span>
+<span class="meta function-call shell"><span class="variable function shell">rdi</span></span><span class="meta function-call arguments shell">            0x403003            4206595</span>
 
-# Executa a syscall...
-(gdb) n
-(gdb) n
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Executa a syscall...</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
 
-# Após a execução da segunda syscall, vemos que em RAX, o program break foi alterado para 0x403003
-(gdb) i r rax
-rax            0x403003            4206595
-</code></pre> <p>Agora, podemos acessar os endereços de memória entre <code>0x403000</code> e <code>0x403003</code>:</p> <pre><code class="language-bash">(gdb) x 0x403000
-0x403000:       0x00000000
-(gdb) x 0x403001
-0x403001:       0x00000000
-(gdb) x 0x403002
-0x403002:       0x00000000
-(gdb) x 0x403003
-0x403003:       0x00000000
-</code></pre> <p><em>Uau!</em> Agora temos no heap uma área reservada especialmente para o nosso querido array, olha que coisa!</p><p>Como vamos manipular o array nesta região da memória?</p><h3>Ponteiros, ponteiros everywhere</h3><p>Após a primeira syscall, devemos pegar o endereço de memória <code>0x403000</code> que representa o primeiro program break e armazenar no ponteiro do array que está em <code>.bss</code>:</p> <pre><code class="language-as">...
-mov rdi, 0
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Após a execução da segunda syscall, vemos que em RAX, o program break foi alterado para 0x403003</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> i r rax</span>
+<span class="meta function-call shell"><span class="variable function shell">rax</span></span><span class="meta function-call arguments shell">            0x403003            4206595</span>
+</span></code></pre> <p>Agora, podemos acessar os endereços de memória entre <code>0x403000</code> e <code>0x403003</code>:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403000:</span></span><span class="meta function-call arguments shell">       0x00000000</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403001</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403001:</span></span><span class="meta function-call arguments shell">       0x00000000</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403002</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403002:</span></span><span class="meta function-call arguments shell">       0x00000000</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403003</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403003:</span></span><span class="meta function-call arguments shell">       0x00000000</span>
+</span></code></pre> <p><em>Uau!</em> Agora temos no heap uma área reservada especialmente para o nosso querido array, olha que coisa!</p><p>Como vamos manipular o array nesta região da memória?</p><h3 id="ponteiros-ponteiros-everywhere">Ponteiros, ponteiros everywhere</h3><p>Após a primeira syscall, devemos pegar o endereço de memória <code>0x403000</code> que representa o primeiro program break e armazenar no ponteiro do array que está em <code>.bss</code>:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">...
+mov rdi, <span class="constant numeric actionscript 2">0</span>
 mov rax, SYS_brk
 syscall
-mov [array], rax      ; &lt;---- breakpoint aqui
+mov [array], rax      ; &lt;<span class="keyword operator symbolic actionscript 2">-</span><span class="keyword operator symbolic actionscript 2">-</span><span class="keyword operator symbolic actionscript 2">-</span><span class="keyword operator symbolic actionscript 2">-</span> breakpoint aqui
 
 mov rdi, rax
-add rdi, CAPACITY
+<span class="support function actionscript 2">add</span> rdi, CAPACITY
 mov rax, SYS_brk
 syscall
 ...
-</code></pre> <p>Vamos verificar com gdb o breakpoint na linha que muda o ponteiro do array:</p> <pre><code class="language-bash">(gdb) b 19
-(gdb) run
+</span></code></pre> <p>Vamos verificar com gdb o breakpoint na linha que muda o ponteiro do array:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> b 19</span>
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> run</span>
 
-(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00000000
+<span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00000000</span>
 
-# Executa a linha que muda o ponteiro
-(gdb) n
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Executa a linha que muda o ponteiro</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> n</span>
 
-# Agora o ponteiro aponta para o endereço 0x403000, 
-# é isto o que queremos
-(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00403000
-</code></pre> <p><em>Importante notar</em> que <strong>array</strong> está no endereço <code>0x402004</code>, na seção <code>.bss</code>, pelo que seu valor representa outro endereço de memória <code>0x403000</code> que é onde deve começar o primeiro elemento do array no heap.</p><p>Agora, quando fizermos a próxima syscall para alocar 3 bytes no heap, o program break será modificado e iremos conseguir manipular o array pois o ponteiro já aponta para o endereço correto.</p><p>Após a segunda syscall, já não podemos mais manipular o <code>array</code> pelo seu valor, pois agora o valor do array já não é mais um elemento de fato, mas sim um endereço para outro lugar na memória.</p><p>Vamos ao programa na versão atual:</p> <pre><code class="language-as">global _start
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Agora o ponteiro aponta para o endereço 0x403000, </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> é isto o que queremos</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00403000</span>
+</span></code></pre> <p><em>Importante notar</em> que <strong>array</strong> está no endereço <code>0x402004</code>, na seção <code>.bss</code>, pelo que seu valor representa outro endereço de memória <code>0x403000</code> que é onde deve começar o primeiro elemento do array no heap.</p><p>Agora, quando fizermos a próxima syscall para alocar 3 bytes no heap, o program break será modificado e iremos conseguir manipular o array pois o ponteiro já aponta para o endereço correto.</p><p>Após a segunda syscall, já não podemos mais manipular o <code>array</code> pelo seu valor, pois agora o valor do array já não é mais um elemento de fato, mas sim um endereço para outro lugar na memória.</p><p>Vamos ao programa na versão atual:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_brk 12
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
-%define CAPACITY 3
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_brk <span class="constant numeric actionscript 2">12</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define CAPACITY <span class="constant numeric actionscript 2">3</span>
 
 section .bss
-array: resb 1   ; 0x403000
+array<span class="keyword operator symbolic actionscript 2">:</span> resb <span class="constant numeric actionscript 2">1</span>   ; <span class="constant numeric actionscript 2">0x403000</span>
 
-section .data
-pointer: db 0
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
 
-section .text
-_start:
-	mov rdi, 0
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 	mov [array], rax
 
 	mov rdi, rax
-	add rdi, CAPACITY
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY
 	mov rax, SYS_brk
 	syscall
 
 	mov rbx, [array]
 
-	mov r8, 1
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">1</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 2
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">2</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 3
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">3</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 4
-	call .append
-.exit:
+	mov r8, <span class="constant numeric actionscript 2">4</span>
+	<span class="support function actionscript 2">call</span> .append
+.exit<span class="keyword operator symbolic actionscript 2">:</span>
 	mov rdi, EXIT_SUCCESS
 	mov rax, SYS_exit
 	syscall
-.append:
+.append<span class="keyword operator symbolic actionscript 2">:</span>
 	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
 	je .done
 
 	mov sil, byte [pointer]
-	mov byte [rbx + rsi], r8b
+	mov byte [rbx <span class="keyword operator symbolic actionscript 2">+</span> rsi], r8b
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-</code></pre> <p>Explicando cada bloco:</p> <pre><code class="language-as">mov rdi, 0
+</span></code></pre> <p>Explicando cada bloco:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov rdi, <span class="constant numeric actionscript 2">0</span>
 mov rax, SYS_brk
 syscall
 mov [array], rax
-</code></pre> <ul><li>busca o program break atual e armazena o endereço no ponteiro <code>array</code></li></ul> <pre><code class="language-as">mov rdi, rax
-add rdi, CAPACITY
+</span></code></pre> <ul><li>busca o program break atual e armazena o endereço no ponteiro <code>array</code></li></ul> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov rdi, rax
+<span class="support function actionscript 2">add</span> rdi, CAPACITY
 mov rax, SYS_brk
 syscall
-</code></pre> <ul><li>modifica o program break atual, incrementando 3 bytes que é a capacidade inicial do array no heap</li></ul> <pre><code class="language-as">; atribuir ao registrador o endereço de memória ao qual o
-; ponteiro "array" está apontando
+</span></code></pre> <ul><li>modifica o program break atual, incrementando 3 bytes que é a capacidade inicial do array no heap</li></ul> <pre><code class="sourceCode language-as"><span class="source actionscript 2">; atribuir ao registrador o endereço de memória ao qual o
+; ponteiro <span class="string quoted double actionscript 2"><span class="punctuation definition string begin actionscript 2">&quot;</span>array<span class="punctuation definition string end actionscript 2">&quot;</span></span> está apontando
 mov rbx, [array] 
-</code></pre> <ul><li>armazena o endereço de memória do ponteiro no registrador RBX. Isto é necessário pois não queremos fazer aritmética diretamente no ponteiro da seção <code>.bss</code>, mas sim através de um registrador que permite</li></ul> <pre><code class="language-as">mov r8, 1
-call .append
-</code></pre> <ul><li>como agora o RDI foi usado como argumento na syscall brk, não convém mais utilizarmos este registrador para representar o elemento a ser adicionado no array, pelo que trocamos pelo registrador R8</li></ul> <pre><code class="language-as">.append:
+</span></code></pre> <ul><li>armazena o endereço de memória do ponteiro no registrador RBX. Isto é necessário pois não queremos fazer aritmética diretamente no ponteiro da seção <code>.bss</code>, mas sim através de um registrador que permite</li></ul> <pre><code class="sourceCode language-as"><span class="source actionscript 2">mov r8, <span class="constant numeric actionscript 2">1</span>
+<span class="support function actionscript 2">call</span> .append
+</span></code></pre> <ul><li>como agora o RDI foi usado como argumento na syscall brk, não convém mais utilizarmos este registrador para representar o elemento a ser adicionado no array, pelo que trocamos pelo registrador R8</li></ul> <pre><code class="sourceCode language-as"><span class="source actionscript 2">.append<span class="keyword operator symbolic actionscript 2">:</span>
 	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
 	je .done
 
 	mov sil, byte [pointer]
-	mov byte [rbx + rsi], r8b    ; indirect-mode addressing
+	mov byte [rbx <span class="keyword operator symbolic actionscript 2">+</span> rsi], r8b    ; indirect<span class="keyword operator symbolic actionscript 2">-</span><span class="support function actionscript 2">mode</span> addressing
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-</code></pre> <p>Agora a rotina <code>.append</code> foi modificado para que a manipulação do array no heap seja através do registrador RBX. Também não podemos mais usar o registrador RAX para representar o ponteiro pois a syscall brk também utilizou como retorno do program break; neste caso trocamos para o RSI (que tem o SIL como sua representação de 8-bits menores).</p><p>Ao executar com gdb, podemos verificar que os elementos estão sendo adicionados no endereço <code>0x403000</code> que fica no heap, através do ponteiro que foi armazenado no registrador RBX:</p> <pre><code class="language-bash"># Array aponta para o endereço 0x403000
-(gdb) x &amp;array
-0x402004 &lt;array&gt;:       0x00403000
+</span></code></pre> <p>Agora a rotina <code>.append</code> foi modificado para que a manipulação do array no heap seja através do registrador RBX. Também não podemos mais usar o registrador RAX para representar o ponteiro pois a syscall brk também utilizou como retorno do program break; neste caso trocamos para o RSI (que tem o SIL como sua representação de 8-bits menores).</p><p>Ao executar com gdb, podemos verificar que os elementos estão sendo adicionados no endereço <code>0x403000</code> que fica no heap, através do ponteiro que foi armazenado no registrador RBX:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Array aponta para o endereço 0x403000</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">array</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402004</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>array<span class="keyword operator assignment redirection shell">&gt;</span>:       0x00403000</span>
 
-# No endereço, temos os elementos adicionados. Yay!
-(gdb) x 0x403000
-0x403000:       0x00030201
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> No endereço, temos os elementos adicionados. Yay!</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403000:</span></span><span class="meta function-call arguments shell">       0x00030201</span>
 
-# E o ponteiro de "índice" corretamente representando o fim do array no heap
-(gdb) x &amp;pointer
-0x402000 &lt;pointer&gt;:     0x00000003
-</code></pre> <p>Neste momento, o programa está com o mesmo comportamento do exemplo anterior com array estático em <code>.bss</code>, não permitindo adicionar mais elementos quando o array atinge seu limite.</p><p>Vamos mudar isto, redimensionando o array e permitir que novos elementos sejam adicionados.</p><h3>Resize com brk</h3><p>A seguir, iniciamos os passos para que o redimensionamento do array seja feito quando <strong>este atingir o limite da capacidade</strong>. Começamos por alterar a rotina <code>.append</code>:</p> <pre><code class="language-as">.append:
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> E o ponteiro de &quot;índice&quot; corretamente representando o fim do array no heap</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">pointer</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402000</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>pointer<span class="keyword operator assignment redirection shell">&gt;</span>:     0x00000003</span>
+</span></code></pre> <p>Neste momento, o programa está com o mesmo comportamento do exemplo anterior com array estático em <code>.bss</code>, não permitindo adicionar mais elementos quando o array atinge seu limite.</p><p>Vamos mudar isto, redimensionando o array e permitir que novos elementos sejam adicionados.</p><h3 id="resize-com-brk">Resize com brk</h3><p>A seguir, iniciamos os passos para que o redimensionamento do array seja feito quando <strong>este atingir o limite da capacidade</strong>. Começamos por alterar a rotina <code>.append</code>:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">.append<span class="keyword operator symbolic actionscript 2">:</span>
 	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
-	je .resize
+	je .<span class="support function actionscript 2">resize</span>
 
 	mov sil, byte [pointer]
-	mov byte [rbx + rsi], r8b
+	mov byte [rbx <span class="keyword operator symbolic actionscript 2">+</span> rsi], r8b
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-.resize:
+.<span class="support function actionscript 2">resize</span><span class="keyword operator symbolic actionscript 2">:</span>
 	...
-</code></pre> <p>Ao invés de fazer jump para <code>.done</code> quando o array estiver cheio, fazemos jump para outra sub-rotina chamada <code>.resize</code>, que deverá fazer a syscall brk novamente, modificando assim o <strong>program break</strong> em uma nova área na memória, obedecendo a capacidade inicial do array:</p> <pre><code class="language-as">.append:
+</span></code></pre> <p>Ao invés de fazer jump para <code>.done</code> quando o array estiver cheio, fazemos jump para outra sub-rotina chamada <code>.resize</code>, que deverá fazer a syscall brk novamente, modificando assim o <strong>program break</strong> em uma nova área na memória, obedecendo a capacidade inicial do array:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">.append<span class="keyword operator symbolic actionscript 2">:</span>
 	cmp byte [pointer], CAPACITY ; verifica se o array está cheio
-	je .resize
+	je .<span class="support function actionscript 2">resize</span>
 
 	mov sil, byte [pointer]
-	mov byte [rbx + rsi], r8b
+	mov byte [rbx <span class="keyword operator symbolic actionscript 2">+</span> rsi], r8b
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-.resize:
-	mov rdi, 0
+.<span class="support function actionscript 2">resize</span><span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 
-	mov rdi, rax            ; RDI passa a representar o break atual
-	add rdi, CAPACITY       ; adiciona 3 bytes, ficando 0x403006
+	mov rdi, rax            ; RDI passa a representar o <span class="keyword control actionscript 2">break</span> atual
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY       ; adiciona <span class="constant numeric actionscript 2">3</span> bytes, ficando <span class="constant numeric actionscript 2">0x403006</span>
 	mov rax, SYS_brk
 	syscall
 	jmp .append
-</code></pre> <ul><li><p>a primeira syscall de resize traz o break atual, no caso já sabemos que é <code>0x403003</code>, que foi alocado no início do programa para o array</p></li><li><p>a segunda syscall de resize modifica o break atual, alocando assim mais 3 bytes no heap</p></li><li><p>ao fim do resize, ao invés de retornar a função, vamos voltar para o início do <code>.append</code> e executar a lógica necessária para adicionar o elemento no array</p></li></ul><p>Desta forma, podemos manipular esta nova área na memória para adicionar mais elementos no array, modificando assim sua capacidade dinamicamente.</p><p>Se executarmos o programa exatamente assim, vamos enfrentar um problema, pois:</p><ul><li><p>a cada vez que é feito o resize, salta para o início da rotina</p></li><li><p>é verificado o tamanho do array (pointeiro) com a capacidade inicial, que no caso é 3. Como o ponteiro atingiu o valor 3, então vai entrar novamente no resize caracterizando assim um loop infinito com resize infinito até acabar a memória</p></li></ul><p>Para resolver isto, precisamos comparar o pointer com a capacidade atual (modificada), e portanto vamos adicionar um valor na seção <code>.data</code> que representa a capacidade atual:</p> <pre><code class="language-as">%define CAPACITY 3
+</span></code></pre> <ul><li><p>a primeira syscall de resize traz o break atual, no caso já sabemos que é <code>0x403003</code>, que foi alocado no início do programa para o array</p></li><li><p>a segunda syscall de resize modifica o break atual, alocando assim mais 3 bytes no heap</p></li><li><p>ao fim do resize, ao invés de retornar a função, vamos voltar para o início do <code>.append</code> e executar a lógica necessária para adicionar o elemento no array</p></li></ul><p>Desta forma, podemos manipular esta nova área na memória para adicionar mais elementos no array, modificando assim sua capacidade dinamicamente.</p><p>Se executarmos o programa exatamente assim, vamos enfrentar um problema, pois:</p><ul><li><p>a cada vez que é feito o resize, salta para o início da rotina</p></li><li><p>é verificado o tamanho do array (pointeiro) com a capacidade inicial, que no caso é 3. Como o ponteiro atingiu o valor 3, então vai entrar novamente no resize caracterizando assim um loop infinito com resize infinito até acabar a memória</p></li></ul><p>Para resolver isto, precisamos comparar o pointer com a capacidade atual (modificada), e portanto vamos adicionar um valor na seção <code>.data</code> que representa a capacidade atual:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="keyword operator symbolic actionscript 2">%</span>define CAPACITY <span class="constant numeric actionscript 2">3</span>
 
-section .data
-pointer: db 0
-currentCapacity: db CAPACITY ; começa com 3
-</code></pre> <p>Na rotina <code>.append</code>, vamos fazer a comparação com o <code>currentCapacity</code>, que vai ser modificado a cada resize, ao invés de ser com <code>CAPACITY</code>, que vai permanecer fixo com o valor inicial enquanto durar o programa.</p> <pre><code class="language-as">.append:
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
+currentCapacity<span class="keyword operator symbolic actionscript 2">:</span> db CAPACITY ; começa com <span class="constant numeric actionscript 2">3</span>
+</span></code></pre> <p>Na rotina <code>.append</code>, vamos fazer a comparação com o <code>currentCapacity</code>, que vai ser modificado a cada resize, ao invés de ser com <code>CAPACITY</code>, que vai permanecer fixo com o valor inicial enquanto durar o programa.</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">.append<span class="keyword operator symbolic actionscript 2">:</span>
 	mov r9, [currentCapacity]
 	cmp byte [pointer], r9b     ; verifica se o array está cheio
-	je .resize
+	je .<span class="support function actionscript 2">resize</span>
 ...
-</code></pre> <p>E, após o redimensionamento antes de voltar pro <code>.append</code>, vamos incrementar o valor da capacidade inicial à capacidade atual:</p> <pre><code class="language-as">.resize:
-	mov rdi, 0
+</span></code></pre> <p>E, após o redimensionamento antes de voltar pro <code>.append</code>, vamos incrementar o valor da capacidade inicial à capacidade atual:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">.<span class="support function actionscript 2">resize</span><span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 
 	mov rdi, rax
-	add rdi, CAPACITY
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY
 	mov rax, SYS_brk
 	syscall
 
 	mov r10, currentCapacity
-	add byte [r10], CAPACITY
+	<span class="support function actionscript 2">add</span> byte [r10], CAPACITY
 	jmp .append
-</code></pre> <p>Ao executar o programa, podemos ver que o elemento 4 foi adicionado com sucesso no array após o redimensionamento:</p> <pre><code class="language-bash">(gdb) x 0x403000
-0x403000:       0x04030201
-</code></pre> <p>E se adicionarmos mais e mais elementos?</p> <pre><code class="language-as">...
-	mov r8, 4
-	call .append
+</span></code></pre> <p>Ao executar o programa, podemos ver que o elemento 4 foi adicionado com sucesso no array após o redimensionamento:</p> <pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x 0x403000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403000:</span></span><span class="meta function-call arguments shell">       0x04030201</span>
+</span></code></pre> <p>E se adicionarmos mais e mais elementos?</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2">...
+	mov r8, <span class="constant numeric actionscript 2">4</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 5
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">5</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 6
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">6</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 7
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">7</span>
+	<span class="support function actionscript 2">call</span> .append
 ...
-</code></pre> <pre><code class="language-bash"># Podemos ver que o currentCapacity é 9, ou seja, foram feitos 
-# 2 redimensionamentos. Nosso array consegue agora acomodar até 9 elementos, 
-# pelo que ao adicionar o décimo elemento, mais um resize seria feito.
-(gdb) x &amp;currentCapacity
-0x402001 &lt;currentCapacity&gt;:     0x09
+</span></code></pre><pre><code class="sourceCode language-bash"><span class="source shell bash"><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Podemos ver que o currentCapacity é 9, ou seja, foram feitos </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> 2 redimensionamentos. Nosso array consegue agora acomodar até 9 elementos, </span><span class="comment line number-sign shell">
+</span><span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> pelo que ao adicionar o décimo elemento, mais um resize seria feito.</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x</span> <span class="keyword operator logical job shell">&amp;</span><span class="meta function-call shell"><span class="variable function shell">currentCapacity</span></span>
+<span class="meta function-call shell"><span class="variable function shell">0x402001</span></span><span class="meta function-call arguments shell"> <span class="keyword operator assignment redirection shell">&lt;</span>currentCapacity<span class="keyword operator assignment redirection shell">&gt;</span>:     0x09</span>
 
-# Buscando os 9 primeiros hexabytes no endereço do array no heap
-(gdb) x/9xb  0x403000
-0x403000:       0x01    0x02    0x03    0x04    0x05    0x06    0x07    0x00
-0x403008:       0x00
-</code></pre> <p><em>How cool is that?</em></p><hr /><h2>O programa final</h2><p>A seguir o programa final, com um array de capacidade inicial de 3 elementos no heap que pode ser redimensionado utilizando a syscall <code>brk</code>, conforme mais elementos vão sendo adicionados no array:</p> <pre><code class="language-as">global _start
+<span class="comment line number-sign shell"><span class="punctuation definition comment begin shell">#</span></span><span class="comment line number-sign shell"> Buscando os 9 primeiros hexabytes no endereço do array no heap</span><span class="comment line number-sign shell">
+</span><span class="punctuation definition compound begin shell">(</span><span class="meta function-call shell"><span class="variable function shell">gdb</span></span><span class="punctuation definition compound end shell">)</span><span class="meta function-call arguments shell"> x/9xb  0x403000</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403000:</span></span><span class="meta function-call arguments shell">       0x01    0x02    0x03    0x04    0x05    0x06    0x07    0x00</span>
+<span class="meta function-call shell"><span class="variable function shell">0x403008:</span></span><span class="meta function-call arguments shell">       0x00</span>
+</span></code></pre> <p><em>How cool is that?</em></p><hr /><h2 id="o-programa-final">O programa final</h2><p>A seguir o programa final, com um array de capacidade inicial de 3 elementos no heap que pode ser redimensionado utilizando a syscall <code>brk</code>, conforme mais elementos vão sendo adicionados no array:</p> <pre><code class="sourceCode language-as"><span class="source actionscript 2"><span class="support function actionscript 2">global</span> _start
 
-%define SYS_brk 12
-%define SYS_exit 60
-%define EXIT_SUCCESS 0
-%define CAPACITY 3
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_brk <span class="constant numeric actionscript 2">12</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define SYS_exit <span class="constant numeric actionscript 2">60</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define EXIT_SUCCESS <span class="constant numeric actionscript 2">0</span>
+<span class="keyword operator symbolic actionscript 2">%</span>define CAPACITY <span class="constant numeric actionscript 2">3</span>
 
 section .bss
-array: resb 1
+array<span class="keyword operator symbolic actionscript 2">:</span> resb <span class="constant numeric actionscript 2">1</span>
 
-section .data
-pointer: db 0
-currentCapacity: db CAPACITY ; capacidade inicial é 3
+section .<span class="support function actionscript 2">data</span>
+pointer<span class="keyword operator symbolic actionscript 2">:</span> db <span class="constant numeric actionscript 2">0</span>
+currentCapacity<span class="keyword operator symbolic actionscript 2">:</span> db CAPACITY ; capacidade inicial é <span class="constant numeric actionscript 2">3</span>
 
-section .text
-_start:
-	mov rdi, 0
+section .<span class="support function actionscript 2">text</span>
+_start<span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 	mov [array], rax
 
 	mov rdi, rax
-	add rdi, CAPACITY
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY
 	mov rax, SYS_brk
 	syscall
 
 	mov rbx, [array]
 
-	mov r8, 1
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">1</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 2
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">2</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 3
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">3</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 4
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">4</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 5
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">5</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 6
-	call .append
+	mov r8, <span class="constant numeric actionscript 2">6</span>
+	<span class="support function actionscript 2">call</span> .append
 
-	mov r8, 7
-	call .append
-.exit:
+	mov r8, <span class="constant numeric actionscript 2">7</span>
+	<span class="support function actionscript 2">call</span> .append
+.exit<span class="keyword operator symbolic actionscript 2">:</span>
 	mov rdi, EXIT_SUCCESS
 	mov rax, SYS_exit
 	syscall
-.append:
+.append<span class="keyword operator symbolic actionscript 2">:</span>
 	mov r9, [currentCapacity]
 	cmp byte [pointer], r9b ; verifica se o array está cheio
-	je .resize
+	je .<span class="support function actionscript 2">resize</span>
 
 	mov sil, byte [pointer]
-	mov byte [rbx + rsi], r8b
+	mov byte [rbx <span class="keyword operator symbolic actionscript 2">+</span> rsi], r8b
 	inc byte [pointer]
-.done:
+.done<span class="keyword operator symbolic actionscript 2">:</span>
 	ret
-.resize:
-	mov rdi, 0
+.<span class="support function actionscript 2">resize</span><span class="keyword operator symbolic actionscript 2">:</span>
+	mov rdi, <span class="constant numeric actionscript 2">0</span>
 	mov rax, SYS_brk
 	syscall
 
 	mov rdi, rax
-	add rdi, CAPACITY
+	<span class="support function actionscript 2">add</span> rdi, CAPACITY
 	mov rax, SYS_brk
 	syscall
 
 	mov r10, currentCapacity
-	add byte [r10], CAPACITY
+	<span class="support function actionscript 2">add</span> byte [r10], CAPACITY
 	jmp .append
-</code></pre> <hr /><h2>Conclusão</h2><p>Neste artigo, mostramos a implementação de um array em Assembly x86, passando por conceitos importantes como layout de memória, manipulação de registradores e alocação dinâmica de memória com <code>brk</code>.</p><p>Este artigo é base para artigos futuros sobre estruturas de dados, onde pretendo escrever sobre a implementação de filas e posteriormente listas ligadas.</p><p><em>Stay tuned!</em></p><hr /><h2>Referências</h2><sub> Addressing modes https://www.tutorialspoint.com/assembly_programming/assembly_addressing_modes.htm Syscall brk https://man7.org/linux/man-pages/man2/brk.2.html ASCII table https://www.asciicharstable.com/_site_media/ascii/ascii-chars-table-landscape.jpg </sub></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')}},2000)})</script></body></html> 
+</span></code></pre> <hr /><h2 id="conclusão">Conclusão</h2><p>Neste artigo, mostramos a implementação de um array em Assembly x86, passando por conceitos importantes como layout de memória, manipulação de registradores e alocação dinâmica de memória com <code>brk</code>.</p><p>Este artigo é base para artigos futuros sobre estruturas de dados, onde pretendo escrever sobre a implementação de filas e posteriormente listas ligadas.</p><p><em>Stay tuned!</em></p><hr /><h2 id="referências">Referências</h2><sub> Addressing modes https://www.tutorialspoint.com/assembly_programming/assembly_addressing_modes.htm Syscall brk https://man7.org/linux/man-pages/man2/brk.2.html ASCII table https://www.asciicharstable.com/_site_media/ascii/ascii-chars-table-landscape.jpg </sub></article></main><footer><a href="../index.html">&larr; back</a> · <a href="https://leandronsp.com/feed.xml">rss</a></footer> <script>window.addEventListener('load',function(){setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';s.async=true;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments)}g('js',new Date());g('config','G-0Y5RNLZMKN')}},2000)})</script></body></html> 
